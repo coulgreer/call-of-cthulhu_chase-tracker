@@ -1,23 +1,55 @@
 {
   "name": "call-of-cthulhu-chase-tracker",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "private": true,
-  "description": "My Gatsby site",
-  "author": "cagreer18",
+  "description": "A Call of Cthulhu chase tracker geared towards Keepers of Arcane Knowledge.",
+  "author": "Coul Greer",
   "keywords": [
-    "gatsby"
+    "Call",
+    "of",
+    "Cthulhu",
+    "CoC",
+    "Lovecraftian",
+    "7e",
+    "7th",
+    "Edition",
+    "Chase",
+    "Tracker",
+    "Keeper",
+    "of",
+    "Arcane",
+    "Knowledge"
   ],
   "scripts": {
     "develop": "gatsby develop",
     "start": "gatsby develop",
     "build": "gatsby build",
     "serve": "gatsby serve",
-    "clean": "gatsby clean"
+    "clean": "gatsby clean",
+    "test": "jest"
   },
   "license": "0BSD",
   "dependencies": {
-    "gatsby": "^2.26.1",
+    "@types/uuid": "^8.3.0",
+    "gatsby": "^2.28.2",
+    "lodash": "^4.17.20",
     "react": "^16.13.1",
-    "react-dom": "^16.13.1"
+    "react-dom": "^16.13.1",
+    "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "@babel/preset-typescript": "^7.12.7",
+    "@testing-library/jest-dom": "^5.11.6",
+    "@testing-library/react": "^11.2.2",
+    "@testing-library/user-event": "^12.6.0",
+    "@tsconfig/recommended": "^1.0.1",
+    "@types/jest": "^26.0.19",
+    "@types/node": "^14.14.16",
+    "@types/react": "^17.0.0",
+    "@types/react-dom": "^17.0.0",
+    "babel-jest": "^26.6.3",
+    "babel-preset-gatsby": "^0.8.0",
+    "identity-obj-proxy": "^3.0.0",
+    "jest": "^26.6.3"
   }
 }
