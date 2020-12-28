@@ -64,7 +64,7 @@ export default class ParticipantTable extends React.Component<
     const displayArea =
       this.state.participantRows.length <
       ParticipantTable.MINIMUM_PARTICIPANTS ? (
-        <div>{this.props.warningMessage}</div>
+        <p>{this.props.warningMessage}</p>
       ) : (
         this.state.participantRows.map((row) => (
           <div key={"row-control " + row.key}>
