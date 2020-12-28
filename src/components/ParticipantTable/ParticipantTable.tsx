@@ -2,6 +2,7 @@ import React from "react";
 
 import ParticipantRow from "../ParticipantRow";
 import AddIcon from "../../images/baseline_add_circle_outline_black_24dp.png";
+import RemoveIcon from "../../images/baseline_remove_circle_outline_black_24dp.png";
 
 interface ParticipantTableProps {
   warningMessage: string;
@@ -15,7 +16,8 @@ export default class ParticipantTable extends React.Component<
   ParticipantTableProps,
   ParticipantTableState
 > {
-  private static datumCount = 0;
+  private static MINIMUM_PARTICIPANTS = 1;
+  private datumCount = 0;
 
   constructor(props: ParticipantTableProps) {
     super(props);
@@ -25,15 +27,28 @@ export default class ParticipantTable extends React.Component<
   }
 
   addParticipant() {
-    ParticipantTable.datumCount++;
+    this.datumCount++;
 
-    let participantName = "Placeholder " + ParticipantTable.datumCount;
+    let participantName = "Placeholder " + this.datumCount;
     let newRow = (
-      <ParticipantRow key={participantName} participantName={participantName} />
+      <ParticipantRow
+        key={"data " + participantName}
+        participantName={participantName}
+      />
     );
 
     this.setState((state) => ({
       participantRows: [...state.participantRows, newRow],
+    }));
+  }
+
+  removeParticipant(component: JSX.Element) {
+    const index = this.state.participantRows.indexOf(component);
+    const newArray = this.state.participantRows;
+    newArray.splice(index, 1);
+
+    this.setState((state) => ({
+      participantRows: newArray,
     }));
   }
 
@@ -47,10 +62,18 @@ export default class ParticipantTable extends React.Component<
     );
 
     const displayArea =
-      this.state.participantRows.length < 1 ? (
+      this.state.participantRows.length <
+      ParticipantTable.MINIMUM_PARTICIPANTS ? (
         <div>{this.props.warningMessage}</div>
       ) : (
-        <div>{this.state.participantRows}</div>
+        this.state.participantRows.map((row) => (
+          <div key={"row-control " + row.key}>
+            {row}
+            <button onClick={this.removeParticipant.bind(this, row)}>
+              <img src={RemoveIcon} alt={"Remove " + row.key} />
+            </button>
+          </div>
+        ))
       );
 
     return (
