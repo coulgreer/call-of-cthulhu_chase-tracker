@@ -4,6 +4,8 @@ import ParticipantRow from "../ParticipantRow";
 import AddIcon from "../../images/baseline_add_circle_outline_black_24dp.png";
 import RemoveIcon from "../../images/baseline_remove_circle_outline_black_24dp.png";
 
+import "./index.css";
+
 interface ParticipantTableProps {
   warningMessage: string;
 }
@@ -67,7 +69,7 @@ export default class ParticipantTable extends React.Component<
         <p>{this.props.warningMessage}</p>
       ) : (
         this.state.participantRows.map((row) => (
-          <div key={"row-control " + row.key}>
+          <div className="row" key={"row-control " + row.key}>
             {row}
             <button onClick={this.removeParticipant.bind(this, row)}>
               <img src={RemoveIcon} alt={"Remove " + row.key} />
@@ -79,7 +81,7 @@ export default class ParticipantTable extends React.Component<
     return (
       <div>
         {addButton}
-        {displayArea}
+        <div className="rows">{displayArea}</div>
       </div>
     );
   }

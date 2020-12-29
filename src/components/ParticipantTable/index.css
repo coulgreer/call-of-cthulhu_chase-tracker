@@ -1,0 +1,8 @@
+.row {
+  width: 100%;
+  border-bottom: 2px solid black;
+}
+
+.rows {
+  padding: 20px;
+}

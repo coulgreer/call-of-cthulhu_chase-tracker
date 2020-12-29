@@ -2,6 +2,8 @@ import React from "react";
 
 import { v4 as uuidv4 } from "uuid";
 
+import "./index.css";
+
 interface StatisticDisplayProps {
   title: string;
   startingValue: number;
@@ -28,14 +30,14 @@ export default class StatisticDisplay extends React.Component<
 
   render() {
     return (
-      <>
+      <div className="display">
         <label id={this.sanitize(this.props.title) + "-" + this.id}>
           {this.props.title}
         </label>
         <p aria-labelledby={this.sanitize(this.props.title) + "-" + this.id}>
           {this.props.startingValue}
         </p>
-      </>
+      </div>
     );
   }
 }

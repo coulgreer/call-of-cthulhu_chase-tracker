@@ -1,0 +1,19 @@
+.display {
+  margin: 4px;
+  padding: 2px;
+  border: 1px solid black;
+  display: inline-block;
+}
+
+label {
+  color: #454777;
+  font-weight: bold;
+  font-size: 24px;
+  text-align: center;
+}
+
+p {
+  font-size: 20px;
+  margin: 0;
+  text-align: center;
+}
