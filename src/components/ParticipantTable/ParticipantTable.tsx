@@ -1,6 +1,8 @@
 import React from "react";
 
 import ParticipantRow from "../ParticipantRow";
+import Modal from "../Modal";
+
 import AddIcon from "../../images/baseline_add_circle_outline_black_24dp.png";
 import RemoveIcon from "../../images/baseline_remove_circle_outline_black_24dp.png";
 
@@ -12,6 +14,7 @@ interface ParticipantTableProps {
 
 interface ParticipantTableState {
   participantRows: JSX.Element[];
+  isModalShown: boolean;
 }
 
 export default class ParticipantTable extends React.Component<
@@ -25,6 +28,7 @@ export default class ParticipantTable extends React.Component<
     super(props);
     this.state = {
       participantRows: [],
+      isModalShown: false,
     };
   }
 
@@ -49,7 +53,7 @@ export default class ParticipantTable extends React.Component<
     const newArray = this.state.participantRows;
     newArray.splice(index, 1);
 
-    this.setState((state) => ({
+    this.setState(() => ({
       participantRows: newArray,
     }));
   }
@@ -78,10 +82,18 @@ export default class ParticipantTable extends React.Component<
         ))
       );
 
+    const modalTitle = <p>Confirm Participant Deletion</p>;
+    const modalBody = <p>Would you like to delete this participant?</p>;
+
     return (
       <div>
         {addButton}
         <div className="rows">{displayArea}</div>
+        <Modal
+          isShown={this.state.isModalShown}
+          title={modalTitle}
+          body={modalBody}
+        />
       </div>
     );
   }

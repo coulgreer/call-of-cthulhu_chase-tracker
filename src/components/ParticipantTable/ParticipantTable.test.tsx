@@ -24,20 +24,20 @@ test("Should generate participants When the add participant button is pressed", 
   expect(screen.getByText("Placeholder 1")).toBeInTheDocument();
 });
 
-test("Should remove the proper participant When two participants exist", () => {
+test("Should remove the proper participant When three participants exist", () => {
   const WARNING_MESSAGE = "This should not show.";
   render(<ParticipantTable warningMessage={WARNING_MESSAGE} />);
 
   const addButton = screen.getByRole("button", { name: /add participant/i });
   userEvent.click(addButton);
   userEvent.click(addButton);
-
-  expect(screen.getByText("Placeholder 1")).toBeInTheDocument();
-  expect(screen.getByText("Placeholder 2")).toBeInTheDocument();
+  userEvent.click(addButton);
 
   userEvent.click(
     screen.getByRole("button", { name: /remove data placeholder 1/i })
   );
 
+  expect(screen.queryByText("Placeholder 1")).not.toBeInTheDocument();
   expect(screen.getByText("Placeholder 2")).toBeInTheDocument();
+  expect(screen.getByText("Placeholder 3")).toBeInTheDocument();
 });
