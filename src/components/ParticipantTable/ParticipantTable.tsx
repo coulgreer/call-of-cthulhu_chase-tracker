@@ -1,23 +1,26 @@
-import React from "react";
+import React, { Component, ReactElement } from "react";
+import Modal from "react-modal";
 
 import ParticipantRow from "../ParticipantRow";
-import Modal from "../Modal";
 
 import AddIcon from "../../images/baseline_add_circle_outline_black_24dp.png";
 import RemoveIcon from "../../images/baseline_remove_circle_outline_black_24dp.png";
 
 import "./index.css";
 
+if (process.env.NODE_ENV !== "test") Modal.setAppElement("#___gatsby");
+
 interface ParticipantTableProps {
   warningMessage: string;
 }
 
 interface ParticipantTableState {
-  participantRows: JSX.Element[];
-  isModalShown: boolean;
+  participantRows: ReactElement[];
+  isModalOpen: boolean;
+  selectedRow: ReactElement | null;
 }
 
-export default class ParticipantTable extends React.Component<
+export default class ParticipantTable extends Component<
   ParticipantTableProps,
   ParticipantTableState
 > {
@@ -28,7 +31,8 @@ export default class ParticipantTable extends React.Component<
     super(props);
     this.state = {
       participantRows: [],
-      isModalShown: false,
+      isModalOpen: false,
+      selectedRow: null,
     };
   }
 
@@ -48,14 +52,30 @@ export default class ParticipantTable extends React.Component<
     }));
   }
 
-  removeParticipant(component: JSX.Element) {
-    const index = this.state.participantRows.indexOf(component);
-    const newArray = this.state.participantRows;
-    newArray.splice(index, 1);
-
+  promptParticipantRemoval(component: ReactElement) {
     this.setState(() => ({
-      participantRows: newArray,
+      isModalOpen: true,
+      selectedRow: component,
     }));
+  }
+
+  removeSelectedParticipant() {
+    if (this.state.selectedRow) {
+      const targetIndex = this.state.participantRows.indexOf(
+        this.state.selectedRow
+      );
+      const modifiedParticipantRows = this.state.participantRows;
+      modifiedParticipantRows.splice(targetIndex, 1);
+
+      this.setState(() => ({
+        participantRows: modifiedParticipantRows,
+        selectedRow: null,
+      }));
+    }
+  }
+
+  closeModal() {
+    this.setState(() => ({ isModalOpen: false }));
   }
 
   render() {
@@ -75,25 +95,28 @@ export default class ParticipantTable extends React.Component<
         this.state.participantRows.map((row) => (
           <div className="row" key={"row-control " + row.key}>
             {row}
-            <button onClick={this.removeParticipant.bind(this, row)}>
+            <button onClick={this.promptParticipantRemoval.bind(this, row)}>
               <img src={RemoveIcon} alt={"Remove " + row.key} />
             </button>
           </div>
         ))
       );
 
-    const modalTitle = <p>Confirm Participant Deletion</p>;
-    const modalBody = <p>Would you like to delete this participant?</p>;
-
     return (
-      <div>
+      <div className="participant-table">
         {addButton}
         <div className="rows">{displayArea}</div>
         <Modal
-          isShown={this.state.isModalShown}
-          title={modalTitle}
-          body={modalBody}
-        />
+          contentLabel={"Confirm Removal"}
+          isOpen={this.state.isModalOpen}
+          onRequestClose={this.closeModal.bind(this)}
+        >
+          <p>Would you like to delete this participant?</p>
+          <button onClick={this.removeSelectedParticipant.bind(this)}>
+            Yes
+          </button>
+          <button onClick={this.closeModal.bind(this)}>Cancel</button>
+        </Modal>
       </div>
     );
   }
