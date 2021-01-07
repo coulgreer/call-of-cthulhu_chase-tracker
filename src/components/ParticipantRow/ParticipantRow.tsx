@@ -6,32 +6,28 @@ interface ParticipantRowProps {
   participantName: string;
 }
 
-interface ParticpantRowState {
-  dexScore: number;
-  movScore: number;
-  isExpanded: boolean;
-}
+const DEX_TITLE = "DEX";
+const MOV_TITLE = "MOV";
 
-export default class ParticipantRow extends React.Component<
-  ParticipantRowProps,
-  ParticpantRowState
-> {
+export default class ParticipantRow extends React.Component<ParticipantRowProps> {
+  static get DEX_TITLE() {
+    return DEX_TITLE;
+  }
+  static get MOV_TITLE() {
+    return MOV_TITLE;
+  }
+
   constructor(props: ParticipantRowProps) {
     super(props);
-    this.state = {
-      dexScore: 0,
-      movScore: 0,
-      isExpanded: false,
-    };
   }
 
   render() {
     return (
-      <>
-        <h1>{this.props.participantName}</h1>
-        <StatisticDisplay title={"DEX"} startingValue={0} />
-        <StatisticDisplay title={"MOV"} startingValue={0} />
-      </>
+      <div className="participant-row">
+        <h2>{this.props.participantName}</h2>
+        <StatisticDisplay title={ParticipantRow.DEX_TITLE} startingValue={0} />
+        <StatisticDisplay title={ParticipantRow.MOV_TITLE} startingValue={0} />
+      </div>
     );
   }
 }

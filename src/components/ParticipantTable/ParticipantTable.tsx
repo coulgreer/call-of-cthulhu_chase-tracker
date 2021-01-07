@@ -20,11 +20,17 @@ interface ParticipantTableState {
   selectedRow: ReactElement | null;
 }
 
+const DEFAULT_NAME = "Placeholder";
+
 export default class ParticipantTable extends Component<
   ParticipantTableProps,
   ParticipantTableState
 > {
-  private static MINIMUM_PARTICIPANTS = 1;
+  static get DEFAULT_NAME() {
+    return DEFAULT_NAME;
+  }
+
+  private static minimumParticipants = 1;
   private datumCount = 0;
 
   constructor(props: ParticipantTableProps) {
@@ -39,7 +45,7 @@ export default class ParticipantTable extends Component<
   addParticipant() {
     this.datumCount++;
 
-    let participantName = "Placeholder " + this.datumCount;
+    let participantName = DEFAULT_NAME + this.datumCount;
     let newRow = (
       <ParticipantRow
         key={"data " + participantName}
@@ -79,17 +85,15 @@ export default class ParticipantTable extends Component<
   }
 
   render() {
-    const addButton = (
-      <div>
-        <button onClick={this.addParticipant.bind(this)}>
-          <img src={AddIcon} alt="Add Participant" />
-        </button>
-      </div>
+    const addButtonElement = (
+      <button onClick={this.addParticipant.bind(this)}>
+        <img src={AddIcon} alt="Add Participant" />
+      </button>
     );
 
-    const displayArea =
+    const rowsElement =
       this.state.participantRows.length <
-      ParticipantTable.MINIMUM_PARTICIPANTS ? (
+      ParticipantTable.minimumParticipants ? (
         <p>{this.props.warningMessage}</p>
       ) : (
         this.state.participantRows.map((row) => (
@@ -102,21 +106,23 @@ export default class ParticipantTable extends Component<
         ))
       );
 
+    const modalElement = (
+      <Modal
+        contentLabel={"Confirm Removal"}
+        isOpen={this.state.isModalOpen}
+        onRequestClose={this.closeModal.bind(this)}
+      >
+        <p>Would you like to delete this participant?</p>
+        <button onClick={this.removeSelectedParticipant.bind(this)}>Yes</button>
+        <button onClick={this.closeModal.bind(this)}>Cancel</button>
+      </Modal>
+    );
+
     return (
       <div className="participant-table">
-        {addButton}
-        <div className="rows">{displayArea}</div>
-        <Modal
-          contentLabel={"Confirm Removal"}
-          isOpen={this.state.isModalOpen}
-          onRequestClose={this.closeModal.bind(this)}
-        >
-          <p>Would you like to delete this participant?</p>
-          <button onClick={this.removeSelectedParticipant.bind(this)}>
-            Yes
-          </button>
-          <button onClick={this.closeModal.bind(this)}>Cancel</button>
-        </Modal>
+        <div>{addButtonElement}</div>
+        <div className="rows">{rowsElement}</div>
+        {modalElement}
       </div>
     );
   }

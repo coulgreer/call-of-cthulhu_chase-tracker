@@ -2,6 +2,8 @@ import React from "react";
 
 import { v4 as uuidv4 } from "uuid";
 
+import { sanitize } from "../../utils/lib/sanitizer";
+
 import "./index.css";
 
 interface StatisticDisplayProps {
@@ -9,12 +11,7 @@ interface StatisticDisplayProps {
   startingValue: number;
 }
 
-interface StatisticDisplayState {}
-
-export default class StatisticDisplay extends React.Component<
-  StatisticDisplayProps,
-  StatisticDisplayState
-> {
+export default class StatisticDisplay extends React.Component<StatisticDisplayProps> {
   private id: string;
 
   constructor(props: StatisticDisplayProps) {
@@ -23,20 +20,13 @@ export default class StatisticDisplay extends React.Component<
     this.id = uuidv4();
   }
 
-  sanitize(str: string): string {
-    str = str.replace(/[^a-z0-9_-]/gim, "");
-    return str.trim();
-  }
-
   render() {
+    const labelID = sanitize(this.props.title) + "-" + this.id;
+
     return (
-      <div className="display">
-        <label id={this.sanitize(this.props.title) + "-" + this.id}>
-          {this.props.title}
-        </label>
-        <p aria-labelledby={this.sanitize(this.props.title) + "-" + this.id}>
-          {this.props.startingValue}
-        </p>
+      <div className="statistic-display">
+        <label id={labelID}>{this.props.title}</label>
+        <p aria-labelledby={labelID}>{this.props.startingValue}</p>
       </div>
     );
   }
