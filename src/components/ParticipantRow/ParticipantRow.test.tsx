@@ -4,7 +4,7 @@ import "@testing-library/jest-dom/extend-expect";
 
 import ParticipantRow from "./";
 
-test("renders participant information", () => {
+test("should render participant information", () => {
   const name = "Test Participant";
 
   render(<ParticipantRow participantName={name} />);

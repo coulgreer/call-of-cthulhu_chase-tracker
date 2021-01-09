@@ -2,7 +2,7 @@ import * as sanitizer from "../lib/sanitizer";
 
 const padding = "   ";
 
-test("removes trailing and leading whitespace", () => {
+test("should remove trailing and leading whitespace", () => {
   const expected = "TEST";
   const paddedString = padding + expected + padding;
 
@@ -11,7 +11,7 @@ test("removes trailing and leading whitespace", () => {
   expect(actual).toBe(expected);
 });
 
-test("removes any non-alphanumeric characters excluding dashes and underscores", () => {
+test("should remove any non-alphanumeric characters excluding dashes and underscores", () => {
   const specialCharacters = " !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
   const unsanitizedString = "Some" + specialCharacters + "String";
 

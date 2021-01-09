@@ -303,5 +303,51 @@ describe("Threshold class names", () => {
       expect(valueEl).not.toHaveClass(StatisticDisplay.LOWER_WARNING_CLASS);
       expect(valueEl).not.toHaveClass(StatisticDisplay.LOWER_LIMIT_CLASS);
     });
+
+    test("should render statistics with no additional className when value is before threshold", () => {
+      const title = "A Title";
+      const startingValue = 18;
+      const upperLimit = 19;
+
+      render(
+        <StatisticDisplay
+          title={title}
+          startingValue={startingValue}
+          upperLimit={upperLimit}
+        />
+      );
+
+      expect(screen.getByText(title)).toBeInTheDocument();
+
+      const valueEl = screen.getByLabelText(title);
+      const statisticValue = valueEl.textContent;
+      expect(statisticValue).toBe(startingValue.toString());
+
+      expect(valueEl).not.toHaveClass(StatisticDisplay.UPPER_LIMIT_CLASS);
+      expect(valueEl).not.toHaveClass(StatisticDisplay.UPPER_WARNING_CLASS);
+      expect(valueEl).not.toHaveClass(StatisticDisplay.LOWER_WARNING_CLASS);
+      expect(valueEl).not.toHaveClass(StatisticDisplay.LOWER_LIMIT_CLASS);
+    });
+
+    test("should throw error when value is outside threshold", () => {
+      const originalError = console.error;
+      console.error = jest.fn();
+
+      const title = "A Title";
+      const startingValue = 20;
+      const upperLimit = 19;
+
+      expect(() => {
+        render(
+          <StatisticDisplay
+            title={title}
+            startingValue={startingValue}
+            upperLimit={upperLimit}
+          />
+        );
+      }).toThrowError();
+
+      console.error = originalError;
+    });
   });
 });

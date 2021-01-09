@@ -56,7 +56,12 @@ export default class StatisticDisplay extends React.Component<StatisticDisplayPr
   isValueAtUpperLimit() {
     if (!this.props.upperLimit) return false;
 
-    return this.props.startingValue >= this.props.upperLimit;
+    if (this.props.startingValue > this.props.upperLimit)
+      throw new Error(
+        `The given value, '${this.props.startingValue}', is past the limit, '${this.props.upperLimit}'.`
+      );
+
+    return this.props.startingValue === this.props.upperLimit;
   }
 
   isValueWithinUpperWarning() {
@@ -76,7 +81,7 @@ export default class StatisticDisplay extends React.Component<StatisticDisplayPr
         `The given value, '${this.props.startingValue}', is past the limit, '${this.props.lowerLimit}'.`
       );
 
-    return this.props.startingValue == this.props.lowerLimit;
+    return this.props.startingValue === this.props.lowerLimit;
   }
 
   isValueWithinLowerWarning() {
