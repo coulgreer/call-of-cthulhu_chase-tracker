@@ -3,7 +3,7 @@ import React from "react";
 import { v4 as uuidv4 } from "uuid";
 import clsx from "clsx";
 
-import { sanitize } from "../../utils/lib/sanitizer";
+import { sanitize } from "../../utils/sanitizer";
 
 import "./index.css";
 
@@ -50,7 +50,38 @@ export default class StatisticDisplay extends React.Component<StatisticDisplayPr
   constructor(props: StatisticDisplayProps) {
     super(props);
 
+    this.validateUpperBound();
+    this.validateLowerBound();
+
     this.id = uuidv4();
+  }
+
+  validateUpperBound() {
+    if (!this.props.upperLimit || !this.props.upperWarning) return;
+
+    if (this.props.upperWarning > this.props.upperLimit) {
+      throw new Error(
+        `The given upper warning, '${this.props.upperWarning}', is greater than the given upper limit, '${this.props.upperLimit}'.`
+      );
+    } else if (this.props.upperWarning === this.props.upperLimit) {
+      throw new Error(
+        `The given upper warning, '${this.props.upperWarning}', is equal to the given upper limit, '${this.props.upperLimit}'. The limit should be greater than the warning threshold.`
+      );
+    }
+  }
+
+  validateLowerBound() {
+    if (!this.props.lowerLimit || !this.props.lowerWarning) return;
+
+    if (this.props.lowerWarning < this.props.lowerLimit) {
+      throw new Error(
+        `The given lower warning, '${this.props.lowerWarning}', is less than the given lower limit, '${this.props.lowerLimit}'.`
+      );
+    } else if (this.props.lowerLimit === this.props.lowerWarning) {
+      throw new Error(
+        `The given lower warning, '${this.props.lowerWarning}', is equal to the given lower limit, '${this.props.lowerLimit}'. The limit should be less than the warning threshold.`
+      );
+    }
   }
 
   isValueAtUpperLimit() {

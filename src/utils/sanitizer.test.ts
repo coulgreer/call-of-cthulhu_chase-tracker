@@ -1,4 +1,4 @@
-import * as sanitizer from "../lib/sanitizer";
+import * as sanitizer from "./sanitizer";
 
 const padding = "   ";
 
