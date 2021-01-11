@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 
 import StatisticDisplay from "./StatisticDisplay";
 
-test("renders statistics", () => {
+test("should render statistics properly", () => {
   const title = "A Title";
   const startingValue = 5;
 
@@ -103,6 +103,30 @@ describe("Threshold class names", () => {
         <StatisticDisplay
           title={title}
           startingValue={startingValue}
+          lowerWarning={lowerWarning}
+          lowerLimit={lowerLimit}
+        />
+      );
+    }).toThrowError();
+    reenableConsoleErrors(consoleError);
+  });
+
+  test("should throw error when lower bound and upper bound intercept", () => {
+    const title = "A Title";
+    const upperLimit = 7;
+    const upperWarning = 3;
+    const lowerWarning = 5;
+    const lowerLimit = 2;
+    const startingValue = upperLimit - lowerLimit;
+
+    const consoleError = disableConsoleErrors();
+    expect(() => {
+      render(
+        <StatisticDisplay
+          title={title}
+          startingValue={startingValue}
+          upperLimit={upperLimit}
+          upperWarning={upperWarning}
           lowerWarning={lowerWarning}
           lowerLimit={lowerLimit}
         />

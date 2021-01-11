@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 import clsx from "clsx";
 
 import { sanitize } from "../../utils/sanitizer";
+import Range from "../../utils/range";
 
 import "./index.css";
 
@@ -50,38 +51,67 @@ export default class StatisticDisplay extends React.Component<StatisticDisplayPr
   constructor(props: StatisticDisplayProps) {
     super(props);
 
-    this.validateUpperBound();
-    this.validateLowerBound();
+    /* TODO(Coul Greer): Refactor the following if to be less indented. Also,
+       store the bounds to be used elsewhere in the class. This will help this
+       class follow SRP. */
+    if (
+      Range.hasIntersection(
+        this.generateUpperBound(),
+        this.generateLowerBound()
+      )
+    ) {
+      throw new Error(
+        `There is an intersection between the upper and lower bounds.`
+      );
+    }
 
     this.id = uuidv4();
   }
 
-  validateUpperBound() {
-    if (!this.props.upperLimit || !this.props.upperWarning) return;
+  generateUpperBound(): Range | null {
+    if (!this.props.upperLimit && !this.props.upperWarning) return null;
 
-    if (this.props.upperWarning > this.props.upperLimit) {
-      throw new Error(
-        `The given upper warning, '${this.props.upperWarning}', is greater than the given upper limit, '${this.props.upperLimit}'.`
-      );
-    } else if (this.props.upperWarning === this.props.upperLimit) {
-      throw new Error(
-        `The given upper warning, '${this.props.upperWarning}', is equal to the given upper limit, '${this.props.upperLimit}'. The limit should be greater than the warning threshold.`
-      );
+    if (this.props.upperLimit && this.props.upperWarning) {
+      if (this.props.upperWarning > this.props.upperLimit) {
+        throw new Error(
+          `The given upper warning, '${this.props.upperWarning}', is greater than the given upper limit, '${this.props.upperLimit}'.`
+        );
+      } else if (this.props.upperWarning === this.props.upperLimit) {
+        throw new Error(
+          `The given upper warning, '${this.props.upperWarning}', is equal to the given upper limit, '${this.props.upperLimit}'. The limit should be greater than the warning threshold.`
+        );
+      }
     }
+
+    const end = this.props.upperLimit
+      ? this.props.upperLimit
+      : Number.MAX_SAFE_INTEGER;
+    const start = this.props.upperWarning ? this.props.upperWarning : end;
+
+    return new Range(start, end);
   }
 
-  validateLowerBound() {
-    if (!this.props.lowerLimit || !this.props.lowerWarning) return;
+  generateLowerBound(): Range | null {
+    if (!this.props.lowerLimit && !this.props.lowerWarning) return null;
 
-    if (this.props.lowerWarning < this.props.lowerLimit) {
-      throw new Error(
-        `The given lower warning, '${this.props.lowerWarning}', is less than the given lower limit, '${this.props.lowerLimit}'.`
-      );
-    } else if (this.props.lowerLimit === this.props.lowerWarning) {
-      throw new Error(
-        `The given lower warning, '${this.props.lowerWarning}', is equal to the given lower limit, '${this.props.lowerLimit}'. The limit should be less than the warning threshold.`
-      );
+    if (this.props.lowerLimit && this.props.lowerWarning) {
+      if (this.props.lowerWarning < this.props.lowerLimit) {
+        throw new Error(
+          `The given lower warning, '${this.props.lowerWarning}', is less than the given lower limit, '${this.props.lowerLimit}'.`
+        );
+      } else if (this.props.lowerLimit === this.props.lowerWarning) {
+        throw new Error(
+          `The given lower warning, '${this.props.lowerWarning}', is equal to the given lower limit, '${this.props.lowerLimit}'. The limit should be less than the warning threshold.`
+        );
+      }
     }
+
+    const end = this.props.lowerLimit
+      ? this.props.lowerLimit
+      : Number.MAX_SAFE_INTEGER;
+    const start = this.props.lowerWarning ? this.props.lowerWarning : end;
+
+    return new Range(start, end);
   }
 
   isValueAtUpperLimit() {
