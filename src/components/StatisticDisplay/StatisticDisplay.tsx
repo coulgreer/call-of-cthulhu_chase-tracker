@@ -45,21 +45,14 @@ export default class StatisticDisplay extends React.Component<StatisticDisplayPr
   static get LOWER_LIMIT_CLASS() {
     return LOWER_LIMIT_CLASS;
   }
-
   private id: string;
 
   constructor(props: StatisticDisplayProps) {
     super(props);
 
-    /* TODO(Coul Greer): Refactor the following if to be less indented. Also,
-       store the bounds to be used elsewhere in the class. This will help this
-       class follow SRP. */
-    if (
-      Range.hasIntersection(
-        this.generateUpperBound(),
-        this.generateLowerBound()
-      )
-    ) {
+    const upperRange = this.generateUpperBound();
+    const lowerRange = this.generateLowerBound();
+    if (Range.hasIntersection(upperRange, lowerRange)) {
       throw new Error(
         `There is an intersection between the upper and lower bounds.`
       );
@@ -68,7 +61,7 @@ export default class StatisticDisplay extends React.Component<StatisticDisplayPr
     this.id = uuidv4();
   }
 
-  generateUpperBound(): Range | null {
+  private generateUpperBound(): Range | null {
     if (!this.props.upperLimit && !this.props.upperWarning) return null;
 
     if (this.props.upperLimit && this.props.upperWarning) {
@@ -91,7 +84,7 @@ export default class StatisticDisplay extends React.Component<StatisticDisplayPr
     return new Range(start, end);
   }
 
-  generateLowerBound(): Range | null {
+  private generateLowerBound(): Range | null {
     if (!this.props.lowerLimit && !this.props.lowerWarning) return null;
 
     if (this.props.lowerLimit && this.props.lowerWarning) {
