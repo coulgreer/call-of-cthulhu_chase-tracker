@@ -77,6 +77,7 @@ export default class ParticipantTable extends Component<
         participantRows: modifiedParticipantRows,
         selectedRow: null,
       }));
+      this.closeModal();
     }
   }
 

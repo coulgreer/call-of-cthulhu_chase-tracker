@@ -67,6 +67,10 @@ describe("Participant Removal", () => {
     expect(
       screen.getByText(ParticipantTable.DEFAULT_NAME + "3")
     ).toBeInTheDocument();
+
+    expect(
+      screen.queryByRole("dialog", { name: /confirm removal/i })
+    ).not.toBeInTheDocument();
   });
 
   test("should preserve all participants when removal is canceled via button", () => {
