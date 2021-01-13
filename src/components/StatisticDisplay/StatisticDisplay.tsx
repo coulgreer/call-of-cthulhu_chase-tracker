@@ -101,7 +101,7 @@ export default class StatisticDisplay extends React.Component<StatisticDisplayPr
 
     const end = this.props.lowerLimit
       ? this.props.lowerLimit
-      : Number.MAX_SAFE_INTEGER;
+      : Number.MIN_SAFE_INTEGER;
     const start = this.props.lowerWarning ? this.props.lowerWarning : end;
 
     return new Range(start, end);
@@ -149,6 +149,7 @@ export default class StatisticDisplay extends React.Component<StatisticDisplayPr
 
   render() {
     const labelID = sanitize(this.props.title) + "-" + this.id;
+    const inputID = "input-" + this.id;
     const className = clsx({
       [UPPER_LIMIT_CLASS]: this.isValueAtUpperLimit(),
       [UPPER_WARNING_CLASS]: this.isValueWithinUpperWarning(),
@@ -158,10 +159,15 @@ export default class StatisticDisplay extends React.Component<StatisticDisplayPr
 
     return (
       <div className="statistic-display">
-        <label id={labelID}>{this.props.title}</label>
-        <p aria-labelledby={labelID} className={className}>
-          {this.props.startingValue}
-        </p>
+        <label htmlFor={inputID} id={labelID}>
+          {this.props.title}
+        </label>
+        <input
+          type="number"
+          id={inputID}
+          className={className}
+          defaultValue={this.props.startingValue}
+        />
       </div>
     );
   }

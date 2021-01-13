@@ -25,8 +25,18 @@ export default class ParticipantRow extends React.Component<ParticipantRowProps>
     return (
       <div className="participant-row">
         <h2>{this.props.participantName}</h2>
-        <StatisticDisplay title={ParticipantRow.DEX_TITLE} startingValue={0} />
-        <StatisticDisplay title={ParticipantRow.MOV_TITLE} startingValue={0} />
+        <StatisticDisplay
+          title={ParticipantRow.DEX_TITLE}
+          lowerWarning={0}
+          upperWarning={100}
+          startingValue={15}
+        />
+        <StatisticDisplay
+          title={ParticipantRow.MOV_TITLE}
+          lowerWarning={1}
+          upperWarning={10}
+          startingValue={2}
+        />
       </div>
     );
   }

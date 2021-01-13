@@ -11,8 +11,9 @@ test("should render statistics properly", () => {
 
   expect(screen.getByText(title)).toBeInTheDocument();
 
-  const statisticValue = screen.getByLabelText(title).textContent;
-  expect(statisticValue).toBe(startingValue.toString());
+  const inputEl = screen.getByLabelText(title, { selector: "input" });
+  expect(inputEl).toBeInTheDocument();
+  expect(inputEl).toHaveValue(startingValue);
 });
 
 describe("Threshold class names", () => {
@@ -22,11 +23,7 @@ describe("Threshold class names", () => {
 
     render(<StatisticDisplay title={title} startingValue={startingValue} />);
 
-    expect(screen.getByText(title)).toBeInTheDocument();
-
     const valueEl = screen.getByLabelText(title);
-    expect(valueEl).toHaveTextContent(startingValue.toString());
-
     expect(valueEl).not.toHaveClass(StatisticDisplay.UPPER_LIMIT_CLASS);
     expect(valueEl).not.toHaveClass(StatisticDisplay.UPPER_WARNING_CLASS);
     expect(valueEl).not.toHaveClass(StatisticDisplay.LOWER_WARNING_CLASS);
@@ -149,11 +146,7 @@ describe("Threshold class names", () => {
         />
       );
 
-      expect(screen.getByText(title)).toBeInTheDocument();
-
       const valueEl = screen.getByLabelText(title);
-      expect(valueEl).toHaveTextContent(startingValue.toString());
-
       expect(valueEl).not.toHaveClass(StatisticDisplay.UPPER_LIMIT_CLASS);
       expect(valueEl).not.toHaveClass(StatisticDisplay.UPPER_WARNING_CLASS);
       expect(valueEl).toHaveClass(StatisticDisplay.LOWER_WARNING_CLASS);
@@ -173,11 +166,7 @@ describe("Threshold class names", () => {
         />
       );
 
-      expect(screen.getByText(title)).toBeInTheDocument();
-
       const valueEl = screen.getByLabelText(title);
-      expect(valueEl).toHaveTextContent(startingValue.toString());
-
       expect(valueEl).not.toHaveClass(StatisticDisplay.UPPER_LIMIT_CLASS);
       expect(valueEl).not.toHaveClass(StatisticDisplay.UPPER_WARNING_CLASS);
       expect(valueEl).toHaveClass(StatisticDisplay.LOWER_WARNING_CLASS);
@@ -197,11 +186,7 @@ describe("Threshold class names", () => {
         />
       );
 
-      expect(screen.getByText(title)).toBeInTheDocument();
-
       const valueEl = screen.getByLabelText(title);
-      expect(valueEl).toHaveTextContent(startingValue.toString());
-
       expect(valueEl).not.toHaveClass(StatisticDisplay.UPPER_LIMIT_CLASS);
       expect(valueEl).not.toHaveClass(StatisticDisplay.UPPER_WARNING_CLASS);
       expect(valueEl).not.toHaveClass(StatisticDisplay.LOWER_WARNING_CLASS);
@@ -223,11 +208,7 @@ describe("Threshold class names", () => {
         />
       );
 
-      expect(screen.getByText(title)).toBeInTheDocument();
-
       const valueEl = screen.getByLabelText(title);
-      expect(valueEl).toHaveTextContent(startingValue.toString());
-
       expect(valueEl).not.toHaveClass(StatisticDisplay.UPPER_LIMIT_CLASS);
       expect(valueEl).not.toHaveClass(StatisticDisplay.UPPER_WARNING_CLASS);
       expect(valueEl).not.toHaveClass(StatisticDisplay.LOWER_WARNING_CLASS);
@@ -247,11 +228,7 @@ describe("Threshold class names", () => {
         />
       );
 
-      expect(screen.getByText(title)).toBeInTheDocument();
-
       const valueEl = screen.getByLabelText(title);
-      expect(valueEl).toHaveTextContent(startingValue.toString());
-
       expect(valueEl).not.toHaveClass(StatisticDisplay.UPPER_LIMIT_CLASS);
       expect(valueEl).not.toHaveClass(StatisticDisplay.UPPER_WARNING_CLASS);
       expect(valueEl).not.toHaveClass(StatisticDisplay.LOWER_WARNING_CLASS);
@@ -291,11 +268,7 @@ describe("Threshold class names", () => {
         />
       );
 
-      expect(screen.getByText(title)).toBeInTheDocument();
-
       const valueEl = screen.getByLabelText(title);
-      expect(valueEl).toHaveTextContent(startingValue.toString());
-
       expect(valueEl).not.toHaveClass(StatisticDisplay.UPPER_LIMIT_CLASS);
       expect(valueEl).toHaveClass(StatisticDisplay.UPPER_WARNING_CLASS);
       expect(valueEl).not.toHaveClass(StatisticDisplay.LOWER_WARNING_CLASS);
@@ -315,11 +288,7 @@ describe("Threshold class names", () => {
         />
       );
 
-      expect(screen.getByText(title)).toBeInTheDocument();
-
       const valueEl = screen.getByLabelText(title);
-      expect(valueEl).toHaveTextContent(startingValue.toString());
-
       expect(valueEl).not.toHaveClass(StatisticDisplay.UPPER_LIMIT_CLASS);
       expect(valueEl).toHaveClass(StatisticDisplay.UPPER_WARNING_CLASS);
       expect(valueEl).not.toHaveClass(StatisticDisplay.LOWER_WARNING_CLASS);
@@ -339,11 +308,7 @@ describe("Threshold class names", () => {
         />
       );
 
-      expect(screen.getByText(title)).toBeInTheDocument();
-
       const valueEl = screen.getByLabelText(title);
-      expect(valueEl).toHaveTextContent(startingValue.toString());
-
       expect(valueEl).not.toHaveClass(StatisticDisplay.UPPER_LIMIT_CLASS);
       expect(valueEl).not.toHaveClass(StatisticDisplay.UPPER_WARNING_CLASS);
       expect(valueEl).not.toHaveClass(StatisticDisplay.LOWER_WARNING_CLASS);
@@ -365,11 +330,7 @@ describe("Threshold class names", () => {
         />
       );
 
-      expect(screen.getByText(title)).toBeInTheDocument();
-
       const valueEl = screen.getByLabelText(title);
-      expect(valueEl).toHaveTextContent(startingValue.toString());
-
       expect(valueEl).toHaveClass(StatisticDisplay.UPPER_LIMIT_CLASS);
       expect(valueEl).not.toHaveClass(StatisticDisplay.UPPER_WARNING_CLASS);
       expect(valueEl).not.toHaveClass(StatisticDisplay.LOWER_WARNING_CLASS);
@@ -389,11 +350,7 @@ describe("Threshold class names", () => {
         />
       );
 
-      expect(screen.getByText(title)).toBeInTheDocument();
-
       const valueEl = screen.getByLabelText(title);
-      expect(valueEl).toHaveTextContent(startingValue.toString());
-
       expect(valueEl).not.toHaveClass(StatisticDisplay.UPPER_LIMIT_CLASS);
       expect(valueEl).not.toHaveClass(StatisticDisplay.UPPER_WARNING_CLASS);
       expect(valueEl).not.toHaveClass(StatisticDisplay.LOWER_WARNING_CLASS);
