@@ -13,6 +13,13 @@ export default class Range {
     this.end = end;
   }
 
+  get getStart() {
+    return this.start;
+  }
+  get getEnd() {
+    return this.end;
+  }
+
   contains(value: number): boolean {
     return (
       (this.start <= value && value <= this.end) ||

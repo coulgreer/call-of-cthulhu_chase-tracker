@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 
 import StatisticDisplay from "./StatisticDisplay";
 
+/* TODO (Coul Greer): Add tests for when both upper and lower limits are the same. */
 test("should render statistics properly", () => {
   const title = "A Title";
   const startingValue = 5;
@@ -466,6 +467,26 @@ describe("Threshold class names", () => {
       expect(inputEl).not.toHaveClass(StatisticDisplay.UPPER_WARNING_CLASS);
       expect(inputEl).not.toHaveClass(StatisticDisplay.LOWER_WARNING_CLASS);
       expect(inputEl).not.toHaveClass(StatisticDisplay.LOWER_LIMIT_CLASS);
+    });
+
+    test("should reset value to limit when value entered pass limit threshold", () => {
+      const title = "TEST TITLE";
+      const startingValue = 3;
+      const upperLimit = 5;
+      render(
+        <StatisticDisplay
+          title={title}
+          startingValue={startingValue}
+          upperLimit={upperLimit}
+        />
+      );
+
+      const inputEl = screen.getByLabelText(title);
+      userEvent.clear(inputEl);
+      userEvent.type(inputEl, "7");
+      inputEl.blur();
+
+      expect(inputEl).toHaveValue(5);
     });
   });
 });
