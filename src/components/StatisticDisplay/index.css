@@ -12,8 +12,18 @@ label {
   text-align: center;
 }
 
-p {
+input[type="number"] {
   font-size: 20px;
   margin: 0;
   text-align: center;
+}
+
+input[type="number"].upper-limit,
+input[type="number"].upper-warning {
+  color: yellow;
+}
+
+input[type="number"].lower-limit,
+input[type="number"].lower-warning {
+  color: orange;
 }
