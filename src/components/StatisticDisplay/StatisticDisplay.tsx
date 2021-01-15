@@ -56,9 +56,8 @@ export default class StatisticDisplay extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
+    this.validateStartingValue();
     const startingValueStr = this.props.startingValue.toString();
-    this.checkValuePastUpperLimit(startingValueStr);
-    this.checkValuePastLowerLimit(startingValueStr);
 
     this.state = {
       value: startingValueStr,
@@ -77,6 +76,20 @@ export default class StatisticDisplay extends React.Component<Props, State> {
 
     this.handleChange = this.handleChange.bind(this);
     this.handleBlur = this.handleBlur.bind(this);
+  }
+
+  private validateStartingValue() {
+    const value = this.props.startingValue;
+
+    if (value > this.props.upperLimit) {
+      throw new RangeError(
+        `The given value, '${value}', is past the limit, '${this.props.upperLimit}'.`
+      );
+    } else if (value < this.props.lowerLimit) {
+      throw new RangeError(
+        `The given value, '${value}', is past the limit, '${this.props.lowerLimit}'.`
+      );
+    }
   }
 
   private generateUpperBound(): Range | null {
@@ -144,13 +157,8 @@ export default class StatisticDisplay extends React.Component<Props, State> {
     return Number.parseInt(value) === this.props.upperLimit;
   }
 
-  checkValuePastUpperLimit(value: string) {
-    const valueNum = Number.parseInt(value);
-
-    if (valueNum > this.props.upperLimit)
-      throw new RangeError(
-        `The given value, '${valueNum}', is past the limit, '${this.props.upperLimit}'.`
-      );
+  isAboveUpperLimit(value: string) {
+    return Number.parseInt(value) > this.props.upperLimit;
   }
 
   isValueWithinLowerWarning(value: string) {
@@ -166,13 +174,8 @@ export default class StatisticDisplay extends React.Component<Props, State> {
     return Number.parseInt(value) === this.props.lowerLimit;
   }
 
-  checkValuePastLowerLimit(value: string) {
-    const valueNum = Number.parseInt(value);
-
-    if (valueNum < this.props.lowerLimit)
-      throw new RangeError(
-        `The given value, '${valueNum}', is past the limit, '${this.props.lowerLimit}'.`
-      );
+  isBelowLowerLimit(value: string) {
+    return Number.parseInt(value) < this.props.lowerLimit;
   }
 
   render() {
@@ -206,16 +209,14 @@ export default class StatisticDisplay extends React.Component<Props, State> {
   private handleChange(event: React.FormEvent<HTMLInputElement>) {
     const value = event.currentTarget.value;
 
-    try {
-      this.checkValuePastLowerLimit(value);
-      this.checkValuePastUpperLimit(value);
-      if (value != "") this.setState({ lastValidValue: value });
-    } catch (error) {
-      const valueNum = Number.parseInt(value);
-      if (valueNum > this.props.upperLimit)
+    if (value != "") {
+      if (this.isAboveUpperLimit(value)) {
         this.setState({ lastValidValue: this.props.upperLimit.toString() });
-      else if (valueNum < this.props.lowerLimit)
+      } else if (this.isBelowLowerLimit(value)) {
         this.setState({ lastValidValue: this.props.lowerLimit.toString() });
+      } else {
+        this.setState({ lastValidValue: value });
+      }
     }
 
     this.setState({ value: value });

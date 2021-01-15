@@ -4,7 +4,6 @@ import userEvent from "@testing-library/user-event";
 
 import StatisticDisplay from "./StatisticDisplay";
 
-/* TODO (Coul Greer): Add tests for when both upper and lower limits are the same. */
 test("should render statistics properly", () => {
   const title = "A Title";
   const startingValue = 5;
