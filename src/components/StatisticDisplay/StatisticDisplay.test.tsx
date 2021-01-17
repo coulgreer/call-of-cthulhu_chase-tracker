@@ -485,7 +485,7 @@ describe("Threshold class names", () => {
       userEvent.type(inputEl, "7");
       inputEl.blur();
 
-      expect(inputEl).toHaveValue(5);
+      expect(inputEl).toHaveValue(upperLimit);
     });
   });
 });

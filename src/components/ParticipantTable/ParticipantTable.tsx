@@ -10,22 +10,19 @@ import "./index.css";
 
 if (process.env.NODE_ENV !== "test") Modal.setAppElement("#___gatsby");
 
-interface ParticipantTableProps {
+interface Props {
   warningMessage: string;
 }
 
-interface ParticipantTableState {
+interface State {
   participantRows: ReactElement[];
   isModalOpen: boolean;
   selectedRow: ReactElement | null;
 }
 
-const DEFAULT_NAME = "Placeholder";
+const DEFAULT_NAME = "Participant";
 
-export default class ParticipantTable extends Component<
-  ParticipantTableProps,
-  ParticipantTableState
-> {
+export default class ParticipantTable extends Component<Props, State> {
   static get DEFAULT_NAME() {
     return DEFAULT_NAME;
   }
@@ -33,20 +30,24 @@ export default class ParticipantTable extends Component<
   private static minimumParticipants = 1;
   private datumCount = 0;
 
-  constructor(props: ParticipantTableProps) {
+  constructor(props: Props) {
     super(props);
     this.state = {
       participantRows: [],
       isModalOpen: false,
       selectedRow: null,
     };
+
+    this.addParticipant = this.addParticipant.bind(this);
+    this.removeSelectedParticipant = this.removeSelectedParticipant.bind(this);
+    this.closeModal = this.closeModal.bind(this);
   }
 
   addParticipant() {
     this.datumCount++;
 
-    let participantName = DEFAULT_NAME + this.datumCount;
-    let newRow = (
+    const participantName = DEFAULT_NAME + this.datumCount;
+    const newRow = (
       <ParticipantRow
         key={"data " + participantName}
         participantName={participantName}
@@ -87,7 +88,7 @@ export default class ParticipantTable extends Component<
 
   render() {
     const addButtonElement = (
-      <button onClick={this.addParticipant.bind(this)}>
+      <button onClick={this.addParticipant}>
         <img src={AddIcon} alt="Add Participant" />
       </button>
     );
@@ -100,7 +101,7 @@ export default class ParticipantTable extends Component<
         this.state.participantRows.map((row) => (
           <div className="row" key={"row-control " + row.key}>
             {row}
-            <button onClick={this.promptParticipantRemoval.bind(this, row)}>
+            <button onClick={() => this.promptParticipantRemoval(row)}>
               <img src={RemoveIcon} alt={"Remove " + row.key} />
             </button>
           </div>
@@ -111,11 +112,11 @@ export default class ParticipantTable extends Component<
       <Modal
         contentLabel={"Confirm Removal"}
         isOpen={this.state.isModalOpen}
-        onRequestClose={this.closeModal.bind(this)}
+        onRequestClose={this.closeModal}
       >
         <p>Would you like to delete this participant?</p>
-        <button onClick={this.removeSelectedParticipant.bind(this)}>Yes</button>
-        <button onClick={this.closeModal.bind(this)}>Cancel</button>
+        <button onClick={this.removeSelectedParticipant}>Yes</button>
+        <button onClick={this.closeModal}>Cancel</button>
       </Modal>
     );
 
