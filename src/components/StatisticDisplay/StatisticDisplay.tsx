@@ -206,7 +206,7 @@ export default class StatisticDisplay extends React.Component<Props, State> {
     );
   }
 
-  private handleChange(event: React.FormEvent<HTMLInputElement>) {
+  private handleChange(event: React.ChangeEvent<HTMLInputElement>) {
     const value = event.currentTarget.value;
 
     if (value != "") {

@@ -34,8 +34,9 @@ describe("Warning Message prop", () => {
     userEvent.click(screen.getByRole("button", { name: /add participant/i }));
 
     expect(screen.queryByText(WARNING_MESSAGE)).not.toBeInTheDocument();
+
     expect(
-      screen.getByText(ParticipantTable.DEFAULT_NAME + " #1")
+      screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #1`)
     ).toBeInTheDocument();
   });
 });
@@ -49,7 +50,7 @@ describe("Participant Removal", () => {
     userEvent.click(addButton);
     userEvent.click(addButton);
 
-    const regexrString = "remove: " + ParticipantTable.DEFAULT_NAME + " #1";
+    const regexrString = `remove: ${ParticipantTable.DEFAULT_NAME} #1`;
     userEvent.click(
       screen.getByRole("button", { name: new RegExp(regexrString, "i") })
     );
@@ -57,15 +58,15 @@ describe("Participant Removal", () => {
     userEvent.click(screen.getByRole("button", { name: /yes/i }));
 
     expect(
-      screen.queryByText(ParticipantTable.DEFAULT_NAME + " #1")
+      screen.queryByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #1`)
     ).not.toBeInTheDocument();
 
     expect(
-      screen.getByText(ParticipantTable.DEFAULT_NAME + " #2")
+      screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #2`)
     ).toBeInTheDocument();
 
     expect(
-      screen.getByText(ParticipantTable.DEFAULT_NAME + " #3")
+      screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #3`)
     ).toBeInTheDocument();
 
     expect(
@@ -81,22 +82,22 @@ describe("Participant Removal", () => {
     userEvent.click(addButton);
     userEvent.click(addButton);
 
-    const regexrString = "remove: " + ParticipantTable.DEFAULT_NAME + " #1";
+    const regexrString = `remove: ${ParticipantTable.DEFAULT_NAME} #1`;
     userEvent.click(
       screen.getByRole("button", { name: new RegExp(regexrString, "i") })
     );
     userEvent.click(screen.getByRole("button", { name: /cancel/i }));
 
     expect(
-      screen.getByText(ParticipantTable.DEFAULT_NAME + " #1")
+      screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #1`)
     ).toBeInTheDocument();
 
     expect(
-      screen.getByText(ParticipantTable.DEFAULT_NAME + " #2")
+      screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #2`)
     ).toBeInTheDocument();
 
     expect(
-      screen.getByText(ParticipantTable.DEFAULT_NAME + " #3")
+      screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #3`)
     ).toBeInTheDocument();
   });
 
@@ -108,7 +109,7 @@ describe("Participant Removal", () => {
     userEvent.click(addButton);
     userEvent.click(addButton);
 
-    const regexrString = "remove: " + ParticipantTable.DEFAULT_NAME + " #1";
+    const regexrString = `remove: ${ParticipantTable.DEFAULT_NAME} #1`;
     userEvent.click(
       screen.getByRole("button", { name: new RegExp(regexrString, "i") })
     );
@@ -122,15 +123,15 @@ describe("Participant Removal", () => {
     });
 
     expect(
-      screen.getByText(ParticipantTable.DEFAULT_NAME + " #1")
+      screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #1`)
     ).toBeInTheDocument();
 
     expect(
-      screen.getByText(ParticipantTable.DEFAULT_NAME + " #2")
+      screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #2`)
     ).toBeInTheDocument();
 
     expect(
-      screen.getByText(ParticipantTable.DEFAULT_NAME + " #3")
+      screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #3`)
     ).toBeInTheDocument();
   });
 });
@@ -146,14 +147,14 @@ test("should have the appropriate default participant name", () => {
 
   userEvent.click(
     screen.getByRole("button", {
-      name: new RegExp(`remove: ${ParticipantTable.DEFAULT_NAME} #2`, "gim"),
+      name: new RegExp(`remove: ${ParticipantTable.DEFAULT_NAME} #2`, "i"),
     })
   );
   userEvent.click(screen.getByRole("button", { name: /yes/i }));
 
   userEvent.click(
     screen.getByRole("button", {
-      name: new RegExp(`remove: ${ParticipantTable.DEFAULT_NAME} #4`, "gim"),
+      name: new RegExp(`remove: ${ParticipantTable.DEFAULT_NAME} #4`, "i"),
     })
   );
   userEvent.click(screen.getByRole("button", { name: /yes/i }));
@@ -161,18 +162,22 @@ test("should have the appropriate default participant name", () => {
   userEvent.click(addButton);
 
   expect(
-    screen.getByText(`${ParticipantTable.DEFAULT_NAME} #1`)
+    screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #1`)
   ).toBeInTheDocument();
+
   expect(
-    screen.getByText(`${ParticipantTable.DEFAULT_NAME} #2`)
+    screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #2`)
   ).toBeInTheDocument();
+
   expect(
-    screen.getByText(`${ParticipantTable.DEFAULT_NAME} #3`)
+    screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #3`)
   ).toBeInTheDocument();
+
   expect(
-    screen.queryByText(`${ParticipantTable.DEFAULT_NAME} #4`)
+    screen.queryByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #4`)
   ).not.toBeInTheDocument();
+
   expect(
-    screen.queryByText(`${ParticipantTable.DEFAULT_NAME} #5`)
+    screen.queryByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #5`)
   ).not.toBeInTheDocument();
 });

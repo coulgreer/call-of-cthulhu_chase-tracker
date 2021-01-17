@@ -101,7 +101,7 @@ export default class ParticipantTable extends Component<Props, State> {
     const newRow = (
       <ParticipantRow
         key={defaultParticipantName}
-        participantName={defaultParticipantName}
+        defaultParticipantName={defaultParticipantName}
       />
     );
 
@@ -130,7 +130,9 @@ export default class ParticipantTable extends Component<Props, State> {
 
   private removeParticipantFromSequence(row: ReactElement) {
     const regex = new RegExp(/[0-9]$/gm);
-    const idNum = Number.parseInt(row.props.participantName.match(regex)[0]);
+    const idNum = Number.parseInt(
+      row.props.defaultParticipantName.match(regex)[0]
+    );
     this.sequnceGenerator.remove(idNum);
   }
 
