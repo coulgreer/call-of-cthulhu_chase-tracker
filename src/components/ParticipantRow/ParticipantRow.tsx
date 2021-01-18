@@ -9,10 +9,13 @@ interface Props {
 interface State {
   currentName: string;
   lastValidName: string;
+  isNameWarningShown: boolean;
 }
 
 const DEX_TITLE = "DEX";
 const MOV_TITLE = "MOV";
+const WARNING_MESSAGE =
+  "A pity. Even Ancient Ones have a name. You ought follow suit.";
 
 export default class ParticipantRow extends React.Component<Props, State> {
   static get DEX_TITLE() {
@@ -22,12 +25,17 @@ export default class ParticipantRow extends React.Component<Props, State> {
     return MOV_TITLE;
   }
 
+  static get WARNING_MESSAGE() {
+    return WARNING_MESSAGE;
+  }
+
   constructor(props: Props) {
     super(props);
 
     this.state = {
       currentName: this.props.defaultParticipantName,
       lastValidName: this.props.defaultParticipantName,
+      isNameWarningShown: false,
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -46,6 +54,9 @@ export default class ParticipantRow extends React.Component<Props, State> {
             onBlur={this.handleBlur}
           />
         </label>
+        {this.state.isNameWarningShown && (
+          <p>{ParticipantRow.WARNING_MESSAGE}</p>
+        )}
         <StatisticDisplay
           title={ParticipantRow.DEX_TITLE}
           lowerWarning={0}
@@ -66,13 +77,21 @@ export default class ParticipantRow extends React.Component<Props, State> {
     const value = event.currentTarget.value;
 
     if (value.trim()) {
-      this.setState(() => ({ lastValidName: value }));
+      this.setState(() => ({
+        lastValidName: value,
+        isNameWarningShown: false,
+      }));
+    } else {
+      this.setState(() => ({ isNameWarningShown: true }));
     }
 
     this.setState(() => ({ currentName: value }));
   }
 
   private handleBlur() {
-    this.setState((state) => ({ currentName: state.lastValidName }));
+    this.setState((state) => ({
+      currentName: state.lastValidName,
+      isNameWarningShown: false,
+    }));
   }
 }
