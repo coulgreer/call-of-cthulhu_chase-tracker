@@ -1,0 +1,39 @@
+.StatisticDisplay {
+  margin: 4px;
+  padding: 2px;
+  display: inline-block;
+  max-width: 119px;
+}
+
+.StatisticDisplay__input,
+.StatisticDisplay__label {
+  display: block;
+}
+
+.StatisticDisplay * {
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.StatisticDisplay__label {
+  color: #454777;
+  font-weight: bold;
+  font-size: 14px;
+  text-align: center;
+}
+
+.StatisticDisplay__input {
+  font-size: 12px;
+  margin: 0;
+  text-align: center;
+}
+
+.StatisticDisplay--upper-limit,
+.StatisticDisplay--upper-warning {
+  color: yellow;
+}
+
+.StatisticDisplay--lower-limit,
+.StatisticDisplay--lower-warning {
+  color: orange;
+}

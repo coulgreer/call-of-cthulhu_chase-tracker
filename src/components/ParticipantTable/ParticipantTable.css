@@ -1,0 +1,17 @@
+.ParticipantTable {
+  height: 100%;
+}
+
+.ParticipantRow {
+  float: left;
+}
+
+.ParticipantTable__row-control {
+  float: right;
+}
+
+.ParticipantTable__row:after {
+  content: "";
+  display: table;
+  clear: both;
+}

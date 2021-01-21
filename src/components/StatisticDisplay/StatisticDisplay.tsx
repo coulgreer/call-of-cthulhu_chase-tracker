@@ -6,12 +6,12 @@ import clsx from "clsx";
 import { sanitize } from "../../utils/sanitizer";
 import Range from "../../utils/range";
 
-import "./index.css";
+import "./StatisticDisplay.css";
 
-const UPPER_LIMIT_CLASS = "upper-limit";
-const UPPER_WARNING_CLASS = "upper-warning";
-const LOWER_WARNING_CLASS = "lower-warning";
-const LOWER_LIMIT_CLASS = "lower-limit";
+const UPPER_LIMIT_CLASS = "StatisticDisplay--upper-limit";
+const UPPER_WARNING_CLASS = "StatisticDisplay--upper-warning";
+const LOWER_WARNING_CLASS = "StatisticDisplay--lower-warning";
+const LOWER_LIMIT_CLASS = "StatisticDisplay--lower-limit";
 
 interface Props {
   title: string;
@@ -190,14 +190,18 @@ export default class StatisticDisplay extends React.Component<Props, State> {
     });
 
     return (
-      <div className="statistic-display">
-        <label htmlFor={inputID} id={labelID}>
+      <div className="StatisticDisplay">
+        <label
+          htmlFor={inputID}
+          id={labelID}
+          className={"StatisticDisplay__label"}
+        >
           {this.props.title}
         </label>
         <input
           type="number"
           id={inputID}
-          className={className}
+          className={"StatisticDisplay__input " + className}
           value={this.state.value}
           onChange={this.handleChange}
           onBlur={this.handleBlur}

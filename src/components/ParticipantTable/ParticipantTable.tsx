@@ -8,7 +8,7 @@ import UniqueSequenceGenerator from "../../utils/unique-sequence-generator";
 import AddIcon from "../../images/baseline_add_circle_outline_black_24dp.png";
 import RemoveIcon from "../../images/baseline_remove_circle_outline_black_24dp.png";
 
-import "./index.css";
+import "./ParticipantTable.css";
 
 if (process.env.NODE_ENV !== "test") Modal.setAppElement("#___gatsby");
 
@@ -64,11 +64,13 @@ export default class ParticipantTable extends Component<Props, State> {
         <p>{this.props.warningMessage}</p>
       ) : (
         this.state.participantRows.map((row) => (
-          <div className="row" key={"row-control " + row.key}>
+          <div className="ParticipantTable__row" key={row.key}>
             {row}
-            <button onClick={() => this.promptParticipantRemoval(row)}>
-              <img src={RemoveIcon} alt={"Remove: " + row.key} />
-            </button>
+            <div className="ParticipantTable__row-control">
+              <button onClick={() => this.promptParticipantRemoval(row)}>
+                <img src={RemoveIcon} alt={"Remove: " + row.key} />
+              </button>
+            </div>
           </div>
         ))
       );
@@ -86,9 +88,9 @@ export default class ParticipantTable extends Component<Props, State> {
     );
 
     return (
-      <div className="participant-table">
+      <div className="ParticipantTable">
         <div>{addButtonElement}</div>
-        <div className="rows">{rowsElement}</div>
+        <div className="ParticipantTable__rows">{rowsElement}</div>
         {modalElement}
       </div>
     );

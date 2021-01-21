@@ -2,6 +2,8 @@ import React from "react";
 
 import StatisticDisplay from "../StatisticDisplay";
 
+import "./ParticipantRow.css";
+
 interface Props {
   defaultParticipantName: string;
 }
@@ -44,31 +46,34 @@ export default class ParticipantRow extends React.Component<Props, State> {
 
   render() {
     return (
-      <div className="participant-row">
-        <label>
-          Name
+      <div className="ParticipantRow">
+        <label className="ParticipantRow__name">
+          <span className="ParticipantRow__label">Name</span>
           <input
             type="text"
             value={this.state.currentName}
             onChange={this.handleChange}
             onBlur={this.handleBlur}
+            className="ParticipantRow__input"
           />
         </label>
         {this.state.isNameWarningShown && (
           <p>{ParticipantRow.WARNING_MESSAGE}</p>
         )}
-        <StatisticDisplay
-          title={ParticipantRow.DEX_TITLE}
-          lowerWarning={0}
-          upperWarning={100}
-          startingValue={15}
-        />
-        <StatisticDisplay
-          title={ParticipantRow.MOV_TITLE}
-          lowerWarning={1}
-          upperWarning={10}
-          startingValue={2}
-        />
+        <div className="ParticipantRow__stats">
+          <StatisticDisplay
+            title={ParticipantRow.DEX_TITLE}
+            lowerWarning={0}
+            upperWarning={100}
+            startingValue={15}
+          />
+          <StatisticDisplay
+            title={ParticipantRow.MOV_TITLE}
+            lowerWarning={1}
+            upperWarning={10}
+            startingValue={2}
+          />
+        </div>
       </div>
     );
   }

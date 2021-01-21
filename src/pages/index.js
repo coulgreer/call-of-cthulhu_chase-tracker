@@ -1,10 +1,15 @@
 import * as React from "react";
 
+import Layout from "../components/Layout";
 import ParticipantTable from "../components/ParticipantTable";
 
-export default function IndexPage() {
-  const WARNING_MESSAGE =
+export default function Home() {
+  const warningMessage =
     "Shame. No prey for the chase. Still, keep your wits about you.";
 
-  return <ParticipantTable warningMessage={WARNING_MESSAGE} />;
+  return (
+    <Layout>
+      <ParticipantTable warningMessage={warningMessage} />
+    </Layout>
+  );
 }
