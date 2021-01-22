@@ -66,11 +66,12 @@ export default class ParticipantTable extends Component<Props, State> {
         this.state.participantRows.map((row) => (
           <div className="ParticipantTable__row" key={row.key}>
             {row}
-            <div className="ParticipantTable__row-control">
-              <button onClick={() => this.promptParticipantRemoval(row)}>
-                <img src={RemoveIcon} alt={"Remove: " + row.key} />
-              </button>
-            </div>
+            <button
+              className="ParticipantTable__row-control"
+              onClick={() => this.promptParticipantRemoval(row)}
+            >
+              <img src={RemoveIcon} alt={"Remove: " + row.key} />
+            </button>
           </div>
         ))
       );

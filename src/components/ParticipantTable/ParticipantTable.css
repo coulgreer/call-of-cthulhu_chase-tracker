@@ -1,17 +1,19 @@
 .ParticipantTable {
+  width: auto;
   height: 100%;
 }
 
+.ParticipantTable__row {
+  padding: 0;
+  position: relative;
+}
+
 .ParticipantRow {
-  float: left;
+  display: inline;
 }
 
 .ParticipantTable__row-control {
   float: right;
-}
-
-.ParticipantTable__row:after {
-  content: "";
-  display: table;
-  clear: both;
+  margin: 0;
+  height: 93px;
 }

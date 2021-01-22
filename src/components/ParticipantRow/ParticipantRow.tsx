@@ -1,5 +1,7 @@
 import React from "react";
 
+import { v4 as uuidv4 } from "uuid";
+
 import StatisticDisplay from "../StatisticDisplay";
 
 import "./ParticipantRow.css";
@@ -31,6 +33,8 @@ export default class ParticipantRow extends React.Component<Props, State> {
     return WARNING_MESSAGE;
   }
 
+  private id: string;
+
   constructor(props: Props) {
     super(props);
 
@@ -40,6 +44,8 @@ export default class ParticipantRow extends React.Component<Props, State> {
       isNameWarningShown: false,
     };
 
+    this.id = uuidv4();
+
     this.handleChange = this.handleChange.bind(this);
     this.handleBlur = this.handleBlur.bind(this);
   }
@@ -47,16 +53,17 @@ export default class ParticipantRow extends React.Component<Props, State> {
   render() {
     return (
       <div className="ParticipantRow">
-        <label className="ParticipantRow__name">
-          <span className="ParticipantRow__label">Name</span>
-          <input
-            type="text"
-            value={this.state.currentName}
-            onChange={this.handleChange}
-            onBlur={this.handleBlur}
-            className="ParticipantRow__input"
-          />
+        <label htmlFor={this.id} className="ParticipantRow__name-label">
+          Name
         </label>
+        <input
+          id={this.id}
+          type="text"
+          value={this.state.currentName}
+          onChange={this.handleChange}
+          onBlur={this.handleBlur}
+          className="ParticipantRow__name-input"
+        />
         {this.state.isNameWarningShown && (
           <p>{ParticipantRow.WARNING_MESSAGE}</p>
         )}

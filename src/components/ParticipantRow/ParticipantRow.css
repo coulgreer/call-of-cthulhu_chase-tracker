@@ -1,8 +1,15 @@
-.ParticipantRow__label {
+.ParticipantRow__name-label {
+  display: block;
+  width: 100%;
   font-size: 12px;
 }
 
-.ParticipantRow__input {
-  display: block;
+.ParticipantRow__name-input {
+  box-sizing: border-box;
+  width: 100%;
   font-size: 18px;
+}
+
+.Participant__stats {
+  width: 100%;
 }
