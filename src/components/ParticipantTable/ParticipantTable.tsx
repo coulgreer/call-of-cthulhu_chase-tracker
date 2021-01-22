@@ -64,6 +64,7 @@ export default class ParticipantTable extends Component<Props, State> {
         <p>{this.props.warningMessage}</p>
       ) : (
         this.state.participantRows.map((row) => (
+          /** TODO (Coul Greer): Convert from div into a td element. Also, add table as the surrounding element */
           <div className="ParticipantTable__row" key={row.key}>
             {row}
             <button
@@ -89,6 +90,7 @@ export default class ParticipantTable extends Component<Props, State> {
     );
 
     return (
+      /** TODO (Coul Greer): Convert div into table element. This is to help format as desired. */
       <div className="ParticipantTable">
         <div>{addButtonElement}</div>
         <div className="ParticipantTable__rows">{rowsElement}</div>

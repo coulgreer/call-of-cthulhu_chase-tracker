@@ -1,3 +1,4 @@
+/* TODO (Coul Greer): Try adding 'display: table' to ParticipantTable. */
 .ParticipantTable {
   width: auto;
   height: 100%;
@@ -9,7 +10,7 @@
 }
 
 .ParticipantRow {
-  display: inline;
+  display: inline-block;
 }
 
 .ParticipantTable__row-control {
