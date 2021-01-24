@@ -1,13 +1,14 @@
+.ParticipantRow {
+  margin: 3px;
+}
+
 .ParticipantRow__name-label {
   display: block;
-  width: 100%;
-  font-size: 12px;
 }
 
 .ParticipantRow__name-input {
   box-sizing: border-box;
   width: 100%;
-  font-size: 18px;
 }
 
 .ParticipantRow__stats {

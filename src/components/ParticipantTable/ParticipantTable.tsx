@@ -53,7 +53,10 @@ export default class ParticipantTable extends Component<Props, State> {
 
   render() {
     const addButtonElement = (
-      <button onClick={this.createParticipant}>
+      <button
+        className="button button--floating-action"
+        onClick={this.createParticipant}
+      >
         <img src={AddIcon} alt="Add Participant" />
       </button>
     );
@@ -61,13 +64,13 @@ export default class ParticipantTable extends Component<Props, State> {
     const rowsElement =
       this.state.participantRows.length <
       ParticipantTable.minimumParticipants ? (
-        <p className="priority-warning centered">{this.props.warningMessage}</p>
+        <p className="centered">{this.props.warningMessage}</p>
       ) : (
         this.state.participantRows.map((row) => (
           <div className="ParticipantTable__row" key={row.key}>
             {row}
             <button
-              className="ParticipantTable__row-control"
+              className="ParticipantTable__row-control button button--call-to-action"
               onClick={() => this.promptParticipantRemoval(row)}
             >
               <img src={RemoveIcon} alt={"Remove: " + row.key} />
@@ -78,13 +81,25 @@ export default class ParticipantTable extends Component<Props, State> {
 
     const modalElement = (
       <Modal
+        className="Modal__Content"
         contentLabel={"Confirm Removal"}
         isOpen={this.state.isModalOpen}
         onRequestClose={this.closeModal}
       >
-        <p>Would you like to delete this participant?</p>
-        <button onClick={this.removeSelectedParticipant}>Yes</button>
-        <button onClick={this.closeModal}>Cancel</button>
+        <p className="Modal__Content__text">
+          Would you like to delete this participant?
+        </p>
+        <div className="Modal__Content__options">
+          <button
+            className="button button--bare"
+            onClick={this.removeSelectedParticipant}
+          >
+            YES
+          </button>
+          <button className="button button--bare" onClick={this.closeModal}>
+            CANCEL
+          </button>
+        </div>
       </Modal>
     );
 

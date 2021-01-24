@@ -12,9 +12,17 @@
   display: grid;
   grid-template-columns: auto 32px;
   column-gap: 5px;
+  border-radius: 6px;
+  background-color: #264e39;
   margin: 15px 0;
+  padding: 2px;
 }
 
 .ParticipantTable__row-control {
   padding: 2px;
+}
+
+.ParticipantTable__label {
+  font-size: 0.714em;
+  opacity: 87%;
 }

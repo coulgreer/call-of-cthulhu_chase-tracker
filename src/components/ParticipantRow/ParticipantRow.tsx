@@ -53,7 +53,7 @@ export default class ParticipantRow extends React.Component<Props, State> {
   render() {
     return (
       <div className="ParticipantRow">
-        <label htmlFor={this.id} className="ParticipantRow__name-label">
+        <label htmlFor={this.id} className="ParticipantRow__name-label input__label">
           Name
         </label>
         <input
@@ -62,10 +62,10 @@ export default class ParticipantRow extends React.Component<Props, State> {
           value={this.state.currentName}
           onChange={this.handleChange}
           onBlur={this.handleBlur}
-          className="ParticipantRow__name-input"
+          className="ParticipantRow__name-input input"
         />
         <p
-          className="warning"
+          className="error"
           style={{
             visibility: this.state.isNameWarningShown ? "visible" : "hidden",
           }}

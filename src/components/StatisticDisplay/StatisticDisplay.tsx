@@ -194,14 +194,14 @@ export default class StatisticDisplay extends React.Component<Props, State> {
         <label
           htmlFor={inputID}
           id={labelID}
-          className={"StatisticDisplay__label"}
+          className={"StatisticDisplay__label input__label"}
         >
           {this.props.title}
         </label>
         <input
           type="number"
           id={inputID}
-          className={"StatisticDisplay__input " + className}
+          className={"StatisticDisplay__input input " + className}
           value={this.state.value}
           onChange={this.handleChange}
           onBlur={this.handleBlur}

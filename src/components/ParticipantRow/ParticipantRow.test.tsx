@@ -13,7 +13,7 @@ test("should render participant information", () => {
   expect(screen.getByRole("textbox", { name: /name/i })).toBeInTheDocument();
   expect(
     screen.queryByText(ParticipantRow.WARNING_MESSAGE)
-  ).not.toBeInTheDocument();
+  ).not.toBeVisible();
   expect(screen.getByLabelText(ParticipantRow.DEX_TITLE)).toBeInTheDocument();
   expect(screen.getByLabelText(ParticipantRow.MOV_TITLE)).toBeInTheDocument();
 });
@@ -71,7 +71,7 @@ test("should render the last valid name when name changed to invalid value with 
 
   expect(
     screen.queryByText(ParticipantRow.WARNING_MESSAGE)
-  ).not.toBeInTheDocument();
+  ).not.toBeVisible();
 
   expect(inputEl).toHaveDisplayValue(validName);
 });
@@ -92,7 +92,7 @@ test("should render with a warning message when an invalid name is displayed and
 
   expect(
     screen.queryByText(ParticipantRow.WARNING_MESSAGE)
-  ).not.toBeInTheDocument();
+  ).not.toBeVisible();
 
   expect(inputEl).toHaveDisplayValue(validName);
 });
