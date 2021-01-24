@@ -10,6 +10,11 @@
   font-size: 18px;
 }
 
-.Participant__stats {
-  width: 100%;
+.ParticipantRow__stats {
+  display: flex;
+  float: right;
+}
+
+.StatisticDisplay {
+  max-width: 8ch;
 }

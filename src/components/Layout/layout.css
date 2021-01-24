@@ -1,13 +1,46 @@
 html,
 body,
-#___gatsby {
-  height: 100%;
-}
-
+#___gatsby,
 #gatsby-focus-wrapper {
   height: 100%;
 }
 
+body {
+  font-family: "Open Sans", sans-serif;
+  font-size: 16px;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Fraunces", serif;
+}
+
+label {
+  font-size: 0.714em;
+}
+
 img {
   max-width: 100%;
+}
+
+.priority-warning {
+  margin: 6px 0 10px;
+  font-size: 0.714em;
+  font-weight: bold;
+  color: red;
+}
+
+.warning {
+  margin: 6px 0 10px;
+  font-size: 0.714em;
+  color: red;
+}
+
+.centered {
+  margin: auto;
+  text-align: center;
 }

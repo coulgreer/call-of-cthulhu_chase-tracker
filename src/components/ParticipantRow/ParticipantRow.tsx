@@ -64,9 +64,14 @@ export default class ParticipantRow extends React.Component<Props, State> {
           onBlur={this.handleBlur}
           className="ParticipantRow__name-input"
         />
-        {this.state.isNameWarningShown && (
-          <p>{ParticipantRow.WARNING_MESSAGE}</p>
-        )}
+        <p
+          className="warning"
+          style={{
+            visibility: this.state.isNameWarningShown ? "visible" : "hidden",
+          }}
+        >
+          {ParticipantRow.WARNING_MESSAGE}
+        </p>
         <div className="ParticipantRow__stats">
           <StatisticDisplay
             title={ParticipantRow.DEX_TITLE}
