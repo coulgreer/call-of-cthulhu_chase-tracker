@@ -53,10 +53,8 @@ export default class ParticipantTable extends Component<Props, State> {
 
   render() {
     const addButtonElement = (
-      <button
-        className="button button--floating-action"
-        onClick={this.createParticipant}
-      >
+      <button className="button fab" onClick={this.createParticipant}>
+        <span className="button-overlay"></span>
         <img src={AddIcon} alt="Add Participant" />
       </button>
     );
@@ -70,9 +68,10 @@ export default class ParticipantTable extends Component<Props, State> {
           <div className="ParticipantTable__row" key={row.key}>
             {row}
             <button
-              className="ParticipantTable__row-control button button--call-to-action"
+              className="ParticipantTable__row-control button button--primary"
               onClick={() => this.promptParticipantRemoval(row)}
             >
+              <span className="button-overlay"></span>
               <img src={RemoveIcon} alt={"Remove: " + row.key} />
             </button>
           </div>
@@ -90,14 +89,16 @@ export default class ParticipantTable extends Component<Props, State> {
           Would you like to delete this participant?
         </p>
         <div className="Modal__Content__options">
+          <button className="button button--tertiary" onClick={this.closeModal}>
+            <span className="button-overlay"></span>
+            CANCEL
+          </button>
           <button
-            className="button button--bare"
+            className="button button--secondary"
             onClick={this.removeSelectedParticipant}
           >
+            <span className="button-overlay"></span>
             YES
-          </button>
-          <button className="button button--bare" onClick={this.closeModal}>
-            CANCEL
           </button>
         </div>
       </Modal>

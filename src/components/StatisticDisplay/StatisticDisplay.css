@@ -19,17 +19,26 @@
 }
 
 .StatisticDisplay__input {
-  margin: 0;
-  font-size: 16px;
+  font-size: 16pt;
   text-align: center;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
 }
 
 .StatisticDisplay--upper-limit,
 .StatisticDisplay--upper-warning {
-  color: yellow;
+  color: var(--secondary);
 }
 
 .StatisticDisplay--lower-limit,
 .StatisticDisplay--lower-warning {
-  color: orange;
+  color: rgba(255, 158, 68, 0.87);
 }

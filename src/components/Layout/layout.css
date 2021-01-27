@@ -1,15 +1,51 @@
+:root {
+  --dark-text--high-emphasis: rgba(9, 11, 14, 0.87);
+  --dark-text--medium-emphasis: rgba(9, 11, 14, 0.6);
+  --dark-text--disabled: rgba(9, 11, 14, 0.38);
+
+  --light-text--high-emphasis: rgba(245, 246, 247, 0.87);
+  --light-text--medium-emphasis: rgba(245, 246, 247, 0.6);
+  --light-text--disabled: rgba(245, 246, 247, 0.38);
+
+  --main-background: rgb(20, 28, 23);
+  --component-background: rgba(143, 204, 184, 0.24);
+  --primary: rgb(143, 204, 184);
+  --primary-variant: rgb(38, 78, 57);
+  --secondary: rgb(240, 219, 130);
+  --secondary-variant: rgb(232, 196, 46);
+  --error: rgb(207, 102, 121);
+
+  /* Uses primary color. */
+  --surface-overlay--hovered: rgba(240, 219, 130, 0.04);
+
+  /* Uses primary color. */
+  --surface-overlay--focused: rgba(240, 219, 130, 0.12);
+
+  /* Uses light-text color. */
+  --theme-color-overlay--hovered: rgba(255, 255, 255, 0.08);
+
+  /* Uses light-text color. */
+  --theme-color-overlay--focused: rgba(255, 255, 255, 0.24);
+}
+
 html,
 body,
 #___gatsby,
 #gatsby-focus-wrapper {
   height: 100%;
+  width: 100%;
 }
 
 body {
-  max-width: 360px;
+  margin: 0;
   font: 400 16pt "Open Sans", sans-serif;
-  background-color: #002513;
-  color: #f5f6f7;
+  background-color: var(--main-background);
+  color: var(--light-text--high-emphasis);
+}
+
+#___gatsby {
+  max-width: 360px;
+  margin: auto;
 }
 
 h1,
@@ -21,52 +57,103 @@ h6 {
   font-family: "Fraunces", serif;
 }
 
-/** TODO (Coul Greer): Add all the pseudo elements to add feedback to the page. */
+/** TODO (Coul Greer): Create a button component to handle the implementation of an overlay. */
 
 /** Buttons */
 .button {
+  position: relative;
   outline: none;
   border-radius: 4px;
   border: none;
   margin: 4px;
   font: inherit;
   font-weight: 700;
+  cursor: pointer;
 }
 
-.button--floating-action {
-  background-color: #e5b918;
+.fab {
+  background-color: var(--secondary-variant);
   padding: 12px;
   border-radius: 50%;
-  box-shadow: 0 6px 10px 0 #1f1b24;
   font-size: 0;
 }
 
-.button--call-to-action {
-  background-color: #e5b918;
+.button-overlay {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  overflow: hidden;
 }
 
-.button--bare {
+.button--primary {
+  background-color: var(--secondary);
+}
+
+.button--primary:hover .button-overlay {
+  background-color: var(--theme-color-overlay--hovered);
+}
+
+.button--primary:focus .button-overlay {
+  background-color: var(--theme-color-overlay--hovered);
+  border-radius: 4px;
+  border: 1px solid var(--light-text--high-emphasis);
+}
+
+.button--secondary {
   background: none;
-  color: #e5b918;
+  color: var(--secondary);
+  border: 1px solid var(--secondary);
+}
+
+.button--secondary:hover .button-overlay {
+  background-color: var(--surface-overlay--hovered);
+}
+
+.button--secondary:focus .button-overlay {
+  background-color: var(--surface-overlay--focused);
+  border-radius: 4px;
+}
+
+.button--tertiary {
+  background: none;
+  color: var(--secondary);
+}
+
+.button--tertiary:hover .button-overlay {
+  background-color: var(--surface-overlay--hovered);
+}
+
+.button--tertiary:focus .button-overlay {
+  background-color: var(--surface-overlay--focused);
+  border-radius: 4px;
+}
+
+.fab:hover .button-overlay {
+  background-color: var(--theme-color-overlay--hovered);
+  border-radius: 50%;
+}
+
+.fab:focus .button-overlay {
+  background-color: var(--theme-color-overlay--focused);
+  border-radius: 50%;
+  border: 1px solid var(--light-text--high-emphasis);
 }
 
 /** Inputs */
 .input {
-  background-color: #121212;
-  color: #f5f6f7;
+  background-color: rgba(255, 255, 255, 0.12);
+  color: var(--light-dark--high-emphasis);
   border: none;
-  border-bottom: 3px solid #f5f6f7;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.24);
+  border-radius: 4px 4px 0 0;
   font: inherit;
-  text-align: center;
 }
 
 .input:focus {
-  background-color: #f5f6f7;
-  color: #000000;
-  border: none;
-  border-bottom: 3px solid #e8c42e;
+  border-bottom: 2px solid var(--secondary-variant);
   outline: none;
-  text-align: left;
 }
 
 .input__label {
@@ -76,11 +163,12 @@ h6 {
 
 /** Modals */
 .Modal__Content {
-  background-color: #002513;
+  background-color: var(--main-background);
   border-radius: 4px;
-  margin: 50% 12px 0;
+  margin: 24px auto;
   padding: 6px;
   overflow: hidden;
+  max-width: 360px;
 }
 
 .Modal__Content__text {
@@ -102,7 +190,7 @@ img {
   margin: 6px 0 10px;
   font-size: 0.714em;
   font-weight: bold;
-  color: #cf6679;
+  color: var(--error);
   opacity: 60%;
 }
 
