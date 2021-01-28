@@ -2,6 +2,7 @@ import React, { Component, ReactElement } from "react";
 import Modal from "react-modal";
 
 import ParticipantRow from "../ParticipantRow";
+import Button from "../Button";
 
 import UniqueSequenceGenerator from "../../utils/unique-sequence-generator";
 
@@ -53,10 +54,9 @@ export default class ParticipantTable extends Component<Props, State> {
 
   render() {
     const addButtonElement = (
-      <button className="button fab" onClick={this.createParticipant}>
-        <span className="button-overlay"></span>
+      <Button className="button fab" onClick={this.createParticipant}>
         <img src={AddIcon} alt="Add Participant" />
-      </button>
+      </Button>
     );
 
     const rowsElement =
@@ -67,13 +67,13 @@ export default class ParticipantTable extends Component<Props, State> {
         this.state.participantRows.map((row) => (
           <div className="ParticipantTable__row" key={row.key}>
             {row}
-            <button
+            <Button
               className="ParticipantTable__row-control button button--primary"
               onClick={() => this.promptParticipantRemoval(row)}
             >
               <span className="button-overlay"></span>
               <img src={RemoveIcon} alt={"Remove: " + row.key} />
-            </button>
+            </Button>
           </div>
         ))
       );
@@ -89,17 +89,17 @@ export default class ParticipantTable extends Component<Props, State> {
           Would you like to delete this participant?
         </p>
         <div className="Modal__Content__options">
-          <button className="button button--tertiary" onClick={this.closeModal}>
+          <Button className="button button--tertiary" onClick={this.closeModal}>
             <span className="button-overlay"></span>
             CANCEL
-          </button>
-          <button
+          </Button>
+          <Button
             className="button button--secondary"
             onClick={this.removeSelectedParticipant}
           >
             <span className="button-overlay"></span>
             YES
-          </button>
+          </Button>
         </div>
       </Modal>
     );
