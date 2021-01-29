@@ -3,7 +3,6 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import ParticipantRow from "./";
-import ParticipantTable from "../ParticipantTable";
 
 test("should render participant information", () => {
   const name = "Test Participant";
@@ -11,11 +10,14 @@ test("should render participant information", () => {
   render(<ParticipantRow defaultParticipantName={name} />);
 
   expect(screen.getByRole("textbox", { name: /name/i })).toBeInTheDocument();
-  expect(
-    screen.queryByText(ParticipantRow.WARNING_MESSAGE)
-  ).not.toBeVisible();
+  expect(screen.queryByText(ParticipantRow.WARNING_MESSAGE)).not.toBeVisible();
   expect(screen.getByLabelText(ParticipantRow.DEX_TITLE)).toBeInTheDocument();
   expect(screen.getByLabelText(ParticipantRow.MOV_TITLE)).toBeInTheDocument();
+  expect(screen.getByLabelText(ParticipantRow.CON_TITLE)).toBeInTheDocument();
+  expect(screen.getByLabelText(ParticipantRow.DRIVE_TITLE)).toBeInTheDocument();
+  expect(screen.getByLabelText(ParticipantRow.RIDE_TITLE)).toBeInTheDocument();
+  expect(screen.getByLabelText(ParticipantRow.AIR_TITLE)).toBeInTheDocument();
+  expect(screen.getByLabelText(ParticipantRow.SEA_TITLE)).toBeInTheDocument();
 });
 
 test("should render given participant name when changed from default name", () => {
@@ -65,13 +67,11 @@ test("should render the last valid name when name changed to invalid value with 
   userEvent.clear(inputEl);
 
   expect(screen.getByText(ParticipantRow.WARNING_MESSAGE)).toBeInTheDocument();
-  
+
   userEvent.type(inputEl, invalidName);
   inputEl.blur();
 
-  expect(
-    screen.queryByText(ParticipantRow.WARNING_MESSAGE)
-  ).not.toBeVisible();
+  expect(screen.queryByText(ParticipantRow.WARNING_MESSAGE)).not.toBeVisible();
 
   expect(inputEl).toHaveDisplayValue(validName);
 });
@@ -90,9 +90,7 @@ test("should render with a warning message when an invalid name is displayed and
 
   userEvent.type(inputEl, validName);
 
-  expect(
-    screen.queryByText(ParticipantRow.WARNING_MESSAGE)
-  ).not.toBeVisible();
+  expect(screen.queryByText(ParticipantRow.WARNING_MESSAGE)).not.toBeVisible();
 
   expect(inputEl).toHaveDisplayValue(validName);
 });

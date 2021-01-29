@@ -2,7 +2,7 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import StatisticDisplay from "./StatisticDisplay";
+import StatisticDisplay from "./";
 
 test("should render statistics properly", () => {
   const title = "A Title";

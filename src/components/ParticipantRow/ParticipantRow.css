@@ -11,11 +11,20 @@
   width: 100%;
 }
 
-.ParticipantRow__stats {
-  display: flex;
+.ParticipantRow__main-characteristics::after {
+  content: "";
+  display: block;
+  clear: both;
+}
+
+.ParticipantRow__main-characteristics .StatisticDisplay {
   float: right;
 }
 
-.StatisticDisplay {
-  max-width: 8ch;
+.StatisticDisplay__input {
+  max-width: 7ch;
 }
+
+/* TODO (Coul Greer): Style the speed statistics so that they are side-by-side with their labels
+   and take up the entire div. The textfield should have a fixed width while the label occupies
+   the rest */

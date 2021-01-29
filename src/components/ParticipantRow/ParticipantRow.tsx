@@ -16,21 +16,36 @@ interface State {
   isNameWarningShown: boolean;
 }
 
-const DEX_TITLE = "DEX";
-const MOV_TITLE = "MOV";
-const WARNING_MESSAGE =
-  "A pity. Even Ancient Ones have a name. You ought follow suit.";
-
 export default class ParticipantRow extends React.Component<Props, State> {
   static get DEX_TITLE() {
-    return DEX_TITLE;
+    return "DEX";
   }
   static get MOV_TITLE() {
-    return MOV_TITLE;
+    return "MOV";
+  }
+
+  static get CON_TITLE() {
+    return "CON";
+  }
+
+  static get DRIVE_TITLE() {
+    return "Drive Auto";
+  }
+
+  static get RIDE_TITLE() {
+    return "Ride";
+  }
+
+  static get AIR_TITLE() {
+    return "Pilot (Aircraft)";
+  }
+
+  static get SEA_TITLE() {
+    return "Pilot (Boat)";
   }
 
   static get WARNING_MESSAGE() {
-    return WARNING_MESSAGE;
+    return "A pity. Even Ancient Ones have a name. You ought follow suit.";
   }
 
   private id: string;
@@ -53,7 +68,10 @@ export default class ParticipantRow extends React.Component<Props, State> {
   render() {
     return (
       <div className="ParticipantRow">
-        <label htmlFor={this.id} className="ParticipantRow__name-label input__label">
+        <label
+          htmlFor={this.id}
+          className="ParticipantRow__name-label input__label"
+        >
           Name
         </label>
         <input
@@ -72,7 +90,7 @@ export default class ParticipantRow extends React.Component<Props, State> {
         >
           {ParticipantRow.WARNING_MESSAGE}
         </p>
-        <div className="ParticipantRow__stats">
+        <div className="ParticipantRow__main-characteristics">
           <StatisticDisplay
             title={ParticipantRow.DEX_TITLE}
             lowerWarning={0}
@@ -84,6 +102,38 @@ export default class ParticipantRow extends React.Component<Props, State> {
             lowerWarning={1}
             upperWarning={10}
             startingValue={2}
+          />
+        </div>
+        <div className="ParticipantRow__speed-stats">
+          <StatisticDisplay
+            title={ParticipantRow.CON_TITLE}
+            lowerWarning={0}
+            upperWarning={100}
+            startingValue={15}
+          />
+          <StatisticDisplay
+            title={ParticipantRow.DRIVE_TITLE}
+            lowerWarning={0}
+            upperWarning={100}
+            startingValue={20}
+          />
+          <StatisticDisplay
+            title={ParticipantRow.RIDE_TITLE}
+            lowerWarning={0}
+            upperWarning={100}
+            startingValue={5}
+          />
+          <StatisticDisplay
+            title={ParticipantRow.AIR_TITLE}
+            lowerWarning={0}
+            upperWarning={100}
+            startingValue={1}
+          />
+          <StatisticDisplay
+            title={ParticipantRow.SEA_TITLE}
+            lowerWarning={0}
+            upperWarning={100}
+            startingValue={1}
           />
         </div>
       </div>

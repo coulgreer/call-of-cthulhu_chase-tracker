@@ -3,7 +3,7 @@ import React from "react";
 import { screen, render } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import Button from "./Button";
+import Button from "./";
 
 test("should render properly", () => {
   const text = "TEST";
