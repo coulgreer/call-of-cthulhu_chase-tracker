@@ -1,8 +1,13 @@
 import React from "react";
+import { Transition, animated } from "react-spring/renderprops";
 
 import { v4 as uuidv4 } from "uuid";
 
+import Button from "../Button";
 import StatisticDisplay from "../StatisticDisplay";
+
+import ExpandLess from "../../images/baseline_expand_less_black_24dp.png";
+import ExpandMore from "../../images/baseline_expand_more_black_24dp.png";
 
 import "./ParticipantRow.css";
 
@@ -13,7 +18,8 @@ interface Props {
 interface State {
   currentName: string;
   lastValidName: string;
-  isNameWarningShown: boolean;
+  nameWarningShown: boolean;
+  expansionShown: boolean;
 }
 
 export default class ParticipantRow extends React.Component<Props, State> {
@@ -56,13 +62,15 @@ export default class ParticipantRow extends React.Component<Props, State> {
     this.state = {
       currentName: this.props.defaultParticipantName,
       lastValidName: this.props.defaultParticipantName,
-      isNameWarningShown: false,
+      nameWarningShown: false,
+      expansionShown: false,
     };
 
     this.id = uuidv4();
 
     this.handleChange = this.handleChange.bind(this);
     this.handleBlur = this.handleBlur.bind(this);
+    this.toggleExpansion = this.toggleExpansion.bind(this);
   }
 
   render() {
@@ -86,58 +94,87 @@ export default class ParticipantRow extends React.Component<Props, State> {
           <p
             className="error"
             style={{
-              visibility: this.state.isNameWarningShown ? "visible" : "hidden",
+              visibility: this.state.nameWarningShown ? "visible" : "hidden",
             }}
           >
             {ParticipantRow.WARNING_MESSAGE}
           </p>
-          <div className="ParticipantRow__main-characteristics">
-            <StatisticDisplay
-              title={ParticipantRow.DEX_TITLE}
-              lowerWarning={0}
-              upperWarning={100}
-              startingValue={15}
-            />
-            <StatisticDisplay
-              title={ParticipantRow.MOV_TITLE}
-              lowerWarning={1}
-              upperWarning={10}
-              startingValue={2}
-            />
+          <div className="ParticipantRow__footer">
+            <div className="ParticipantRow__main-characteristics">
+              <StatisticDisplay
+                title={ParticipantRow.DEX_TITLE}
+                lowerWarning={0}
+                upperWarning={100}
+                startingValue={15}
+              />
+              <StatisticDisplay
+                title={ParticipantRow.MOV_TITLE}
+                lowerWarning={1}
+                upperWarning={10}
+                startingValue={2}
+              />
+            </div>
+            <Button
+              className="button button--primary button--small button--circular"
+              onClick={this.toggleExpansion}
+            >
+              {this.state.expansionShown ? (
+                <img src={ExpandLess} alt="Collapse" />
+              ) : (
+                <img src={ExpandMore} alt="Expand" />
+              )}
+            </Button>
           </div>
         </div>
-        <div className="ParticipantRow__extended-display">
-          <StatisticDisplay
-            title={ParticipantRow.CON_TITLE}
-            lowerWarning={0}
-            upperWarning={100}
-            startingValue={15}
-          />
-          <StatisticDisplay
-            title={ParticipantRow.DRIVE_TITLE}
-            lowerWarning={0}
-            upperWarning={100}
-            startingValue={20}
-          />
-          <StatisticDisplay
-            title={ParticipantRow.RIDE_TITLE}
-            lowerWarning={0}
-            upperWarning={100}
-            startingValue={5}
-          />
-          <StatisticDisplay
-            title={ParticipantRow.AIR_TITLE}
-            lowerWarning={0}
-            upperWarning={100}
-            startingValue={1}
-          />
-          <StatisticDisplay
-            title={ParticipantRow.SEA_TITLE}
-            lowerWarning={0}
-            upperWarning={100}
-            startingValue={1}
-          />
-        </div>
+        <Transition
+          native
+          items={this.state.expansionShown}
+          from={{ height: 0, overflow: "hidden" }}
+          enter={{ height: "auto" }}
+          leave={{ height: 0 }}
+        >
+          {(expansionShown) =>
+            expansionShown &&
+            ((props) => (
+              <animated.div
+                className="ParticipantRow__extended-display"
+                style={props}
+              >
+                <h3>Speed STATS</h3>
+                <StatisticDisplay
+                  title={ParticipantRow.CON_TITLE}
+                  lowerWarning={0}
+                  upperWarning={100}
+                  startingValue={15}
+                />
+                <StatisticDisplay
+                  title={ParticipantRow.DRIVE_TITLE}
+                  lowerWarning={0}
+                  upperWarning={100}
+                  startingValue={20}
+                />
+                <StatisticDisplay
+                  title={ParticipantRow.RIDE_TITLE}
+                  lowerWarning={0}
+                  upperWarning={100}
+                  startingValue={5}
+                />
+                <StatisticDisplay
+                  title={ParticipantRow.AIR_TITLE}
+                  lowerWarning={0}
+                  upperWarning={100}
+                  startingValue={1}
+                />
+                <StatisticDisplay
+                  title={ParticipantRow.SEA_TITLE}
+                  lowerWarning={0}
+                  upperWarning={100}
+                  startingValue={1}
+                />
+              </animated.div>
+            ))
+          }
+        </Transition>
       </div>
     );
   }
@@ -148,10 +185,10 @@ export default class ParticipantRow extends React.Component<Props, State> {
     if (value.trim()) {
       this.setState(() => ({
         lastValidName: value,
-        isNameWarningShown: false,
+        nameWarningShown: false,
       }));
     } else {
-      this.setState(() => ({ isNameWarningShown: true }));
+      this.setState(() => ({ nameWarningShown: true }));
     }
 
     this.setState(() => ({ currentName: value }));
@@ -160,7 +197,13 @@ export default class ParticipantRow extends React.Component<Props, State> {
   private handleBlur() {
     this.setState((state) => ({
       currentName: state.lastValidName,
-      isNameWarningShown: false,
+      nameWarningShown: false,
+    }));
+  }
+
+  private toggleExpansion() {
+    this.setState((state) => ({
+      expansionShown: !state.expansionShown,
     }));
   }
 }

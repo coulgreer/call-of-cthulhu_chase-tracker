@@ -4,15 +4,64 @@ import userEvent from "@testing-library/user-event";
 
 import ParticipantRow from "./";
 
-test("should render participant information", () => {
+test("should render participant information properly when collapsed", () => {
   const name = "Test Participant";
 
   render(<ParticipantRow defaultParticipantName={name} />);
 
   expect(screen.getByRole("textbox", { name: /name/i })).toBeInTheDocument();
+
   expect(screen.queryByText(ParticipantRow.WARNING_MESSAGE)).not.toBeVisible();
+
   expect(screen.getByLabelText(ParticipantRow.DEX_TITLE)).toBeInTheDocument();
   expect(screen.getByLabelText(ParticipantRow.MOV_TITLE)).toBeInTheDocument();
+
+  expect(screen.getByRole("button", { name: /expand/i })).toBeInTheDocument();
+
+  expect(
+    screen.queryByRole("heading", { name: /speed stats/i })
+  ).not.toBeInTheDocument();
+
+  expect(
+    screen.queryByLabelText(ParticipantRow.CON_TITLE)
+  ).not.toBeInTheDocument();
+
+  expect(
+    screen.queryByLabelText(ParticipantRow.DRIVE_TITLE)
+  ).not.toBeInTheDocument();
+
+  expect(
+    screen.queryByLabelText(ParticipantRow.RIDE_TITLE)
+  ).not.toBeInTheDocument();
+
+  expect(
+    screen.queryByLabelText(ParticipantRow.AIR_TITLE)
+  ).not.toBeInTheDocument();
+
+  expect(
+    screen.queryByLabelText(ParticipantRow.SEA_TITLE)
+  ).not.toBeInTheDocument();
+});
+
+test("should render participant information properly when expanded", () => {
+  const name = "Test Participant";
+
+  render(<ParticipantRow defaultParticipantName={name} />);
+
+  const buttonEl = screen.getByRole("button", { name: /expand/i });
+  userEvent.click(buttonEl);
+
+  expect(screen.getByRole("textbox", { name: /name/i })).toBeInTheDocument();
+
+  expect(screen.queryByText(ParticipantRow.WARNING_MESSAGE)).not.toBeVisible();
+
+  expect(screen.getByLabelText(ParticipantRow.DEX_TITLE)).toBeInTheDocument();
+  expect(screen.getByLabelText(ParticipantRow.MOV_TITLE)).toBeInTheDocument();
+
+  expect(
+    screen.getByRole("heading", { name: /speed stats/i })
+  ).toBeInTheDocument();
+
   expect(screen.getByLabelText(ParticipantRow.CON_TITLE)).toBeInTheDocument();
   expect(screen.getByLabelText(ParticipantRow.DRIVE_TITLE)).toBeInTheDocument();
   expect(screen.getByLabelText(ParticipantRow.RIDE_TITLE)).toBeInTheDocument();

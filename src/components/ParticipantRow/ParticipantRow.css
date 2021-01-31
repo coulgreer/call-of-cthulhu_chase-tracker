@@ -11,14 +11,21 @@
   padding: 4px;
 }
 
-.ParticipantRow__main-characteristics::after {
+.ParticipantRow__main-display::after {
   content: "";
   display: block;
   clear: both;
 }
 
+.ParticipantRow__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
 .ParticipantRow__main-characteristics .StatisticDisplay {
   float: left;
+  margin-bottom: 0;
 }
 
 .ParticipantRow__extended-display {
@@ -27,6 +34,16 @@
   padding: 6px;
   margin: 0 4px;
   box-shadow: inset 0 0 12px #121212;
+}
+
+.ParticipantRow__extended-display .StatisticDisplay {
+  display: grid;
+  grid-template-columns: auto 8ch;
+  column-gap: 12px;
+}
+
+.ParticipantRow__extended-display .StatisticDisplay__label {
+  text-align: right;
 }
 
 .ParticipantRow__extended-display .input {
@@ -40,7 +57,7 @@
 }
 
 .StatisticDisplay {
-  margin: 12px auto
+  margin: 12px auto;
 }
 
 .StatisticDisplay__input {
