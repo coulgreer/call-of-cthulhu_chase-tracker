@@ -54,7 +54,10 @@ export default class ParticipantTable extends Component<Props, State> {
 
   render() {
     const addButtonElement = (
-      <Button className="button fab" onClick={this.createParticipant}>
+      <Button
+        className="button fab"
+        onClick={this.createParticipant}
+      >
         <img src={AddIcon} alt="Add Participant" />
       </Button>
     );
@@ -68,7 +71,7 @@ export default class ParticipantTable extends Component<Props, State> {
           <div className="ParticipantTable__row" key={row.key}>
             {row}
             <Button
-              className="ParticipantTable__row-control button button--primary"
+              className="ParticipantTable__row-control button button--primary button--small"
               onClick={() => this.promptParticipantRemoval(row)}
             >
               <span className="button-overlay"></span>
@@ -89,12 +92,15 @@ export default class ParticipantTable extends Component<Props, State> {
           Would you like to delete this participant?
         </p>
         <div className="Modal__Content__options">
-          <Button className="button button--tertiary" onClick={this.closeModal}>
+          <Button
+            className="button button--tertiary button--medium"
+            onClick={this.closeModal}
+          >
             <span className="button-overlay"></span>
             CANCEL
           </Button>
           <Button
-            className="button button--secondary"
+            className="button button--secondary button--medium"
             onClick={this.removeSelectedParticipant}
           >
             <span className="button-overlay"></span>

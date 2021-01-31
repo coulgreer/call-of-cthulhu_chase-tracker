@@ -1,7 +1,3 @@
-.ParticipantRow {
-  margin: 3px;
-}
-
 .ParticipantRow__name-label {
   display: block;
 }
@@ -11,6 +7,10 @@
   width: 100%;
 }
 
+.ParticipantRow__main-display {
+  padding: 4px;
+}
+
 .ParticipantRow__main-characteristics::after {
   content: "";
   display: block;
@@ -18,13 +18,31 @@
 }
 
 .ParticipantRow__main-characteristics .StatisticDisplay {
-  float: right;
+  float: left;
+}
+
+.ParticipantRow__extended-display {
+  background-color: rgba(245, 246, 247, 0.87);
+  color: var(--dark-text--high-emphasis);
+  padding: 6px;
+  margin: 0 4px;
+  box-shadow: inset 0 0 12px #121212;
+}
+
+.ParticipantRow__extended-display .input {
+  background-color: var(--primary);
+  color: var(--light-text--high-emphasis);
+  border-bottom: 1px solid var(--light-overlay--medium-emphasis);
+}
+
+.ParticipantRow__extended-display .input:focus {
+  border-bottom: 2px solid var(--secondary-variant);
+}
+
+.StatisticDisplay {
+  margin: 12px auto
 }
 
 .StatisticDisplay__input {
   max-width: 7ch;
 }
-
-/* TODO (Coul Greer): Style the speed statistics so that they are side-by-side with their labels
-   and take up the entire div. The textfield should have a fixed width while the label occupies
-   the rest */

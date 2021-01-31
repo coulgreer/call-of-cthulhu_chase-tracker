@@ -68,43 +68,45 @@ export default class ParticipantRow extends React.Component<Props, State> {
   render() {
     return (
       <div className="ParticipantRow">
-        <label
-          htmlFor={this.id}
-          className="ParticipantRow__name-label input__label"
-        >
-          Name
-        </label>
-        <input
-          id={this.id}
-          type="text"
-          value={this.state.currentName}
-          onChange={this.handleChange}
-          onBlur={this.handleBlur}
-          className="ParticipantRow__name-input input"
-        />
-        <p
-          className="error"
-          style={{
-            visibility: this.state.isNameWarningShown ? "visible" : "hidden",
-          }}
-        >
-          {ParticipantRow.WARNING_MESSAGE}
-        </p>
-        <div className="ParticipantRow__main-characteristics">
-          <StatisticDisplay
-            title={ParticipantRow.DEX_TITLE}
-            lowerWarning={0}
-            upperWarning={100}
-            startingValue={15}
+        <div className="ParticipantRow__main-display">
+          <label
+            htmlFor={this.id}
+            className="ParticipantRow__name-label input__label"
+          >
+            Name
+          </label>
+          <input
+            id={this.id}
+            type="text"
+            value={this.state.currentName}
+            onChange={this.handleChange}
+            onBlur={this.handleBlur}
+            className="ParticipantRow__name-input input"
           />
-          <StatisticDisplay
-            title={ParticipantRow.MOV_TITLE}
-            lowerWarning={1}
-            upperWarning={10}
-            startingValue={2}
-          />
+          <p
+            className="error"
+            style={{
+              visibility: this.state.isNameWarningShown ? "visible" : "hidden",
+            }}
+          >
+            {ParticipantRow.WARNING_MESSAGE}
+          </p>
+          <div className="ParticipantRow__main-characteristics">
+            <StatisticDisplay
+              title={ParticipantRow.DEX_TITLE}
+              lowerWarning={0}
+              upperWarning={100}
+              startingValue={15}
+            />
+            <StatisticDisplay
+              title={ParticipantRow.MOV_TITLE}
+              lowerWarning={1}
+              upperWarning={10}
+              startingValue={2}
+            />
+          </div>
         </div>
-        <div className="ParticipantRow__speed-stats">
+        <div className="ParticipantRow__extended-display">
           <StatisticDisplay
             title={ParticipantRow.CON_TITLE}
             lowerWarning={0}

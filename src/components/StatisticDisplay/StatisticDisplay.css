@@ -1,13 +1,14 @@
 .StatisticDisplay {
+  display:flex;
+  flex-direction: column;
+  align-items: center;
   margin: 4px;
   padding: 2px;
-  max-width: 155px;
-  font-size: 16px;
+  font-size: 14pt;
 }
 
 .StatisticDisplay__input,
 .StatisticDisplay__label {
-  display: block;
   box-sizing: border-box;
   max-width: 100%;
 }
@@ -19,7 +20,8 @@
 }
 
 .StatisticDisplay__input {
-  font-size: 16pt;
+  padding: 0 0.25ch;
+  font-size: 1em;
   text-align: center;
 }
 

@@ -4,14 +4,22 @@
   border-radius: 4px;
   border: none;
   margin: 4px;
+  padding: 6px 8px;
   font: inherit;
   font-weight: 700;
   cursor: pointer;
 }
 
 .fab {
+  position: fixed;
+  z-index: 1;
+  bottom: 0;
+  right: 0;
+  min-width: 72px;
+  min-height: 72px;
+  margin: 12px;
+  box-shadow: 4px 6px 6px #121212;
   background-color: var(--secondary-variant);
-  padding: 12px;
   border-radius: 50%;
   font-size: 0;
 }
@@ -23,6 +31,21 @@
   left: 0;
   right: 0;
   overflow: hidden;
+}
+
+.button--large {
+  min-width: 72px;
+  min-height: 72px;
+}
+
+.button--medium {
+  min-width: 60px;
+  min-height: 60px;
+}
+
+.button--small {
+  min-width: 42px;
+  min-height: 42px;
 }
 
 .button--primary {

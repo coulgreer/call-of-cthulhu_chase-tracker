@@ -15,24 +15,20 @@
   --secondary-variant: rgb(232, 196, 46);
   --error: rgb(207, 102, 121);
 
-  /* Uses primary color. */
   --surface-overlay--hovered: rgba(240, 219, 130, 0.04);
-
-  /* Uses primary color. */
   --surface-overlay--focused: rgba(240, 219, 130, 0.12);
 
-  /* Uses light-text color. */
-  --theme-color-overlay--hovered: rgba(255, 255, 255, 0.08);
+  --dark-overlay--low-emphasis: rgba(245, 246, 247, 0.08);
+  --dark-overlay--medium-emphasis: rgba(245, 246, 247, 0.24);
 
-  /* Uses light-text color. */
-  --theme-color-overlay--focused: rgba(255, 255, 255, 0.24);
+  --light-overlay--low-emphasis: rgba(9, 11, 14, 0.08);
+  --light-overlay--medium-emphasis: rgba(9, 11, 14, 0.24);
 }
 
 html,
 body,
 #___gatsby,
 #gatsby-focus-wrapper {
-  height: 100%;
   width: 100%;
 }
 
@@ -59,10 +55,10 @@ h6 {
 
 /** Inputs */
 .input {
-  background-color: rgba(255, 255, 255, 0.12);
-  color: var(--light-dark--high-emphasis);
+  background-color:var(--dark-overlay--low-emphasis);
+  color: var(--light-text--high-emphasis);
   border: none;
-  border-bottom: 2px solid rgba(255, 255, 255, 0.24);
+  border-bottom: 1px solid var(--dark-overlay--medium-emphasis);
   border-radius: 4px 4px 0 0;
   font: inherit;
 }
@@ -78,6 +74,10 @@ h6 {
 }
 
 /** Modals */
+.ReactModalPortal * {
+  z-index: 2;
+}
+
 .Modal__Content {
   background-color: var(--main-background);
   border-radius: 4px;
