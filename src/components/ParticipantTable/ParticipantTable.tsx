@@ -6,7 +6,7 @@ import Button from "../Button";
 
 import UniqueSequenceGenerator from "../../utils/unique-sequence-generator";
 
-import AddIcon from "../../images/baseline_add_circle_outline_black_24dp.png";
+import AddIcon from "../../images/baseline_add_black_36dp.png";
 import RemoveIcon from "../../images/baseline_remove_circle_outline_black_24dp.png";
 
 import "./ParticipantTable.css";

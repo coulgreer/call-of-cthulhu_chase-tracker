@@ -53,11 +53,11 @@
 }
 
 .button--primary:hover .button-overlay {
-  background-color: var(--theme-color-overlay--hovered);
+  background-color: var(--dark-overlay--low-emphasis);
 }
 
 .button--primary:focus .button-overlay {
-  background-color: var(--theme-color-overlay--hovered);
+  background-color: var(--dark-overlay--low-emphasis);
   border-radius: 4px;
   border: 1px solid var(--light-text--high-emphasis);
 }
@@ -92,12 +92,12 @@
 }
 
 .fab:hover .button-overlay {
-  background-color: var(--theme-color-overlay--hovered);
+  background-color: var(--dark-overlay--low-emphasis);
   border-radius: 50%;
 }
 
 .fab:focus .button-overlay {
-  background-color: var(--theme-color-overlay--focused);
+  background-color: var(--dark-overlay--medium-emphasis);
   border-radius: 50%;
   border: 1px solid var(--light-text--high-emphasis);
 }
