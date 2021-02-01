@@ -41,6 +41,21 @@ test("should render participant information properly when collapsed", () => {
   expect(
     screen.queryByLabelText(ParticipantRow.SEA_TITLE)
   ).not.toBeInTheDocument();
+
+
+  
+
+  expect(
+    screen.queryByRole("heading", { name: /misc\. stats/i })
+  ).not.toBeInTheDocument();
+
+  expect(screen.queryByLabelText(ParticipantRow.STR_TITLE)).not.toBeInTheDocument();
+  expect(screen.queryByLabelText(ParticipantRow.CLIMB_TITLE)).not.toBeInTheDocument();
+  expect(screen.queryByLabelText(ParticipantRow.SWIM_TITLE)).not.toBeInTheDocument();
+  expect(screen.queryByLabelText(ParticipantRow.DODGE_TITLE)).not.toBeInTheDocument();
+  expect(screen.queryByLabelText(ParticipantRow.BRAWL_TITLE)).not.toBeInTheDocument();
+  expect(screen.queryByLabelText(ParticipantRow.HANDGUN_TITLE)).not.toBeInTheDocument();
+  expect(screen.queryByLabelText(ParticipantRow.RIFLE_TITLE)).not.toBeInTheDocument();
 });
 
 test("should render participant information properly when expanded", () => {
@@ -67,6 +82,18 @@ test("should render participant information properly when expanded", () => {
   expect(screen.getByLabelText(ParticipantRow.RIDE_TITLE)).toBeInTheDocument();
   expect(screen.getByLabelText(ParticipantRow.AIR_TITLE)).toBeInTheDocument();
   expect(screen.getByLabelText(ParticipantRow.SEA_TITLE)).toBeInTheDocument();
+
+  expect(
+    screen.getByRole("heading", { name: /misc\. stats/i })
+  ).toBeInTheDocument();
+
+  expect(screen.getByLabelText(ParticipantRow.STR_TITLE)).toBeInTheDocument();
+  expect(screen.getByLabelText(ParticipantRow.CLIMB_TITLE)).toBeInTheDocument();
+  expect(screen.getByLabelText(ParticipantRow.SWIM_TITLE)).toBeInTheDocument();
+  expect(screen.getByLabelText(ParticipantRow.DODGE_TITLE)).toBeInTheDocument();
+  expect(screen.getByLabelText(ParticipantRow.BRAWL_TITLE)).toBeInTheDocument();
+  expect(screen.getByLabelText(ParticipantRow.HANDGUN_TITLE)).toBeInTheDocument();
+  expect(screen.getByLabelText(ParticipantRow.RIFLE_TITLE)).toBeInTheDocument();
 });
 
 test("should render given participant name when changed from default name", () => {

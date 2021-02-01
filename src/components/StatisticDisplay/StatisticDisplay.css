@@ -1,28 +1,26 @@
 .StatisticDisplay {
-  display:flex;
+  display: flex;
   flex-direction: column;
   align-items: center;
   margin: 4px;
   padding: 2px;
-  font-size: 14pt;
+  font-size: 18px;
 }
 
 .StatisticDisplay__input,
 .StatisticDisplay__label {
   box-sizing: border-box;
   max-width: 100%;
+  font-size: 1em;
+  text-align: center;
 }
 
 .StatisticDisplay__label {
   font-weight: bold;
-  font-size: 1em;
-  text-align: center;
 }
 
 .StatisticDisplay__input {
   padding: 0 0.25ch;
-  font-size: 1em;
-  text-align: center;
 }
 
 input::-webkit-outer-spin-button,

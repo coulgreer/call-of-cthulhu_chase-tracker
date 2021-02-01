@@ -93,7 +93,6 @@
   box-shadow: 4px 6px 6px #121212;
   background-color: var(--secondary-variant);
   border-radius: 50%;
-  font-size: 0;
 }
 
 .fab:hover .button-overlay {

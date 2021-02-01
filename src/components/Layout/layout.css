@@ -32,9 +32,13 @@ body,
   width: 100%;
 }
 
+html {
+  font-size: 16px;
+}
+
 body {
-  margin: 0;
-  font: 400 16pt "Open Sans", sans-serif;
+  font-weight: 400;
+  font-family: "Open Sans", sans-serif;
   background-color: var(--main-background);
   color: var(--light-text--high-emphasis);
 }
@@ -50,12 +54,37 @@ h3,
 h4,
 h5,
 h6 {
+  margin: 3rem 0 1.38rem;
   font-family: "Fraunces", serif;
+}
+
+h1 {
+  font-size: 3.815rem;
+}
+
+h2 {
+  font-size: 3.052rem;
+}
+
+h3 {
+  font-size: 2.441rem;
+}
+
+h4 {
+  font-size: 1.953rem;
+}
+
+h5 {
+  font-size: 1.563rem;
+}
+
+h6 {
+  font-size: 1.25rem;
 }
 
 /** Inputs */
 .input {
-  background-color:var(--dark-overlay--low-emphasis);
+  background-color: var(--dark-overlay--low-emphasis);
   color: var(--light-text--high-emphasis);
   border: none;
   border-bottom: 1px solid var(--dark-overlay--medium-emphasis);
@@ -69,8 +98,8 @@ h6 {
 }
 
 .input__label {
-  font-size: 0.714em;
-  opacity: 87%;
+  font-size: 0.8rem;
+  font-weight: bold;
 }
 
 /** Modals */
@@ -104,7 +133,7 @@ img {
 
 .error {
   margin: 6px 0 10px;
-  font-size: 0.714em;
+  font-size: 0.8rem;
   font-weight: bold;
   color: var(--error);
   opacity: 60%;
