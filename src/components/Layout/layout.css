@@ -17,6 +17,7 @@
 
   --surface-overlay--hovered: rgba(240, 219, 130, 0.04);
   --surface-overlay--focused: rgba(240, 219, 130, 0.12);
+  --surface-overlay--selected: rgba(240, 219, 130, 0.32);
 
   --dark-overlay--low-emphasis: rgba(245, 246, 247, 0.08);
   --dark-overlay--medium-emphasis: rgba(245, 246, 247, 0.24);
@@ -46,6 +47,12 @@ body {
 #___gatsby {
   max-width: 360px;
   margin: auto;
+}
+
+::selection,
+::-moz-selection {
+  background-color: var(--secondary-variant);
+  color: var(--light-text--high-emphasis);
 }
 
 h1,
