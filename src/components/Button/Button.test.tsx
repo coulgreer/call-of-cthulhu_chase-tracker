@@ -3,7 +3,7 @@ import React from "react";
 import { screen, render } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import Button from "./";
+import Button from ".";
 
 test("should render properly", () => {
   const text = "TEST";
@@ -21,7 +21,7 @@ test("should use callback when button clicked", () => {
   let newText = "";
 
   const cb = () => {
-    newText = oldText + "!";
+    newText = `${oldText}!`;
   };
 
   render(<Button onClick={cb}>{oldText}</Button>);
@@ -29,5 +29,5 @@ test("should use callback when button clicked", () => {
   const buttonEl = screen.getByText(new RegExp(oldText));
   userEvent.click(buttonEl);
 
-  expect(newText).toEqual(oldText + "!");
+  expect(newText).toEqual(`${oldText}!`);
 });

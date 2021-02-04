@@ -27,7 +27,7 @@ test("should return false when removing non-existant value in sequence", () => {
   const actual = sequenceGen.remove(start + 1);
 
   expect(actual).toBeFalsy();
-})
+});
 
 test("should return all numbers in the sequence", () => {
   const start = 0;

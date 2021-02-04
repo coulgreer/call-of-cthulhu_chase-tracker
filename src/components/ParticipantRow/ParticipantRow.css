@@ -56,6 +56,11 @@
   border-bottom: 2px solid var(--secondary-variant);
 }
 
+.ParticipantRow__extended-display .button {
+  width: 100%;
+  margin: 12px 0;
+}
+
 .StatisticDisplay {
   margin: 12px auto;
 }

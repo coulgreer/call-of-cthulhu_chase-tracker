@@ -5,7 +5,7 @@ import ParticipantTable from "../components/ParticipantTable";
 
 export default function Home() {
   const warningMessage =
-    "Shame. No prey for the chase. Still, keep your wits about you.";
+    "No poor souls for the chase. Still, keep your wits about you.";
 
   return (
     <Layout>

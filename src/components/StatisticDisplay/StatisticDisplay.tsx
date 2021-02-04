@@ -3,15 +3,10 @@ import React from "react";
 import { v4 as uuidv4 } from "uuid";
 import clsx from "clsx";
 
-import { sanitize } from "../../utils/sanitizer";
+import sanitize from "../../utils/sanitizer";
 import Range from "../../utils/range";
 
 import "./StatisticDisplay.css";
-
-const UPPER_LIMIT_CLASS = "StatisticDisplay--upper-limit";
-const UPPER_WARNING_CLASS = "StatisticDisplay--upper-warning";
-const LOWER_WARNING_CLASS = "StatisticDisplay--lower-warning";
-const LOWER_LIMIT_CLASS = "StatisticDisplay--lower-limit";
 
 interface Props {
   title: string;
@@ -36,19 +31,19 @@ export default class StatisticDisplay extends React.Component<Props, State> {
   };
 
   static get UPPER_LIMIT_CLASS() {
-    return UPPER_LIMIT_CLASS;
+    return "StatisticDisplay--upper-limit";
   }
 
   static get UPPER_WARNING_CLASS() {
-    return UPPER_WARNING_CLASS;
+    return "StatisticDisplay--upper-warning";
   }
 
   static get LOWER_WARNING_CLASS() {
-    return LOWER_WARNING_CLASS;
+    return "StatisticDisplay--lower-warning";
   }
 
   static get LOWER_LIMIT_CLASS() {
-    return LOWER_LIMIT_CLASS;
+    return "StatisticDisplay--lower-limit";
   }
 
   private id: string;
@@ -56,8 +51,10 @@ export default class StatisticDisplay extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
+    const { startingValue } = this.props;
+
     this.validateStartingValue();
-    const startingValueStr = this.props.startingValue.toString();
+    const startingValueStr = startingValue.toString();
 
     this.state = {
       value: startingValueStr,
@@ -79,114 +76,148 @@ export default class StatisticDisplay extends React.Component<Props, State> {
   }
 
   private validateStartingValue() {
-    const value = this.props.startingValue;
+    const { startingValue, upperLimit, lowerLimit } = this.props;
 
-    if (value > this.props.upperLimit) {
+    if (startingValue > upperLimit) {
       throw new RangeError(
-        `The given value, '${value}', is past the limit, '${this.props.upperLimit}'.`
+        `The given value, '${startingValue}', is past the limit, '${upperLimit}'.`
       );
-    } else if (value < this.props.lowerLimit) {
+    } else if (startingValue < lowerLimit) {
       throw new RangeError(
-        `The given value, '${value}', is past the limit, '${this.props.lowerLimit}'.`
+        `The given value, '${startingValue}', is past the limit, '${lowerLimit}'.`
       );
     }
   }
 
   private generateUpperBound(): Range | null {
-    if (this.props.upperLimit === null && this.props.upperWarning === null)
-      return null;
+    const { upperLimit, upperWarning } = this.props;
 
-    if (this.props.upperLimit !== null && this.props.upperWarning !== null) {
-      if (this.props.upperWarning > this.props.upperLimit) {
+    if (upperLimit === null && upperWarning === null) return null;
+
+    if (upperLimit !== null && upperWarning !== null) {
+      if (upperWarning > upperLimit) {
         throw new RangeError(
-          `The given upper warning, '${this.props.upperWarning}', is greater than the given upper limit, '${this.props.upperLimit}'.`
+          `The given upper warning, '${upperWarning}', is greater than the given upper limit, '${upperLimit}'.`
         );
-      } else if (this.props.upperWarning === this.props.upperLimit) {
+      } else if (upperWarning === upperLimit) {
         throw new RangeError(
-          `The given upper warning, '${this.props.upperWarning}', is equal to the given upper limit, '${this.props.upperLimit}'. The limit should be greater than the warning threshold.`
+          `The given upper warning, '${upperWarning}', is equal to the given upper limit, '${upperLimit}'. The limit should be greater than the warning threshold.`
         );
       }
     }
 
-    const end =
-      this.props.upperLimit !== null
-        ? this.props.upperLimit
-        : Number.MAX_SAFE_INTEGER;
-    const start =
-      this.props.upperWarning !== null ? this.props.upperWarning : end;
+    const end = upperLimit !== null ? upperLimit : Number.MAX_SAFE_INTEGER;
+    const start = upperWarning !== null ? upperWarning : end;
 
     return new Range(start, end);
   }
 
   private generateLowerBound(): Range | null {
-    if (this.props.lowerLimit === null && this.props.lowerWarning === null)
-      return null;
+    const { lowerLimit, lowerWarning } = this.props;
 
-    if (this.props.lowerLimit !== null && this.props.lowerWarning !== null) {
-      if (this.props.lowerWarning < this.props.lowerLimit) {
+    if (lowerLimit === null && lowerWarning === null) return null;
+
+    if (lowerLimit !== null && lowerWarning !== null) {
+      if (lowerWarning < lowerLimit) {
         throw new RangeError(
-          `The given lower warning, '${this.props.lowerWarning}', is less than the given lower limit, '${this.props.lowerLimit}'.`
+          `The given lower warning, '${lowerWarning}', is less than the given lower limit, '${lowerLimit}'.`
         );
-      } else if (this.props.lowerLimit === this.props.lowerWarning) {
+      } else if (lowerLimit === lowerWarning) {
         throw new RangeError(
-          `The given lower warning, '${this.props.lowerWarning}', is equal to the given lower limit, '${this.props.lowerLimit}'. The limit should be less than the warning threshold.`
+          `The given lower warning, '${lowerWarning}', is equal to the given lower limit, '${lowerLimit}'. The limit should be less than the warning threshold.`
         );
       }
     }
 
-    const end =
-      this.props.lowerLimit !== null
-        ? this.props.lowerLimit
-        : Number.MIN_SAFE_INTEGER;
-    const start =
-      this.props.lowerWarning !== null ? this.props.lowerWarning : end;
+    const end = lowerLimit !== null ? lowerLimit : Number.MIN_SAFE_INTEGER;
+    const start = lowerWarning !== null ? lowerWarning : end;
 
     return new Range(start, end);
   }
 
   isValueWithinUpperWarning(value: string) {
-    if (this.props.upperWarning === null) return false;
+    const { upperWarning } = this.props;
+
+    if (upperWarning === null) return false;
 
     return (
-      Number.parseInt(value) >= this.props.upperWarning &&
+      Number.parseInt(value, 10) >= upperWarning &&
       !this.isValueAtUpperLimit(value)
     );
   }
 
   isValueAtUpperLimit(value: string) {
-    return Number.parseInt(value) === this.props.upperLimit;
+    const { upperLimit } = this.props;
+
+    return Number.parseInt(value, 10) === upperLimit;
   }
 
   isAboveUpperLimit(value: string) {
-    return Number.parseInt(value) > this.props.upperLimit;
+    const { upperLimit } = this.props;
+
+    return Number.parseInt(value, 10) > upperLimit;
   }
 
   isValueWithinLowerWarning(value: string) {
-    if (this.props.lowerWarning === null) return false;
+    const { lowerWarning } = this.props;
+
+    if (lowerWarning === null) return false;
 
     return (
-      Number.parseInt(value) <= this.props.lowerWarning &&
+      Number.parseInt(value, 10) <= lowerWarning &&
       !this.isValueAtLowerLimit(value)
     );
   }
 
   isValueAtLowerLimit(value: string) {
-    return Number.parseInt(value) === this.props.lowerLimit;
+    const { lowerLimit } = this.props;
+
+    return Number.parseInt(value, 10) === lowerLimit;
   }
 
   isBelowLowerLimit(value: string) {
-    return Number.parseInt(value) < this.props.lowerLimit;
+    const { lowerLimit } = this.props;
+
+    return Number.parseInt(value, 10) < lowerLimit;
+  }
+
+  private handleChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const { upperLimit, lowerLimit } = this.props;
+    const { value } = event.currentTarget;
+
+    if (value !== "") {
+      if (this.isAboveUpperLimit(value)) {
+        this.setState({ lastValidValue: upperLimit.toString() });
+      } else if (this.isBelowLowerLimit(value)) {
+        this.setState({ lastValidValue: lowerLimit.toString() });
+      } else {
+        this.setState({ lastValidValue: value });
+      }
+    }
+
+    this.setState({ value });
+  }
+
+  private handleBlur() {
+    this.setState((state) => ({ value: state.lastValidValue }));
   }
 
   render() {
-    const labelID = sanitize(this.props.title) + "-" + this.id;
-    const inputID = "input-" + this.id;
+    const { title } = this.props;
+    const { value } = this.state;
 
-    let className = clsx({
-      [UPPER_LIMIT_CLASS]: this.isValueAtUpperLimit(this.state.value),
-      [UPPER_WARNING_CLASS]: this.isValueWithinUpperWarning(this.state.value),
-      [LOWER_WARNING_CLASS]: this.isValueWithinLowerWarning(this.state.value),
-      [LOWER_LIMIT_CLASS]: this.isValueAtLowerLimit(this.state.value),
+    const labelID = `${sanitize(title)}-${this.id}`;
+    const inputID = `input-${this.id}`;
+
+    const className = clsx({
+      [StatisticDisplay.UPPER_LIMIT_CLASS]: this.isValueAtUpperLimit(value),
+      [StatisticDisplay.UPPER_WARNING_CLASS]: this.isValueWithinUpperWarning(
+        value
+      ),
+      [StatisticDisplay.LOWER_WARNING_CLASS]: this.isValueWithinLowerWarning(
+        value
+      ),
+      [StatisticDisplay.LOWER_LIMIT_CLASS]: this.isValueAtLowerLimit(value),
     });
 
     return (
@@ -194,39 +225,19 @@ export default class StatisticDisplay extends React.Component<Props, State> {
         <label
           htmlFor={inputID}
           id={labelID}
-          className={"StatisticDisplay__label input__label"}
+          className="StatisticDisplay__label input__label"
         >
-          {this.props.title}
+          {title}
         </label>
         <input
           type="number"
           id={inputID}
-          className={"StatisticDisplay__input input " + className}
-          value={this.state.value}
+          className={`StatisticDisplay__input input ${className}`}
+          value={value}
           onChange={this.handleChange}
           onBlur={this.handleBlur}
         />
       </div>
     );
-  }
-
-  private handleChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const value = event.currentTarget.value;
-
-    if (value != "") {
-      if (this.isAboveUpperLimit(value)) {
-        this.setState({ lastValidValue: this.props.upperLimit.toString() });
-      } else if (this.isBelowLowerLimit(value)) {
-        this.setState({ lastValidValue: this.props.lowerLimit.toString() });
-      } else {
-        this.setState({ lastValidValue: value });
-      }
-    }
-
-    this.setState({ value: value });
-  }
-
-  private handleBlur() {
-    this.setState((state) => ({ value: state.lastValidValue }));
   }
 }

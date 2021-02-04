@@ -1,5 +1,6 @@
 export default class UniqueSequenceGenerator {
   private start;
+
   private sequence;
 
   constructor(start: number) {
@@ -17,14 +18,14 @@ export default class UniqueSequenceGenerator {
   }
 
   private findLowestAvailableValue(): number {
-    if (!this.sequence.has(this.start + 1)) return this.start + 1;
+    const firstValue = this.start + 1;
+    if (!this.sequence.has(firstValue)) return firstValue;
 
-    for (let value of this.sequence) {
-      let next = value + 1;
-      if (!this.sequence.has(next)) return next;
-    }
+    const targetValue = [...this.sequence].find(
+      (value) => !this.sequence.has(value + 1)
+    );
 
-    return this.start;
+    return targetValue === undefined ? this.start : targetValue + 1;
   }
 
   remove(value: number) {
