@@ -136,7 +136,7 @@ describe("Participant Removal", () => {
   });
 });
 
-test("should have the appropriate default participant name", () => {
+test("should have the appropriate default participant name when a participant has been removed", () => {
   renderParticipantTableWithModal("TESTING");
 
   const addButton = screen.getByRole("button", { name: /add participant/i });
@@ -180,4 +180,79 @@ test("should have the appropriate default participant name", () => {
   expect(
     screen.queryByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #5`)
   ).not.toBeInTheDocument();
+});
+
+describe("Confirmation Tests", () => {
+  test("should properly remove and add back participants when their numbers would sort differently between numerical and alphabetical", () => {
+    renderParticipantTableWithModal("TESTING");
+
+    const addButton = screen.getByRole("button", { name: /add participant/i });
+
+    // Create 10+ participants.
+    userEvent.click(addButton);
+    userEvent.click(addButton);
+    userEvent.click(addButton);
+    userEvent.click(addButton);
+    userEvent.click(addButton);
+    userEvent.click(addButton);
+    userEvent.click(addButton);
+    userEvent.click(addButton);
+    userEvent.click(addButton);
+    userEvent.click(addButton);
+
+    // Remove a participant that's not at the end of the sequence.
+    userEvent.click(
+      screen.getByRole("button", {
+        name: new RegExp(`remove: ${ParticipantTable.DEFAULT_NAME} #1$`, "i"),
+      })
+    );
+    userEvent.click(screen.getByRole("button", { name: /yes/i }));
+
+    /** Then, remove another participant that starts with a differing digit
+     *  from the first, but is not at the end of the sequence. */
+    userEvent.click(
+      screen.getByRole("button", {
+        name: new RegExp(`remove: ${ParticipantTable.DEFAULT_NAME} #3$`, "i"),
+      })
+    );
+    userEvent.click(screen.getByRole("button", { name: /yes/i }));
+
+    // Add the participants back.
+    userEvent.click(addButton);
+    userEvent.click(addButton);
+
+    expect(
+      screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #1`)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #2`)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #3`)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #4`)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #5`)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #6`)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #7`)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #8`)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #9`)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #10`)
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #11`)
+    ).not.toBeInTheDocument();
+  });
 });

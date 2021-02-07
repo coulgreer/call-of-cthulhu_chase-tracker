@@ -12,7 +12,7 @@ export default class UniqueSequenceGenerator {
     const value = this.findLowestAvailableValue();
     this.sequence.add(value);
 
-    this.sequence = new Set<number>([...this.sequence].sort());
+    this.sequence = new Set<number>([...this.sequence].sort((a, b) => a - b));
 
     return value;
   }
