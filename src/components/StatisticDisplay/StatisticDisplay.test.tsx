@@ -37,7 +37,6 @@ describe("Threshold class names", () => {
       const startingValue = 0;
       const threshold = 7;
 
-      const consoleError = disableConsoleErrors();
       expect(() => {
         render(
           <StatisticDisplay
@@ -47,8 +46,7 @@ describe("Threshold class names", () => {
             upperLimit={threshold}
           />
         );
-      }).toThrowError();
-      reenableConsoleErrors(consoleError);
+      }).toThrow();
     });
 
     test("should throw error when upper warning threshold is greater than upper limit threshold", () => {
@@ -57,7 +55,6 @@ describe("Threshold class names", () => {
       const upperWarning = 7;
       const upperLimit = upperWarning - 1;
 
-      const consoleError = disableConsoleErrors();
       expect(() => {
         render(
           <StatisticDisplay
@@ -67,8 +64,7 @@ describe("Threshold class names", () => {
             upperLimit={upperLimit}
           />
         );
-      }).toThrowError();
-      reenableConsoleErrors(consoleError);
+      }).toThrow();
     });
 
     test("should throw error when lower warning and lower limit are equal", () => {
@@ -76,7 +72,6 @@ describe("Threshold class names", () => {
       const startingValue = 0;
       const threshold = -7;
 
-      const consoleError = disableConsoleErrors();
       expect(() => {
         render(
           <StatisticDisplay
@@ -86,8 +81,7 @@ describe("Threshold class names", () => {
             lowerLimit={threshold}
           />
         );
-      }).toThrowError();
-      reenableConsoleErrors(consoleError);
+      }).toThrow();
     });
 
     test("should throw error when lower warning threshold is less than lower limit threshold", () => {
@@ -96,7 +90,6 @@ describe("Threshold class names", () => {
       const lowerWarning = -7;
       const lowerLimit = lowerWarning + 1;
 
-      const consoleError = disableConsoleErrors();
       expect(() => {
         render(
           <StatisticDisplay
@@ -106,8 +99,7 @@ describe("Threshold class names", () => {
             lowerLimit={lowerLimit}
           />
         );
-      }).toThrowError();
-      reenableConsoleErrors(consoleError);
+      }).toThrow();
     });
 
     test("should throw error when lower bound and upper bound intercept", () => {
@@ -118,7 +110,6 @@ describe("Threshold class names", () => {
       const lowerLimit = 2;
       const startingValue = upperLimit - lowerLimit;
 
-      const consoleError = disableConsoleErrors();
       expect(() => {
         render(
           <StatisticDisplay
@@ -130,8 +121,7 @@ describe("Threshold class names", () => {
             lowerLimit={lowerLimit}
           />
         );
-      }).toThrowError();
-      reenableConsoleErrors(consoleError);
+      }).toThrow();
     });
 
     describe("Lower Warning threshold", () => {
@@ -242,7 +232,6 @@ describe("Threshold class names", () => {
         const lowerLimit = -19;
         const startingValue = lowerLimit - 1;
 
-        const originalError = disableConsoleErrors();
         expect(() => {
           render(
             <StatisticDisplay
@@ -251,8 +240,7 @@ describe("Threshold class names", () => {
               lowerLimit={lowerLimit}
             />
           );
-        }).toThrowError();
-        reenableConsoleErrors(originalError);
+        }).toThrow();
       });
     });
 
@@ -364,7 +352,6 @@ describe("Threshold class names", () => {
         const upperLimit = 19;
         const startingValue = upperLimit + 1;
 
-        const originalError = disableConsoleErrors();
         expect(() => {
           render(
             <StatisticDisplay
@@ -373,8 +360,7 @@ describe("Threshold class names", () => {
               upperLimit={upperLimit}
             />
           );
-        }).toThrowError();
-        reenableConsoleErrors(originalError);
+        }).toThrow();
       });
     });
   });

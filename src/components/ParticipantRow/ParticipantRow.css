@@ -56,6 +56,16 @@
   border-bottom: 2px solid var(--secondary-variant);
 }
 
+.ParticipantRow__extended-display .StatisticDisplay--upper-limit,
+.ParticipantRow__extended-display .StatisticDisplay--upper-warning {
+  color: var(--secondary);
+}
+
+.ParticipantRow__extended-display .StatisticDisplay--lower-limit,
+.ParticipantRow__extended-display .StatisticDisplay--lower-warning {
+  color: rgba(255, 158, 68, 0.87);
+}
+
 .ParticipantRow__extended-display .button {
   width: 100%;
   margin: 12px 0;

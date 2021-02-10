@@ -1,8 +1,6 @@
 import React, { ReactNode } from "react";
 import { Transition, animated } from "react-spring/renderprops";
 
-import { v4 as uuidv4 } from "uuid";
-
 import Button from "../Button";
 import StatisticDisplay from "../StatisticDisplay";
 
@@ -99,8 +97,6 @@ export default class ParticipantRow extends React.Component<Props, State> {
     return "New Stat";
   }
 
-  private id: string;
-
   private speedStatSequence: UniqueSequenceGenerator;
 
   private hazardStatSequence: UniqueSequenceGenerator;
@@ -122,8 +118,6 @@ export default class ParticipantRow extends React.Component<Props, State> {
       hazardStats: this.initializeHazardStats(),
     };
 
-    this.id = uuidv4();
-
     this.handleChange = this.handleChange.bind(this);
     this.handleBlur = this.handleBlur.bind(this);
     this.toggleExpansion = this.toggleExpansion.bind(this);
@@ -133,95 +127,23 @@ export default class ParticipantRow extends React.Component<Props, State> {
 
   private initializeSpeedStats() {
     return [
-      <StatisticDisplay
-        title={ParticipantRow.CON_TITLE}
-        lowerWarning={ParticipantRow.MIN_PERCENTILE - 1}
-        upperWarning={ParticipantRow.MAX_PERCENTILE}
-        startingValue={15}
-        key={this.speedStatSequence.nextNum()}
-      />,
-      <StatisticDisplay
-        title={ParticipantRow.DRIVE_TITLE}
-        lowerWarning={ParticipantRow.MIN_PERCENTILE - 1}
-        upperWarning={ParticipantRow.MAX_PERCENTILE}
-        startingValue={20}
-        key={this.speedStatSequence.nextNum()}
-      />,
-      <StatisticDisplay
-        title={ParticipantRow.RIDE_TITLE}
-        lowerWarning={ParticipantRow.MIN_PERCENTILE - 1}
-        upperWarning={ParticipantRow.MAX_PERCENTILE}
-        startingValue={5}
-        key={this.speedStatSequence.nextNum()}
-      />,
-      <StatisticDisplay
-        title={ParticipantRow.AIR_TITLE}
-        lowerWarning={ParticipantRow.MIN_PERCENTILE - 1}
-        upperWarning={ParticipantRow.MAX_PERCENTILE}
-        startingValue={1}
-        key={this.speedStatSequence.nextNum()}
-      />,
-      <StatisticDisplay
-        title={ParticipantRow.SEA_TITLE}
-        lowerWarning={ParticipantRow.MIN_PERCENTILE - 1}
-        upperWarning={ParticipantRow.MAX_PERCENTILE}
-        startingValue={1}
-        key={this.speedStatSequence.nextNum()}
-      />,
+      this.createSpeedStatistic(ParticipantRow.CON_TITLE, 15),
+      this.createSpeedStatistic(ParticipantRow.DRIVE_TITLE, 20),
+      this.createSpeedStatistic(ParticipantRow.RIDE_TITLE, 5),
+      this.createSpeedStatistic(ParticipantRow.AIR_TITLE, 1),
+      this.createSpeedStatistic(ParticipantRow.SEA_TITLE, 1),
     ];
   }
 
   private initializeHazardStats() {
     return [
-      <StatisticDisplay
-        title={ParticipantRow.STR_TITLE}
-        lowerWarning={ParticipantRow.MIN_PERCENTILE - 1}
-        upperWarning={ParticipantRow.MAX_PERCENTILE}
-        startingValue={15}
-        key={this.hazardStatSequence.nextNum()}
-      />,
-      <StatisticDisplay
-        title={ParticipantRow.CLIMB_TITLE}
-        lowerWarning={ParticipantRow.MIN_PERCENTILE - 1}
-        upperWarning={ParticipantRow.MAX_PERCENTILE}
-        startingValue={20}
-        key={this.hazardStatSequence.nextNum()}
-      />,
-      <StatisticDisplay
-        title={ParticipantRow.SWIM_TITLE}
-        lowerWarning={ParticipantRow.MIN_PERCENTILE - 1}
-        upperWarning={ParticipantRow.MAX_PERCENTILE}
-        startingValue={20}
-        key={this.hazardStatSequence.nextNum()}
-      />,
-      <StatisticDisplay
-        title={ParticipantRow.DODGE_TITLE}
-        lowerWarning={ParticipantRow.MIN_PERCENTILE - 1}
-        upperWarning={ParticipantRow.MAX_PERCENTILE}
-        startingValue={7}
-        key={this.hazardStatSequence.nextNum()}
-      />,
-      <StatisticDisplay
-        title={ParticipantRow.BRAWL_TITLE}
-        lowerWarning={ParticipantRow.MIN_PERCENTILE - 1}
-        upperWarning={ParticipantRow.MAX_PERCENTILE}
-        startingValue={25}
-        key={this.hazardStatSequence.nextNum()}
-      />,
-      <StatisticDisplay
-        title={ParticipantRow.HANDGUN_TITLE}
-        lowerWarning={ParticipantRow.MIN_PERCENTILE - 1}
-        upperWarning={ParticipantRow.MAX_PERCENTILE}
-        startingValue={20}
-        key={this.hazardStatSequence.nextNum()}
-      />,
-      <StatisticDisplay
-        title={ParticipantRow.RIFLE_TITLE}
-        lowerWarning={ParticipantRow.MIN_PERCENTILE - 1}
-        upperWarning={ParticipantRow.MAX_PERCENTILE}
-        startingValue={25}
-        key={this.hazardStatSequence.nextNum()}
-      />,
+      this.createHazardStatistic(ParticipantRow.STR_TITLE, 15),
+      this.createHazardStatistic(ParticipantRow.CLIMB_TITLE, 20),
+      this.createHazardStatistic(ParticipantRow.SWIM_TITLE, 20),
+      this.createHazardStatistic(ParticipantRow.DODGE_TITLE, 7),
+      this.createHazardStatistic(ParticipantRow.BRAWL_TITLE, 25),
+      this.createHazardStatistic(ParticipantRow.HANDGUN_TITLE, 20),
+      this.createHazardStatistic(ParticipantRow.RIFLE_TITLE, 25),
     ];
   }
 
@@ -258,6 +180,8 @@ export default class ParticipantRow extends React.Component<Props, State> {
     const newSkill = (
       <StatisticDisplay
         title={`${ParticipantRow.DEFAULT_STAT_NAME} #${key}`}
+        lowerWarning={ParticipantRow.MIN_PERCENTILE - 1}
+        upperWarning={ParticipantRow.MAX_PERCENTILE}
         startingValue={15}
         key={key}
       />
@@ -272,6 +196,8 @@ export default class ParticipantRow extends React.Component<Props, State> {
     const newSkill = (
       <StatisticDisplay
         title={`${ParticipantRow.DEFAULT_STAT_NAME} #${key}`}
+        lowerWarning={ParticipantRow.MIN_PERCENTILE - 1}
+        upperWarning={ParticipantRow.MAX_PERCENTILE}
         startingValue={15}
         key={key}
       />
@@ -279,6 +205,30 @@ export default class ParticipantRow extends React.Component<Props, State> {
     this.setState((state) => ({
       hazardStats: [...state.hazardStats, newSkill],
     }));
+  }
+
+  private createSpeedStatistic(title: string, startingValue: number) {
+    return (
+      <StatisticDisplay
+        title={title}
+        lowerWarning={ParticipantRow.MIN_PERCENTILE - 1}
+        upperWarning={ParticipantRow.MAX_PERCENTILE}
+        startingValue={startingValue}
+        key={this.speedStatSequence.nextNum()}
+      />
+    );
+  }
+
+  private createHazardStatistic(title: string, startingValue: number) {
+    return (
+      <StatisticDisplay
+        title={title}
+        lowerWarning={ParticipantRow.MIN_PERCENTILE - 1}
+        upperWarning={ParticipantRow.MAX_PERCENTILE}
+        startingValue={startingValue}
+        key={this.hazardStatSequence.nextNum()}
+      />
+    );
   }
 
   render() {
@@ -292,20 +242,16 @@ export default class ParticipantRow extends React.Component<Props, State> {
 
     const mainEl = (
       <div className="ParticipantRow__main-display">
-        <label
-          htmlFor={this.id}
-          className="ParticipantRow__name-label input__label"
-        >
+        <label className="ParticipantRow__name-label input__label">
           Name
+          <input
+            type="text"
+            value={currentName}
+            onChange={this.handleChange}
+            onBlur={this.handleBlur}
+            className="ParticipantRow__name-input input"
+          />
         </label>
-        <input
-          id={this.id}
-          type="text"
-          value={currentName}
-          onChange={this.handleChange}
-          onBlur={this.handleBlur}
-          className="ParticipantRow__name-input input"
-        />
         <p
           className="error"
           style={{

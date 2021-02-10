@@ -101,7 +101,8 @@ h6 {
   border: none;
   border-bottom: 1px solid var(--dark-overlay--medium-emphasis);
   border-radius: 4px 4px 0 0;
-  font: inherit;
+  font-family: inherit;
+  font-size: 1.0rem;
 }
 
 .input:focus {

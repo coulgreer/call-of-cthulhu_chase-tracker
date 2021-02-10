@@ -25,11 +25,19 @@
   },
   "plugins": ["react", "@typescript-eslint"],
   "rules": {
-    "import/no-unresolved": "error",
-    "react/static-property-placement": [
+    "import/no-extraneous-dependencies": [
       "error",
-      "static public field"
-    ]
+      {
+        "devDependencies": [
+          "**/*.test.[jt]s?(x)",
+          "**/*.spec.[jt]s?(x)",
+          "**/setup-test-env.ts"
+        ]
+      }
+    ],
+    "import/no-unresolved": "error",
+    "jsx-a11y/label-has-associated-control": ["error", { "assert": "either" }],
+    "react/static-property-placement": ["error", "static public field"]
   },
   "settings": {
     "import/parsers": {
