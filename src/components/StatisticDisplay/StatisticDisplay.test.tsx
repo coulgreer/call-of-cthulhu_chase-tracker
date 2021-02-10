@@ -5,12 +5,19 @@ import userEvent from "@testing-library/user-event";
 import StatisticDisplay from ".";
 
 test("should render statistics properly", () => {
+  const className = "StatisticDisplay--vertical";
   const title = "A Title";
   const startingValue = 5;
 
-  render(<StatisticDisplay title={title} startingValue={startingValue} />);
+  render(
+    <StatisticDisplay
+      className={className}
+      title={title}
+      startingValue={startingValue}
+    />
+  );
 
-  expect(screen.getByText(title)).toBeInTheDocument();
+  expect(screen.getByText(title)).toHaveClass(className);
 
   const inputEl = screen.getByLabelText(title, { selector: "input" });
   expect(inputEl).toBeInTheDocument();

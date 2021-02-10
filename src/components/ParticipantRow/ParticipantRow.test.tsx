@@ -22,6 +22,10 @@ describe("Collapse/Expand detailed data", () => {
     expect(screen.getByRole("button", { name: /expand/i })).toBeInTheDocument();
 
     expect(
+      screen.getByRole("spinbutton", { name: /speed/i })
+    ).toBeInTheDocument();
+
+    expect(
       screen.queryByRole("heading", { name: /speed stats/i })
     ).not.toBeInTheDocument();
     expect(
@@ -91,6 +95,10 @@ describe("Collapse/Expand detailed data", () => {
 
     expect(screen.getByLabelText(ParticipantRow.DEX_TITLE)).toBeInTheDocument();
     expect(screen.getByLabelText(ParticipantRow.MOV_TITLE)).toBeInTheDocument();
+
+    expect(
+      screen.getByRole("spinbutton", { name: /speed/i })
+    ).toBeInTheDocument();
 
     expect(
       screen.getByRole("heading", { name: /speed stats/i })

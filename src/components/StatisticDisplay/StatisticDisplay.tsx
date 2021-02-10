@@ -1,14 +1,12 @@
 import React from "react";
-
-import { v4 as uuidv4 } from "uuid";
 import clsx from "clsx";
 
-import sanitize from "../../utils/sanitizer";
 import Range from "../../utils/range";
 
 import "./StatisticDisplay.css";
 
 interface Props {
+  className: string;
   title: string;
   startingValue: number;
   upperLimit: number;
@@ -24,6 +22,7 @@ interface State {
 
 export default class StatisticDisplay extends React.Component<Props, State> {
   static defaultProps = {
+    className: "",
     upperLimit: Number.MAX_SAFE_INTEGER,
     upperWarning: null,
     lowerWarning: null,
@@ -46,8 +45,6 @@ export default class StatisticDisplay extends React.Component<Props, State> {
     return "StatisticDisplay--lower-limit";
   }
 
-  private id: string;
-
   constructor(props: Props) {
     super(props);
 
@@ -68,8 +65,6 @@ export default class StatisticDisplay extends React.Component<Props, State> {
         `There is an intersection between the upper and lower bounds.`
       );
     }
-
-    this.id = uuidv4();
 
     this.handleChange = this.handleChange.bind(this);
     this.handleBlur = this.handleBlur.bind(this);
@@ -203,13 +198,10 @@ export default class StatisticDisplay extends React.Component<Props, State> {
   }
 
   render() {
-    const { title } = this.props;
+    const { title, className } = this.props;
     const { value } = this.state;
 
-    const labelID = `${sanitize(title)}-${this.id}`;
-    const inputID = `input-${this.id}`;
-
-    const className = clsx({
+    const inputClassName = clsx({
       [StatisticDisplay.UPPER_LIMIT_CLASS]: this.isValueAtUpperLimit(value),
       [StatisticDisplay.UPPER_WARNING_CLASS]: this.isValueWithinUpperWarning(
         value
@@ -221,23 +213,18 @@ export default class StatisticDisplay extends React.Component<Props, State> {
     });
 
     return (
-      <div className="StatisticDisplay">
-        <label
-          htmlFor={inputID}
-          id={labelID}
-          className="StatisticDisplay__label input__label"
-        >
-          {title}
-        </label>
+      <label
+        className={`StatisticDisplay StatisticDisplay__label input__label ${className}`}
+      >
+        {title}
         <input
           type="number"
-          id={inputID}
-          className={`StatisticDisplay__input input ${className}`}
+          className={`StatisticDisplay__input input ${inputClassName}`}
           value={value}
           onChange={this.handleChange}
           onBlur={this.handleBlur}
         />
-      </div>
+      </label>
     );
   }
 }

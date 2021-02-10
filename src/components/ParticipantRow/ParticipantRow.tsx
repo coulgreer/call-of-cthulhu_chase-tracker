@@ -210,6 +210,7 @@ export default class ParticipantRow extends React.Component<Props, State> {
   private createSpeedStatistic(title: string, startingValue: number) {
     return (
       <StatisticDisplay
+        className="StatisticDisplay--horizontal"
         title={title}
         lowerWarning={ParticipantRow.MIN_PERCENTILE - 1}
         upperWarning={ParticipantRow.MAX_PERCENTILE}
@@ -222,6 +223,7 @@ export default class ParticipantRow extends React.Component<Props, State> {
   private createHazardStatistic(title: string, startingValue: number) {
     return (
       <StatisticDisplay
+        className="StatisticDisplay--horizontal"
         title={title}
         lowerWarning={ParticipantRow.MIN_PERCENTILE - 1}
         upperWarning={ParticipantRow.MAX_PERCENTILE}
@@ -263,12 +265,19 @@ export default class ParticipantRow extends React.Component<Props, State> {
         <div className="ParticipantRow__footer">
           <div className="ParticipantRow__main-characteristics">
             <StatisticDisplay
+              className="StatisticDisplay--vertical"
               title={ParticipantRow.DEX_TITLE}
               lowerWarning={ParticipantRow.MIN_PERCENTILE - 1}
               upperWarning={ParticipantRow.MAX_PERCENTILE}
               startingValue={15}
             />
             <StatisticDisplay
+              className="StatisticDisplay--vertical"
+              title="Speed"
+              startingValue={0}
+            />
+            <StatisticDisplay
+              className="StatisticDisplay--vertical"
               title={ParticipantRow.MOV_TITLE}
               lowerWarning={1}
               upperWarning={10}
