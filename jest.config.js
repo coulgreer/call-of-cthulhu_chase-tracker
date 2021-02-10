@@ -15,5 +15,5 @@ module.exports = {
   },
   testURL: `http://localhost`,
   setupFiles: [`<rootDir>/loadershim.js`],
-  setupFilesAfterEnv: [`<rootDir>/src/utils/setup-test-env.ts`],
+  setupFilesAfterEnv: [`@testing-library/jest-dom/extend-expect`],
 };
