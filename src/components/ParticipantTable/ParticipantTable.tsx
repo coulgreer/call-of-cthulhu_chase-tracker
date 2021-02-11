@@ -130,7 +130,6 @@ export default class ParticipantTable extends Component<Props, State> {
               className="ParticipantTable__row-control button button--primary button--small"
               onClick={() => this.promptParticipantRemoval(row)}
             >
-              <span className="button-overlay" />
               <img src={RemoveIcon} alt={`Remove: ${row.key}`} />
             </Button>
           </div>
@@ -152,14 +151,12 @@ export default class ParticipantTable extends Component<Props, State> {
             className="button button--tertiary button--medium"
             onClick={this.closeModal}
           >
-            <span className="button-overlay" />
             CANCEL
           </Button>
           <Button
             className="button button--secondary button--medium"
             onClick={this.removeSelectedParticipant}
           >
-            <span className="button-overlay" />
             YES
           </Button>
         </div>

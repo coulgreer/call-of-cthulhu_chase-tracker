@@ -11,7 +11,7 @@ interface Props {
 function Button({ onClick, className, children }: Props) {
   return (
     <button type="button" onClick={onClick} className={className}>
-      <span data-testid="overlay" className="button-overlay" />
+      <span data-testid="overlay" className="button__overlay" />
       {children}
     </button>
   );

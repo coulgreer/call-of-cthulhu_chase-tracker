@@ -10,8 +10,6 @@ input[type="number"] {
 
 .StatisticDisplay {
   display: flex;
-  margin: 4px;
-  padding: 2px;
   font-size: 18px;
 }
 
@@ -39,7 +37,6 @@ input[type="number"] {
 .StatisticDisplay__label {
   box-sizing: border-box;
   max-width: 100%;
-  font-size: 1em;
   text-align: center;
 }
 
@@ -49,4 +46,6 @@ input[type="number"] {
 
 .StatisticDisplay__input {
   padding: 0 0.25ch;
+  font-size: 1em;
+  font-weight: normal;
 }

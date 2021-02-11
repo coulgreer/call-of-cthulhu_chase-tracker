@@ -25,6 +25,7 @@
 
 .ParticipantRow__main-characteristics .StatisticDisplay {
   float: left;
+  margin: 4px 2px 0;
   margin-bottom: 0;
 }
 
@@ -72,10 +73,6 @@
   margin: 12px 0;
 }
 
-.StatisticDisplay {
-  margin: 12px auto;
-}
-
 .StatisticDisplay__input {
-  max-width: 7ch;
+  width: 7ch;
 }

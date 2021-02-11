@@ -20,8 +20,12 @@
 }
 
 .ParticipantTable__row-control {
-  padding: 0;
+  height: 100%;
   margin: 0;
+  border-radius: 0 4px 4px 0;
+}
+
+.ParticipantTable__row-control .button__overlay {
   border-radius: 0 4px 4px 0;
 }
 

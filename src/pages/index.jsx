@@ -1,4 +1,5 @@
 import * as React from "react";
+import SEO from "../components/SEO";
 
 import Layout from "../components/Layout";
 import ParticipantTable from "../components/ParticipantTable";
@@ -9,6 +10,7 @@ export default function Home() {
 
   return (
     <Layout>
+      <SEO />
       <ParticipantTable warningMessage={warningMessage} />
     </Layout>
   );

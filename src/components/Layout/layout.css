@@ -94,15 +94,35 @@ h6 {
   font-size: 1.25rem;
 }
 
+p {
+  line-height: 150%;
+}
+
+button {
+  min-width: 48px;
+  min-height: 48px;
+  padding: 6px 12px;
+  margin: 4px 6px;
+}
+
+label {
+  min-width: 48px;
+  min-height: 48px;
+  margin: 4px;
+}
+
 /** Inputs */
 .input {
+  padding: 4px;
   background-color: var(--dark-overlay--low-emphasis);
   color: var(--light-text--high-emphasis);
   border: none;
   border-bottom: 1px solid var(--dark-overlay--medium-emphasis);
   border-radius: 4px 4px 0 0;
   font-family: inherit;
-  font-size: 1.0rem;
+  font-size: 1rem;
+  font-weight: normal;
+  line-height: 150%;
 }
 
 .input:focus {
@@ -123,7 +143,7 @@ h6 {
 .Modal__Content {
   background-color: var(--main-background);
   border-radius: 4px;
-  margin: 24px auto;
+  margin: 50% auto;
   padding: 6px;
   overflow: hidden;
   max-width: 360px;
