@@ -18,12 +18,15 @@ describe("Collapse/Expand detailed data", () => {
 
     expect(screen.getByLabelText(ParticipantRow.DEX_TITLE)).toBeInTheDocument();
     expect(screen.getByLabelText(ParticipantRow.MOV_TITLE)).toBeInTheDocument();
-
-    expect(screen.getByRole("button", { name: /expand/i })).toBeInTheDocument();
+    expect(
+      screen.getByLabelText(ParticipantRow.SPEED_TITLE)
+    ).toBeInTheDocument();
 
     expect(
-      screen.getByRole("spinbutton", { name: /speed/i })
+      screen.getByRole("button", { name: /generate/i })
     ).toBeInTheDocument();
+
+    expect(screen.getByRole("button", { name: /expand/i })).toBeInTheDocument();
 
     expect(
       screen.queryByRole("heading", { name: /speed stats/i })
@@ -95,9 +98,12 @@ describe("Collapse/Expand detailed data", () => {
 
     expect(screen.getByLabelText(ParticipantRow.DEX_TITLE)).toBeInTheDocument();
     expect(screen.getByLabelText(ParticipantRow.MOV_TITLE)).toBeInTheDocument();
+    expect(
+      screen.getByLabelText(ParticipantRow.SPEED_TITLE)
+    ).toBeInTheDocument();
 
     expect(
-      screen.getByRole("spinbutton", { name: /speed/i })
+      screen.getByRole("button", { name: /generate/i })
     ).toBeInTheDocument();
 
     expect(

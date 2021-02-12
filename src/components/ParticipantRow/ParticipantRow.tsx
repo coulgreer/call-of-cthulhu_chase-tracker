@@ -37,6 +37,10 @@ export default class ParticipantRow extends React.Component<Props, State> {
     return "DEX";
   }
 
+  static get SPEED_TITLE() {
+    return "Speed";
+  }
+
   static get MOV_TITLE() {
     return "MOV";
   }
@@ -118,11 +122,14 @@ export default class ParticipantRow extends React.Component<Props, State> {
       hazardStats: this.initializeHazardStats(),
     };
 
-    this.handleChange = this.handleChange.bind(this);
-    this.handleBlur = this.handleBlur.bind(this);
-    this.toggleExpansion = this.toggleExpansion.bind(this);
-    this.handleSpeedClick = this.handleSpeedClick.bind(this);
-    this.handleHazardClick = this.handleHazardClick.bind(this);
+    this.handleNameChanged = this.handleNameChanged.bind(this);
+    this.handleNameDeselected = this.handleNameDeselected.bind(this);
+    this.handleViewToggling = this.handleViewToggling.bind(this);
+    this.handleSpeedModifierGenerating = this.handleSpeedModifierGenerating.bind(
+      this
+    );
+    this.handleSpeedStatCreating = this.handleSpeedStatCreating.bind(this);
+    this.handleHazardStatCreating = this.handleHazardStatCreating.bind(this);
   }
 
   private initializeSpeedStats() {
@@ -147,7 +154,7 @@ export default class ParticipantRow extends React.Component<Props, State> {
     ];
   }
 
-  private handleChange(event: React.ChangeEvent<HTMLInputElement>) {
+  private handleNameChanged(event: React.ChangeEvent<HTMLInputElement>) {
     const { value } = event.currentTarget;
 
     if (value.trim()) {
@@ -162,23 +169,24 @@ export default class ParticipantRow extends React.Component<Props, State> {
     this.setState(() => ({ currentName: value }));
   }
 
-  private handleBlur() {
+  private handleNameDeselected() {
     this.setState((state) => ({
       currentName: state.lastValidName,
       nameWarningShown: false,
     }));
   }
 
-  private toggleExpansion() {
+  private handleViewToggling() {
     this.setState((state) => ({
       expansionShown: !state.expansionShown,
     }));
   }
 
-  private handleSpeedClick() {
+  private handleSpeedStatCreating() {
     const key = this.speedStatSequence.nextNum();
     const newSkill = (
       <StatisticDisplay
+        className="StatisticDisplay--horizontal"
         title={`${ParticipantRow.DEFAULT_STAT_NAME} #${key}`}
         lowerWarning={ParticipantRow.MIN_PERCENTILE - 1}
         upperWarning={ParticipantRow.MAX_PERCENTILE}
@@ -191,10 +199,11 @@ export default class ParticipantRow extends React.Component<Props, State> {
     }));
   }
 
-  private handleHazardClick() {
+  private handleHazardStatCreating() {
     const key = this.hazardStatSequence.nextNum();
     const newSkill = (
       <StatisticDisplay
+        className="StatisticDisplay--horizontal"
         title={`${ParticipantRow.DEFAULT_STAT_NAME} #${key}`}
         lowerWarning={ParticipantRow.MIN_PERCENTILE - 1}
         upperWarning={ParticipantRow.MAX_PERCENTILE}
@@ -205,6 +214,10 @@ export default class ParticipantRow extends React.Component<Props, State> {
     this.setState((state) => ({
       hazardStats: [...state.hazardStats, newSkill],
     }));
+  }
+
+  private handleSpeedModifierGenerating() {
+    // TODO (Coul Greer): Implement the roll func and use the result to change the speed modifier. Also, make the modifier explicitly have a + or -.
   }
 
   private createSpeedStatistic(title: string, startingValue: number) {
@@ -249,8 +262,8 @@ export default class ParticipantRow extends React.Component<Props, State> {
           <input
             type="text"
             value={currentName}
-            onChange={this.handleChange}
-            onBlur={this.handleBlur}
+            onChange={this.handleNameChanged}
+            onBlur={this.handleNameDeselected}
             className="ParticipantRow__name-input input"
           />
         </label>
@@ -273,7 +286,7 @@ export default class ParticipantRow extends React.Component<Props, State> {
             />
             <StatisticDisplay
               className="StatisticDisplay--vertical"
-              title="Speed"
+              title={ParticipantRow.SPEED_TITLE}
               startingValue={0}
             />
             <StatisticDisplay
@@ -283,10 +296,13 @@ export default class ParticipantRow extends React.Component<Props, State> {
               upperWarning={10}
               startingValue={2}
             />
+            <Button onClick={this.handleSpeedModifierGenerating}>
+              GENERATE
+            </Button>
           </div>
           <Button
             className="button button--primary button--small button--circular"
-            onClick={this.toggleExpansion}
+            onClick={this.handleViewToggling}
           >
             {expansionShown ? (
               <img src={ExpandLess} alt="Collapse" />
@@ -304,7 +320,7 @@ export default class ParticipantRow extends React.Component<Props, State> {
         {speedStats}
         <Button
           className="button button--small button--primary"
-          onClick={this.handleSpeedClick}
+          onClick={this.handleSpeedStatCreating}
         >
           <img src={Add} alt="Add Speed Stat" />
         </Button>
@@ -317,7 +333,7 @@ export default class ParticipantRow extends React.Component<Props, State> {
         {hazardStats}
         <Button
           className="button button--small button--primary"
-          onClick={this.handleHazardClick}
+          onClick={this.handleHazardStatCreating}
         >
           <img src={Add} alt="Add Hazard Stat" />
         </Button>
