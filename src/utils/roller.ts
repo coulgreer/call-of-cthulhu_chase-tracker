@@ -15,27 +15,26 @@ export function roll(val: number): Result {
   const hardSuccessThreshold = val / 2;
   const regularSuccessThreshold = val;
   const failureThreshold = val < 50 ? 59 : 99;
-  const fumble = val < 50 ? 96 : 100;
 
-  const result = Math.random() * faceCount + 1;
+  const result = Math.floor(Math.random() * faceCount) + 1;
 
-  if (result >= fumble) {
+  if (result > failureThreshold) {
     return Result.Fumble;
   }
 
-  if (result >= failureThreshold) {
+  if (result > regularSuccessThreshold) {
     return Result.Failure;
   }
 
-  if (result >= regularSuccessThreshold) {
+  if (result > hardSuccessThreshold) {
     return Result.RegularSuccess;
   }
 
-  if (result >= hardSuccessThreshold) {
+  if (result > extremeSuccessThreshold) {
     return Result.HardSuccess;
   }
 
-  if (result >= extremeSuccessThreshold) {
+  if (result > criticalThreshold) {
     return Result.ExtremeSuccess;
   }
 

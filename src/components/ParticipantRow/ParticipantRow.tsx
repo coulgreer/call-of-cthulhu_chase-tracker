@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import React, { ReactNode, RefObject } from "react";
 import { Transition, animated } from "react-spring/renderprops";
 
 import Button from "../Button";
@@ -10,6 +10,27 @@ import ExpandMore from "../../images/baseline_expand_more_black_24dp.png";
 
 import "./ParticipantRow.css";
 import UniqueSequenceGenerator from "../../utils/unique-sequence-generator";
+import { roll, Result } from "../../utils/roller";
+
+function determineDegreeOfSuccess(value: number) {
+  const degreeOfSuccess = roll(value);
+
+  switch (degreeOfSuccess) {
+    case Result.CriticalSuccess:
+    case Result.ExtremeSuccess:
+      return 1;
+    case Result.HardSuccess:
+    case Result.RegularSuccess:
+      return 0;
+    case Result.Failure:
+    case Result.Fumble:
+      return -1;
+    default:
+      throw new Error(
+        `The degree of success, ${degreeOfSuccess}, was unexpected.`
+      );
+  }
+}
 
 interface Props {
   defaultParticipantName: string;
@@ -105,6 +126,8 @@ export default class ParticipantRow extends React.Component<Props, State> {
 
   private hazardStatSequence: UniqueSequenceGenerator;
 
+  private speedModifierRef: RefObject<StatisticDisplay>;
+
   constructor(props: Props) {
     super(props);
 
@@ -112,6 +135,7 @@ export default class ParticipantRow extends React.Component<Props, State> {
 
     this.speedStatSequence = new UniqueSequenceGenerator(0);
     this.hazardStatSequence = new UniqueSequenceGenerator(0);
+    this.speedModifierRef = React.createRef<StatisticDisplay>();
 
     this.state = {
       currentName: defaultParticipantName,
@@ -217,7 +241,14 @@ export default class ParticipantRow extends React.Component<Props, State> {
   }
 
   private handleSpeedModifierGenerating() {
-    // TODO (Coul Greer): Implement the roll func and use the result to change the speed modifier. Also, make the modifier explicitly have a + or -.
+    // TODO (Coul Greer): Correct the supplied 40 to be dynamic to what the user desires.
+    const modifier = determineDegreeOfSuccess(40);
+    const speedModifierEl = this.speedModifierRef.current;
+    if (speedModifierEl !== null) {
+      speedModifierEl.setState({
+        value: modifier.toString(),
+      });
+    }
   }
 
   private createSpeedStatistic(title: string, startingValue: number) {
@@ -285,6 +316,7 @@ export default class ParticipantRow extends React.Component<Props, State> {
               startingValue={15}
             />
             <StatisticDisplay
+              ref={this.speedModifierRef}
               className="StatisticDisplay--vertical"
               title={ParticipantRow.SPEED_TITLE}
               startingValue={0}
@@ -296,7 +328,10 @@ export default class ParticipantRow extends React.Component<Props, State> {
               upperWarning={10}
               startingValue={2}
             />
-            <Button onClick={this.handleSpeedModifierGenerating}>
+            <Button
+              className="button button--secondary button--small"
+              onClick={this.handleSpeedModifierGenerating}
+            >
               GENERATE
             </Button>
           </div>
