@@ -139,6 +139,7 @@ export default class ParticipantTable extends Component<Props, State> {
     const modalElement = (
       <Modal
         className="Modal__Content"
+        overlayClassName="Modal__Overlay"
         contentLabel="Confirm Removal"
         isOpen={modalShown}
         onRequestClose={this.closeModal}
