@@ -271,3 +271,173 @@ describe("Stat manipulation", () => {
     expect(screen.getByLabelText(/new stat #8/i)).toBeInTheDocument();
   });
 });
+
+describe("Stat value updated", () => {
+  describe("when spinbutton cleared", () => {
+    test("should have no value for 'main statistic'", () => {
+      const name = "TEST_NAME";
+      render(<ParticipantRow defaultParticipantName={name} />);
+
+      const statisticDisplayEl = screen.getByRole("spinbutton", {
+        name: ParticipantRow.DEX_TITLE,
+      });
+      userEvent.clear(statisticDisplayEl);
+
+      expect(statisticDisplayEl).toHaveDisplayValue("");
+    });
+
+    test("should have no value for 'speed statistic'", () => {
+      const name = "TEST_NAME";
+      render(<ParticipantRow defaultParticipantName={name} />);
+
+      // Need to expand the extended view due to the children elements not existing otherwise.
+      userEvent.click(screen.getByRole("button", { name: /expand/i }));
+
+      const statisticDisplayEl = screen.getByRole("spinbutton", {
+        name: ParticipantRow.CON_TITLE,
+      });
+      userEvent.clear(statisticDisplayEl);
+
+      expect(statisticDisplayEl).toHaveDisplayValue("");
+    });
+
+    test("should have no value for 'hazard statistic'", () => {
+      const name = "TEST_NAME";
+      render(<ParticipantRow defaultParticipantName={name} />);
+
+      // Need to expand the extended view due to the children elements not existing otherwise.
+      userEvent.click(screen.getByRole("button", { name: /expand/i }));
+
+      const statisticDisplayEl = screen.getByRole("spinbutton", {
+        name: ParticipantRow.STR_TITLE,
+      });
+      userEvent.clear(statisticDisplayEl);
+
+      expect(statisticDisplayEl).toHaveDisplayValue("");
+    });
+  });
+
+  describe("when spinbutton recieves additional input", () => {
+    test("should update display for 'main statistic'", () => {
+      const name = "TEST_NAME";
+      const value = "12";
+      render(<ParticipantRow defaultParticipantName={name} />);
+
+      const statisticDisplayEl = screen.getByRole("spinbutton", {
+        name: ParticipantRow.DEX_TITLE,
+      });
+      userEvent.clear(statisticDisplayEl);
+      userEvent.type(statisticDisplayEl, value);
+
+      expect(statisticDisplayEl).toHaveDisplayValue(value);
+    });
+
+    test("should update display for 'speed statistic'", () => {
+      const name = "TEST_NAME";
+      const value = "12";
+      render(<ParticipantRow defaultParticipantName={name} />);
+
+      // Need to expand the extended view due to the children elements not existing otherwise.
+      userEvent.click(screen.getByRole("button", { name: /expand/i }));
+
+      const statisticDisplayEl = screen.getByRole("spinbutton", {
+        name: ParticipantRow.CON_TITLE,
+      });
+      userEvent.clear(statisticDisplayEl);
+      userEvent.type(statisticDisplayEl, value);
+
+      expect(statisticDisplayEl).toHaveDisplayValue(value);
+    });
+
+    test("should update display for 'hazard statistic'", () => {
+      const name = "TEST_NAME";
+      const value = "12";
+      render(<ParticipantRow defaultParticipantName={name} />);
+
+      // Need to expand the extended view due to the children elements not existing otherwise.
+      userEvent.click(screen.getByRole("button", { name: /expand/i }));
+
+      const statisticDisplayEl = screen.getByRole("spinbutton", {
+        name: ParticipantRow.STR_TITLE,
+      });
+      userEvent.clear(statisticDisplayEl);
+      userEvent.type(statisticDisplayEl, value);
+
+      expect(statisticDisplayEl).toHaveDisplayValue(value);
+    });
+  });
+
+  describe("when spinbutton changes then loses focus", () => {
+    test("should update value for 'main statistic'", () => {
+      const name = "TEST_NAME";
+      const value = 12;
+      render(<ParticipantRow defaultParticipantName={name} />);
+
+      const statisticDisplayEl = screen.getByRole("spinbutton", {
+        name: ParticipantRow.DEX_TITLE,
+      });
+      userEvent.clear(statisticDisplayEl);
+      userEvent.type(statisticDisplayEl, value.toString());
+      statisticDisplayEl.blur();
+
+      expect(statisticDisplayEl).toHaveValue(value);
+    });
+
+    test("should update value for 'speed statistic'", () => {
+      const name = "TEST_NAME";
+      const value = 12;
+      render(<ParticipantRow defaultParticipantName={name} />);
+
+      // Need to expand the extended view due to the children elements not existing otherwise.
+      userEvent.click(screen.getByRole("button", { name: /expand/i }));
+
+      const statisticDisplayEl = screen.getByRole("spinbutton", {
+        name: ParticipantRow.CON_TITLE,
+      });
+      userEvent.clear(statisticDisplayEl);
+      userEvent.type(statisticDisplayEl, value.toString());
+      statisticDisplayEl.blur();
+
+      expect(statisticDisplayEl).toHaveValue(value);
+    });
+
+    test("should update value for 'hazard statistic'", () => {
+      const name = "TEST_NAME";
+      const value = 12;
+      render(<ParticipantRow defaultParticipantName={name} />);
+
+      // Need to expand the extended view due to the children elements not existing otherwise.
+      userEvent.click(screen.getByRole("button", { name: /expand/i }));
+
+      const statisticDisplayEl = screen.getByRole("spinbutton", {
+        name: ParticipantRow.STR_TITLE,
+      });
+      userEvent.clear(statisticDisplayEl);
+      userEvent.type(statisticDisplayEl, value.toString());
+      statisticDisplayEl.blur();
+
+      expect(statisticDisplayEl).toHaveValue(value);
+    });
+  });
+});
+
+test("should reveal modal when 'generate speed modifier' button is pressed", () => {
+  const name = "TEST_NAME";
+  render(<ParticipantRow defaultParticipantName={name} />);
+
+  userEvent.click(screen.getByRole("button", { name: /generate/i }));
+
+  expect(screen.getByRole("dialog")).toBeInTheDocument();
+});
+
+test("should close modal when any button is pressed", () => {
+  const name = "TEST_NAME";
+  render(<ParticipantRow defaultParticipantName={name} />);
+  userEvent.click(screen.getByRole("button", { name: /generate/i }));
+
+  expect(screen.getByRole("dialog")).toBeInTheDocument();
+
+  userEvent.type(screen.getByRole("dialog"), "{esc}");
+
+  expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+});

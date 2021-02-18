@@ -5,22 +5,30 @@ import Range from "../../utils/range";
 
 import "./StatisticDisplay.css";
 
+export interface Data {
+  title: string;
+  currentValue: string;
+  validValue: number;
+  upperLimit?: number;
+  upperWarning?: number;
+  lowerWarning?: number;
+  lowerLimit?: number;
+  key?: number;
+}
+
 interface Props {
   className: string;
   title: string;
-  startingValue: number;
+  currentValue: string;
   upperLimit: number;
   upperWarning: number;
   lowerWarning: number;
   lowerLimit: number;
+  onChange?: (value: string) => void;
+  onBlur?: () => void;
 }
 
-interface State {
-  value: string;
-  lastValidValue: string;
-}
-
-export default class StatisticDisplay extends React.Component<Props, State> {
+export default class StatisticDisplay extends React.Component<Props> {
   static defaultProps = {
     className: "",
     upperLimit: Number.MAX_SAFE_INTEGER,
@@ -48,15 +56,7 @@ export default class StatisticDisplay extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
-    const { startingValue } = this.props;
-
-    this.validateStartingValue();
-    const startingValueStr = startingValue.toString();
-
-    this.state = {
-      value: startingValueStr,
-      lastValidValue: startingValueStr,
-    };
+    const { currentValue, lowerLimit, upperLimit } = this.props;
 
     const upperRange = this.generateUpperBound();
     const lowerRange = this.generateLowerBound();
@@ -66,22 +66,18 @@ export default class StatisticDisplay extends React.Component<Props, State> {
       );
     }
 
-    this.handleChange = this.handleChange.bind(this);
-    this.handleBlur = this.handleBlur.bind(this);
-  }
-
-  private validateStartingValue() {
-    const { startingValue, upperLimit, lowerLimit } = this.props;
-
-    if (startingValue > upperLimit) {
-      throw new RangeError(
-        `The given value, '${startingValue}', is past the limit, '${upperLimit}'.`
-      );
-    } else if (startingValue < lowerLimit) {
-      throw new RangeError(
-        `The given value, '${startingValue}', is past the limit, '${lowerLimit}'.`
+    const currentValueNum = Number.parseInt(currentValue, 10);
+    if (
+      this.isAboveUpperLimit(currentValueNum) ||
+      this.isBelowLowerLimit(currentValueNum)
+    ) {
+      throw new Error(
+        `The value, ${currentValue}, is outside the defined bounds of ${upperLimit} and ${lowerLimit}`
       );
     }
+
+    this.handleChange = this.handleChange.bind(this);
+    this.handleBlur = this.handleBlur.bind(this);
   }
 
   private generateUpperBound(): Range | null {
@@ -130,86 +126,73 @@ export default class StatisticDisplay extends React.Component<Props, State> {
     return new Range(start, end);
   }
 
-  isValueWithinUpperWarning(value: string) {
+  isValueWithinUpperWarning(value: number) {
     const { upperWarning } = this.props;
 
     if (upperWarning === null) return false;
 
-    return (
-      Number.parseInt(value, 10) >= upperWarning &&
-      !this.isValueAtUpperLimit(value)
-    );
+    return value >= upperWarning && !this.isValueAtUpperLimit(value);
   }
 
-  isValueAtUpperLimit(value: string) {
+  isValueAtUpperLimit(value: number) {
     const { upperLimit } = this.props;
 
-    return Number.parseInt(value, 10) === upperLimit;
+    return value === upperLimit;
   }
 
-  isAboveUpperLimit(value: string) {
+  isAboveUpperLimit(value: number) {
     const { upperLimit } = this.props;
 
-    return Number.parseInt(value, 10) > upperLimit;
+    return value > upperLimit;
   }
 
-  isValueWithinLowerWarning(value: string) {
+  isValueWithinLowerWarning(value: number) {
     const { lowerWarning } = this.props;
 
     if (lowerWarning === null) return false;
 
-    return (
-      Number.parseInt(value, 10) <= lowerWarning &&
-      !this.isValueAtLowerLimit(value)
-    );
+    return value <= lowerWarning && !this.isValueAtLowerLimit(value);
   }
 
-  isValueAtLowerLimit(value: string) {
+  isValueAtLowerLimit(value: number) {
     const { lowerLimit } = this.props;
 
-    return Number.parseInt(value, 10) === lowerLimit;
+    return value === lowerLimit;
   }
 
-  isBelowLowerLimit(value: string) {
+  isBelowLowerLimit(value: number) {
     const { lowerLimit } = this.props;
 
-    return Number.parseInt(value, 10) < lowerLimit;
+    return value < lowerLimit;
   }
 
-  private handleChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const { upperLimit, lowerLimit } = this.props;
-    const { value } = event.currentTarget;
-
-    if (value !== "") {
-      if (this.isAboveUpperLimit(value)) {
-        this.setState({ lastValidValue: upperLimit.toString() });
-      } else if (this.isBelowLowerLimit(value)) {
-        this.setState({ lastValidValue: lowerLimit.toString() });
-      } else {
-        this.setState({ lastValidValue: value });
-      }
-    }
-
-    this.setState({ value });
+  private handleChange(evt: React.ChangeEvent<HTMLInputElement>) {
+    const { onChange } = this.props;
+    if (onChange !== undefined) onChange(evt.target.value);
   }
 
   private handleBlur() {
-    this.setState((state) => ({ value: state.lastValidValue }));
+    const { onBlur } = this.props;
+    if (onBlur !== undefined) onBlur();
   }
 
   render() {
-    const { title, className } = this.props;
-    const { value } = this.state;
+    const { title, className, currentValue } = this.props;
+    const currentValueNum = Number.parseInt(currentValue, 10);
 
     const inputClassName = clsx({
-      [StatisticDisplay.UPPER_LIMIT_CLASS]: this.isValueAtUpperLimit(value),
+      [StatisticDisplay.UPPER_LIMIT_CLASS]: this.isValueAtUpperLimit(
+        currentValueNum
+      ),
       [StatisticDisplay.UPPER_WARNING_CLASS]: this.isValueWithinUpperWarning(
-        value
+        currentValueNum
       ),
       [StatisticDisplay.LOWER_WARNING_CLASS]: this.isValueWithinLowerWarning(
-        value
+        currentValueNum
       ),
-      [StatisticDisplay.LOWER_LIMIT_CLASS]: this.isValueAtLowerLimit(value),
+      [StatisticDisplay.LOWER_LIMIT_CLASS]: this.isValueAtLowerLimit(
+        currentValueNum
+      ),
     });
 
     return (
@@ -220,7 +203,7 @@ export default class StatisticDisplay extends React.Component<Props, State> {
         <input
           type="number"
           className={`StatisticDisplay__input input ${inputClassName}`}
-          value={value}
+          value={currentValue}
           onChange={this.handleChange}
           onBlur={this.handleBlur}
         />

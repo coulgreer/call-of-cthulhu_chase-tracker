@@ -1,19 +1,18 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 
 import StatisticDisplay from ".";
 
 test("should render statistics properly", () => {
   const className = "StatisticDisplay--vertical";
   const title = "A Title";
-  const startingValue = 5;
+  const currentValue = "5";
 
   render(
     <StatisticDisplay
       className={className}
       title={title}
-      startingValue={startingValue}
+      currentValue={currentValue}
     />
   );
 
@@ -21,16 +20,16 @@ test("should render statistics properly", () => {
 
   const inputEl = screen.getByLabelText(title, { selector: "input" });
   expect(inputEl).toBeInTheDocument();
-  expect(inputEl).toHaveValue(startingValue);
+  expect(inputEl).toHaveValue(Number.parseInt(currentValue, 10));
 });
 
 describe("Threshold class names", () => {
   describe("when initially created", () => {
     test("should render statistics without any additional className when thresholds are not provided", () => {
       const title = "A Title";
-      const startingValue = 0;
+      const currentValue = "0";
 
-      render(<StatisticDisplay title={title} startingValue={startingValue} />);
+      render(<StatisticDisplay title={title} currentValue={currentValue} />);
 
       const valueEl = screen.getByLabelText(title);
       expect(valueEl).not.toHaveClass(StatisticDisplay.UPPER_LIMIT_CLASS);
@@ -41,14 +40,14 @@ describe("Threshold class names", () => {
 
     test("should throw error when upper warning and upper limit are equal", () => {
       const title = "A Title";
-      const startingValue = 0;
+      const currentValue = "0";
       const threshold = 7;
 
       expect(() => {
         render(
           <StatisticDisplay
             title={title}
-            startingValue={startingValue}
+            currentValue={currentValue}
             upperWarning={threshold}
             upperLimit={threshold}
           />
@@ -58,7 +57,7 @@ describe("Threshold class names", () => {
 
     test("should throw error when upper warning threshold is greater than upper limit threshold", () => {
       const title = "A Title";
-      const startingValue = 0;
+      const currentValue = "0";
       const upperWarning = 7;
       const upperLimit = upperWarning - 1;
 
@@ -66,7 +65,7 @@ describe("Threshold class names", () => {
         render(
           <StatisticDisplay
             title={title}
-            startingValue={startingValue}
+            currentValue={currentValue}
             upperWarning={upperWarning}
             upperLimit={upperLimit}
           />
@@ -76,14 +75,14 @@ describe("Threshold class names", () => {
 
     test("should throw error when lower warning and lower limit are equal", () => {
       const title = "A Title";
-      const startingValue = 0;
+      const currentValue = "0";
       const threshold = -7;
 
       expect(() => {
         render(
           <StatisticDisplay
             title={title}
-            startingValue={startingValue}
+            currentValue={currentValue}
             lowerWarning={threshold}
             lowerLimit={threshold}
           />
@@ -93,7 +92,7 @@ describe("Threshold class names", () => {
 
     test("should throw error when lower warning threshold is less than lower limit threshold", () => {
       const title = "A Title";
-      const startingValue = 0;
+      const currentValue = "0";
       const lowerWarning = -7;
       const lowerLimit = lowerWarning + 1;
 
@@ -101,7 +100,7 @@ describe("Threshold class names", () => {
         render(
           <StatisticDisplay
             title={title}
-            startingValue={startingValue}
+            currentValue={currentValue}
             lowerWarning={lowerWarning}
             lowerLimit={lowerLimit}
           />
@@ -115,13 +114,13 @@ describe("Threshold class names", () => {
       const upperWarning = 3;
       const lowerWarning = 5;
       const lowerLimit = 2;
-      const startingValue = upperLimit - lowerLimit;
+      const currentValue = (upperLimit - lowerLimit).toString();
 
       expect(() => {
         render(
           <StatisticDisplay
             title={title}
-            startingValue={startingValue}
+            currentValue={currentValue}
             upperLimit={upperLimit}
             upperWarning={upperWarning}
             lowerWarning={lowerWarning}
@@ -135,12 +134,12 @@ describe("Threshold class names", () => {
       test("should render statistics with an additional className when value is inside threshold", () => {
         const title = "A Title";
         const lowerWarning = -7;
-        const startingValue = lowerWarning - 1;
+        const currentValue = (lowerWarning - 1).toString();
 
         render(
           <StatisticDisplay
             title={title}
-            startingValue={startingValue}
+            currentValue={currentValue}
             lowerWarning={lowerWarning}
           />
         );
@@ -155,12 +154,12 @@ describe("Threshold class names", () => {
       test("should render statistics with an additional className when value is at threshold", () => {
         const title = "A Title";
         const lowerWarning = -7;
-        const startingValue = lowerWarning;
+        const currentValue = lowerWarning.toString();
 
         render(
           <StatisticDisplay
             title={title}
-            startingValue={startingValue}
+            currentValue={currentValue}
             lowerWarning={lowerWarning}
           />
         );
@@ -175,12 +174,12 @@ describe("Threshold class names", () => {
       test("should render statistics with no additional className when value is outside threshold", () => {
         const title = "A Title";
         const lowerWarning = -7;
-        const startingValue = lowerWarning + 1;
+        const currentValue = (lowerWarning + 1).toString();
 
         render(
           <StatisticDisplay
             title={title}
-            startingValue={startingValue}
+            currentValue={currentValue}
             lowerWarning={lowerWarning}
           />
         );
@@ -197,12 +196,12 @@ describe("Threshold class names", () => {
       test("should render statistics with an additional className when value is at threshold", () => {
         const title = "A Title";
         const lowerLimit = -19;
-        const startingValue = lowerLimit;
+        const currentValue = lowerLimit.toString();
 
         render(
           <StatisticDisplay
             title={title}
-            startingValue={startingValue}
+            currentValue={currentValue}
             lowerLimit={lowerLimit}
           />
         );
@@ -217,12 +216,12 @@ describe("Threshold class names", () => {
       test("should render statistics with no additional className when value is before threshold", () => {
         const title = "A Title";
         const lowerLimit = -19;
-        const startingValue = lowerLimit + 1;
+        const currentValue = (lowerLimit + 1).toString();
 
         render(
           <StatisticDisplay
             title={title}
-            startingValue={startingValue}
+            currentValue={currentValue}
             lowerLimit={lowerLimit}
           />
         );
@@ -234,16 +233,16 @@ describe("Threshold class names", () => {
         expect(valueEl).not.toHaveClass(StatisticDisplay.LOWER_LIMIT_CLASS);
       });
 
-      test("should throw error when value is outside threshold", () => {
+      test("should throw error when value is below lower limit threshold", () => {
         const title = "A Title";
         const lowerLimit = -19;
-        const startingValue = lowerLimit - 1;
+        const currentValue = (lowerLimit - 1).toString();
 
         expect(() => {
           render(
             <StatisticDisplay
               title={title}
-              startingValue={startingValue}
+              currentValue={currentValue}
               lowerLimit={lowerLimit}
             />
           );
@@ -255,12 +254,12 @@ describe("Threshold class names", () => {
       test("should render statistics with an additional className when value is inside threshold", () => {
         const title = "A Title";
         const upperWarning = 7;
-        const startingValue = upperWarning + 1;
+        const currentValue = (upperWarning + 1).toString();
 
         render(
           <StatisticDisplay
             title={title}
-            startingValue={startingValue}
+            currentValue={currentValue}
             upperWarning={upperWarning}
           />
         );
@@ -275,12 +274,12 @@ describe("Threshold class names", () => {
       test("should render statistics with an additional className when value is at threshold", () => {
         const title = "A Title";
         const upperWarning = 7;
-        const startingValue = upperWarning;
+        const currentValue = upperWarning.toString();
 
         render(
           <StatisticDisplay
             title={title}
-            startingValue={startingValue}
+            currentValue={currentValue}
             upperWarning={upperWarning}
           />
         );
@@ -295,12 +294,12 @@ describe("Threshold class names", () => {
       test("should render statistics with an additional className when value is outside threshold", () => {
         const title = "A Title";
         const upperWarning = 7;
-        const startingValue = upperWarning - 1;
+        const currentValue = (upperWarning - 1).toString();
 
         render(
           <StatisticDisplay
             title={title}
-            startingValue={startingValue}
+            currentValue={currentValue}
             upperWarning={upperWarning}
           />
         );
@@ -317,12 +316,12 @@ describe("Threshold class names", () => {
       test("should render statistics with an additional className when value is at threshold", () => {
         const title = "A Title";
         const upperLimit = 19;
-        const startingValue = upperLimit;
+        const currentValue = upperLimit.toString();
 
         render(
           <StatisticDisplay
             title={title}
-            startingValue={startingValue}
+            currentValue={currentValue}
             upperLimit={upperLimit}
           />
         );
@@ -337,12 +336,12 @@ describe("Threshold class names", () => {
       test("should render statistics with no additional className when value is before threshold", () => {
         const title = "A Title";
         const upperLimit = 19;
-        const startingValue = upperLimit - 1;
+        const currentValue = (upperLimit - 1).toString();
 
         render(
           <StatisticDisplay
             title={title}
-            startingValue={startingValue}
+            currentValue={currentValue}
             upperLimit={upperLimit}
           />
         );
@@ -354,157 +353,21 @@ describe("Threshold class names", () => {
         expect(valueEl).not.toHaveClass(StatisticDisplay.LOWER_LIMIT_CLASS);
       });
 
-      test("should throw error when value is outside threshold", () => {
+      test("should throw error when value is above upper limit threshold", () => {
         const title = "A Title";
         const upperLimit = 19;
-        const startingValue = upperLimit + 1;
+        const currentValue = (upperLimit + 1).toString();
 
         expect(() => {
           render(
             <StatisticDisplay
               title={title}
-              startingValue={startingValue}
+              currentValue={currentValue}
               upperLimit={upperLimit}
             />
           );
         }).toThrow();
       });
     });
-  });
-
-  describe("when value updated", () => {
-    test("should change class when decreasing value pass lower warning threshold", () => {
-      const title = "TEST TITLE";
-      const startingValue = 0;
-      const lowerWarning = -3;
-      render(
-        <StatisticDisplay
-          title={title}
-          startingValue={startingValue}
-          lowerWarning={lowerWarning}
-        />
-      );
-
-      const inputEl = screen.getByLabelText(title);
-      userEvent.clear(inputEl);
-      userEvent.type(inputEl, "-5");
-
-      expect(inputEl).not.toHaveClass(StatisticDisplay.UPPER_LIMIT_CLASS);
-      expect(inputEl).not.toHaveClass(StatisticDisplay.UPPER_WARNING_CLASS);
-      expect(inputEl).toHaveClass(StatisticDisplay.LOWER_WARNING_CLASS);
-      expect(inputEl).not.toHaveClass(StatisticDisplay.LOWER_LIMIT_CLASS);
-    });
-
-    test("should change class when increasing value pass upper warning threshold", () => {
-      const title = "TEST TITLE";
-      const startingValue = 0;
-      const upperWarning = 3;
-      render(
-        <StatisticDisplay
-          title={title}
-          startingValue={startingValue}
-          upperWarning={upperWarning}
-        />
-      );
-
-      const inputEl = screen.getByLabelText(title);
-      userEvent.clear(inputEl);
-      userEvent.type(inputEl, "5");
-
-      expect(inputEl).not.toHaveClass(StatisticDisplay.UPPER_LIMIT_CLASS);
-      expect(inputEl).toHaveClass(StatisticDisplay.UPPER_WARNING_CLASS);
-      expect(inputEl).not.toHaveClass(StatisticDisplay.LOWER_WARNING_CLASS);
-      expect(inputEl).not.toHaveClass(StatisticDisplay.LOWER_LIMIT_CLASS);
-    });
-
-    test("should change class when decreasing value to lower limit threshold", () => {
-      const title = "TEST TITLE";
-      const startingValue = 0;
-      const lowerLimit = -3;
-      render(
-        <StatisticDisplay
-          title={title}
-          startingValue={startingValue}
-          lowerLimit={lowerLimit}
-        />
-      );
-
-      const inputEl = screen.getByLabelText(title);
-      userEvent.clear(inputEl);
-      userEvent.type(inputEl, "-3");
-
-      expect(inputEl).not.toHaveClass(StatisticDisplay.UPPER_LIMIT_CLASS);
-      expect(inputEl).not.toHaveClass(StatisticDisplay.UPPER_WARNING_CLASS);
-      expect(inputEl).not.toHaveClass(StatisticDisplay.LOWER_WARNING_CLASS);
-      expect(inputEl).toHaveClass(StatisticDisplay.LOWER_LIMIT_CLASS);
-    });
-
-    test("should change class when increasing value to upper limit threshold", () => {
-      const title = "TEST TITLE";
-      const startingValue = 0;
-      const upperLimit = 3;
-      render(
-        <StatisticDisplay
-          title={title}
-          startingValue={startingValue}
-          upperLimit={upperLimit}
-        />
-      );
-
-      const inputEl = screen.getByLabelText(title);
-      userEvent.clear(inputEl);
-      userEvent.type(inputEl, "3");
-
-      expect(inputEl).toHaveClass(StatisticDisplay.UPPER_LIMIT_CLASS);
-      expect(inputEl).not.toHaveClass(StatisticDisplay.UPPER_WARNING_CLASS);
-      expect(inputEl).not.toHaveClass(StatisticDisplay.LOWER_WARNING_CLASS);
-      expect(inputEl).not.toHaveClass(StatisticDisplay.LOWER_LIMIT_CLASS);
-    });
-
-    test("should reset value to limit when value entered pass limit threshold", () => {
-      const title = "TEST TITLE";
-      const startingValue = 3;
-      const upperLimit = 5;
-      render(
-        <StatisticDisplay
-          title={title}
-          startingValue={startingValue}
-          upperLimit={upperLimit}
-        />
-      );
-
-      const inputEl = screen.getByLabelText(title);
-      userEvent.clear(inputEl);
-      userEvent.type(inputEl, "7");
-      inputEl.blur();
-
-      expect(inputEl).toHaveValue(upperLimit);
-    });
-  });
-});
-
-describe("User input validation", () => {
-  test("should update value when additional numbers are added", () => {
-    const title = "TEST TITLE";
-    const startingValue = 2;
-    render(<StatisticDisplay title={title} startingValue={startingValue} />);
-
-    const inputEl = screen.getByLabelText(title);
-    userEvent.type(inputEl, "3");
-
-    expect(inputEl).toHaveValue(23);
-  });
-
-  test("should return to prior valid value when input cleared and focus lost", () => {
-    const title = "TEST TITLE";
-    const startingValue = 3;
-    render(<StatisticDisplay title={title} startingValue={startingValue} />);
-
-    const inputEl = screen.getByLabelText(title);
-    userEvent.type(inputEl, "5");
-    userEvent.clear(inputEl);
-    inputEl.blur();
-
-    expect(inputEl).toHaveValue(35);
   });
 });

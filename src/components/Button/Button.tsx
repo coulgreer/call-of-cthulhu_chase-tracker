@@ -18,7 +18,9 @@ function Button({ onClick, className, children }: Props) {
 }
 
 Button.defaultProps = {
-  onClick: () => {},
+  onClick: () => {
+    // do nothing
+  },
   className: "button",
   children: null,
 };

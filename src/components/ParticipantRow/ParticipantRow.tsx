@@ -1,8 +1,10 @@
-import React, { ReactNode, RefObject } from "react";
+import React from "react";
 import { Transition, animated } from "react-spring/renderprops";
+import Modal from "react-modal";
 
 import Button from "../Button";
-import StatisticDisplay from "../StatisticDisplay";
+import { Data as StatisticDisplayData } from "../StatisticDisplay";
+import DisplayFactory from "../StatisticDisplay/DisplayFactory";
 
 import Add from "../../images/baseline_add_black_36dp_x1.png";
 import ExpandLess from "../../images/baseline_expand_less_black_24dp.png";
@@ -41,19 +43,14 @@ interface State {
   lastValidName: string;
   nameWarningShown: boolean;
   expansionShown: boolean;
-  speedStats: ReactNode[];
-  hazardStats: ReactNode[];
+  mainStats: StatisticDisplayData[];
+  speedStats: StatisticDisplayData[];
+  hazardStats: StatisticDisplayData[];
+  selectedStatValue: string;
+  modalShown: boolean;
 }
 
 export default class ParticipantRow extends React.Component<Props, State> {
-  static get MAX_PERCENTILE() {
-    return 100;
-  }
-
-  static get MIN_PERCENTILE() {
-    return 1;
-  }
-
   static get DEX_TITLE() {
     return "DEX";
   }
@@ -126,55 +123,244 @@ export default class ParticipantRow extends React.Component<Props, State> {
 
   private hazardStatSequence: UniqueSequenceGenerator;
 
-  private speedModifierRef: RefObject<StatisticDisplay>;
+  private speedEl: StatisticDisplayData;
 
   constructor(props: Props) {
     super(props);
 
-    const { defaultParticipantName } = this.props;
-
     this.speedStatSequence = new UniqueSequenceGenerator(0);
     this.hazardStatSequence = new UniqueSequenceGenerator(0);
-    this.speedModifierRef = React.createRef<StatisticDisplay>();
+    this.speedEl = { title: "", currentValue: "0", validValue: 0 };
+
+    this.handleNameChanged = this.handleNameChanged.bind(this);
+    this.handleNameDeselected = this.handleNameDeselected.bind(this);
+    this.handleViewToggling = this.handleViewToggling.bind(this);
+    this.openModal = this.openModal.bind(this);
+    this.closeModal = this.closeModal.bind(this);
+    this.handleSelectionChange = this.handleSelectionChange.bind(this);
+    this.handleSpeedStatCreating = this.handleSpeedStatCreating.bind(this);
+    this.handleHazardStatCreating = this.handleHazardStatCreating.bind(this);
+    this.calculateModifier = this.calculateModifier.bind(this);
+
+    const { defaultParticipantName } = this.props;
 
     this.state = {
       currentName: defaultParticipantName,
       lastValidName: defaultParticipantName,
       nameWarningShown: false,
       expansionShown: false,
+      mainStats: this.initializeMainStats(),
       speedStats: this.initializeSpeedStats(),
       hazardStats: this.initializeHazardStats(),
+      selectedStatValue: "",
+      modalShown: false,
     };
+  }
 
-    this.handleNameChanged = this.handleNameChanged.bind(this);
-    this.handleNameDeselected = this.handleNameDeselected.bind(this);
-    this.handleViewToggling = this.handleViewToggling.bind(this);
-    this.handleSpeedModifierGenerating = this.handleSpeedModifierGenerating.bind(
-      this
+  private handleMainStatisticChange(index: number, value: string) {
+    const { mainStats } = this.state;
+    const data = mainStats[index];
+    const {
+      upperLimit = Number.MAX_SAFE_INTEGER,
+      lowerLimit = Number.MIN_SAFE_INTEGER,
+    } = data;
+
+    if (value !== "") {
+      const valueNum = Number.parseInt(value, 10);
+      if (valueNum > upperLimit) {
+        data.validValue = upperLimit;
+      } else if (valueNum < lowerLimit) {
+        data.validValue = lowerLimit;
+      } else {
+        data.validValue = valueNum;
+      }
+    }
+    data.currentValue = value;
+
+    mainStats[index] = data;
+    this.setState({ mainStats });
+  }
+
+  private handleSpeedStatisticChange(index: number, value: string) {
+    const { speedStats } = this.state;
+    const data = speedStats[index];
+    const {
+      upperLimit = Number.MAX_SAFE_INTEGER,
+      lowerLimit = Number.MIN_SAFE_INTEGER,
+    } = data;
+
+    if (value !== "") {
+      const valueNum = Number.parseInt(value, 10);
+      if (valueNum > upperLimit) {
+        data.validValue = upperLimit;
+      } else if (valueNum < lowerLimit) {
+        data.validValue = lowerLimit;
+      } else {
+        data.validValue = valueNum;
+      }
+    }
+    data.currentValue = value;
+
+    speedStats[index] = data;
+    this.setState({ speedStats });
+  }
+
+  private handleHazardStatisticChange(index: number, value: string) {
+    const { hazardStats } = this.state;
+    const data = hazardStats[index];
+    const {
+      upperLimit = Number.MAX_SAFE_INTEGER,
+      lowerLimit = Number.MIN_SAFE_INTEGER,
+    } = data;
+
+    if (value !== "") {
+      const valueNum = Number.parseInt(value, 10);
+      if (valueNum > upperLimit) {
+        data.validValue = upperLimit;
+      } else if (valueNum < lowerLimit) {
+        data.validValue = lowerLimit;
+      } else {
+        data.validValue = valueNum;
+      }
+    }
+    data.currentValue = value;
+
+    hazardStats[index] = data;
+    this.setState({ hazardStats });
+  }
+
+  private handleMainStatisticBlur(index: number) {
+    const { mainStats } = this.state;
+    const data = mainStats[index];
+    const { validValue } = data;
+
+    data.currentValue = validValue.toString();
+    mainStats[index] = data;
+
+    this.setState({ mainStats });
+  }
+
+  private handleSpeedStatisticBlur(index: number) {
+    const { speedStats } = this.state;
+    const data = speedStats[index];
+    const { validValue } = data;
+
+    data.currentValue = validValue.toString();
+    speedStats[index] = data;
+
+    this.setState({ speedStats });
+  }
+
+  private handleHazardStatisticBlur(index: number) {
+    const { hazardStats } = this.state;
+    const data = hazardStats[index];
+    const { validValue } = data;
+
+    data.currentValue = validValue.toString();
+    hazardStats[index] = data;
+
+    this.setState({ hazardStats });
+  }
+
+  initializeMainStats() {
+    const stats = [
+      { title: ParticipantRow.DEX_TITLE, currentValue: "15", validValue: 15 },
+      { title: ParticipantRow.SPEED_TITLE, currentValue: "0", validValue: 0 },
+      {
+        title: ParticipantRow.MOV_TITLE,
+        currentValue: "2",
+        validValue: 2,
+        lowerWarning: 1,
+        upperWarning: 10,
+      },
+    ];
+
+    [this.speedEl] = stats.filter(
+      (stat) => stat.title === ParticipantRow.SPEED_TITLE
     );
-    this.handleSpeedStatCreating = this.handleSpeedStatCreating.bind(this);
-    this.handleHazardStatCreating = this.handleHazardStatCreating.bind(this);
+
+    return stats;
   }
 
   private initializeSpeedStats() {
     return [
-      this.createSpeedStatistic(ParticipantRow.CON_TITLE, 15),
-      this.createSpeedStatistic(ParticipantRow.DRIVE_TITLE, 20),
-      this.createSpeedStatistic(ParticipantRow.RIDE_TITLE, 5),
-      this.createSpeedStatistic(ParticipantRow.AIR_TITLE, 1),
-      this.createSpeedStatistic(ParticipantRow.SEA_TITLE, 1),
+      {
+        title: ParticipantRow.CON_TITLE,
+        currentValue: "15",
+        validValue: 15,
+        key: this.speedStatSequence.nextNum(),
+      },
+      {
+        title: ParticipantRow.DRIVE_TITLE,
+        currentValue: "20",
+        validValue: 20,
+        key: this.speedStatSequence.nextNum(),
+      },
+      {
+        title: ParticipantRow.RIDE_TITLE,
+        currentValue: "5",
+        validValue: 5,
+        key: this.speedStatSequence.nextNum(),
+      },
+      {
+        title: ParticipantRow.AIR_TITLE,
+        currentValue: "1",
+        validValue: 1,
+        key: this.speedStatSequence.nextNum(),
+      },
+      {
+        title: ParticipantRow.SEA_TITLE,
+        currentValue: "1",
+        validValue: 1,
+        key: this.speedStatSequence.nextNum(),
+      },
     ];
   }
 
   private initializeHazardStats() {
     return [
-      this.createHazardStatistic(ParticipantRow.STR_TITLE, 15),
-      this.createHazardStatistic(ParticipantRow.CLIMB_TITLE, 20),
-      this.createHazardStatistic(ParticipantRow.SWIM_TITLE, 20),
-      this.createHazardStatistic(ParticipantRow.DODGE_TITLE, 7),
-      this.createHazardStatistic(ParticipantRow.BRAWL_TITLE, 25),
-      this.createHazardStatistic(ParticipantRow.HANDGUN_TITLE, 20),
-      this.createHazardStatistic(ParticipantRow.RIFLE_TITLE, 25),
+      {
+        title: ParticipantRow.STR_TITLE,
+        currentValue: "15",
+        validValue: 15,
+        key: this.hazardStatSequence.nextNum(),
+      },
+      {
+        title: ParticipantRow.CLIMB_TITLE,
+        currentValue: "20",
+        validValue: 20,
+        key: this.hazardStatSequence.nextNum(),
+      },
+      {
+        title: ParticipantRow.SWIM_TITLE,
+        currentValue: "20",
+        validValue: 20,
+        key: this.hazardStatSequence.nextNum(),
+      },
+      {
+        title: ParticipantRow.DODGE_TITLE,
+        currentValue: "7",
+        validValue: 7,
+        key: this.hazardStatSequence.nextNum(),
+      },
+      {
+        title: ParticipantRow.BRAWL_TITLE,
+        currentValue: "25",
+        validValue: 25,
+        key: this.hazardStatSequence.nextNum(),
+      },
+      {
+        title: ParticipantRow.HANDGUN_TITLE,
+        currentValue: "20",
+        validValue: 20,
+        key: this.hazardStatSequence.nextNum(),
+      },
+      {
+        title: ParticipantRow.RIFLE_TITLE,
+        currentValue: "25",
+        validValue: 25,
+        key: this.hazardStatSequence.nextNum(),
+      },
     ];
   }
 
@@ -208,73 +394,57 @@ export default class ParticipantRow extends React.Component<Props, State> {
 
   private handleSpeedStatCreating() {
     const key = this.speedStatSequence.nextNum();
-    const newSkill = (
-      <StatisticDisplay
-        className="StatisticDisplay--horizontal"
-        title={`${ParticipantRow.DEFAULT_STAT_NAME} #${key}`}
-        lowerWarning={ParticipantRow.MIN_PERCENTILE - 1}
-        upperWarning={ParticipantRow.MAX_PERCENTILE}
-        startingValue={15}
-        key={key}
-      />
-    );
+    const newData = {
+      title: `${ParticipantRow.DEFAULT_STAT_NAME} #${key}`,
+      currentValue: "15",
+      validValue: 15,
+      key,
+    };
+
     this.setState((state) => ({
-      speedStats: [...state.speedStats, newSkill],
+      speedStats: [...state.speedStats, newData],
     }));
   }
 
   private handleHazardStatCreating() {
     const key = this.hazardStatSequence.nextNum();
-    const newSkill = (
-      <StatisticDisplay
-        className="StatisticDisplay--horizontal"
-        title={`${ParticipantRow.DEFAULT_STAT_NAME} #${key}`}
-        lowerWarning={ParticipantRow.MIN_PERCENTILE - 1}
-        upperWarning={ParticipantRow.MAX_PERCENTILE}
-        startingValue={15}
-        key={key}
-      />
-    );
+    const newData = {
+      title: `${ParticipantRow.DEFAULT_STAT_NAME} #${key}`,
+      currentValue: "15",
+      validValue: 15,
+      key,
+    };
+
     this.setState((state) => ({
-      hazardStats: [...state.hazardStats, newSkill],
+      hazardStats: [...state.hazardStats, newData],
     }));
   }
 
-  private handleSpeedModifierGenerating() {
-    // TODO (Coul Greer): Correct the supplied 40 to be dynamic to what the user desires.
-    const modifier = determineDegreeOfSuccess(40);
-    const speedModifierEl = this.speedModifierRef.current;
-    if (speedModifierEl !== null) {
-      speedModifierEl.setState({
-        value: modifier.toString(),
-      });
-    }
+  private openModal() {
+    this.setState({ modalShown: true });
   }
 
-  private createSpeedStatistic(title: string, startingValue: number) {
-    return (
-      <StatisticDisplay
-        className="StatisticDisplay--horizontal"
-        title={title}
-        lowerWarning={ParticipantRow.MIN_PERCENTILE - 1}
-        upperWarning={ParticipantRow.MAX_PERCENTILE}
-        startingValue={startingValue}
-        key={this.speedStatSequence.nextNum()}
-      />
-    );
+  private closeModal() {
+    this.setState(() => ({ modalShown: false }));
   }
 
-  private createHazardStatistic(title: string, startingValue: number) {
-    return (
-      <StatisticDisplay
-        className="StatisticDisplay--horizontal"
-        title={title}
-        lowerWarning={ParticipantRow.MIN_PERCENTILE - 1}
-        upperWarning={ParticipantRow.MAX_PERCENTILE}
-        startingValue={startingValue}
-        key={this.hazardStatSequence.nextNum()}
-      />
+  private handleSelectionChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const { value } = event.target;
+
+    this.setState({ selectedStatValue: value });
+  }
+
+  private calculateModifier() {
+    const { selectedStatValue } = this.state;
+
+    const modifier = determineDegreeOfSuccess(
+      Number.parseInt(selectedStatValue, 10)
     );
+
+    this.speedEl.currentValue = modifier.toString();
+    this.speedEl.validValue = modifier;
+
+    this.closeModal();
   }
 
   render() {
@@ -282,9 +452,48 @@ export default class ParticipantRow extends React.Component<Props, State> {
       currentName,
       nameWarningShown,
       expansionShown,
+      mainStats,
       speedStats,
       hazardStats,
+      modalShown,
     } = this.state;
+
+    const selectSpeedStatModal = (
+      <Modal
+        className="Modal__Content"
+        overlayClassName="Modal__Overlay"
+        contentLabel="Select Speed Statistic"
+        isOpen={modalShown}
+        onRequestClose={this.closeModal}
+      >
+        <p>Select a speed skill</p>
+        <form>
+          {speedStats.map((data) => (
+            <label>
+              {data.title}
+              <input
+                type="radio"
+                name="selectedStatValue"
+                value={data.validValue}
+                onChange={this.handleSelectionChange}
+              />
+            </label>
+          ))}
+          <input
+            className="button button--secondary button--small"
+            type="button"
+            value="CANCEL"
+            onClick={this.closeModal}
+          />
+          <input
+            className="button button--primary button--small"
+            type="button"
+            value="CONFIRM"
+            onClick={this.calculateModifier}
+          />
+        </form>
+      </Modal>
+    );
 
     const mainEl = (
       <div className="ParticipantRow__main-display">
@@ -308,29 +517,17 @@ export default class ParticipantRow extends React.Component<Props, State> {
         </p>
         <div className="ParticipantRow__footer">
           <div className="ParticipantRow__main-characteristics">
-            <StatisticDisplay
-              className="StatisticDisplay--vertical"
-              title={ParticipantRow.DEX_TITLE}
-              lowerWarning={ParticipantRow.MIN_PERCENTILE - 1}
-              upperWarning={ParticipantRow.MAX_PERCENTILE}
-              startingValue={15}
-            />
-            <StatisticDisplay
-              ref={this.speedModifierRef}
-              className="StatisticDisplay--vertical"
-              title={ParticipantRow.SPEED_TITLE}
-              startingValue={0}
-            />
-            <StatisticDisplay
-              className="StatisticDisplay--vertical"
-              title={ParticipantRow.MOV_TITLE}
-              lowerWarning={1}
-              upperWarning={10}
-              startingValue={2}
-            />
+            {mainStats.map((data, index) =>
+              DisplayFactory.createStatisticDisplay(
+                "StatisticDisplay--vertical",
+                data,
+                (value) => this.handleMainStatisticChange(index, value),
+                () => this.handleMainStatisticBlur(index)
+              )
+            )}
             <Button
               className="button button--secondary button--small"
-              onClick={this.handleSpeedModifierGenerating}
+              onClick={this.openModal}
             >
               GENERATE
             </Button>
@@ -352,7 +549,14 @@ export default class ParticipantRow extends React.Component<Props, State> {
     const speedStatsEl = (
       <div>
         <h4>SPEED Stats</h4>
-        {speedStats}
+        {speedStats.map((data, index) =>
+          DisplayFactory.createStatisticDisplay(
+            "StatisticDisplay--horizontal",
+            data,
+            (value) => this.handleSpeedStatisticChange(index, value),
+            () => this.handleSpeedStatisticBlur(index)
+          )
+        )}
         <Button
           className="button button--small button--primary"
           onClick={this.handleSpeedStatCreating}
@@ -365,7 +569,14 @@ export default class ParticipantRow extends React.Component<Props, State> {
     const hazardStatsEl = (
       <div>
         <h4>HAZARD Stats</h4>
-        {hazardStats}
+        {hazardStats.map((data, index) =>
+          DisplayFactory.createStatisticDisplay(
+            "StatisticDisplay--horizontal",
+            data,
+            (value) => this.handleHazardStatisticChange(index, value),
+            () => this.handleHazardStatisticBlur(index)
+          )
+        )}
         <Button
           className="button button--small button--primary"
           onClick={this.handleHazardStatCreating}
@@ -402,6 +613,7 @@ export default class ParticipantRow extends React.Component<Props, State> {
       <div className="ParticipantRow">
         {mainEl}
         {extendedEl}
+        {selectSpeedStatModal}
       </div>
     );
   }

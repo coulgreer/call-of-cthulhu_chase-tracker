@@ -1,1 +1,1 @@
-export { default } from "./StatisticDisplay";
+export { default, Data } from "./StatisticDisplay";
