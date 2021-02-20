@@ -119,6 +119,26 @@ export default class ParticipantRow extends React.Component<Props, State> {
     return "New Stat";
   }
 
+  /* eslint-disable no-param-reassign */
+  static manageValue(value: string, data: StatisticDisplayData) {
+    const {
+      upperLimit = Number.MAX_SAFE_INTEGER,
+      lowerLimit = Number.MIN_SAFE_INTEGER,
+    } = data;
+
+    if (value !== "") {
+      const valueNum = Number.parseInt(value, 10);
+      if (valueNum > upperLimit) {
+        data.validValue = upperLimit;
+      } else if (valueNum < lowerLimit) {
+        data.validValue = lowerLimit;
+      } else {
+        data.validValue = valueNum;
+      }
+    }
+    data.currentValue = value;
+  }
+
   private speedStatSequence: UniqueSequenceGenerator;
 
   private hazardStatSequence: UniqueSequenceGenerator;
@@ -160,22 +180,8 @@ export default class ParticipantRow extends React.Component<Props, State> {
   private handleMainStatisticChange(index: number, value: string) {
     const { mainStats } = this.state;
     const data = mainStats[index];
-    const {
-      upperLimit = Number.MAX_SAFE_INTEGER,
-      lowerLimit = Number.MIN_SAFE_INTEGER,
-    } = data;
 
-    if (value !== "") {
-      const valueNum = Number.parseInt(value, 10);
-      if (valueNum > upperLimit) {
-        data.validValue = upperLimit;
-      } else if (valueNum < lowerLimit) {
-        data.validValue = lowerLimit;
-      } else {
-        data.validValue = valueNum;
-      }
-    }
-    data.currentValue = value;
+    ParticipantRow.manageValue(value, data);
 
     mainStats[index] = data;
     this.setState({ mainStats });
@@ -184,22 +190,8 @@ export default class ParticipantRow extends React.Component<Props, State> {
   private handleSpeedStatisticChange(index: number, value: string) {
     const { speedStats } = this.state;
     const data = speedStats[index];
-    const {
-      upperLimit = Number.MAX_SAFE_INTEGER,
-      lowerLimit = Number.MIN_SAFE_INTEGER,
-    } = data;
 
-    if (value !== "") {
-      const valueNum = Number.parseInt(value, 10);
-      if (valueNum > upperLimit) {
-        data.validValue = upperLimit;
-      } else if (valueNum < lowerLimit) {
-        data.validValue = lowerLimit;
-      } else {
-        data.validValue = valueNum;
-      }
-    }
-    data.currentValue = value;
+    ParticipantRow.manageValue(value, data);
 
     speedStats[index] = data;
     this.setState({ speedStats });
@@ -208,22 +200,8 @@ export default class ParticipantRow extends React.Component<Props, State> {
   private handleHazardStatisticChange(index: number, value: string) {
     const { hazardStats } = this.state;
     const data = hazardStats[index];
-    const {
-      upperLimit = Number.MAX_SAFE_INTEGER,
-      lowerLimit = Number.MIN_SAFE_INTEGER,
-    } = data;
 
-    if (value !== "") {
-      const valueNum = Number.parseInt(value, 10);
-      if (valueNum > upperLimit) {
-        data.validValue = upperLimit;
-      } else if (valueNum < lowerLimit) {
-        data.validValue = lowerLimit;
-      } else {
-        data.validValue = valueNum;
-      }
-    }
-    data.currentValue = value;
+    ParticipantRow.manageValue(value, data);
 
     hazardStats[index] = data;
     this.setState({ hazardStats });

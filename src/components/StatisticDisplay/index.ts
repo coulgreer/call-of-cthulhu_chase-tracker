@@ -1,1 +1,1 @@
-export { default, Data } from "./StatisticDisplay";
+export { default, Data, Props } from "./StatisticDisplay";

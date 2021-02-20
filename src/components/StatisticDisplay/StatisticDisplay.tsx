@@ -16,13 +16,13 @@ export interface Data {
   key?: number;
 }
 
-interface Props {
+export interface Props {
   className: string;
   title: string;
   currentValue: string;
   upperLimit: number;
-  upperWarning: number;
-  lowerWarning: number;
+  upperWarning?: number;
+  lowerWarning?: number;
   lowerLimit: number;
   onChange?: (value: string) => void;
   onBlur?: () => void;
@@ -32,8 +32,6 @@ export default class StatisticDisplay extends React.Component<Props> {
   static defaultProps = {
     className: "",
     upperLimit: Number.MAX_SAFE_INTEGER,
-    upperWarning: null,
-    lowerWarning: null,
     lowerLimit: Number.MIN_SAFE_INTEGER,
   };
 
@@ -80,12 +78,10 @@ export default class StatisticDisplay extends React.Component<Props> {
     this.handleBlur = this.handleBlur.bind(this);
   }
 
-  private generateUpperBound(): Range | null {
+  private generateUpperBound(): Range {
     const { upperLimit, upperWarning } = this.props;
 
-    if (upperLimit === null && upperWarning === null) return null;
-
-    if (upperLimit !== null && upperWarning !== null) {
+    if (upperWarning !== undefined) {
       if (upperWarning > upperLimit) {
         throw new RangeError(
           `The given upper warning, '${upperWarning}', is greater than the given upper limit, '${upperLimit}'.`
@@ -97,18 +93,16 @@ export default class StatisticDisplay extends React.Component<Props> {
       }
     }
 
-    const end = upperLimit !== null ? upperLimit : Number.MAX_SAFE_INTEGER;
-    const start = upperWarning !== null ? upperWarning : end;
+    const end = upperLimit;
+    const start = upperWarning ?? end;
 
     return new Range(start, end);
   }
 
-  private generateLowerBound(): Range | null {
+  private generateLowerBound(): Range {
     const { lowerLimit, lowerWarning } = this.props;
 
-    if (lowerLimit === null && lowerWarning === null) return null;
-
-    if (lowerLimit !== null && lowerWarning !== null) {
+    if (lowerWarning !== undefined) {
       if (lowerWarning < lowerLimit) {
         throw new RangeError(
           `The given lower warning, '${lowerWarning}', is less than the given lower limit, '${lowerLimit}'.`
@@ -120,8 +114,8 @@ export default class StatisticDisplay extends React.Component<Props> {
       }
     }
 
-    const end = lowerLimit !== null ? lowerLimit : Number.MIN_SAFE_INTEGER;
-    const start = lowerWarning !== null ? lowerWarning : end;
+    const end = lowerLimit;
+    const start = lowerWarning ?? end;
 
     return new Range(start, end);
   }
@@ -129,7 +123,7 @@ export default class StatisticDisplay extends React.Component<Props> {
   isValueWithinUpperWarning(value: number) {
     const { upperWarning } = this.props;
 
-    if (upperWarning === null) return false;
+    if (upperWarning === undefined) return false;
 
     return value >= upperWarning && !this.isValueAtUpperLimit(value);
   }
@@ -149,7 +143,7 @@ export default class StatisticDisplay extends React.Component<Props> {
   isValueWithinLowerWarning(value: number) {
     const { lowerWarning } = this.props;
 
-    if (lowerWarning === null) return false;
+    if (lowerWarning === undefined) return false;
 
     return value <= lowerWarning && !this.isValueAtLowerLimit(value);
   }
