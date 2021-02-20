@@ -85,7 +85,7 @@ describe("Confirmation Tests", () => {
     // Remove a number that's not at the end of the sequence.
     sequenceGen.remove(1);
 
-    /** Then, remove another number that starts with a differing digit
+    /* Then, remove another number that starts with a differing digit
      *  from the first, but is not at the end of the sequence. */
     sequenceGen.remove(3);
 

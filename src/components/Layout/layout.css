@@ -111,7 +111,7 @@ label {
   margin: 4px;
 }
 
-/** Inputs */
+/* Inputs */
 .input {
   padding: 4px;
   background-color: var(--dark-overlay--low-emphasis);
@@ -135,7 +135,7 @@ label {
   font-weight: bold;
 }
 
-/** Modals */
+/* Modals */
 .ReactModalPortal * {
   z-index: 2;
 }
@@ -167,7 +167,7 @@ label {
   background-color: rgba(9, 11, 14, 0.87);
 }
 
-/** Miscellaneous */
+/* Miscellaneous */
 img {
   max-width: 100%;
   height: auto;

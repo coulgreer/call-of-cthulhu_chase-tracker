@@ -208,7 +208,7 @@ describe("Confirmation Tests", () => {
     );
     userEvent.click(screen.getByRole("button", { name: /yes/i }));
 
-    /** Then, remove another participant that starts with a differing digit
+    /* Then, remove another participant that starts with a differing digit
      *  from the first, but is not at the end of the sequence. */
     userEvent.click(
       screen.getByRole("button", {
