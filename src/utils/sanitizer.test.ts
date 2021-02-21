@@ -1,8 +1,7 @@
 import sanitize from "./sanitizer";
 
-const padding = "   ";
-
 test("should remove trailing and leading whitespace", () => {
+  const padding = "   ";
   const expected = "TEST";
   const paddedString = padding + expected + padding;
 
