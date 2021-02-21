@@ -1,5 +1,15 @@
 const faceCount = 100;
 
+/**
+ * A collection of potential results from a simulated die roll. From best
+ * degree to worst degree of success:
+ * - Critical success
+ * - Extreme success
+ * - Hard success
+ * - Regular success
+ * - Failure
+ * - Fumble
+ */
 export enum Result {
   CriticalSuccess,
   ExtremeSuccess,
@@ -9,12 +19,17 @@ export enum Result {
   Fumble,
 }
 
-export function roll(val: number): Result {
+/**
+ * Generates a success metric, `Result`, based on a randomly generated value
+ * and probability.
+ * @param value - The value used to derive the thresholds of success.
+ */
+export function roll(value: number): Result {
   const criticalThreshold = 1;
-  const extremeSuccessThreshold = val / 5;
-  const hardSuccessThreshold = val / 2;
-  const regularSuccessThreshold = val;
-  const failureThreshold = val < 50 ? 59 : 99;
+  const extremeSuccessThreshold = value / 5;
+  const hardSuccessThreshold = value / 2;
+  const regularSuccessThreshold = value;
+  const failureThreshold = value < 50 ? 59 : 99;
 
   const result = Math.floor(Math.random() * faceCount) + 1;
 
