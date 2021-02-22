@@ -4,10 +4,10 @@ import userEvent from "@testing-library/user-event";
 
 import ParticipantRow from ".";
 
+const name = "TEST_NAME";
+
 describe("Collapse/Expand detailed data", () => {
   test("should render participant information properly when collapsed", () => {
-    const name = "Test Participant";
-
     render(<ParticipantRow defaultParticipantName={name} />);
 
     expect(screen.getByRole("textbox", { name: /name/i })).toBeInTheDocument();
@@ -83,8 +83,6 @@ describe("Collapse/Expand detailed data", () => {
   });
 
   test("should render participant information properly when expanded", () => {
-    const name = "Test Participant";
-
     render(<ParticipantRow defaultParticipantName={name} />);
 
     const buttonEl = screen.getByRole("button", { name: /expand/i });
@@ -155,10 +153,10 @@ describe("Collapse/Expand detailed data", () => {
 });
 
 describe("Participant name rendering", () => {
-  test("should render given name when changed from default name", () => {
-    const defaultName = "Default Name";
-    const newName = "Test Name";
+  const defaultName = "Default Name";
 
+  test("should render given name when changed from default name", () => {
+    const newName = "Test Name";
     render(<ParticipantRow defaultParticipantName={defaultName} />);
 
     const inputEl = screen.getByRole("textbox", { name: /name/i });
@@ -169,34 +167,26 @@ describe("Participant name rendering", () => {
   });
 
   test("should render the last valid name when name changed to empty string", () => {
-    const defaultName = "Default Name";
     const validName = "Valid";
     const invalidName = "";
-
     render(<ParticipantRow defaultParticipantName={defaultName} />);
 
     const inputEl = screen.getByRole("textbox", { name: /name/i });
-
     userEvent.clear(inputEl);
     userEvent.type(inputEl, validName);
-
     userEvent.clear(inputEl);
     userEvent.type(inputEl, invalidName);
-
     inputEl.blur();
 
     expect(inputEl).toHaveDisplayValue(validName);
   });
 
   test("should render the last valid name when name changed to invalid value with trailing and/or leading spaces", () => {
-    const defaultName = "Default Name";
     const validName = "Valid";
     const invalidName = "    ";
-
     render(<ParticipantRow defaultParticipantName={defaultName} />);
 
     const inputEl = screen.getByRole("textbox", { name: /name/i });
-
     userEvent.clear(inputEl);
     userEvent.type(inputEl, validName);
     userEvent.clear(inputEl);
@@ -211,14 +201,11 @@ describe("Participant name rendering", () => {
     expect(
       screen.queryByText(ParticipantRow.WARNING_MESSAGE)
     ).not.toBeVisible();
-
     expect(inputEl).toHaveDisplayValue(validName);
   });
 
-  test("should render with a warning message when an invalid name is displayed and hide the message upon receiving a valid character", () => {
-    const defaultName = "Default Name";
+  test("should render with a warning message when an invalid name is displayed then hide the message upon receiving a valid character", () => {
     const validName = "valid";
-
     render(<ParticipantRow defaultParticipantName={defaultName} />);
 
     const inputEl = screen.getByRole("textbox", { name: /name/i });
@@ -227,7 +214,6 @@ describe("Participant name rendering", () => {
     expect(
       screen.getByText(ParticipantRow.WARNING_MESSAGE)
     ).toBeInTheDocument();
-
     expect(inputEl).toHaveDisplayValue("");
 
     userEvent.type(inputEl, validName);
@@ -235,194 +221,106 @@ describe("Participant name rendering", () => {
     expect(
       screen.queryByText(ParticipantRow.WARNING_MESSAGE)
     ).not.toBeVisible();
-
     expect(inputEl).toHaveDisplayValue(validName);
   });
 });
 
-describe("Stat manipulation", () => {
-  test("should add speed stat when 'add speed stat' clicked", () => {
-    const name = "TEST";
+describe("Statistic data manipulation", () => {
+  test("should add speed stat when 'add speed stat' button clicked", () => {
     render(<ParticipantRow defaultParticipantName={name} />);
 
     userEvent.click(screen.getByRole("button", { name: /expand/i }));
 
     expect(screen.queryByLabelText(/new stat #6/i)).not.toBeInTheDocument();
 
-    const addButtonEl = screen.getByRole("button", { name: /add speed stat/i });
-    userEvent.click(addButtonEl);
+    userEvent.click(screen.getByRole("button", { name: /add speed stat/i }));
 
     expect(screen.getByLabelText(/new stat #6/i)).toBeInTheDocument();
   });
 
   test("should add hazard stat when 'add hazard stat' clicked", () => {
-    const name = "TEST";
     render(<ParticipantRow defaultParticipantName={name} />);
 
     userEvent.click(screen.getByRole("button", { name: /expand/i }));
 
     expect(screen.queryByLabelText(/new stat #8/i)).not.toBeInTheDocument();
 
-    const addButtonEl = screen.getByRole("button", {
-      name: /add hazard stat/i,
-    });
-    userEvent.click(addButtonEl);
+    userEvent.click(
+      screen.getByRole("button", {
+        name: /add hazard stat/i,
+      })
+    );
 
     expect(screen.getByLabelText(/new stat #8/i)).toBeInTheDocument();
   });
 });
 
-describe("Stat value updated", () => {
-  describe("when spinbutton cleared", () => {
-    test("should have no value for 'main statistic'", () => {
-      const name = "TEST_NAME";
-      render(<ParticipantRow defaultParticipantName={name} />);
+describe("Statistic Display event handlers", () => {
+  const validInput = 11;
 
-      const statisticDisplayEl = screen.getByRole("spinbutton", {
-        name: ParticipantRow.DEX_TITLE,
-      });
-      userEvent.clear(statisticDisplayEl);
+  test("should change 'main statistic' to the last valid value when changed to an invalid value and focus lost", () => {
+    render(<ParticipantRow defaultParticipantName={name} />);
 
-      expect(statisticDisplayEl).toHaveDisplayValue("");
+    const statisticDisplayEl = screen.getByRole("spinbutton", {
+      name: ParticipantRow.DEX_TITLE,
     });
+    userEvent.clear(statisticDisplayEl);
+    userEvent.type(statisticDisplayEl, validInput.toString());
+    userEvent.clear(statisticDisplayEl);
 
-    test("should have no value for 'speed statistic'", () => {
-      const name = "TEST_NAME";
-      render(<ParticipantRow defaultParticipantName={name} />);
+    expect(statisticDisplayEl).toHaveDisplayValue("");
+    expect(statisticDisplayEl).toHaveValue(null);
 
-      // Need to expand the extended view due to the children elements not existing otherwise.
-      userEvent.click(screen.getByRole("button", { name: /expand/i }));
+    statisticDisplayEl.blur();
 
-      const statisticDisplayEl = screen.getByRole("spinbutton", {
-        name: ParticipantRow.CON_TITLE,
-      });
-      userEvent.clear(statisticDisplayEl);
-
-      expect(statisticDisplayEl).toHaveDisplayValue("");
-    });
-
-    test("should have no value for 'hazard statistic'", () => {
-      const name = "TEST_NAME";
-      render(<ParticipantRow defaultParticipantName={name} />);
-
-      // Need to expand the extended view due to the children elements not existing otherwise.
-      userEvent.click(screen.getByRole("button", { name: /expand/i }));
-
-      const statisticDisplayEl = screen.getByRole("spinbutton", {
-        name: ParticipantRow.STR_TITLE,
-      });
-      userEvent.clear(statisticDisplayEl);
-
-      expect(statisticDisplayEl).toHaveDisplayValue("");
-    });
+    expect(statisticDisplayEl).toHaveDisplayValue(validInput.toString());
+    expect(statisticDisplayEl).toHaveValue(validInput);
   });
 
-  describe("when spinbutton recieves additional input", () => {
-    test("should update display for 'main statistic'", () => {
-      const name = "TEST_NAME";
-      const value = "12";
-      render(<ParticipantRow defaultParticipantName={name} />);
+  test("should change 'speed statistic' to the last valid value when changed to an invalid value and focus lost", () => {
+    render(<ParticipantRow defaultParticipantName={name} />);
+    // Need to expand the extended view due to the children elements not existing otherwise.
+    userEvent.click(screen.getByRole("button", { name: /expand/i }));
 
-      const statisticDisplayEl = screen.getByRole("spinbutton", {
-        name: ParticipantRow.DEX_TITLE,
-      });
-      userEvent.clear(statisticDisplayEl);
-      userEvent.type(statisticDisplayEl, value);
-
-      expect(statisticDisplayEl).toHaveDisplayValue(value);
+    const statisticDisplayEl = screen.getByRole("spinbutton", {
+      name: ParticipantRow.CON_TITLE,
     });
+    userEvent.clear(statisticDisplayEl);
+    userEvent.type(statisticDisplayEl, validInput.toString());
+    userEvent.clear(statisticDisplayEl);
 
-    test("should update display for 'speed statistic'", () => {
-      const name = "TEST_NAME";
-      const value = "12";
-      render(<ParticipantRow defaultParticipantName={name} />);
+    expect(statisticDisplayEl).toHaveDisplayValue("");
+    expect(statisticDisplayEl).toHaveValue(null);
 
-      // Need to expand the extended view due to the children elements not existing otherwise.
-      userEvent.click(screen.getByRole("button", { name: /expand/i }));
+    statisticDisplayEl.blur();
 
-      const statisticDisplayEl = screen.getByRole("spinbutton", {
-        name: ParticipantRow.CON_TITLE,
-      });
-      userEvent.clear(statisticDisplayEl);
-      userEvent.type(statisticDisplayEl, value);
-
-      expect(statisticDisplayEl).toHaveDisplayValue(value);
-    });
-
-    test("should update display for 'hazard statistic'", () => {
-      const name = "TEST_NAME";
-      const value = "12";
-      render(<ParticipantRow defaultParticipantName={name} />);
-
-      // Need to expand the extended view due to the children elements not existing otherwise.
-      userEvent.click(screen.getByRole("button", { name: /expand/i }));
-
-      const statisticDisplayEl = screen.getByRole("spinbutton", {
-        name: ParticipantRow.STR_TITLE,
-      });
-      userEvent.clear(statisticDisplayEl);
-      userEvent.type(statisticDisplayEl, value);
-
-      expect(statisticDisplayEl).toHaveDisplayValue(value);
-    });
+    expect(statisticDisplayEl).toHaveDisplayValue(validInput.toString());
+    expect(statisticDisplayEl).toHaveValue(validInput);
   });
 
-  describe("when spinbutton changes then loses focus", () => {
-    test("should update value for 'main statistic'", () => {
-      const name = "TEST_NAME";
-      const value = 12;
-      render(<ParticipantRow defaultParticipantName={name} />);
+  test("should change 'hazard statistic' to the last valid value when changed to an invalid value and focus lost", () => {
+    render(<ParticipantRow defaultParticipantName={name} />);
+    // Need to expand the extended view due to the children elements not existing otherwise.
+    userEvent.click(screen.getByRole("button", { name: /expand/i }));
 
-      const statisticDisplayEl = screen.getByRole("spinbutton", {
-        name: ParticipantRow.DEX_TITLE,
-      });
-      userEvent.clear(statisticDisplayEl);
-      userEvent.type(statisticDisplayEl, value.toString());
-      statisticDisplayEl.blur();
-
-      expect(statisticDisplayEl).toHaveValue(value);
+    const statisticDisplayEl = screen.getByRole("spinbutton", {
+      name: ParticipantRow.STR_TITLE,
     });
+    userEvent.clear(statisticDisplayEl);
+    userEvent.type(statisticDisplayEl, validInput.toString());
+    userEvent.clear(statisticDisplayEl);
 
-    test("should update value for 'speed statistic'", () => {
-      const name = "TEST_NAME";
-      const value = 12;
-      render(<ParticipantRow defaultParticipantName={name} />);
+    expect(statisticDisplayEl).toHaveDisplayValue("");
+    expect(statisticDisplayEl).toHaveValue(null);
 
-      // Need to expand the extended view due to the children elements not existing otherwise.
-      userEvent.click(screen.getByRole("button", { name: /expand/i }));
+    statisticDisplayEl.blur();
 
-      const statisticDisplayEl = screen.getByRole("spinbutton", {
-        name: ParticipantRow.CON_TITLE,
-      });
-      userEvent.clear(statisticDisplayEl);
-      userEvent.type(statisticDisplayEl, value.toString());
-      statisticDisplayEl.blur();
-
-      expect(statisticDisplayEl).toHaveValue(value);
-    });
-
-    test("should update value for 'hazard statistic'", () => {
-      const name = "TEST_NAME";
-      const value = 12;
-      render(<ParticipantRow defaultParticipantName={name} />);
-
-      // Need to expand the extended view due to the children elements not existing otherwise.
-      userEvent.click(screen.getByRole("button", { name: /expand/i }));
-
-      const statisticDisplayEl = screen.getByRole("spinbutton", {
-        name: ParticipantRow.STR_TITLE,
-      });
-      userEvent.clear(statisticDisplayEl);
-      userEvent.type(statisticDisplayEl, value.toString());
-      statisticDisplayEl.blur();
-
-      expect(statisticDisplayEl).toHaveValue(value);
-    });
+    expect(statisticDisplayEl).toHaveDisplayValue(validInput.toString());
+    expect(statisticDisplayEl).toHaveValue(validInput);
   });
 });
 
 test("should reveal modal when 'generate speed modifier' button is pressed", () => {
-  const name = "TEST_NAME";
   render(<ParticipantRow defaultParticipantName={name} />);
 
   userEvent.click(screen.getByRole("button", { name: /generate/i }));
@@ -431,7 +329,6 @@ test("should reveal modal when 'generate speed modifier' button is pressed", () 
 });
 
 test("should close modal when any button is pressed", () => {
-  const name = "TEST_NAME";
   render(<ParticipantRow defaultParticipantName={name} />);
   userEvent.click(screen.getByRole("button", { name: /generate/i }));
 

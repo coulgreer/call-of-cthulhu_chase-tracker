@@ -24,8 +24,8 @@ export interface Props {
   upperWarning?: number;
   lowerWarning?: number;
   lowerLimit: number;
-  onChange?: (value: string) => void;
-  onBlur?: () => void;
+  onStatisticChange?: (value: string) => void;
+  onStatisticBlur?: () => void;
 }
 
 export default class StatisticDisplay extends React.Component<Props> {
@@ -161,13 +161,13 @@ export default class StatisticDisplay extends React.Component<Props> {
   }
 
   private handleChange(evt: React.ChangeEvent<HTMLInputElement>) {
-    const { onChange } = this.props;
-    if (onChange !== undefined) onChange(evt.target.value);
+    const { onStatisticChange } = this.props;
+    if (onStatisticChange !== undefined) onStatisticChange(evt.target.value);
   }
 
   private handleBlur() {
-    const { onBlur } = this.props;
-    if (onBlur !== undefined) onBlur();
+    const { onStatisticBlur } = this.props;
+    if (onStatisticBlur !== undefined) onStatisticBlur();
   }
 
   render() {

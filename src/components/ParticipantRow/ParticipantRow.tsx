@@ -14,40 +14,20 @@ import "./ParticipantRow.css";
 import UniqueSequenceGenerator from "../../utils/unique-sequence-generator";
 import { roll, Result } from "../../utils/roller";
 
-function determineDegreeOfSuccess(value: number) {
-  const degreeOfSuccess = roll(value);
-
-  switch (degreeOfSuccess) {
-    case Result.CriticalSuccess:
-    case Result.ExtremeSuccess:
-      return 1;
-    case Result.HardSuccess:
-    case Result.RegularSuccess:
-      return 0;
-    case Result.Failure:
-    case Result.Fumble:
-      return -1;
-    default:
-      throw new Error(
-        `The degree of success, ${degreeOfSuccess}, was unexpected.`
-      );
-  }
-}
-
 interface Props {
   defaultParticipantName: string;
 }
 
 interface State {
   currentName: string;
-  lastValidName: string;
+  validName: string;
   nameWarningShown: boolean;
   expansionShown: boolean;
-  mainStats: StatisticDisplayData[];
-  speedStats: StatisticDisplayData[];
-  hazardStats: StatisticDisplayData[];
-  selectedStatValue: string;
   modalShown: boolean;
+  mainStatistics: StatisticDisplayData[];
+  speedStatistics: StatisticDisplayData[];
+  hazardStatistics: StatisticDisplayData[];
+  selectedStatValue: string;
 }
 
 export default class ParticipantRow extends React.Component<Props, State> {
@@ -119,6 +99,26 @@ export default class ParticipantRow extends React.Component<Props, State> {
     return "New Stat";
   }
 
+  static generateSpeedModifier(value: number) {
+    const degreeOfSuccess = roll(value);
+
+    switch (degreeOfSuccess) {
+      case Result.CriticalSuccess:
+      case Result.ExtremeSuccess:
+        return 1;
+      case Result.HardSuccess:
+      case Result.RegularSuccess:
+        return 0;
+      case Result.Failure:
+      case Result.Fumble:
+        return -1;
+      default:
+        throw new Error(
+          `The degree of success, ${degreeOfSuccess}, was unexpected.`
+        );
+    }
+  }
+
   /* eslint-disable no-param-reassign */
   static manageValue(value: string, data: StatisticDisplayData) {
     const {
@@ -143,104 +143,44 @@ export default class ParticipantRow extends React.Component<Props, State> {
 
   private hazardStatSequence: UniqueSequenceGenerator;
 
-  private speedEl: StatisticDisplayData;
+  private speedStatisticEl: StatisticDisplayData;
 
   constructor(props: Props) {
     super(props);
 
     this.speedStatSequence = new UniqueSequenceGenerator(0);
     this.hazardStatSequence = new UniqueSequenceGenerator(0);
-    this.speedEl = { title: "", currentValue: "0", validValue: 0 };
+    this.speedStatisticEl = { title: "", currentValue: "0", validValue: 0 };
 
-    this.handleNameChanged = this.handleNameChanged.bind(this);
-    this.handleNameDeselected = this.handleNameDeselected.bind(this);
-    this.handleViewToggling = this.handleViewToggling.bind(this);
+    this.handleNameChange = this.handleNameChange.bind(this);
+    this.handleNameBlur = this.handleNameBlur.bind(this);
+
+    this.toggleExpansion = this.toggleExpansion.bind(this);
     this.openModal = this.openModal.bind(this);
     this.closeModal = this.closeModal.bind(this);
+
+    this.createSpeedStatistic = this.createSpeedStatistic.bind(this);
+    this.createHazardStatistic = this.createHazardStatistic.bind(this);
+
+    this.calculateSpeedModifier = this.calculateSpeedModifier.bind(this);
     this.handleSelectionChange = this.handleSelectionChange.bind(this);
-    this.handleSpeedStatCreating = this.handleSpeedStatCreating.bind(this);
-    this.handleHazardStatCreating = this.handleHazardStatCreating.bind(this);
-    this.calculateModifier = this.calculateModifier.bind(this);
 
     const { defaultParticipantName } = this.props;
 
     this.state = {
       currentName: defaultParticipantName,
-      lastValidName: defaultParticipantName,
+      validName: defaultParticipantName,
       nameWarningShown: false,
       expansionShown: false,
-      mainStats: this.initializeMainStats(),
-      speedStats: this.initializeSpeedStats(),
-      hazardStats: this.initializeHazardStats(),
+      mainStatistics: this.initializeMainStatistics(),
+      speedStatistics: this.initializeSpeedStatistics(),
+      hazardStatistics: this.initializeHazardStatistics(),
       selectedStatValue: "",
       modalShown: false,
     };
   }
 
-  private handleMainStatisticChange(index: number, value: string) {
-    const { mainStats } = this.state;
-    const data = mainStats[index];
-
-    ParticipantRow.manageValue(value, data);
-
-    mainStats[index] = data;
-    this.setState({ mainStats });
-  }
-
-  private handleSpeedStatisticChange(index: number, value: string) {
-    const { speedStats } = this.state;
-    const data = speedStats[index];
-
-    ParticipantRow.manageValue(value, data);
-
-    speedStats[index] = data;
-    this.setState({ speedStats });
-  }
-
-  private handleHazardStatisticChange(index: number, value: string) {
-    const { hazardStats } = this.state;
-    const data = hazardStats[index];
-
-    ParticipantRow.manageValue(value, data);
-
-    hazardStats[index] = data;
-    this.setState({ hazardStats });
-  }
-
-  private handleMainStatisticBlur(index: number) {
-    const { mainStats } = this.state;
-    const data = mainStats[index];
-    const { validValue } = data;
-
-    data.currentValue = validValue.toString();
-    mainStats[index] = data;
-
-    this.setState({ mainStats });
-  }
-
-  private handleSpeedStatisticBlur(index: number) {
-    const { speedStats } = this.state;
-    const data = speedStats[index];
-    const { validValue } = data;
-
-    data.currentValue = validValue.toString();
-    speedStats[index] = data;
-
-    this.setState({ speedStats });
-  }
-
-  private handleHazardStatisticBlur(index: number) {
-    const { hazardStats } = this.state;
-    const data = hazardStats[index];
-    const { validValue } = data;
-
-    data.currentValue = validValue.toString();
-    hazardStats[index] = data;
-
-    this.setState({ hazardStats });
-  }
-
-  initializeMainStats() {
+  private initializeMainStatistics() {
     const stats = [
       { title: ParticipantRow.DEX_TITLE, currentValue: "15", validValue: 15 },
       { title: ParticipantRow.SPEED_TITLE, currentValue: "0", validValue: 0 },
@@ -253,14 +193,14 @@ export default class ParticipantRow extends React.Component<Props, State> {
       },
     ];
 
-    [this.speedEl] = stats.filter(
+    [this.speedStatisticEl] = stats.filter(
       (stat) => stat.title === ParticipantRow.SPEED_TITLE
     );
 
     return stats;
   }
 
-  private initializeSpeedStats() {
+  private initializeSpeedStatistics() {
     return [
       {
         title: ParticipantRow.CON_TITLE,
@@ -295,7 +235,7 @@ export default class ParticipantRow extends React.Component<Props, State> {
     ];
   }
 
-  private initializeHazardStats() {
+  private initializeHazardStatistics() {
     return [
       {
         title: ParticipantRow.STR_TITLE,
@@ -342,12 +282,12 @@ export default class ParticipantRow extends React.Component<Props, State> {
     ];
   }
 
-  private handleNameChanged(event: React.ChangeEvent<HTMLInputElement>) {
+  private handleNameChange(event: React.ChangeEvent<HTMLInputElement>) {
     const { value } = event.currentTarget;
 
     if (value.trim()) {
       this.setState(() => ({
-        lastValidName: value,
+        validName: value,
         nameWarningShown: false,
       }));
     } else {
@@ -357,20 +297,99 @@ export default class ParticipantRow extends React.Component<Props, State> {
     this.setState(() => ({ currentName: value }));
   }
 
-  private handleNameDeselected() {
+  private handleNameBlur() {
     this.setState((state) => ({
-      currentName: state.lastValidName,
+      currentName: state.validName,
       nameWarningShown: false,
     }));
   }
 
-  private handleViewToggling() {
+  private handleMainStatisticChange(index: number, value: string) {
+    const { mainStatistics } = this.state;
+    const data = mainStatistics[index];
+
+    ParticipantRow.manageValue(value, data);
+
+    mainStatistics[index] = data;
+    this.setState({ mainStatistics });
+  }
+
+  private handleSpeedStatisticChange(index: number, value: string) {
+    const { speedStatistics } = this.state;
+    const data = speedStatistics[index];
+
+    ParticipantRow.manageValue(value, data);
+
+    speedStatistics[index] = data;
+    this.setState({ speedStatistics });
+  }
+
+  private handleHazardStatisticChange(index: number, value: string) {
+    const { hazardStatistics } = this.state;
+    const data = hazardStatistics[index];
+
+    ParticipantRow.manageValue(value, data);
+
+    hazardStatistics[index] = data;
+    this.setState({ hazardStatistics });
+  }
+
+  private handleMainStatisticBlur(index: number) {
+    const { mainStatistics } = this.state;
+    const data = mainStatistics[index];
+    const { validValue } = data;
+
+    data.currentValue = validValue.toString();
+    mainStatistics[index] = data;
+
+    this.setState({ mainStatistics });
+  }
+
+  private handleSpeedStatisticBlur(index: number) {
+    const { speedStatistics } = this.state;
+    const data = speedStatistics[index];
+    const { validValue } = data;
+
+    data.currentValue = validValue.toString();
+    speedStatistics[index] = data;
+
+    this.setState({ speedStatistics });
+  }
+
+  private handleHazardStatisticBlur(index: number) {
+    const { hazardStatistics } = this.state;
+    const data = hazardStatistics[index];
+    const { validValue } = data;
+
+    data.currentValue = validValue.toString();
+    hazardStatistics[index] = data;
+
+    this.setState({ hazardStatistics });
+  }
+
+  private handleSelectionChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const { value } = event.target;
+
+    this.setState({ selectedStatValue: value });
+  }
+
+  private calculateSpeedModifier() {
+    const { selectedStatValue } = this.state;
+
+    const modifier = ParticipantRow.generateSpeedModifier(
+      Number.parseInt(selectedStatValue, 10)
+    );
+    this.updateSpeedModifierEl(modifier);
+    this.closeModal();
+  }
+
+  private toggleExpansion() {
     this.setState((state) => ({
       expansionShown: !state.expansionShown,
     }));
   }
 
-  private handleSpeedStatCreating() {
+  private createSpeedStatistic() {
     const key = this.speedStatSequence.nextNum();
     const newData = {
       title: `${ParticipantRow.DEFAULT_STAT_NAME} #${key}`,
@@ -380,11 +399,11 @@ export default class ParticipantRow extends React.Component<Props, State> {
     };
 
     this.setState((state) => ({
-      speedStats: [...state.speedStats, newData],
+      speedStatistics: [...state.speedStatistics, newData],
     }));
   }
 
-  private handleHazardStatCreating() {
+  private createHazardStatistic() {
     const key = this.hazardStatSequence.nextNum();
     const newData = {
       title: `${ParticipantRow.DEFAULT_STAT_NAME} #${key}`,
@@ -394,7 +413,7 @@ export default class ParticipantRow extends React.Component<Props, State> {
     };
 
     this.setState((state) => ({
-      hazardStats: [...state.hazardStats, newData],
+      hazardStatistics: [...state.hazardStatistics, newData],
     }));
   }
 
@@ -403,40 +422,18 @@ export default class ParticipantRow extends React.Component<Props, State> {
   }
 
   private closeModal() {
-    this.setState(() => ({ modalShown: false }));
+    this.setState({ modalShown: false });
   }
 
-  private handleSelectionChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const { value } = event.target;
-
-    this.setState({ selectedStatValue: value });
+  private updateSpeedModifierEl(modifier: number) {
+    this.speedStatisticEl.currentValue = modifier.toString();
+    this.speedStatisticEl.validValue = modifier;
   }
 
-  private calculateModifier() {
-    const { selectedStatValue } = this.state;
+  private renderSpeedStatisticModal() {
+    const { modalShown, speedStatistics: speedStats } = this.state;
 
-    const modifier = determineDegreeOfSuccess(
-      Number.parseInt(selectedStatValue, 10)
-    );
-
-    this.speedEl.currentValue = modifier.toString();
-    this.speedEl.validValue = modifier;
-
-    this.closeModal();
-  }
-
-  render() {
-    const {
-      currentName,
-      nameWarningShown,
-      expansionShown,
-      mainStats,
-      speedStats,
-      hazardStats,
-      modalShown,
-    } = this.state;
-
-    const selectSpeedStatModal = (
+    return (
       <Modal
         className="Modal__Content"
         overlayClassName="Modal__Overlay"
@@ -467,21 +464,30 @@ export default class ParticipantRow extends React.Component<Props, State> {
             className="button button--primary button--small"
             type="button"
             value="CONFIRM"
-            onClick={this.calculateModifier}
+            onClick={this.calculateSpeedModifier}
           />
         </form>
       </Modal>
     );
+  }
 
-    const mainEl = (
+  private renderMainDisplay() {
+    const {
+      expansionShown,
+      nameWarningShown,
+      currentName,
+      mainStatistics: mainStats,
+    } = this.state;
+
+    return (
       <div className="ParticipantRow__main-display">
         <label className="ParticipantRow__name-label input__label">
           Name
           <input
             type="text"
             value={currentName}
-            onChange={this.handleNameChanged}
-            onBlur={this.handleNameDeselected}
+            onChange={this.handleNameChange}
+            onBlur={this.handleNameBlur}
             className="ParticipantRow__name-input input"
           />
         </label>
@@ -512,7 +518,7 @@ export default class ParticipantRow extends React.Component<Props, State> {
           </div>
           <Button
             className="button button--primary button--small button--circular"
-            onClick={this.handleViewToggling}
+            onClick={this.toggleExpansion}
           >
             {expansionShown ? (
               <img src={ExpandLess} alt="Collapse" />
@@ -523,48 +529,11 @@ export default class ParticipantRow extends React.Component<Props, State> {
         </div>
       </div>
     );
+  }
 
-    const speedStatsEl = (
-      <div>
-        <h4>SPEED Stats</h4>
-        {speedStats.map((data, index) =>
-          DisplayFactory.createStatisticDisplay(
-            "StatisticDisplay--horizontal",
-            data,
-            (value) => this.handleSpeedStatisticChange(index, value),
-            () => this.handleSpeedStatisticBlur(index)
-          )
-        )}
-        <Button
-          className="button button--small button--primary"
-          onClick={this.handleSpeedStatCreating}
-        >
-          <img src={Add} alt="Add Speed Stat" />
-        </Button>
-      </div>
-    );
-
-    const hazardStatsEl = (
-      <div>
-        <h4>HAZARD Stats</h4>
-        {hazardStats.map((data, index) =>
-          DisplayFactory.createStatisticDisplay(
-            "StatisticDisplay--horizontal",
-            data,
-            (value) => this.handleHazardStatisticChange(index, value),
-            () => this.handleHazardStatisticBlur(index)
-          )
-        )}
-        <Button
-          className="button button--small button--primary"
-          onClick={this.handleHazardStatCreating}
-        >
-          <img src={Add} alt="Add Hazard Stat" />
-        </Button>
-      </div>
-    );
-
-    const extendedEl = (
+  private renderExpansiveDisplay() {
+    const { expansionShown } = this.state;
+    return (
       <Transition
         native
         items={expansionShown}
@@ -579,19 +548,68 @@ export default class ParticipantRow extends React.Component<Props, State> {
               className="ParticipantRow__extended-display"
               style={props}
             >
-              {speedStatsEl}
-              {hazardStatsEl}
+              {this.renderSpeedStatistics()}
+              {this.renderHazardStatistics()}
             </animated.div>
           ))
         }
       </Transition>
     );
+  }
+
+  private renderSpeedStatistics() {
+    const { speedStatistics: speedStats } = this.state;
 
     return (
+      <div>
+        <h4>SPEED Stats</h4>
+        {speedStats.map((data, index) =>
+          DisplayFactory.createStatisticDisplay(
+            "StatisticDisplay--horizontal",
+            data,
+            (value) => this.handleSpeedStatisticChange(index, value),
+            () => this.handleSpeedStatisticBlur(index)
+          )
+        )}
+        <Button
+          className="button button--small button--primary"
+          onClick={this.createSpeedStatistic}
+        >
+          <img src={Add} alt="Add Speed Stat" />
+        </Button>
+      </div>
+    );
+  }
+
+  private renderHazardStatistics() {
+    const { hazardStatistics: hazardStats } = this.state;
+    return (
+      <div>
+        <h4>HAZARD Stats</h4>
+        {hazardStats.map((data, index) =>
+          DisplayFactory.createStatisticDisplay(
+            "StatisticDisplay--horizontal",
+            data,
+            (value) => this.handleHazardStatisticChange(index, value),
+            () => this.handleHazardStatisticBlur(index)
+          )
+        )}
+        <Button
+          className="button button--small button--primary"
+          onClick={this.createHazardStatistic}
+        >
+          <img src={Add} alt="Add Hazard Stat" />
+        </Button>
+      </div>
+    );
+  }
+
+  render() {
+    return (
       <div className="ParticipantRow">
-        {mainEl}
-        {extendedEl}
-        {selectSpeedStatModal}
+        {this.renderMainDisplay()}
+        {this.renderExpansiveDisplay()}
+        {this.renderSpeedStatisticModal()}
       </div>
     );
   }

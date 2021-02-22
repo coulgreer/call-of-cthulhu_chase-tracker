@@ -14,8 +14,8 @@ export default class DisplayFactory {
   static createStatisticDisplay(
     className: string,
     { title, currentValue, key }: StatisticDisplayData,
-    onChange: (value: string) => void,
-    onBlur: () => void
+    handleStatisticChange: (value: string) => void,
+    handleStatisticBlur: () => void
   ) {
     return (
       <StatisticDisplay
@@ -24,8 +24,8 @@ export default class DisplayFactory {
         lowerWarning={DisplayFactory.MIN_PERCENTILE - 1}
         upperWarning={DisplayFactory.MAX_PERCENTILE}
         currentValue={currentValue}
-        onChange={onChange}
-        onBlur={onBlur}
+        onStatisticChange={handleStatisticChange}
+        onStatisticBlur={handleStatisticBlur}
         key={key}
       />
     );

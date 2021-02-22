@@ -10,8 +10,8 @@ const DEFAULT_PROPS: Props = {
   currentValue: "5",
   upperLimit: 11,
   lowerLimit: -11,
-  onChange: jest.fn(),
-  onBlur: jest.fn(),
+  onStatisticChange: jest.fn(),
+  onStatisticBlur: jest.fn(),
 };
 
 test("should render statistics properly", () => {
@@ -39,13 +39,13 @@ test("should call onChange handler when anything is changed in input", () => {
     <StatisticDisplay
       title={DEFAULT_PROPS.title}
       currentValue={DEFAULT_PROPS.currentValue}
-      onChange={DEFAULT_PROPS.onChange}
+      onStatisticChange={DEFAULT_PROPS.onStatisticChange}
     />
   );
 
   userEvent.type(screen.getByLabelText(DEFAULT_PROPS.title), "a");
 
-  expect(DEFAULT_PROPS.onChange).toBeCalled();
+  expect(DEFAULT_PROPS.onStatisticChange).toBeCalled();
 });
 
 test("should call onBlur handler when input is deselected", () => {
@@ -53,7 +53,7 @@ test("should call onBlur handler when input is deselected", () => {
     <StatisticDisplay
       title={DEFAULT_PROPS.title}
       currentValue={DEFAULT_PROPS.currentValue}
-      onBlur={DEFAULT_PROPS.onBlur}
+      onStatisticBlur={DEFAULT_PROPS.onStatisticBlur}
     />
   );
 
@@ -61,7 +61,7 @@ test("should call onBlur handler when input is deselected", () => {
   userEvent.click(inputEl);
   inputEl.blur();
 
-  expect(DEFAULT_PROPS.onBlur).toBeCalled();
+  expect(DEFAULT_PROPS.onStatisticBlur).toBeCalled();
 });
 
 describe("Threshold class names", () => {
