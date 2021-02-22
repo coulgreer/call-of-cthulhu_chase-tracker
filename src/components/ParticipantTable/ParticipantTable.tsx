@@ -51,10 +51,21 @@ export default class ParticipantTable extends Component<Props, State> {
     this.closeModal = this.closeModal.bind(this);
   }
 
-  private createParticipant() {
-    const idNum = this.sequnceGenerator.nextNum();
+  private removeSelectedParticipant() {
+    const { selectedRow } = this.state;
 
-    const defaultParticipantName = `${ParticipantTable.DEFAULT_NAME} #${idNum}`;
+    if (selectedRow) {
+      this.removeParticipantFromSequence(selectedRow);
+      this.removeParticipantFromTable(selectedRow);
+    }
+
+    this.closeModal();
+  }
+
+  private createParticipant() {
+    const defaultParticipantName = `${
+      ParticipantTable.DEFAULT_NAME
+    } #${this.sequnceGenerator.nextNum()}`;
     const newRow = (
       <ParticipantRow
         key={defaultParticipantName}
@@ -68,27 +79,15 @@ export default class ParticipantTable extends Component<Props, State> {
   }
 
   private promptParticipantRemoval(row: ReactElement) {
-    this.setState(() => ({
+    this.setState({
       modalShown: true,
       selectedRow: row,
-    }));
-  }
-
-  private removeSelectedParticipant() {
-    const { selectedRow } = this.state;
-
-    if (selectedRow) {
-      this.removeParticipantFromSequence(selectedRow);
-      this.removeParticipantFromTable(selectedRow);
-    }
-
-    this.closeModal();
+    });
   }
 
   private removeParticipantFromSequence(row: ReactElement) {
-    const regex = /[0-9]+$/gm;
     const idNum = Number.parseInt(
-      row.props.defaultParticipantName.match(regex)[0],
+      row.props.defaultParticipantName.match(/[0-9]+$/)[0],
       10
     );
     this.sequnceGenerator.remove(idNum);
@@ -106,37 +105,21 @@ export default class ParticipantTable extends Component<Props, State> {
   }
 
   private closeModal() {
-    this.setState(() => ({ modalShown: false }));
+    this.setState({ modalShown: false });
   }
 
-  render() {
-    const { warningMessage } = this.props;
-    const { participantRows, modalShown } = this.state;
-
-    const addButtonElement = (
+  private renderFloatingActionButton() {
+    return (
       <Button className="button fab" onClick={this.createParticipant}>
         <img src={AddIcon} alt="Add Participant" />
       </Button>
     );
+  }
 
-    const rowsElement =
-      participantRows.length < ParticipantTable.minimumParticipants ? (
-        <p className="centered">{warningMessage}</p>
-      ) : (
-        participantRows.map((row) => (
-          <div className="ParticipantTable__row" key={row.key}>
-            {row}
-            <Button
-              className="ParticipantTable__row-control button button--primary button--small"
-              onClick={() => this.promptParticipantRemoval(row)}
-            >
-              <img src={RemoveIcon} alt={`Remove: ${row.key}`} />
-            </Button>
-          </div>
-        ))
-      );
+  private renderRemovalModal() {
+    const { modalShown } = this.state;
 
-    const modalElement = (
+    return (
       <Modal
         className="Modal__Content"
         overlayClassName="Modal__Overlay"
@@ -163,12 +146,42 @@ export default class ParticipantTable extends Component<Props, State> {
         </div>
       </Modal>
     );
+  }
+
+  private renderWarningMessage() {
+    const { warningMessage } = this.props;
+
+    return <p className="centered">{warningMessage}</p>;
+  }
+
+  private renderParticipants() {
+    const { participantRows } = this.state;
+    return participantRows.map((row) => (
+      <div className="ParticipantTable__row" key={row.key}>
+        {row}
+        <Button
+          className="ParticipantTable__row-control button button--primary button--small"
+          onClick={() => this.promptParticipantRemoval(row)}
+        >
+          <img src={RemoveIcon} alt={`Remove: ${row.key}`} />
+        </Button>
+      </div>
+    ));
+  }
+
+  render() {
+    const { participantRows } = this.state;
+
+    const rowsElement =
+      participantRows.length < ParticipantTable.minimumParticipants
+        ? this.renderWarningMessage()
+        : this.renderParticipants();
 
     return (
       <div className="ParticipantTable">
-        {addButtonElement}
         <div className="ParticipantTable__rows">{rowsElement}</div>
-        {modalElement}
+        {this.renderFloatingActionButton()}
+        {this.renderRemovalModal()}
       </div>
     );
   }
