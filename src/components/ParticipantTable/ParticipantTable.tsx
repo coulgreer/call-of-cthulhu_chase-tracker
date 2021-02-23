@@ -115,7 +115,7 @@ export default class ParticipantTable extends Component<Props, State> {
       </Button>
     );
   }
-
+  
   private renderRemovalModal() {
     const { modalShown } = this.state;
 

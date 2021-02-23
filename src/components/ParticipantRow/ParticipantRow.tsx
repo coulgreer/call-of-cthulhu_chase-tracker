@@ -430,6 +430,12 @@ export default class ParticipantRow extends React.Component<Props, State> {
     this.speedStatisticEl.validValue = modifier;
   }
 
+  /*
+   * FIXME (Coul Greer): There is a known bug in ReactModal involving radio
+   * buttons and pressing shift+tab. The focus escapes the modal when
+   * shift-tabbing through modal elements causing a break in the very point of
+   * using this package.
+   */
   private renderSpeedStatisticModal() {
     const { modalShown, speedStatistics: speedStats } = this.state;
 
@@ -444,28 +450,32 @@ export default class ParticipantRow extends React.Component<Props, State> {
         <p>Select a speed skill</p>
         <form>
           {speedStats.map((data) => (
-            <label>
-              {data.title}
+            <label className="radio input__label">
               <input
+                className="radio__checkbox"
                 type="radio"
-                name="selectedStatValue"
+                name="selectedStatistic"
                 value={data.validValue}
                 onChange={this.handleSelectionChange}
               />
+              <span className="radio__checkmark" />
+              {data.title}
             </label>
           ))}
-          <input
-            className="button button--secondary button--small"
-            type="button"
-            value="CANCEL"
-            onClick={this.closeModal}
-          />
-          <input
-            className="button button--primary button--small"
-            type="button"
-            value="CONFIRM"
-            onClick={this.calculateSpeedModifier}
-          />
+          <div className="Modal__Content__options">
+            <Button
+              className="button button--secondary button--small"
+              onClick={this.closeModal}
+            >
+              CANCEL
+            </Button>
+            <Button
+              className="button button--primary button--small"
+              onClick={this.calculateSpeedModifier}
+            >
+              CONFIRM
+            </Button>
+          </div>
         </form>
       </Modal>
     );

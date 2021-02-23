@@ -135,18 +135,74 @@ label {
   font-weight: bold;
 }
 
+/* Input: radio */
+.radio {
+  position: relative;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.radio__checkbox {
+  position: absolute;
+  opacity: 0;
+}
+
+.radio__checkmark {
+  position: relative;
+  display: flex;
+  width: 16px;
+  height: 16px;
+  margin-right: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--secondary);
+}
+
+.radio__checkbox:focus + .radio__checkmark,
+.radio:hover .radio__checkmark {
+  border-radius: 100%;
+  box-shadow: 0 0 2px #fff, 0 0 6px var(--secondary);
+}
+
+.radio__checkmark::after {
+  content: "";
+  position: absolute;
+  display: block;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: var(--secondary);
+  opacity: 0;
+  transform: scale(0);
+}
+
+.radio__checkbox:checked + .radio__checkmark::after {
+  opacity: 1;
+  transform: scale(0.6);
+  transition: all 0.2s ease;
+}
+
+.radio__label {
+  line-height: 1;
+}
+
 /* Modals */
 .ReactModalPortal * {
   z-index: 2;
 }
 
 .Modal__Content {
-  background-color: var(--main-background);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  margin: 0;
   border-radius: 4px;
-  margin: 50% auto;
   padding: 6px;
-  overflow: hidden;
   max-width: 360px;
+  overflow: hidden;
+  background-color: var(--main-background);
 }
 
 .Modal__Content__text {
