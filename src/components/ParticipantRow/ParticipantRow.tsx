@@ -6,7 +6,7 @@ import Button from "../Button";
 import { Data as StatisticDisplayData } from "../StatisticDisplay";
 import DisplayFactory from "../StatisticDisplay/DisplayFactory";
 
-import Add from "../../images/baseline_add_black_36dp_x1.png";
+import Add from "../../images/baseline_add_black_24dp_x2.png";
 import ExpandLess from "../../images/baseline_expand_less_black_24dp.png";
 import ExpandMore from "../../images/baseline_expand_more_black_24dp.png";
 

@@ -6,7 +6,7 @@ import Button from "../Button";
 
 import UniqueSequenceGenerator from "../../utils/unique-sequence-generator";
 
-import AddIcon from "../../images/baseline_add_black_36dp.png";
+import AddIcon from "../../images/baseline_add_black_24dp_x2.png";
 import RemoveIcon from "../../images/baseline_remove_circle_outline_black_24dp.png";
 
 import "./ParticipantTable.css";
@@ -115,7 +115,7 @@ export default class ParticipantTable extends Component<Props, State> {
       </Button>
     );
   }
-  
+
   private renderRemovalModal() {
     const { modalShown } = this.state;
 
