@@ -55,6 +55,14 @@ describe("Removal from sequence", () => {
 
     expect(actual).toBeFalsy();
   });
+
+  test("should return false when removing an undefined value", () => {
+    const sequenceGen = new UniqueSequenceGenerator(start);
+
+    const actual = sequenceGen.remove(undefined);
+
+    expect(actual).toBeFalsy();
+  });
 });
 
 describe("Confirmation Tests", () => {

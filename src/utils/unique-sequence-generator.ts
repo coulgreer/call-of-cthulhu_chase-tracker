@@ -45,7 +45,8 @@ export default class UniqueSequenceGenerator {
    * @param value - The desired number to remove from the sequnce.
    * @return If the value removed from the sequence.
    */
-  remove(value: number) {
+  remove(value: number | undefined) {
+    if (value === undefined) return false;
     return this.sequence.delete(value);
   }
 

@@ -19,6 +19,9 @@
   --surface-overlay--focused: rgba(240, 219, 130, 0.12);
   --surface-overlay--selected: rgba(240, 219, 130, 0.32);
 
+  --surface-overlay--light--hovered: rgba(0, 28, 23, 0.04);
+  --surface-overlay--light--focused: rgba(20, 28, 23, 0.12);
+
   --dark-overlay--low-emphasis: rgba(245, 246, 247, 0.08);
   --dark-overlay--medium-emphasis: rgba(245, 246, 247, 0.24);
 

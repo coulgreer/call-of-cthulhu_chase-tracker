@@ -228,7 +228,7 @@ describe("Participant name rendering", () => {
 describe("Statistic data manipulation", () => {
   test("should add speed stat when 'add speed stat' button clicked", () => {
     render(<ParticipantRow defaultParticipantName={name} />);
-
+    // Need to expand the extended view due to the children elements not existing otherwise.
     userEvent.click(screen.getByRole("button", { name: /expand/i }));
 
     expect(screen.queryByLabelText(/new stat #6/i)).not.toBeInTheDocument();
@@ -238,9 +238,29 @@ describe("Statistic data manipulation", () => {
     expect(screen.getByLabelText(/new stat #6/i)).toBeInTheDocument();
   });
 
+  test("should remove given speed stat when the 'remove speed stat' is clicked", () => {
+    render(<ParticipantRow defaultParticipantName={name} />);
+    // Need to expand the extended view due to the children elements not existing otherwise.
+    userEvent.click(screen.getByRole("button", { name: /expand/i }));
+
+    expect(
+      screen.getByLabelText(new RegExp(ParticipantRow.CON_TITLE, "i"))
+    ).toBeInTheDocument();
+
+    userEvent.click(
+      screen.getByRole("button", {
+        name: new RegExp(`remove: ${ParticipantRow.CON_TITLE}`, "i"),
+      })
+    );
+
+    expect(
+      screen.queryByLabelText(new RegExp(ParticipantRow.CON_TITLE, "i"))
+    ).not.toBeInTheDocument();
+  });
+
   test("should add hazard stat when 'add hazard stat' clicked", () => {
     render(<ParticipantRow defaultParticipantName={name} />);
-
+    // Need to expand the extended view due to the children elements not existing otherwise.
     userEvent.click(screen.getByRole("button", { name: /expand/i }));
 
     expect(screen.queryByLabelText(/new stat #8/i)).not.toBeInTheDocument();
@@ -252,6 +272,62 @@ describe("Statistic data manipulation", () => {
     );
 
     expect(screen.getByLabelText(/new stat #8/i)).toBeInTheDocument();
+  });
+
+  test("should remove given hazard stat when the 'remove hazard stat' is clicked", () => {
+    render(<ParticipantRow defaultParticipantName={name} />);
+    // Need to expand the extended view due to the children elements not existing otherwise.
+    userEvent.click(screen.getByRole("button", { name: /expand/i }));
+
+    expect(
+      screen.getByLabelText(new RegExp(ParticipantRow.STR_TITLE, "i"))
+    ).toBeInTheDocument();
+
+    userEvent.click(
+      screen.getByRole("button", {
+        name: new RegExp(`remove: ${ParticipantRow.STR_TITLE}`, "i"),
+      })
+    );
+
+    expect(
+      screen.queryByLabelText(new RegExp(ParticipantRow.STR_TITLE, "i"))
+    ).not.toBeInTheDocument();
+  });
+
+  describe("when a statistic is deleted", () => {
+    test("should add a speed stat with the appropriate name when creating a new speed stat", () => {
+      render(<ParticipantRow defaultParticipantName={name} />);
+      // Need to expand the extended view due to the children elements not existing otherwise.
+      userEvent.click(screen.getByRole("button", { name: /expand/i }));
+
+      userEvent.click(
+        screen.getByRole("button", {
+          name: new RegExp(`remove: ${ParticipantRow.CON_TITLE}`, "i"),
+        })
+      );
+      userEvent.click(screen.getByRole("button", { name: /add speed stat/i }));
+
+      expect(
+        screen.getByLabelText(`${ParticipantRow.DEFAULT_STAT_NAME} #1`)
+      ).toBeInTheDocument();
+    });
+
+    test("should add a hazard stat with the appropriate name when creating a new hazard stat", () => {
+      render(<ParticipantRow defaultParticipantName={name} />);
+      // Need to expand the extended view due to the children elements not existing otherwise.
+      userEvent.click(screen.getByRole("button", { name: /expand/i }));
+
+      userEvent.click(
+        screen.getByRole("button", {
+          name: new RegExp(`remove: ${ParticipantRow.STR_TITLE}`, "i"),
+        })
+      );
+      userEvent.click(screen.getByRole("button", { name: /add hazard stat/i }));
+
+      expect(
+        screen.getByLabelText(`${ParticipantRow.DEFAULT_STAT_NAME} #1`)
+      ).toBeInTheDocument();
+    });
   });
 });
 
@@ -320,21 +396,23 @@ describe("Statistic Display event handlers", () => {
   });
 });
 
-test("should reveal modal when 'generate speed modifier' button is pressed", () => {
-  render(<ParticipantRow defaultParticipantName={name} />);
+describe("Modal", () => {
+  test("should reveal modal when 'generate speed modifier' button is pressed", () => {
+    render(<ParticipantRow defaultParticipantName={name} />);
 
-  userEvent.click(screen.getByRole("button", { name: /generate/i }));
+    userEvent.click(screen.getByRole("button", { name: /generate/i }));
 
-  expect(screen.getByRole("dialog")).toBeInTheDocument();
-});
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+  });
 
-test("should close modal when any button is pressed", () => {
-  render(<ParticipantRow defaultParticipantName={name} />);
-  userEvent.click(screen.getByRole("button", { name: /generate/i }));
+  test("should close modal when any button is pressed", () => {
+    render(<ParticipantRow defaultParticipantName={name} />);
+    userEvent.click(screen.getByRole("button", { name: /generate/i }));
 
-  expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
 
-  userEvent.type(screen.getByRole("dialog"), "{esc}");
+    userEvent.type(screen.getByRole("dialog"), "{esc}");
 
-  expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
 });

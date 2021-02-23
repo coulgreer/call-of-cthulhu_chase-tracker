@@ -6,9 +6,10 @@ import Button from "../Button";
 import { Data as StatisticDisplayData } from "../StatisticDisplay";
 import DisplayFactory from "../StatisticDisplay/DisplayFactory";
 
-import Add from "../../images/baseline_add_black_24dp_x2.png";
-import ExpandLess from "../../images/baseline_expand_less_black_24dp.png";
-import ExpandMore from "../../images/baseline_expand_more_black_24dp.png";
+import AddIcon from "../../images/baseline_add_black_24dp_x2.png";
+import DeleteIcon from "../../images/baseline_delete_black_24dp.png";
+import ExpandLessIcon from "../../images/baseline_expand_less_black_24dp.png";
+import ExpandMoreIcon from "../../images/baseline_expand_more_black_24dp.png";
 
 import "./ParticipantRow.css";
 import UniqueSequenceGenerator from "../../utils/unique-sequence-generator";
@@ -403,6 +404,16 @@ export default class ParticipantRow extends React.Component<Props, State> {
     }));
   }
 
+  private deleteSpeedStatistic(data: StatisticDisplayData) {
+    const { speedStatistics } = this.state;
+    const index = speedStatistics.indexOf(data);
+    const [removedData] = speedStatistics.splice(index, 1);
+
+    this.speedStatSequence.remove(removedData.key);
+
+    this.setState({ speedStatistics });
+  }
+
   private createHazardStatistic() {
     const key = this.hazardStatSequence.nextNum();
     const newData = {
@@ -415,6 +426,16 @@ export default class ParticipantRow extends React.Component<Props, State> {
     this.setState((state) => ({
       hazardStatistics: [...state.hazardStatistics, newData],
     }));
+  }
+
+  private deleteHazardStatistic(data: StatisticDisplayData) {
+    const { hazardStatistics } = this.state;
+    const index = hazardStatistics.indexOf(data);
+    const [removedData] = hazardStatistics.splice(index, 1);
+
+    this.hazardStatSequence.remove(removedData.key);
+
+    this.setState({ hazardStatistics });
   }
 
   private openModal() {
@@ -531,9 +552,9 @@ export default class ParticipantRow extends React.Component<Props, State> {
             onClick={this.toggleExpansion}
           >
             {expansionShown ? (
-              <img src={ExpandLess} alt="Collapse" />
+              <img src={ExpandLessIcon} alt="Collapse" />
             ) : (
-              <img src={ExpandMore} alt="Expand" />
+              <img src={ExpandMoreIcon} alt="Expand" />
             )}
           </Button>
         </div>
@@ -573,19 +594,27 @@ export default class ParticipantRow extends React.Component<Props, State> {
     return (
       <div>
         <h4>SPEED Stats</h4>
-        {speedStats.map((data, index) =>
-          DisplayFactory.createStatisticDisplay(
-            "StatisticDisplay--horizontal",
-            data,
-            (value) => this.handleSpeedStatisticChange(index, value),
-            () => this.handleSpeedStatisticBlur(index)
-          )
-        )}
+        {speedStats.map((data, index) => (
+          <div className="ParticipantRow__extended-display__statistics-controls">
+            <Button
+              className="button button--small button--tertiary--light"
+              onClick={() => this.deleteSpeedStatistic(data)}
+            >
+              <img src={DeleteIcon} alt={`remove: ${data.title}`} />
+            </Button>
+            {DisplayFactory.createStatisticDisplay(
+              "StatisticDisplay--horizontal",
+              data,
+              (value) => this.handleSpeedStatisticChange(index, value),
+              () => this.handleSpeedStatisticBlur(index)
+            )}
+          </div>
+        ))}
         <Button
           className="button button--small button--primary"
           onClick={this.createSpeedStatistic}
         >
-          <img src={Add} alt="Add Speed Stat" />
+          <img src={AddIcon} alt="Add Speed Stat" />
         </Button>
       </div>
     );
@@ -596,19 +625,27 @@ export default class ParticipantRow extends React.Component<Props, State> {
     return (
       <div>
         <h4>HAZARD Stats</h4>
-        {hazardStats.map((data, index) =>
-          DisplayFactory.createStatisticDisplay(
-            "StatisticDisplay--horizontal",
-            data,
-            (value) => this.handleHazardStatisticChange(index, value),
-            () => this.handleHazardStatisticBlur(index)
-          )
-        )}
+        {hazardStats.map((data, index) => (
+          <div className="ParticipantRow__extended-display__statistics-controls">
+            <Button
+              className="button button--small button--tertiary--light"
+              onClick={() => this.deleteHazardStatistic(data)}
+            >
+              <img src={DeleteIcon} alt={`remove: ${data.title}`} />
+            </Button>
+            {DisplayFactory.createStatisticDisplay(
+              "StatisticDisplay--horizontal",
+              data,
+              (value) => this.handleHazardStatisticChange(index, value),
+              () => this.handleHazardStatisticBlur(index)
+            )}
+          </div>
+        ))}
         <Button
           className="button button--small button--primary"
           onClick={this.createHazardStatistic}
         >
-          <img src={Add} alt="Add Hazard Stat" />
+          <img src={AddIcon} alt="Add Hazard Stat" />
         </Button>
       </div>
     );

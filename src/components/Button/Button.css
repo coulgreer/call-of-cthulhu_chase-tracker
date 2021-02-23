@@ -40,6 +40,11 @@
   color: var(--secondary);
 }
 
+.button--tertiary--light {
+  background: none;
+  color: var(--secondary);
+}
+
 .button__overlay {
   position: absolute;
   top: 0;
@@ -73,6 +78,15 @@
 
 .button--tertiary:focus .button__overlay {
   background-color: var(--surface-overlay--focused);
+  border-radius: 4px;
+}
+
+.button--tertiary--light:hover .button__overlay {
+  background-color: var(--surface-overlay--light--hovered);
+}
+
+.button--tertiary--light:focus .button__overlay {
+  background-color: var(--surface-overlay--light--focused);
   border-radius: 4px;
 }
 
