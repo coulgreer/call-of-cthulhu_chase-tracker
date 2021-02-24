@@ -26,6 +26,7 @@
     "build": "gatsby build",
     "serve": "gatsby serve",
     "clean": "gatsby clean",
+    "heroku-postbuild": "gatsby build",
     "type-check": "npx tsc --noEmit",
     "lint": "npx eslint src --ext .js,.jsx,.ts,.tsx",
     "test": "jest --silent"
