@@ -213,6 +213,7 @@ label {
 }
 
 .Modal__Content__options {
+  display: flex;
   float: right;
   margin-top: 24px;
 }
