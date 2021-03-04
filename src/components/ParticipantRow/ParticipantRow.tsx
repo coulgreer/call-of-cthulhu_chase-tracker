@@ -8,6 +8,7 @@ import DisplayFactory from "../StatisticDisplay/DisplayFactory";
 
 import AddIcon from "../../images/baseline_add_black_24dp_x2.png";
 import DeleteIcon from "../../images/baseline_delete_black_24dp.png";
+import EditIcon from "../../images/baseline_edit_black_24dp.png";
 import ExpandLessIcon from "../../images/baseline_expand_less_black_24dp.png";
 import ExpandMoreIcon from "../../images/baseline_expand_more_black_24dp.png";
 
@@ -458,7 +459,7 @@ export default class ParticipantRow extends React.Component<Props, State> {
    * using this package.
    */
   private renderSpeedStatisticModal() {
-    const { modalShown, speedStatistics: speedStats } = this.state;
+    const { modalShown, speedStatistics } = this.state;
 
     return (
       <Modal
@@ -470,7 +471,7 @@ export default class ParticipantRow extends React.Component<Props, State> {
       >
         <p>Select a speed skill</p>
         <form>
-          {speedStats.map((data) => (
+          {speedStatistics.map((data) => (
             <label className="radio input__label">
               <input
                 className="radio__checkbox"
@@ -507,7 +508,7 @@ export default class ParticipantRow extends React.Component<Props, State> {
       expansionShown,
       nameWarningShown,
       currentName,
-      mainStatistics: mainStats,
+      mainStatistics,
     } = this.state;
 
     return (
@@ -532,7 +533,7 @@ export default class ParticipantRow extends React.Component<Props, State> {
         </p>
         <div className="ParticipantRow__footer">
           <div className="ParticipantRow__main-characteristics">
-            {mainStats.map((data, index) =>
+            {mainStatistics.map((data, index) =>
               DisplayFactory.createStatisticDisplay(
                 "StatisticDisplay--vertical",
                 data,
@@ -589,18 +590,21 @@ export default class ParticipantRow extends React.Component<Props, State> {
   }
 
   private renderSpeedStatistics() {
-    const { speedStatistics: speedStats } = this.state;
+    const { speedStatistics } = this.state;
 
     return (
       <div>
         <h4>SPEED Stats</h4>
-        {speedStats.map((data, index) => (
+        {speedStatistics.map((data, index) => (
           <div className="ParticipantRow__extended-display__statistics-controls">
             <Button
               className="button button--small button--tertiary--light"
               onClick={() => this.deleteSpeedStatistic(data)}
             >
               <img src={DeleteIcon} alt={`remove: ${data.title}`} />
+            </Button>
+            <Button className="button button--small button--tertiary--light">
+              <img src={EditIcon} alt={`rename: ${data.title}`} />
             </Button>
             {DisplayFactory.createStatisticDisplay(
               "StatisticDisplay--horizontal",
@@ -632,6 +636,9 @@ export default class ParticipantRow extends React.Component<Props, State> {
               onClick={() => this.deleteHazardStatistic(data)}
             >
               <img src={DeleteIcon} alt={`remove: ${data.title}`} />
+            </Button>
+            <Button className="button button--small button--tertiary--light">
+              <img src={EditIcon} alt={`rename: ${data.title}`} />
             </Button>
             {DisplayFactory.createStatisticDisplay(
               "StatisticDisplay--horizontal",
