@@ -79,16 +79,6 @@
   color: rgba(255, 158, 68, 0.87);
 }
 
-.ParticipantRow__extended-display .button {
-  width: 100%;
-  margin: 12px 0;
-}
-
-.ParticipantRow__extended-display__statistics-controls {
-  display: grid;
-  grid-template-columns: 36px auto;
-}
-
 .StatisticDisplay__input {
   width: 7ch;
 }

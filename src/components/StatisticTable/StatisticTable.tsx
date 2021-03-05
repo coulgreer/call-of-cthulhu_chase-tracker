@@ -8,6 +8,8 @@ import AddIcon from "../../images/baseline_add_black_24dp_x2.png";
 import DeleteIcon from "../../images/baseline_delete_black_24dp.png";
 import EditIcon from "../../images/baseline_edit_black_24dp.png";
 
+import "./StatisticTable.css";
+
 interface Props {
   title: string;
   data: Data[];
@@ -58,10 +60,10 @@ export default class StatisticTable extends React.Component<Props> {
   render() {
     const { title, data } = this.props;
     return (
-      <div>
+      <div className="StatisticTable">
         <h4>{title}</h4>
         {data.map((datum, index) => (
-          <div className="ParticipantRow__extended-display__statistics-controls">
+          <div className="StatisticTable__statistics-controls">
             <Button
               className="button button--small button--tertiary--light"
               onClick={() => this.handleDeleteClick(index)}
