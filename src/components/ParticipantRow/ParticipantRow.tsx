@@ -159,6 +159,7 @@ export default class ParticipantRow extends React.Component<Props, State> {
     this.openModal = this.openModal.bind(this);
     this.closeModal = this.closeModal.bind(this);
 
+    // Speed Statistic method binds
     this.createSpeedStatistic = this.createSpeedStatistic.bind(this);
     this.deleteSpeedStatistic = this.deleteSpeedStatistic.bind(this);
     this.renameSpeedStatistic = this.renameSpeedStatistic.bind(this);
@@ -167,8 +168,10 @@ export default class ParticipantRow extends React.Component<Props, State> {
     );
     this.handleSpeedStatisticBlur = this.handleSpeedStatisticBlur.bind(this);
 
+    // Hazard Statistic method binds
     this.createHazardStatistic = this.createHazardStatistic.bind(this);
     this.deleteHazardStatistic = this.deleteHazardStatistic.bind(this);
+    this.renameHazardStatistic = this.renameHazardStatistic.bind(this);
     this.handleHazardStatisticChange = this.handleHazardStatisticChange.bind(
       this
     );
@@ -457,6 +460,16 @@ export default class ParticipantRow extends React.Component<Props, State> {
     this.setState({ hazardStatistics });
   }
 
+  private renameHazardStatistic(index: number, value: string) {
+    const { hazardStatistics } = this.state;
+    const data = hazardStatistics[index];
+
+    data.title = value;
+    hazardStatistics[index] = data;
+
+    this.setState({ hazardStatistics });
+  }
+
   private openModal() {
     this.setState({ modalShown: true });
   }
@@ -634,6 +647,7 @@ export default class ParticipantRow extends React.Component<Props, State> {
         data={hazardStatistics}
         onCreateClick={this.createHazardStatistic}
         onDeleteClick={this.deleteHazardStatistic}
+        onRenameStatistic={this.renameHazardStatistic}
         onStatisticValueChange={this.handleHazardStatisticChange}
         onStatisticValueBlur={this.handleHazardStatisticBlur}
       />

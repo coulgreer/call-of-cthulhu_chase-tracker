@@ -403,8 +403,32 @@ describe("Modal", () => {
   });
 
   describe("Statistic Modal", () => {
-    test("should rename statistic when given a new name", () => {
+    test("should rename speed statistic when given a new name", () => {
       const originName = ParticipantRow.CON_TITLE;
+      const newName = "NEW_TEST";
+      renderExpandedParticipantRow(name);
+
+      expect(screen.queryByText(newName)).not.toBeInTheDocument();
+      expect(screen.getByText(originName)).toBeInTheDocument();
+
+      userEvent.click(
+        screen.getByRole("button", {
+          name: new RegExp(`rename: ${originName}`, "i"),
+        })
+      );
+
+      const nameTextboxEl = screen.getByRole("textbox", { name: /new name/i });
+      userEvent.clear(nameTextboxEl);
+      userEvent.type(nameTextboxEl, newName);
+
+      userEvent.click(screen.getByRole("button", { name: /^rename$/i }));
+
+      expect(screen.getByText(newName)).toBeInTheDocument();
+      expect(screen.queryByText(originName)).not.toBeInTheDocument();
+    });
+    
+    test("should rename hazard statistic when given a new name", () => {
+      const originName = ParticipantRow.STR_TITLE;
       const newName = "NEW_TEST";
       renderExpandedParticipantRow(name);
 
@@ -453,6 +477,32 @@ describe("Confirmation Tests", () => {
 
     expect(screen.getByRole("textbox", { name: /new name/i })).toHaveValue(
       ParticipantRow.DRIVE_TITLE
+    );
+  });
+
+  test("should reset textbox to current name when another skill has been renamed", () => {
+    const firstNewName = "First Name";
+    renderExpandedParticipantRow(name);
+
+    userEvent.click(
+      screen.getByRole("button", {
+        name: new RegExp(`rename: ${ParticipantRow.STR_TITLE}`),
+      })
+    );
+
+    const renameInputEl = screen.getByRole("textbox", { name: /new name/i });
+    userEvent.clear(renameInputEl);
+    userEvent.type(renameInputEl, firstNewName);
+    userEvent.click(screen.getByRole("button", { name: /^rename$/i }));
+
+    userEvent.click(
+      screen.getByRole("button", {
+        name: new RegExp(`rename: ${ParticipantRow.CLIMB_TITLE}`),
+      })
+    );
+
+    expect(screen.getByRole("textbox", { name: /new name/i })).toHaveValue(
+      ParticipantRow.CLIMB_TITLE
     );
   });
 });
