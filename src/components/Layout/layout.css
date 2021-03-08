@@ -218,6 +218,11 @@ label {
   margin-top: 24px;
 }
 
+.Modal__Content .input__label {
+  display: flex;
+  flex-direction: column;
+}
+
 .Modal__Overlay {
   position: fixed;
   left: 0;

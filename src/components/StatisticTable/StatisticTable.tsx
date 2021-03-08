@@ -1,5 +1,7 @@
 import React from "react";
 
+import Modal from "react-modal";
+
 import Button from "../Button";
 import { Data } from "../StatisticDisplay";
 import DisplayFactory from "../StatisticDisplay/DisplayFactory";
@@ -15,52 +17,97 @@ interface Props {
   data: Data[];
   onDeleteClick?: (index: number) => void;
   onCreateClick?: () => void;
-  onRenameClick?: (index: number) => void;
-  onChange?: (index: number, value: string) => void;
-  onBlur?: (index: number) => void;
+  onRenameStatistic?: (index: number, value: string) => void;
+  onStatisticValueChange?: (index: number, value: string) => void;
+  onStatisticValueBlur?: (index: number) => void;
 }
 
-export default class StatisticTable extends React.Component<Props> {
+interface State {
+  modalShown: boolean;
+  validNewName: string;
+  currentNewName: string;
+  selectedIndex: number;
+}
+
+export default class StatisticTable extends React.Component<Props, State> {
+  static defaultNewName = "New Name";
+
   constructor(props: Props) {
     super(props);
 
+    this.closeModal = this.closeModal.bind(this);
+
     this.handleCreateClick = this.handleCreateClick.bind(this);
+    this.handleStatisticNameChange = this.handleStatisticNameChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+
+    this.state = {
+      modalShown: false,
+      validNewName: StatisticTable.defaultNewName,
+      currentNewName: StatisticTable.defaultNewName,
+      selectedIndex: -1,
+    };
   }
 
   private handleDeleteClick(index: number) {
     const { onDeleteClick } = this.props;
 
-    if (onDeleteClick !== undefined) onDeleteClick(index);
+    if (onDeleteClick) onDeleteClick(index);
   }
 
   private handleCreateClick() {
     const { onCreateClick } = this.props;
 
-    if (onCreateClick !== undefined) onCreateClick();
+    if (onCreateClick) onCreateClick();
   }
 
-  private handleRenameClick(index: number) {
-    const { onRenameClick } = this.props;
+  private handlePromptRenameClick(index: number) {
+    const { data } = this.props;
 
-    if (onRenameClick !== undefined) onRenameClick(index);
+    this.setState({
+      modalShown: true,
+      selectedIndex: index,
+      currentNewName: data[index].title,
+      validNewName: data[index].title,
+    });
   }
 
-  private handleChange(index: number, value: string) {
-    const { onChange } = this.props;
+  private handleSubmit() {
+    const { onRenameStatistic } = this.props;
+    const { selectedIndex, validNewName } = this.state;
 
-    if (onChange !== undefined) onChange(index, value);
+    if (onRenameStatistic) onRenameStatistic(selectedIndex, validNewName);
+    this.setState({ modalShown: false, selectedIndex: -1 });
   }
 
-  private handleBlur(index: number) {
-    const { onBlur } = this.props;
+  private handleStatisticValueChange(index: number, value: string) {
+    const { onStatisticValueChange } = this.props;
 
-    if (onBlur !== undefined) onBlur(index);
+    if (onStatisticValueChange) onStatisticValueChange(index, value);
   }
 
-  render() {
+  private handleStatisticValueBlur(index: number) {
+    const { onStatisticValueBlur } = this.props;
+
+    if (onStatisticValueBlur) onStatisticValueBlur(index);
+  }
+
+  private handleStatisticNameChange(evt: React.ChangeEvent<HTMLInputElement>) {
+    const { value } = evt.target;
+
+    if (value) this.setState({ validNewName: value });
+    this.setState({ currentNewName: value });
+  }
+
+  private closeModal() {
+    this.setState({ modalShown: false });
+  }
+
+  private renderContent() {
     const { title, data } = this.props;
+
     return (
-      <div className="StatisticTable">
+      <>
         <h4>{title}</h4>
         {data.map((datum, index) => (
           <div className="StatisticTable__statistics-controls">
@@ -72,15 +119,15 @@ export default class StatisticTable extends React.Component<Props> {
             </Button>
             <Button
               className="button button--small button--tertiary--light"
-              onClick={() => this.handleRenameClick(index)}
+              onClick={() => this.handlePromptRenameClick(index)}
             >
               <img src={EditIcon} alt={`rename: ${datum.title}`} />
             </Button>
             {DisplayFactory.createStatisticDisplay(
               "StatisticDisplay--horizontal",
               datum,
-              (value) => this.handleChange(index, value),
-              () => this.handleBlur(index)
+              (value) => this.handleStatisticValueChange(index, value),
+              () => this.handleStatisticValueBlur(index)
             )}
           </div>
         ))}
@@ -90,6 +137,57 @@ export default class StatisticTable extends React.Component<Props> {
         >
           <img src={AddIcon} alt="create statistic" />
         </Button>
+      </>
+    );
+  }
+
+  private renderModal() {
+    const { modalShown, currentNewName } = this.state;
+
+    return (
+      <Modal
+        className="Modal__Content"
+        overlayClassName="Modal__Overlay"
+        contentLabel="Rename the Statistic"
+        isOpen={modalShown}
+        onRequestClose={this.closeModal}
+      >
+        <p className="Modal__Content__text">Rename the Statistic</p>
+        <form onSubmit={this.handleSubmit}>
+          <label className="input__label">
+            New name
+            <input
+              className="input"
+              type="text"
+              value={currentNewName}
+              onChange={this.handleStatisticNameChange}
+              required
+            />
+          </label>
+          <div className="Modal__Content__options">
+            <Button
+              className="button button--tertiary button--medium"
+              onClick={this.closeModal}
+            >
+              CANCEL
+            </Button>
+            <Button
+              className="button button--secondary button--medium"
+              type="submit"
+            >
+              RENAME
+            </Button>
+          </div>
+        </form>
+      </Modal>
+    );
+  }
+
+  render() {
+    return (
+      <div className="StatisticTable">
+        {this.renderContent()}
+        {this.renderModal()}
       </div>
     );
   }

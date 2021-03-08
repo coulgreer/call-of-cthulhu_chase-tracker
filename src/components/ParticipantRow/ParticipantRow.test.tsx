@@ -6,6 +6,12 @@ import ParticipantRow from ".";
 
 const name = "TEST_NAME";
 
+function renderExpandedParticipantRow(participantName: string) {
+  render(<ParticipantRow defaultParticipantName={participantName} />);
+  // Need to expand the extended view due to the children elements not existing otherwise.
+  userEvent.click(screen.getByRole("button", { name: /expand/i }));
+}
+
 describe("Collapse/Expand detailed data", () => {
   test("should render participant information properly when collapsed", () => {
     render(<ParticipantRow defaultParticipantName={name} />);
@@ -219,9 +225,7 @@ describe("Participant name rendering", () => {
 
 describe("Statistic data manipulation", () => {
   test("should create speed statistic when appropriate 'create statistic' button clicked", () => {
-    render(<ParticipantRow defaultParticipantName={name} />);
-    // Need to expand the extended view due to the children elements not existing otherwise.
-    userEvent.click(screen.getByRole("button", { name: /expand/i }));
+    renderExpandedParticipantRow(name);
 
     expect(screen.queryByLabelText(/new stat #6/i)).not.toBeInTheDocument();
 
@@ -233,9 +237,7 @@ describe("Statistic data manipulation", () => {
   });
 
   test("should delete given speed stat when the 'delete speed stat' is clicked", () => {
-    render(<ParticipantRow defaultParticipantName={name} />);
-    // Need to expand the extended view due to the children elements not existing otherwise.
-    userEvent.click(screen.getByRole("button", { name: /expand/i }));
+    renderExpandedParticipantRow(name);
 
     expect(
       screen.getByLabelText(new RegExp(ParticipantRow.CON_TITLE, "i"))
@@ -253,9 +255,7 @@ describe("Statistic data manipulation", () => {
   });
 
   test("should create hazard stat when 'create hazard statistic' clicked", () => {
-    render(<ParticipantRow defaultParticipantName={name} />);
-    // Need to expand the extended view due to the children elements not existing otherwise.
-    userEvent.click(screen.getByRole("button", { name: /expand/i }));
+    renderExpandedParticipantRow(name);
 
     expect(screen.queryByLabelText(/new stat #8/i)).not.toBeInTheDocument();
 
@@ -267,9 +267,7 @@ describe("Statistic data manipulation", () => {
   });
 
   test("should delete given hazard stat when the 'delete hazard statistic' is clicked", () => {
-    render(<ParticipantRow defaultParticipantName={name} />);
-    // Need to expand the extended view due to the children elements not existing otherwise.
-    userEvent.click(screen.getByRole("button", { name: /expand/i }));
+    renderExpandedParticipantRow(name);
 
     expect(
       screen.getByLabelText(new RegExp(ParticipantRow.STR_TITLE, "i"))
@@ -288,9 +286,7 @@ describe("Statistic data manipulation", () => {
 
   describe("when a statistic is deleted", () => {
     test("should create a speed stat with the appropriate name when creating a new speed stat", () => {
-      render(<ParticipantRow defaultParticipantName={name} />);
-      // Need to expand the extended view due to the children elements not existing otherwise.
-      userEvent.click(screen.getByRole("button", { name: /expand/i }));
+      renderExpandedParticipantRow(name);
 
       userEvent.click(
         screen.getByRole("button", {
@@ -307,9 +303,7 @@ describe("Statistic data manipulation", () => {
     });
 
     test("should create a hazard stat with the appropriate name when creating a new hazard stat", () => {
-      render(<ParticipantRow defaultParticipantName={name} />);
-      // Need to expand the extended view due to the children elements not existing otherwise.
-      userEvent.click(screen.getByRole("button", { name: /expand/i }));
+      renderExpandedParticipantRow(name);
 
       userEvent.click(
         screen.getByRole("button", {
@@ -350,9 +344,7 @@ describe("Statistic Display event handlers", () => {
   });
 
   test("should change 'speed statistic' to the last valid value when changed to an invalid value and focus lost", () => {
-    render(<ParticipantRow defaultParticipantName={name} />);
-    // Need to expand the extended view due to the children elements not existing otherwise.
-    userEvent.click(screen.getByRole("button", { name: /expand/i }));
+    renderExpandedParticipantRow(name);
 
     const statisticDisplayEl = screen.getByRole("spinbutton", {
       name: ParticipantRow.CON_TITLE,
@@ -371,9 +363,7 @@ describe("Statistic Display event handlers", () => {
   });
 
   test("should change 'hazard statistic' to the last valid value when changed to an invalid value and focus lost", () => {
-    render(<ParticipantRow defaultParticipantName={name} />);
-    // Need to expand the extended view due to the children elements not existing otherwise.
-    userEvent.click(screen.getByRole("button", { name: /expand/i }));
+    renderExpandedParticipantRow(name);
 
     const statisticDisplayEl = screen.getByRole("spinbutton", {
       name: ParticipantRow.STR_TITLE,
@@ -410,5 +400,59 @@ describe("Modal", () => {
     userEvent.type(screen.getByRole("dialog"), "{esc}");
 
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  describe("Statistic Modal", () => {
+    test("should rename statistic when given a new name", () => {
+      const originName = ParticipantRow.CON_TITLE;
+      const newName = "NEW_TEST";
+      renderExpandedParticipantRow(name);
+
+      expect(screen.queryByText(newName)).not.toBeInTheDocument();
+      expect(screen.getByText(originName)).toBeInTheDocument();
+
+      userEvent.click(
+        screen.getByRole("button", {
+          name: new RegExp(`rename: ${originName}`, "i"),
+        })
+      );
+
+      const nameTextboxEl = screen.getByRole("textbox", { name: /new name/i });
+      userEvent.clear(nameTextboxEl);
+      userEvent.type(nameTextboxEl, newName);
+
+      userEvent.click(screen.getByRole("button", { name: /^rename$/i }));
+
+      expect(screen.getByText(newName)).toBeInTheDocument();
+      expect(screen.queryByText(originName)).not.toBeInTheDocument();
+    });
+  });
+});
+
+describe("Confirmation Tests", () => {
+  test("should reset textbox to current name when another skill has been renamed", () => {
+    const firstNewName = "First Name";
+    renderExpandedParticipantRow(name);
+
+    userEvent.click(
+      screen.getByRole("button", {
+        name: new RegExp(`rename: ${ParticipantRow.CON_TITLE}`),
+      })
+    );
+
+    const renameInputEl = screen.getByRole("textbox", { name: /new name/i });
+    userEvent.clear(renameInputEl);
+    userEvent.type(renameInputEl, firstNewName);
+    userEvent.click(screen.getByRole("button", { name: /^rename$/i }));
+
+    userEvent.click(
+      screen.getByRole("button", {
+        name: new RegExp(`rename: ${ParticipantRow.DRIVE_TITLE}`),
+      })
+    );
+
+    expect(screen.getByRole("textbox", { name: /new name/i })).toHaveValue(
+      ParticipantRow.DRIVE_TITLE
+    );
   });
 });

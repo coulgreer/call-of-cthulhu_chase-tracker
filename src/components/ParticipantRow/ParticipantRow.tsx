@@ -161,6 +161,7 @@ export default class ParticipantRow extends React.Component<Props, State> {
 
     this.createSpeedStatistic = this.createSpeedStatistic.bind(this);
     this.deleteSpeedStatistic = this.deleteSpeedStatistic.bind(this);
+    this.renameSpeedStatistic = this.renameSpeedStatistic.bind(this);
     this.handleSpeedStatisticChange = this.handleSpeedStatisticChange.bind(
       this
     );
@@ -423,6 +424,16 @@ export default class ParticipantRow extends React.Component<Props, State> {
     this.setState({ speedStatistics });
   }
 
+  private renameSpeedStatistic(index: number, value: string) {
+    const { speedStatistics } = this.state;
+    const data = speedStatistics[index];
+
+    data.title = value;
+    speedStatistics[index] = data;
+
+    this.setState({ speedStatistics });
+  }
+
   private createHazardStatistic() {
     const key = this.hazardStatSequence.nextNum();
     const newData = {
@@ -606,8 +617,9 @@ export default class ParticipantRow extends React.Component<Props, State> {
         data={speedStatistics}
         onCreateClick={this.createSpeedStatistic}
         onDeleteClick={this.deleteSpeedStatistic}
-        onChange={this.handleSpeedStatisticChange}
-        onBlur={this.handleSpeedStatisticBlur}
+        onRenameStatistic={this.renameSpeedStatistic}
+        onStatisticValueChange={this.handleSpeedStatisticChange}
+        onStatisticValueBlur={this.handleSpeedStatisticBlur}
       />
     );
   }
@@ -622,8 +634,8 @@ export default class ParticipantRow extends React.Component<Props, State> {
         data={hazardStatistics}
         onCreateClick={this.createHazardStatistic}
         onDeleteClick={this.deleteHazardStatistic}
-        onChange={this.handleHazardStatisticChange}
-        onBlur={this.handleHazardStatisticBlur}
+        onStatisticValueChange={this.handleHazardStatisticChange}
+        onStatisticValueBlur={this.handleHazardStatisticBlur}
       />
     );
   }

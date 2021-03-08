@@ -15,7 +15,6 @@ const DEFAULT_PROPS = {
 
 test("should render properly", () => {
   const [first, second] = DEFAULT_PROPS.data;
-
   render(
     <StatisticTable title={DEFAULT_PROPS.title} data={DEFAULT_PROPS.data} />
   );
@@ -45,7 +44,6 @@ test("should render properly", () => {
       name: new RegExp(`delete: ${second.title}`),
     })
   ).toBeInTheDocument();
-
   expect(
     screen.getByRole("button", {
       name: new RegExp(`rename: ${second.title}`),
@@ -55,29 +53,76 @@ test("should render properly", () => {
 
 test("should use provided callback", () => {
   const [first] = DEFAULT_PROPS.data;
+  const handleCreateClick = jest.fn();
   const handleDeleteClick = jest.fn();
   const handleRenameClick = jest.fn();
-  const handleCreateClick = jest.fn();
   render(
     <StatisticTable
       title={DEFAULT_PROPS.title}
       data={DEFAULT_PROPS.data}
       onCreateClick={handleCreateClick}
       onDeleteClick={handleDeleteClick}
-      onRenameClick={handleRenameClick}
+      onRenameStatistic={handleRenameClick}
     />
   );
 
   userEvent.click(screen.getByRole("button", { name: /create statistic/i }));
+
   expect(handleCreateClick).toBeCalledTimes(1);
 
   userEvent.click(
     screen.getByRole("button", { name: new RegExp(`delete: ${first.title}`) })
   );
+
   expect(handleDeleteClick).toBeCalledTimes(1);
 
   userEvent.click(
     screen.getByRole("button", { name: new RegExp(`rename: ${first.title}`) })
   );
+  userEvent.click(screen.getByRole("button", { name: /^rename$/i }));
+
   expect(handleRenameClick).toBeCalledTimes(1);
+});
+
+test("should properly display modal", () => {
+  const [first] = DEFAULT_PROPS.data;
+  render(
+    <StatisticTable title={DEFAULT_PROPS.title} data={DEFAULT_PROPS.data} />
+  );
+
+  expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+
+  userEvent.click(
+    screen.getByRole("button", { name: new RegExp(`rename: ${first.title}`) })
+  );
+
+  expect(screen.getByRole("dialog")).toBeInTheDocument();
+});
+
+test("should close modal when cancel button is pressed", () => {
+  const [first] = DEFAULT_PROPS.data;
+  render(
+    <StatisticTable title={DEFAULT_PROPS.title} data={DEFAULT_PROPS.data} />
+  );
+
+  userEvent.click(
+    screen.getByRole("button", { name: new RegExp(`rename: ${first.title}`) })
+  );
+  userEvent.click(screen.getByRole("button", { name: /cancel/i }));
+
+  expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+});
+
+test("should close modal when accept button is pressed", () => {
+  const [first] = DEFAULT_PROPS.data;
+  render(
+    <StatisticTable title={DEFAULT_PROPS.title} data={DEFAULT_PROPS.data} />
+  );
+
+  userEvent.click(
+    screen.getByRole("button", { name: new RegExp(`rename: ${first.title}`) })
+  );
+  userEvent.click(screen.getByRole("button", { name: /^rename$/i }));
+
+  expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
 });

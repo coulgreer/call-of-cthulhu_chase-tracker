@@ -55,7 +55,7 @@ describe("Participant Removal", () => {
         name: new RegExp(`remove: ${ParticipantTable.DEFAULT_NAME} #1`, "i"),
       })
     );
-    userEvent.click(screen.getByRole("button", { name: /yes/i }));
+    userEvent.click(screen.getByRole("button", { name: /delete/i }));
 
     expect(
       screen.queryByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #1`)
@@ -138,13 +138,13 @@ test("should have the appropriate default participant name when a participant ha
       name: new RegExp(`remove: ${ParticipantTable.DEFAULT_NAME} #2`, "i"),
     })
   );
-  userEvent.click(screen.getByRole("button", { name: /yes/i }));
+  userEvent.click(screen.getByRole("button", { name: /delete/i }));
   userEvent.click(
     screen.getByRole("button", {
       name: new RegExp(`remove: ${ParticipantTable.DEFAULT_NAME} #4`, "i"),
     })
   );
-  userEvent.click(screen.getByRole("button", { name: /yes/i }));
+  userEvent.click(screen.getByRole("button", { name: /delete/i }));
   userEvent.click(addButton);
 
   expect(
@@ -188,7 +188,7 @@ describe("Confirmation Tests", () => {
         name: new RegExp(`remove: ${ParticipantTable.DEFAULT_NAME} #1$`, "i"),
       })
     );
-    userEvent.click(screen.getByRole("button", { name: /yes/i }));
+    userEvent.click(screen.getByRole("button", { name: /delete/i }));
 
     /* Then, remove another participant that starts with a differing digit
      *  from the first, but is not at the end of the sequence. */
@@ -197,7 +197,7 @@ describe("Confirmation Tests", () => {
         name: new RegExp(`remove: ${ParticipantTable.DEFAULT_NAME} #3$`, "i"),
       })
     );
-    userEvent.click(screen.getByRole("button", { name: /yes/i }));
+    userEvent.click(screen.getByRole("button", { name: /delete/i }));
 
     // Add the participants back.
     userEvent.click(addButton);

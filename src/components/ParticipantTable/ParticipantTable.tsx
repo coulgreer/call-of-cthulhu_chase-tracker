@@ -47,11 +47,11 @@ export default class ParticipantTable extends Component<Props, State> {
     );
 
     this.createParticipant = this.createParticipant.bind(this);
-    this.removeSelectedParticipant = this.removeSelectedParticipant.bind(this);
+    this.deleteSelectedParticipant = this.deleteSelectedParticipant.bind(this);
     this.closeModal = this.closeModal.bind(this);
   }
 
-  private removeSelectedParticipant() {
+  private deleteSelectedParticipant() {
     const { selectedRow } = this.state;
 
     if (selectedRow) {
@@ -139,9 +139,9 @@ export default class ParticipantTable extends Component<Props, State> {
           </Button>
           <Button
             className="button button--secondary button--medium"
-            onClick={this.removeSelectedParticipant}
+            onClick={this.deleteSelectedParticipant}
           >
-            YES
+            DELETE
           </Button>
         </div>
       </Modal>

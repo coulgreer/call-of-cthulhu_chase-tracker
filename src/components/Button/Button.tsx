@@ -3,14 +3,19 @@ import React, { ReactNode } from "react";
 import "./Button.css";
 
 interface Props {
+  type?: "button" | "submit";
   onClick?(evt: React.MouseEvent<HTMLElement>): void;
   className?: string;
   children?: ReactNode;
 }
 
-function Button({ onClick, className, children }: Props) {
+function Button({ type, onClick, className, children }: Props) {
   return (
-    <button type="button" onClick={onClick} className={className}>
+    <button
+      type={type === "submit" ? "submit" : "button"}
+      onClick={onClick}
+      className={className}
+    >
       <span data-testid="overlay" className="button__overlay" />
       {children}
     </button>
@@ -18,6 +23,7 @@ function Button({ onClick, className, children }: Props) {
 }
 
 Button.defaultProps = {
+  type: "button",
   onClick: () => {
     // do nothing
   },
