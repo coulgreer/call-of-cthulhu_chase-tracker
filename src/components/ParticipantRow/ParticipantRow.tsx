@@ -501,17 +501,17 @@ export default class ParticipantRow extends React.Component<Props, State> {
         onRequestClose={this.closeModal}
       >
         <p>Select a speed skill</p>
-        <form>
+        <form onSubmit={this.calculateSpeedModifier}>
           {speedStatistics.map((data) => (
-            <label className="radio input__label">
+            <label className="input__radio input__label">
               <input
-                className="radio__checkbox"
+                className="input__radio__checkbox"
                 type="radio"
                 name="selectedStatistic"
                 value={data.validValue}
                 onChange={this.handleSelectionChange}
               />
-              <span className="radio__checkmark" />
+              <span className="input__radio__checkmark" />
               {data.title}
             </label>
           ))}
@@ -524,7 +524,7 @@ export default class ParticipantRow extends React.Component<Props, State> {
             </Button>
             <Button
               className="button button--primary button--small"
-              onClick={this.calculateSpeedModifier}
+              type="submit"
             >
               CONFIRM
             </Button>
@@ -544,14 +544,14 @@ export default class ParticipantRow extends React.Component<Props, State> {
 
     return (
       <div className="ParticipantRow__main-display">
-        <label className="ParticipantRow__name-label input__label">
+        <label className="input input__label">
           Name
           <input
+            className="input__textbox input__textbox--full-width"
             type="text"
             value={currentName}
             onChange={this.handleNameChange}
             onBlur={this.handleNameBlur}
-            className="ParticipantRow__name-input input"
           />
         </label>
         <p

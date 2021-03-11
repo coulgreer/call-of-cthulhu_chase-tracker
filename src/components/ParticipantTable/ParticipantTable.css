@@ -28,8 +28,3 @@
 .ParticipantTable__row-control .button__overlay {
   border-radius: 0 4px 4px 0;
 }
-
-.ParticipantTable__label {
-  font-size: 0.8rem;
-  opacity: 87%;
-}

@@ -112,13 +112,13 @@ export default class StatisticTable extends React.Component<Props, State> {
         {data.map((datum, index) => (
           <div className="StatisticTable__statistics-controls">
             <Button
-              className="button button--small button--tertiary--light"
+              className="button button--small button--tertiary-on-light"
               onClick={() => this.handleDeleteClick(index)}
             >
               <img src={DeleteIcon} alt={`delete: ${datum.title}`} />
             </Button>
             <Button
-              className="button button--small button--tertiary--light"
+              className="button button--small button--tertiary-on-light"
               onClick={() => this.handlePromptRenameClick(index)}
             >
               <img src={EditIcon} alt={`rename: ${datum.title}`} />
@@ -154,10 +154,10 @@ export default class StatisticTable extends React.Component<Props, State> {
       >
         <p className="Modal__Content__text">Rename the Statistic</p>
         <form onSubmit={this.handleSubmit}>
-          <label className="input__label">
+          <label className="input input__label">
             New name
             <input
-              className="input"
+              className="input__textbox input__textbox--full-width"
               type="text"
               value={currentNewName}
               onChange={this.handleStatisticNameChange}
@@ -166,13 +166,13 @@ export default class StatisticTable extends React.Component<Props, State> {
           </label>
           <div className="Modal__Content__options">
             <Button
-              className="button button--tertiary button--medium"
+              className="button button--medium button--tertiary-on-dark"
               onClick={this.closeModal}
             >
               CANCEL
             </Button>
             <Button
-              className="button button--secondary button--medium"
+              className="button button--medium button--secondary"
               type="submit"
             >
               RENAME

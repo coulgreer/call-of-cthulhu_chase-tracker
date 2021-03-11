@@ -4,7 +4,6 @@
   justify-content: center;
   position: relative;
   border: none;
-  min-width: 42px;
   font: inherit;
   font-weight: bold;
   outline: none;
@@ -35,12 +34,8 @@
   border: 1px solid var(--secondary);
 }
 
-.button--tertiary {
-  background: none;
-  color: var(--secondary);
-}
-
-.button--tertiary--light {
+.button--tertiary-on-dark,
+.button--tertiary-on-light {
   background: none;
   color: var(--secondary);
 }
@@ -72,20 +67,20 @@
   border-radius: 4px;
 }
 
-.button--tertiary:hover .button__overlay {
+.button--tertiary-on-dark:hover .button__overlay {
   background-color: var(--surface-overlay--hovered);
 }
 
-.button--tertiary:focus .button__overlay {
+.button--tertiary-on-dark:focus .button__overlay {
   background-color: var(--surface-overlay--focused);
   border-radius: 4px;
 }
 
-.button--tertiary--light:hover .button__overlay {
+.button--tertiary-on-light:hover .button__overlay {
   background-color: var(--surface-overlay--light--hovered);
 }
 
-.button--tertiary--light:focus .button__overlay {
+.button--tertiary-on-light:focus .button__overlay {
   background-color: var(--surface-overlay--light--focused);
   border-radius: 4px;
 }
@@ -117,8 +112,4 @@
   background-color: var(--dark-overlay--medium-emphasis);
   border-radius: 50%;
   border: 1px solid var(--light-text--high-emphasis);
-}
-
-.button--image {
-  line-height: 0;
 }

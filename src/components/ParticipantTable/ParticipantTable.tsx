@@ -132,7 +132,7 @@ export default class ParticipantTable extends Component<Props, State> {
         </p>
         <div className="Modal__Content__options">
           <Button
-            className="button button--tertiary button--medium"
+            className="button button--tertiary-on-dark button--medium"
             onClick={this.closeModal}
           >
             CANCEL

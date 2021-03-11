@@ -36,19 +36,19 @@ export default class StatisticDisplay extends React.Component<Props> {
   };
 
   static get UPPER_LIMIT_CLASS() {
-    return "StatisticDisplay--upper-limit";
+    return "input__textbox--upper-limit";
   }
 
   static get UPPER_WARNING_CLASS() {
-    return "StatisticDisplay--upper-warning";
+    return "input__textbox--upper-warning";
   }
 
   static get LOWER_WARNING_CLASS() {
-    return "StatisticDisplay--lower-warning";
+    return "input__textbox--lower-warning";
   }
 
   static get LOWER_LIMIT_CLASS() {
-    return "StatisticDisplay--lower-limit";
+    return "input__textbox--lower-limit";
   }
 
   constructor(props: Props) {
@@ -190,13 +190,11 @@ export default class StatisticDisplay extends React.Component<Props> {
     });
 
     return (
-      <label
-        className={`StatisticDisplay StatisticDisplay__label input__label ${className}`}
-      >
+      <label className={`StatisticDisplay input__label ${className}`}>
         {title}
         <input
           type="number"
-          className={`StatisticDisplay__input input ${inputClassName}`}
+          className={`input__textbox input__textbox--centered ${inputClassName}`}
           value={currentValue}
           onChange={this.handleChange}
           onBlur={this.handleBlur}
