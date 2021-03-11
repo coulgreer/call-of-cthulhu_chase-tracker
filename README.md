@@ -2,16 +2,14 @@
 
 A utility website to be used in tandem with Call of Cthulhu 7th Edition while in a chase. The goal is to ease the burdens of the user with the crunchy details of gameplay while allowing more focus on story and roleplaying aspects.
 
-## Demo
+Check out the web app at: https://callofcthulhu-chasetracker.herokuapp.com/
 
-*insert gif of basic functions*
-
-### Terminology
+## Terminology
 
 - CON - Constitution
 - DEX - Dexterity
 - MOV - Movement
-- SPD - Speed Modifier
+- Speed - Speed Modifier
 - STR - Strength
 
 ## Key Features
@@ -63,8 +61,6 @@ npm test
 
 - [React](https://reactjs.org/)
 - [Gatsby](https://www.gatsbyjs.com/)
-- [react-modal](https://www.npmjs.com/package/react-modal)
-- [Typescript](https://www.typescriptlang.org/)
 
 ## License
 
