@@ -110,7 +110,7 @@ export default class StatisticTable extends React.Component<Props, State> {
       <>
         <h4>{title}</h4>
         {data.map((datum, index) => (
-          <div className="StatisticTable__statistics-controls">
+          <div className="StatisticTable__statistics-controls" key={datum.key}>
             <Button
               className="button button--small button--tertiary-on-light"
               onClick={() => this.handleDeleteClick(index)}

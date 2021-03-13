@@ -30,6 +30,8 @@ interface State {
   selectedStatValue: string;
 }
 
+const SEQUENCE_START = 0;
+
 export default class ParticipantRow extends React.Component<Props, State> {
   static get DEX_TITLE() {
     return "DEX";
@@ -148,8 +150,8 @@ export default class ParticipantRow extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
-    this.speedStatSequence = new UniqueSequenceGenerator(0);
-    this.hazardStatSequence = new UniqueSequenceGenerator(0);
+    this.speedStatSequence = new UniqueSequenceGenerator(SEQUENCE_START);
+    this.hazardStatSequence = new UniqueSequenceGenerator(SEQUENCE_START);
     this.speedStatisticEl = { title: "", currentValue: "0", validValue: 0 };
 
     this.handleNameChange = this.handleNameChange.bind(this);
@@ -197,14 +199,25 @@ export default class ParticipantRow extends React.Component<Props, State> {
 
   private initializeMainStatistics() {
     const stats = [
-      { title: ParticipantRow.DEX_TITLE, currentValue: "15", validValue: 15 },
-      { title: ParticipantRow.SPEED_TITLE, currentValue: "0", validValue: 0 },
+      {
+        title: ParticipantRow.DEX_TITLE,
+        currentValue: "15",
+        validValue: 15,
+        key: 1,
+      },
+      {
+        title: ParticipantRow.SPEED_TITLE,
+        currentValue: "0",
+        validValue: 0,
+        key: 2,
+      },
       {
         title: ParticipantRow.MOV_TITLE,
         currentValue: "2",
         validValue: 2,
         lowerWarning: 1,
         upperWarning: 10,
+        key: 3,
       },
     ];
 
@@ -503,7 +516,7 @@ export default class ParticipantRow extends React.Component<Props, State> {
         <p>Select a speed skill</p>
         <form onSubmit={this.calculateSpeedModifier}>
           {speedStatistics.map((data) => (
-            <label className="input__radio input__label">
+            <label className="input__radio input__label" key={data.key}>
               <input
                 className="input__radio__checkbox"
                 type="radio"
