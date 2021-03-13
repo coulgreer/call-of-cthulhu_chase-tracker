@@ -18,6 +18,7 @@ export interface Data {
 
 export interface Props {
   className: string;
+  textboxClassName?: string;
   title: string;
   currentValue: string;
   upperLimit: number;
@@ -34,6 +35,14 @@ export default class StatisticDisplay extends React.Component<Props> {
     upperLimit: Number.MAX_SAFE_INTEGER,
     lowerLimit: Number.MIN_SAFE_INTEGER,
   };
+
+  static get DARK_MODE_CLASS() {
+    return "input__textbox--on-dark";
+  }
+
+  static get LIGHT_MODE_CLASS() {
+    return "input__textbox--on-light";
+  }
 
   static get UPPER_LIMIT_CLASS() {
     return "input__textbox--upper-limit";
@@ -171,7 +180,7 @@ export default class StatisticDisplay extends React.Component<Props> {
   }
 
   render() {
-    const { title, className, currentValue } = this.props;
+    const { title, className, textboxClassName, currentValue } = this.props;
     const currentValueNum = Number.parseInt(currentValue, 10);
 
     const inputClassName = clsx({
@@ -194,7 +203,9 @@ export default class StatisticDisplay extends React.Component<Props> {
         {title}
         <input
           type="number"
-          className={`input__textbox input__textbox--centered ${inputClassName}`}
+          className={`input__textbox input__textbox--centered ${inputClassName} ${
+            textboxClassName || StatisticDisplay.DARK_MODE_CLASS
+          }`}
           value={currentValue}
           onChange={this.handleChange}
           onBlur={this.handleBlur}

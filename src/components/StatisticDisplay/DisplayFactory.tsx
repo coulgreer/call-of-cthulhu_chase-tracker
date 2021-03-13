@@ -13,16 +13,24 @@ export default class DisplayFactory {
 
   static createStatisticDisplay(
     className: string,
-    { title, currentValue, key }: StatisticDisplayData,
+    {
+      title,
+      currentValue,
+      key,
+      lowerWarning,
+      upperWarning,
+    }: StatisticDisplayData,
     handleStatisticChange: (value: string) => void,
-    handleStatisticBlur: () => void
+    handleStatisticBlur: () => void,
+    textboxClassName?: string
   ) {
     return (
       <StatisticDisplay
         className={className}
+        textboxClassName={textboxClassName}
         title={title}
-        lowerWarning={DisplayFactory.MIN_PERCENTILE - 1}
-        upperWarning={DisplayFactory.MAX_PERCENTILE}
+        lowerWarning={lowerWarning || DisplayFactory.MIN_PERCENTILE - 1}
+        upperWarning={upperWarning || DisplayFactory.MAX_PERCENTILE}
         currentValue={currentValue}
         onStatisticChange={handleStatisticChange}
         onStatisticBlur={handleStatisticBlur}

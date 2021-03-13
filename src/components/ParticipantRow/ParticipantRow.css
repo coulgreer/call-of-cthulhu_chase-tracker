@@ -44,12 +44,6 @@
   text-align: right;
 }
 
-.ParticipantRow__extended-display .input__textbox {
-  background-color: var(--primary);
-  color: var(--light-text--high-emphasis);
-  border-bottom: 1px solid var(--light-overlay--medium-emphasis);
-}
-
 .ParticipantRow__extended-display .input__textbox:focus {
   border-bottom: 2px solid var(--secondary-variant);
 }

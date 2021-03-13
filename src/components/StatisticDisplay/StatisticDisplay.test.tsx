@@ -32,6 +32,29 @@ test("should render statistics properly", () => {
   });
   expect(inputEl).toBeInTheDocument();
   expect(inputEl).toHaveDisplayValue(DEFAULT_PROPS.currentValue);
+  expect(inputEl).toHaveClass(StatisticDisplay.DARK_MODE_CLASS);
+});
+
+test("should render statistics properly when textbox class is provided", () => {
+  const className = "StatisticDisplay--vertical";
+
+  render(
+    <StatisticDisplay
+      className={className}
+      textboxClassName={StatisticDisplay.LIGHT_MODE_CLASS}
+      title={DEFAULT_PROPS.title}
+      currentValue={DEFAULT_PROPS.currentValue}
+    />
+  );
+
+  expect(screen.getByText(DEFAULT_PROPS.title)).toHaveClass(className);
+
+  const inputEl = screen.getByLabelText(DEFAULT_PROPS.title, {
+    selector: "input",
+  });
+  expect(inputEl).toBeInTheDocument();
+  expect(inputEl).toHaveDisplayValue(DEFAULT_PROPS.currentValue);
+  expect(inputEl).toHaveClass(StatisticDisplay.LIGHT_MODE_CLASS);
 });
 
 test("should call onChange handler when anything is changed in input", () => {

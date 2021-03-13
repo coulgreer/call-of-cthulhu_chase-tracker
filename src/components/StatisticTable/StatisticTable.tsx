@@ -127,7 +127,8 @@ export default class StatisticTable extends React.Component<Props, State> {
               "StatisticDisplay--horizontal",
               datum,
               (value) => this.handleStatisticValueChange(index, value),
-              () => this.handleStatisticValueBlur(index)
+              () => this.handleStatisticValueBlur(index),
+              "input__textbox--on-light"
             )}
           </div>
         ))}
