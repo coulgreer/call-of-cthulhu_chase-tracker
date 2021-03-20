@@ -454,7 +454,7 @@ describe("Modal", () => {
 });
 
 describe("Confirmation Tests", () => {
-  test("should reset textbox to current name when another skill has been renamed", () => {
+  test("should reset textbox to current name when another speed skill has been renamed", () => {
     const firstNewName = "First Name";
     renderExpandedParticipantRow(name);
 
@@ -480,7 +480,7 @@ describe("Confirmation Tests", () => {
     );
   });
 
-  test("should reset textbox to current name when another skill has been renamed", () => {
+  test("should reset textbox to current name when another hazard skill has been renamed", () => {
     const firstNewName = "First Name";
     renderExpandedParticipantRow(name);
 
