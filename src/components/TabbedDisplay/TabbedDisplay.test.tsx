@@ -22,11 +22,16 @@ test("should render properly", () => {
   render(<TabbedDisplay displays={DEFAULT_PROPS.children} />);
 
   expect(
-    screen.getByRole("button", { name: new RegExp(displayedTitle1) })
-  ).toBeInTheDocument();
+    screen.getByRole("button", {
+      name: new RegExp(displayedTitle1),
+    })
+  ).toHaveClass("TabbedDisplay__tab--enabled");
   expect(
-    screen.getByRole("button", { name: new RegExp(displayedTitle2) })
-  ).toBeInTheDocument();
+    screen.getByRole("button", {
+      name: new RegExp(displayedTitle2),
+    })
+  ).toHaveClass("TabbedDisplay__tab--disabled");
+
   expect(screen.getByText(displayedText1)).toBeInTheDocument();
   expect(screen.queryByText(displayedText2)).not.toBeInTheDocument();
 });

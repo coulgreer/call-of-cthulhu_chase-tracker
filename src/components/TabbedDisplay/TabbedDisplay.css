@@ -1,0 +1,22 @@
+.TabbedDisplay__tabs {
+  margin: 6px 6px 0;
+}
+
+.TabbedDisplay__tab {
+  width: 100%;
+  margin: 0;
+  border-style: solid;
+  border-color: var(--secondary);
+  border-width: 3px;
+  border-radius: 0;
+}
+
+.TabbedDisplay__tab--enabled {
+  background-color: var(--primary);
+  border-bottom-width: 0;
+}
+
+.TabbedDisplay__tab--disabled {
+  background-color: none;
+  border-width: 0 0 3px 0;
+}

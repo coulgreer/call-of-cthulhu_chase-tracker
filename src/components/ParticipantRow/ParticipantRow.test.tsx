@@ -426,7 +426,7 @@ describe("Modal", () => {
       expect(screen.getByText(newName)).toBeInTheDocument();
       expect(screen.queryByText(originName)).not.toBeInTheDocument();
     });
-    
+
     test("should rename hazard statistic when given a new name", () => {
       const originName = ParticipantRow.STR_TITLE;
       const newName = "NEW_TEST";
