@@ -10,7 +10,12 @@ export default function Home() {
     "No poor souls for the chase. Still, keep your wits about you.";
   const participantTable = <ParticipantTable warningMessage={warningMessage} />;
 
-  const displays = [{ title: "Participants", content: participantTable }];
+  const groupPlaceholder = <div />;
+
+  const displays = [
+    { title: "Participants", content: participantTable },
+    { title: "Groups", content: groupPlaceholder },
+  ];
 
   return (
     <Layout>
