@@ -55,7 +55,7 @@ export default class TabbedDisplay extends React.Component<Props, State> {
         </div>
         <div className="TabbedDisplay__displays">
           {displays.map((display, index) => {
-            return this.isActive(index) && <div>{display.content}</div>;
+            return <div hidden={!this.isActive(index)}>{display.content}</div>;
           })}
         </div>
       </div>

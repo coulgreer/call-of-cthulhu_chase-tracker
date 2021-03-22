@@ -4,6 +4,7 @@ import { screen, render } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import TabbedDisplay from ".";
+import ParticipantTable from "../ParticipantTable";
 
 const displayedTitle1 = "DISPLAY 1";
 const displayedText1 = "Some displayed text";
@@ -33,7 +34,7 @@ test("should render properly", () => {
   ).toHaveClass("TabbedDisplay__tab--disabled");
 
   expect(screen.getByText(displayedText1)).toBeInTheDocument();
-  expect(screen.queryByText(displayedText2)).not.toBeInTheDocument();
+  expect(screen.getByText(displayedText2)).not.toBeVisible();
 });
 
 test("should switch displays when tab is clicked", () => {
@@ -45,6 +46,42 @@ test("should switch displays when tab is clicked", () => {
     })
   );
 
-  expect(screen.queryByText(displayedText1)).not.toBeInTheDocument();
+  expect(screen.getByText(displayedText1)).not.toBeVisible();
   expect(screen.getByText(displayedText2)).toBeInTheDocument();
+});
+
+describe("Confirmation tests", () => {
+  test("should maintain state when tabbed display are switched", () => {
+    const displayedTitle3 = "DISPLAY 3";
+    const warningText = "Testing";
+    const { children } = DEFAULT_PROPS;
+    children.push({
+      title: displayedTitle3,
+      content: <ParticipantTable warningMessage={warningText} />,
+    });
+
+    render(<TabbedDisplay displays={children} />);
+
+    userEvent.click(
+      screen.getByRole("button", {
+        name: new RegExp(displayedTitle3),
+      })
+    );
+    userEvent.click(screen.getByRole("button", { name: /add participant/i }));
+
+    expect(screen.getByRole("textbox", { name: /name/i })).toBeInTheDocument();
+
+    userEvent.click(
+      screen.getByRole("button", {
+        name: new RegExp(displayedTitle2),
+      })
+    );
+    userEvent.click(
+      screen.getByRole("button", {
+        name: new RegExp(displayedTitle3),
+      })
+    );
+
+    expect(screen.getByRole("textbox", { name: /name/i })).toBeInTheDocument();
+  });
 });
