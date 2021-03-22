@@ -50,6 +50,16 @@ test("should switch displays when tab is clicked", () => {
   expect(screen.getByText(displayedText2)).toBeInTheDocument();
 });
 
+test("should throw error when duplicate titles exist", () => {
+  const duplicatedTitle = "REPEAT";
+  const displays = [
+    { title: duplicatedTitle, content: <p>Some text</p> },
+    { title: duplicatedTitle, content: <p>Some more text</p> },
+  ];
+
+  expect(() => render(<TabbedDisplay displays={displays} />)).toThrowError();
+});
+
 describe("Confirmation tests", () => {
   test("should maintain state when tabbed display are switched", () => {
     const displayedTitle3 = "DISPLAY 3";

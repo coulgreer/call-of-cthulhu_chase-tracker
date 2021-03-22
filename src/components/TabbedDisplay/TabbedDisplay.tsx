@@ -21,7 +21,23 @@ export default class TabbedDisplay extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
+    this.checkForDuplicateTitle();
+
     this.state = { displayedIndex: 0 };
+  }
+
+  private checkForDuplicateTitle() {
+    const { displays } = this.props;
+
+    for (let i = 0; i < displays.length - 1; i += 1) {
+      for (let j = i + 1; j < displays.length; j += 1) {
+        if (displays[i].title === displays[j].title) {
+          throw new Error(
+            `Duplicate titles have been found for '${displays[i].title}'.`
+          );
+        }
+      }
+    }
   }
 
   private handleClick(index: number) {
@@ -48,6 +64,7 @@ export default class TabbedDisplay extends React.Component<Props, State> {
                   : "TabbedDisplay__tab--disabled"
               }`}
               onClick={() => this.handleClick(index)}
+              key={display.title}
             >
               {display.title}
             </Button>
@@ -55,7 +72,11 @@ export default class TabbedDisplay extends React.Component<Props, State> {
         </div>
         <div className="TabbedDisplay__displays">
           {displays.map((display, index) => {
-            return <div hidden={!this.isActive(index)}>{display.content}</div>;
+            return (
+              <div hidden={!this.isActive(index)} key={display.title}>
+                {display.content}
+              </div>
+            );
           })}
         </div>
       </div>
