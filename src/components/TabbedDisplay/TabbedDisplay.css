@@ -16,13 +16,13 @@
 }
 
 .TabbedDisplay__tab--enabled {
-  background-color: var(--main-background);
-  color: var(--light-text--high-emphasis);
+  background-color: var(--background);
+  color: rgba(var(--text-color--light), var(--text-emphasis--high));
   border-style: solid solid none;
 }
 
 .TabbedDisplay__tab--disabled {
   background-color: var(--primary-variant);
-  color: var(--light-text--high-emphasis);
+  color: rgba(var(--text-color--light), var(--text-emphasis--high));
   border-style: none none solid;
 }

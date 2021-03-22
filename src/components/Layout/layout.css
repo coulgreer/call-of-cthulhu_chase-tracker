@@ -1,32 +1,30 @@
 :root {
-  --dark-text--high-emphasis: rgba(9, 11, 14, 0.87);
-  --dark-text--medium-emphasis: rgba(9, 11, 14, 0.6);
-  --dark-text--disabled: rgba(9, 11, 14, 0.38);
+  /* COLORS: Text */
+  --text-color--dark: 9, 11, 14;
+  --text-color--light: 245, 246, 247;
 
-  --light-text--high-emphasis: rgba(245, 246, 247, 0.87);
-  --light-text--medium-emphasis: rgba(245, 246, 247, 0.6);
-  --light-text--disabled: rgba(245, 246, 247, 0.38);
+  --text-emphasis--high: 0.87;
+  --text-emphasis--medium: 0.6;
+  --text-emphasis--disable: 0.38;
 
-  --main-background: rgb(20, 28, 23);
-  --component-background: rgba(143, 204, 184, 0.24);
-  --primary: rgb(143, 204, 184);
-  --primary-variant: rgb(38, 78, 57);
-  --secondary: rgb(240, 219, 130);
-  --secondary-variant: rgb(232, 196, 46);
   --error: rgb(207, 102, 121);
 
-  --surface-overlay--hovered: rgba(240, 219, 130, 0.04);
-  --surface-overlay--focused: rgba(240, 219, 130, 0.12);
-  --surface-overlay--selected: rgba(240, 219, 130, 0.32);
+  /* COLORS: Brand */
+  --background: rgb(20, 28, 23);
+  --component-background: rgba(143, 204, 184, 0.24);
 
-  --surface-overlay--light--hovered: rgba(0, 28, 23, 0.04);
-  --surface-overlay--light--focused: rgba(20, 28, 23, 0.12);
+  --primary: rgb(143, 204, 184);
+  --primary-variant: rgb(38, 78, 57);
 
-  --dark-overlay--low-emphasis: rgba(245, 246, 247, 0.08);
-  --dark-overlay--medium-emphasis: rgba(245, 246, 247, 0.24);
+  --secondary: rgb(240, 219, 130);
+  --secondary-variant: rgb(232, 196, 46);
 
-  --light-overlay--low-emphasis: rgba(9, 11, 14, 0.08);
-  --light-overlay--medium-emphasis: rgba(9, 11, 14, 0.24);
+  --overlay-color--on-surface: 240, 219, 130;
+  --overlay-color--on-dark: 245, 246, 247;
+  --overlay-color--on-light: 20, 28, 23;
+
+  --state--hovered: 0.04;
+  --state--focused: 0.12;
 }
 
 html,
@@ -44,8 +42,8 @@ html {
 body {
   font-weight: 400;
   font-family: "Open Sans", sans-serif;
-  background-color: var(--main-background);
-  color: var(--light-text--high-emphasis);
+  background-color: var(--background);
+  color: rgba(var(--text-color--light), var(--text-emphasis--high));
 }
 
 #___gatsby {
@@ -55,12 +53,12 @@ body {
 
 ::selection {
   background-color: var(--secondary-variant);
-  color: var(--light-text--high-emphasis);
+  color: rgba(var(--text-color--light), var(--text-emphasis--high));
 }
 
 ::-moz-selection {
   background-color: var(--secondary-variant);
-  color: var(--light-text--high-emphasis);
+  color: rgba(var(--text-color--light), var(--text-emphasis--high));
 }
 
 h1,
@@ -136,10 +134,11 @@ input[type="number"] {
 .input__textbox {
   box-sizing: border-box;
   padding: 0 0.25ch;
-  background-color: var(--dark-overlay--low-emphasis);
-  color: var(--light-text--high-emphasis);
+  background-color: rgba(var(--overlay-color--on-dark), var(--state--hovered));
+  color: rgba(var(--text-color--light), var(--text-emphasis--high));
   border: none;
-  border-bottom: 1px solid var(--dark-overlay--medium-emphasis);
+  border-bottom: 1px solid
+    rgba(var(--overlay-color--on-dark), var(--state--focused));
   border-radius: 4px 4px 0 0;
   font-family: inherit;
   font-size: 1rem;
@@ -162,8 +161,9 @@ input[type="number"] {
 
 .input__textbox--on-light {
   background-color: var(--primary);
-  color: var(--light-text--high-emphasis);
-  border-bottom: 1px solid var(--light-overlay--medium-emphasis);
+  color: rgba(var(--text-color--light), var(--text-emphasis--high));
+  border-bottom: 1px solid
+    rgba(var(--overlay-color--on-light), var(--state--focused));
 }
 
 .input__textbox--upper-limit,
@@ -244,7 +244,7 @@ input[type="number"] {
   padding: 6px;
   max-width: 360px;
   overflow: hidden;
-  background-color: var(--main-background);
+  background-color: var(--background);
 }
 
 .Modal__Content__text {

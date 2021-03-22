@@ -50,38 +50,50 @@
 }
 
 .button--primary:hover .button__overlay {
-  background-color: var(--dark-overlay--low-emphasis);
+  background-color: rgba(var(--overlay-color--on-dark), var(--state--hovered));
 }
 
 .button--primary:focus .button__overlay {
-  background-color: var(--dark-overlay--medium-emphasis);
-  border: 1px solid var(--light-text--high-emphasis);
+  background-color: rgba(var(--overlay-color--on-dark), var(--state--focused));
+  border: 1px solid rgba(var(--text-color--light), var(--text-emphasis--high));
 }
 
 .button--secondary:hover .button__overlay {
-  background-color: var(--surface-overlay--hovered);
+  background-color: rgba(
+    var(--overlay-color--on-surface),
+    var(--state--hovered)
+  );
 }
 
 .button--secondary:focus .button__overlay {
-  background-color: var(--surface-overlay--focused);
+  background-color: rgba(
+    var(--overlay-color--on-surface),
+    var(--state--focused)
+  );
   border-radius: 4px;
 }
 
 .button--tertiary-on-dark:hover .button__overlay {
-  background-color: var(--surface-overlay--hovered);
+  background-color: rgba(
+    var(--overlay-color--on-surface),
+    var(--state--hovered)
+  );
 }
 
 .button--tertiary-on-dark:focus .button__overlay {
-  background-color: var(--surface-overlay--focused);
+  background-color: rgba(
+    var(--overlay-color--on-surface),
+    var(--state--focused)
+  );
   border-radius: 4px;
 }
 
 .button--tertiary-on-light:hover .button__overlay {
-  background-color: var(--surface-overlay--light--hovered);
+  background-color: rgba(var(--overlay-color--on-light), var(--state--hovered));
 }
 
 .button--tertiary-on-light:focus .button__overlay {
-  background-color: var(--surface-overlay--light--focused);
+  background-color: rgba(var(--overlay-color--on-light), var(--state--focused));
   border-radius: 4px;
 }
 
@@ -104,12 +116,12 @@
 }
 
 .fab:hover .button__overlay {
-  background-color: var(--dark-overlay--low-emphasis);
+  background-color: rgba(var(--overlay-color--on-dark), var(--state--hovered));
   border-radius: 50%;
 }
 
 .fab:focus .button__overlay {
-  background-color: var(--dark-overlay--medium-emphasis);
+  background-color: rgba(var(--overlay-color--on-dark), var(--state--focused));
   border-radius: 50%;
-  border: 1px solid var(--light-text--high-emphasis);
+  border: 1px solid rgba(var(--text-color--light), var(--text-emphasis--high));
 }
