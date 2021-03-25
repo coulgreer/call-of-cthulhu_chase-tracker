@@ -9,7 +9,11 @@ import "@fontsource/open-sans/700.css";
 
 import "./layout.css";
 
-function Layout({ children }) {
+interface Props {
+  children: React.ReactNode;
+}
+
+function Layout({ children }: Props) {
   return <>{children}</>;
 }
 

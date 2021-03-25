@@ -103,7 +103,7 @@ export default class GroupRow extends React.Component<Props, State> {
 
   private renderDistancer() {
     const { ownedIndex, groups } = this.props;
-    const { distancerName: distancer } = this.state;
+    const { distancerName } = this.state;
 
     return (
       <>
@@ -119,7 +119,7 @@ export default class GroupRow extends React.Component<Props, State> {
             )}
           </select>
         </label>
-        <p hidden={distancer === GroupRow.DEFAULT_DISTANCER_NAME}>
+        <p hidden={distancerName === GroupRow.DEFAULT_DISTANCER_NAME}>
           {GroupRow.NO_DISTANCER_WARNING_MESSAGE}
         </p>
       </>

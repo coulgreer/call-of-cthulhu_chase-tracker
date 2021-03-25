@@ -10,18 +10,15 @@ const DEFAULT_PROPS = {
     {
       id: 1,
       name: "Group 1",
-      distancerName: GroupRow.DEFAULT_DISTANCER_NAME,
       pursuerNames: ["Group 2"],
     },
     {
       id: 2,
       name: "Group 2",
-      distancerName: "Group 1",
       pursuerNames: ["Group 3"],
     },
-    { id: 3, name: "Group 3", distancerName: "Group 2", pursuerNames: [] },
+    { id: 3, name: "Group 3", pursuerNames: [] },
   ],
-  handleNameChange: jest.fn(),
 };
 
 test("should render properly when details are not expanded", () => {
