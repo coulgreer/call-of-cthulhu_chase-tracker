@@ -5,8 +5,29 @@ import userEvent from "@testing-library/user-event";
 
 import GroupRow from "./GroupRow";
 
+const DEFAULT_PROPS = {
+  groups: [
+    {
+      id: 1,
+      name: "Group 1",
+      distancerName: GroupRow.DEFAULT_DISTANCER_NAME,
+      pursuerNames: ["Group 2"],
+    },
+    {
+      id: 2,
+      name: "Group 2",
+      distancerName: "Group 1",
+      pursuerNames: ["Group 3"],
+    },
+    { id: 3, name: "Group 3", distancerName: "Group 2", pursuerNames: [] },
+  ],
+  handleNameChange: jest.fn(),
+};
+
 test("should render properly when details are not expanded", () => {
-  render(<GroupRow />);
+  const { groups } = DEFAULT_PROPS;
+
+  render(<GroupRow ownedIndex={0} groups={groups} />);
 
   expect(screen.getByRole("button", { name: /split/i })).toBeInTheDocument();
   expect(screen.getByRole("button", { name: /join/i })).toBeInTheDocument();
@@ -19,7 +40,13 @@ test("should render properly when details are not expanded", () => {
   expect(
     screen.queryByRole("combobox", { name: /distancer/i })
   ).not.toBeInTheDocument();
+  expect(
+    screen.queryByText(GroupRow.NO_DISTANCER_WARNING_MESSAGE)
+  ).not.toBeInTheDocument();
   expect(screen.queryByLabelText(/pursuer\(s\)/i)).not.toBeInTheDocument();
+  expect(
+    screen.queryByText(GroupRow.NO_PURSUER_WARNING_MESSAGE)
+  ).not.toBeInTheDocument();
   expect(
     screen.queryByRole("heading", { name: /members/i })
   ).not.toBeInTheDocument();
@@ -31,7 +58,9 @@ test("should render properly when details are not expanded", () => {
 });
 
 test("should render properly when details are expanded", () => {
-  render(<GroupRow />);
+  const { groups } = DEFAULT_PROPS;
+
+  render(<GroupRow ownedIndex={0} groups={groups} />);
 
   expect(screen.getByRole("button", { name: /split/i })).toBeInTheDocument();
   expect(screen.getByRole("button", { name: /join/i })).toBeInTheDocument();
@@ -46,9 +75,37 @@ test("should render properly when details are expanded", () => {
   expect(
     screen.getByRole("combobox", { name: /distancer/i })
   ).toBeInTheDocument();
+  expect(
+    screen.getByText(GroupRow.NO_DISTANCER_WARNING_MESSAGE)
+  ).toBeInTheDocument();
   expect(screen.getByLabelText(/pursuer\(s\)/i)).toBeInTheDocument();
+  expect(
+    screen.getByText(GroupRow.NO_PURSUER_WARNING_MESSAGE)
+  ).toBeInTheDocument();
   expect(screen.getByRole("heading", { name: /members/i })).toBeInTheDocument();
   expect(screen.getByText(/highest mov/i)).toBeInTheDocument();
   expect(screen.getByText(/lowest mov/i)).toBeInTheDocument();
   expect(screen.getByRole("button", { name: /add/i })).toBeInTheDocument();
+});
+
+test("should hide warning and display current distancer when a group has a distancer", () => {
+  const { groups } = DEFAULT_PROPS;
+
+  render(<GroupRow ownedIndex={0} groups={groups} />);
+  userEvent.click(screen.getByRole("button", { name: /expand more/i }));
+
+  expect(
+    screen.getByText(GroupRow.NO_DISTANCER_WARNING_MESSAGE)
+  ).not.toBeVisible();
+});
+
+test("should hide warning and display current pursuer(s) when a group has any pursuers", () => {
+  const { groups } = DEFAULT_PROPS;
+
+  render(<GroupRow ownedIndex={1} groups={groups} />);
+  userEvent.click(screen.getByRole("button", { name: /expand more/i }));
+
+  expect(
+    screen.getByText(GroupRow.NO_PURSUER_WARNING_MESSAGE)
+  ).not.toBeVisible();
 });
