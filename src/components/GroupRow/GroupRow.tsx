@@ -14,9 +14,10 @@ interface State {
   distancerName: string;
 }
 
-interface Data {
-  id: number;
+export interface Data {
+  id: string;
   name: string;
+  distancerName: string;
   pursuerNames: string[];
 }
 

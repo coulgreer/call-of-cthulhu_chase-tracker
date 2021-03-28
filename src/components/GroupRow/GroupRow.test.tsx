@@ -3,21 +3,27 @@ import React from "react";
 import { screen, render } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import GroupRow from "./GroupRow";
+import GroupRow from ".";
+
+const group1Name = "Group 1";
+const group2Name = "Group 2";
+const group3Name = "Group 3";
 
 const DEFAULT_PROPS = {
   groups: [
     {
-      id: 1,
-      name: "Group 1",
-      pursuerNames: ["Group 2"],
+      id: "1",
+      name: group1Name,
+      distancerName: "",
+      pursuerNames: [group2Name],
     },
     {
-      id: 2,
-      name: "Group 2",
-      pursuerNames: ["Group 3"],
+      id: "2",
+      name: group2Name,
+      distancerName: group1Name,
+      pursuerNames: [group3Name],
     },
-    { id: 3, name: "Group 3", pursuerNames: [] },
+    { id: "3", name: group3Name, distancerName: group2Name, pursuerNames: [] },
   ],
 };
 
