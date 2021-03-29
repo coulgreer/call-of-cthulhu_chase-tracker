@@ -87,6 +87,16 @@ export default class StatisticDisplay extends React.Component<Props> {
     this.handleBlur = this.handleBlur.bind(this);
   }
 
+  private handleChange(evt: React.ChangeEvent<HTMLInputElement>) {
+    const { onStatisticChange } = this.props;
+    if (onStatisticChange !== undefined) onStatisticChange(evt.target.value);
+  }
+
+  private handleBlur() {
+    const { onStatisticBlur } = this.props;
+    if (onStatisticBlur !== undefined) onStatisticBlur();
+  }
+
   private generateUpperBound(): Range {
     const { upperLimit, upperWarning } = this.props;
 
@@ -167,16 +177,6 @@ export default class StatisticDisplay extends React.Component<Props> {
     const { lowerLimit } = this.props;
 
     return value < lowerLimit;
-  }
-
-  private handleChange(evt: React.ChangeEvent<HTMLInputElement>) {
-    const { onStatisticChange } = this.props;
-    if (onStatisticChange !== undefined) onStatisticChange(evt.target.value);
-  }
-
-  private handleBlur() {
-    const { onStatisticBlur } = this.props;
-    if (onStatisticBlur !== undefined) onStatisticBlur();
   }
 
   render() {

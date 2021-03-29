@@ -3,6 +3,7 @@ import { Transition, animated } from "react-spring/renderprops";
 import Modal from "react-modal";
 
 import Button from "../Button";
+import StatisticTable from "../StatisticTable";
 import { Data as StatisticDisplayData } from "../StatisticDisplay";
 import DisplayFactory from "../StatisticDisplay/DisplayFactory";
 
@@ -12,7 +13,6 @@ import ExpandMoreIcon from "../../images/baseline_expand_more_black_24dp.png";
 import "./ParticipantRow.css";
 import UniqueSequenceGenerator from "../../utils/unique-sequence-generator";
 import { roll, Result } from "../../utils/roller";
-import StatisticTable from "../StatisticTable";
 
 interface Props {
   defaultParticipantName: string;
@@ -197,6 +197,97 @@ export default class ParticipantRow extends React.Component<Props, State> {
     };
   }
 
+  private handleNameChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const { value } = event.currentTarget;
+
+    if (value.trim()) {
+      this.setState(() => ({
+        validName: value,
+        nameWarningShown: false,
+      }));
+    } else {
+      this.setState(() => ({ nameWarningShown: true }));
+    }
+
+    this.setState(() => ({ currentName: value }));
+  }
+
+  private handleNameBlur() {
+    this.setState((state) => ({
+      currentName: state.validName,
+      nameWarningShown: false,
+    }));
+  }
+
+  private handleMainStatisticChange(index: number, value: string) {
+    const { mainStatistics } = this.state;
+    const data = mainStatistics[index];
+
+    ParticipantRow.manageValue(value, data);
+
+    mainStatistics[index] = data;
+    this.setState({ mainStatistics });
+  }
+
+  private handleSpeedStatisticChange(index: number, value: string) {
+    const { speedStatistics } = this.state;
+    const data = speedStatistics[index];
+
+    ParticipantRow.manageValue(value, data);
+
+    speedStatistics[index] = data;
+    this.setState({ speedStatistics });
+  }
+
+  private handleHazardStatisticChange(index: number, value: string) {
+    const { hazardStatistics } = this.state;
+    const data = hazardStatistics[index];
+
+    ParticipantRow.manageValue(value, data);
+
+    hazardStatistics[index] = data;
+    this.setState({ hazardStatistics });
+  }
+
+  private handleMainStatisticBlur(index: number) {
+    const { mainStatistics } = this.state;
+    const data = mainStatistics[index];
+    const { validValue } = data;
+
+    data.currentValue = validValue.toString();
+    mainStatistics[index] = data;
+
+    this.setState({ mainStatistics });
+  }
+
+  private handleSpeedStatisticBlur(index: number) {
+    const { speedStatistics } = this.state;
+    const data = speedStatistics[index];
+    const { validValue } = data;
+
+    data.currentValue = validValue.toString();
+    speedStatistics[index] = data;
+
+    this.setState({ speedStatistics });
+  }
+
+  private handleHazardStatisticBlur(index: number) {
+    const { hazardStatistics } = this.state;
+    const data = hazardStatistics[index];
+    const { validValue } = data;
+
+    data.currentValue = validValue.toString();
+    hazardStatistics[index] = data;
+
+    this.setState({ hazardStatistics });
+  }
+
+  private handleSelectionChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const { value } = event.target;
+
+    this.setState({ selectedStatValue: value });
+  }
+
   private initializeMainStatistics() {
     const stats = [
       {
@@ -308,97 +399,6 @@ export default class ParticipantRow extends React.Component<Props, State> {
         key: this.hazardStatSequence.nextNum(),
       },
     ];
-  }
-
-  private handleNameChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const { value } = event.currentTarget;
-
-    if (value.trim()) {
-      this.setState(() => ({
-        validName: value,
-        nameWarningShown: false,
-      }));
-    } else {
-      this.setState(() => ({ nameWarningShown: true }));
-    }
-
-    this.setState(() => ({ currentName: value }));
-  }
-
-  private handleNameBlur() {
-    this.setState((state) => ({
-      currentName: state.validName,
-      nameWarningShown: false,
-    }));
-  }
-
-  private handleMainStatisticChange(index: number, value: string) {
-    const { mainStatistics } = this.state;
-    const data = mainStatistics[index];
-
-    ParticipantRow.manageValue(value, data);
-
-    mainStatistics[index] = data;
-    this.setState({ mainStatistics });
-  }
-
-  private handleSpeedStatisticChange(index: number, value: string) {
-    const { speedStatistics } = this.state;
-    const data = speedStatistics[index];
-
-    ParticipantRow.manageValue(value, data);
-
-    speedStatistics[index] = data;
-    this.setState({ speedStatistics });
-  }
-
-  private handleHazardStatisticChange(index: number, value: string) {
-    const { hazardStatistics } = this.state;
-    const data = hazardStatistics[index];
-
-    ParticipantRow.manageValue(value, data);
-
-    hazardStatistics[index] = data;
-    this.setState({ hazardStatistics });
-  }
-
-  private handleMainStatisticBlur(index: number) {
-    const { mainStatistics } = this.state;
-    const data = mainStatistics[index];
-    const { validValue } = data;
-
-    data.currentValue = validValue.toString();
-    mainStatistics[index] = data;
-
-    this.setState({ mainStatistics });
-  }
-
-  private handleSpeedStatisticBlur(index: number) {
-    const { speedStatistics } = this.state;
-    const data = speedStatistics[index];
-    const { validValue } = data;
-
-    data.currentValue = validValue.toString();
-    speedStatistics[index] = data;
-
-    this.setState({ speedStatistics });
-  }
-
-  private handleHazardStatisticBlur(index: number) {
-    const { hazardStatistics } = this.state;
-    const data = hazardStatistics[index];
-    const { validValue } = data;
-
-    data.currentValue = validValue.toString();
-    hazardStatistics[index] = data;
-
-    this.setState({ hazardStatistics });
-  }
-
-  private handleSelectionChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const { value } = event.target;
-
-    this.setState({ selectedStatValue: value });
   }
 
   private calculateSpeedModifier() {

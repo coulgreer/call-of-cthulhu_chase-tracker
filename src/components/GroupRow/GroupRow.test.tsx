@@ -14,7 +14,7 @@ const DEFAULT_PROPS = {
     {
       id: "1",
       name: group1Name,
-      distancerName: "",
+      distancerName: GroupRow.INVALID_DISTANCER_NAME,
       pursuerNames: [group2Name],
     },
     {
@@ -94,7 +94,7 @@ test("should render properly when details are expanded", () => {
 test("should hide warning and display current distancer when a group has a distancer", () => {
   const { groups } = DEFAULT_PROPS;
 
-  render(<GroupRow ownedIndex={0} groups={groups} />);
+  render(<GroupRow ownedIndex={2} groups={groups} />);
   userEvent.click(screen.getByRole("button", { name: /expand more/i }));
 
   expect(
@@ -105,7 +105,7 @@ test("should hide warning and display current distancer when a group has a dista
 test("should hide warning and display current pursuer(s) when a group has any pursuers", () => {
   const { groups } = DEFAULT_PROPS;
 
-  render(<GroupRow ownedIndex={1} groups={groups} />);
+  render(<GroupRow ownedIndex={0} groups={groups} />);
   userEvent.click(screen.getByRole("button", { name: /expand more/i }));
 
   expect(

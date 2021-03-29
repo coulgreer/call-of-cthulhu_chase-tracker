@@ -26,6 +26,10 @@ export default class TabbedDisplay extends React.Component<Props, State> {
     this.state = { displayedIndex: 0 };
   }
 
+  private handleClick(index: number) {
+    this.setState({ displayedIndex: index });
+  }
+
   private checkForDuplicateTitle() {
     const { displays } = this.props;
 
@@ -38,10 +42,6 @@ export default class TabbedDisplay extends React.Component<Props, State> {
         }
       }
     }
-  }
-
-  private handleClick(index: number) {
-    this.setState({ displayedIndex: index });
   }
 
   private isActive(index: number) {

@@ -4,6 +4,11 @@ import { Transition, animated } from "react-spring/renderprops";
 
 import Button from "../Button";
 
+import ExpandLessIcon from "../../images/baseline_expand_less_black_24dp.png";
+import ExpandMoreIcon from "../../images/baseline_expand_more_black_24dp.png";
+
+import "./GroupRow.css";
+
 interface Props {
   ownedIndex: number;
   groups: Data[];
@@ -22,7 +27,7 @@ export interface Data {
 }
 
 export default class GroupRow extends React.Component<Props, State> {
-  static DEFAULT_DISTANCER_NAME = "N/A";
+  static INVALID_DISTANCER_NAME = "N/A";
 
   static get NO_DISTANCER_WARNING_MESSAGE() {
     return "No appetite for the hunt? In due time it will come. It always does...";
@@ -35,19 +40,17 @@ export default class GroupRow extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
+    const { groups, ownedIndex } = this.props;
+    const currentGroup = groups[ownedIndex];
+
     this.state = {
       isShown: false,
-      distancerName: GroupRow.DEFAULT_DISTANCER_NAME,
+      distancerName:
+        currentGroup.distancerName || GroupRow.INVALID_DISTANCER_NAME,
     };
 
     this.toggleExpansion = this.toggleExpansion.bind(this);
     this.handleDistancerBlur = this.handleDistancerBlur.bind(this);
-  }
-
-  private toggleExpansion() {
-    this.setState((state) => ({
-      isShown: !state.isShown,
-    }));
   }
 
   private handleDistancerBlur(evt: React.ChangeEvent<HTMLSelectElement>) {
@@ -56,25 +59,40 @@ export default class GroupRow extends React.Component<Props, State> {
     this.setState({ distancerName: value });
   }
 
+  private toggleExpansion() {
+    this.setState((state) => ({
+      isShown: !state.isShown,
+    }));
+  }
+
   private renderMainContent() {
     const { isShown } = this.state;
 
     return (
-      <>
-        <Button>SPLIT</Button>
-        <Button>JOIN</Button>
-        <label>
+      <div className="GroupRow__main-display">
+        <div className="GroupRow__merge-controls">
+          <Button className="button button--small button--secondary">
+            SPLIT
+          </Button>
+          <Button className="button button--small button--secondary">
+            JOIN
+          </Button>
+        </div>
+        <label className="input input__label">
           Name
-          <input />
+          <input className="input__textbox input__textbox--full-width" />
         </label>
-        <Button onClick={this.toggleExpansion}>
+        <Button
+          className="button button--primary button--small button--circular"
+          onClick={this.toggleExpansion}
+        >
           {isShown ? (
-            <img src="#" alt="expand less" />
+            <img src={ExpandLessIcon} alt="expand less" />
           ) : (
-            <img src="#" alt="expand more" />
+            <img src={ExpandMoreIcon} alt="expand more" />
           )}
         </Button>
-      </>
+      </div>
     );
   }
 
@@ -92,7 +110,7 @@ export default class GroupRow extends React.Component<Props, State> {
         {(shown) =>
           shown &&
           ((props) => (
-            <animated.div style={props}>
+            <animated.div style={props} className="GroupRow__extended-display">
               {this.renderDistancer()}
               {this.renderPursuers()}
             </animated.div>
@@ -108,10 +126,13 @@ export default class GroupRow extends React.Component<Props, State> {
 
     return (
       <>
-        <label>
+        <label className="input input__label">
           Distancer
-          <select onBlur={this.handleDistancerBlur}>
-            <option value={GroupRow.DEFAULT_DISTANCER_NAME}>[N/A]</option>
+          <select
+            className="input input__combobox input__combobox--full-width"
+            onBlur={this.handleDistancerBlur}
+          >
+            <option value={GroupRow.INVALID_DISTANCER_NAME}>[N/A]</option>
             {groups.map(
               (group, index) =>
                 ownedIndex !== index && (
@@ -120,7 +141,10 @@ export default class GroupRow extends React.Component<Props, State> {
             )}
           </select>
         </label>
-        <p hidden={distancerName === GroupRow.DEFAULT_DISTANCER_NAME}>
+        <p
+          className="centered error"
+          hidden={distancerName !== GroupRow.INVALID_DISTANCER_NAME}
+        >
           {GroupRow.NO_DISTANCER_WARNING_MESSAGE}
         </p>
       </>
@@ -133,15 +157,18 @@ export default class GroupRow extends React.Component<Props, State> {
 
     return (
       <>
-        <p>{pursuerLabel}</p>
+        <h5>{pursuerLabel}</h5>
         <div aria-label={pursuerLabel} />
-        <p hidden={groups[ownedIndex].pursuerNames.length > 0}>
+        <p
+          className="centered error"
+          hidden={groups[ownedIndex].pursuerNames.length > 0}
+        >
           {GroupRow.NO_PURSUER_WARNING_MESSAGE}
         </p>
         <h3>Members</h3>
         <p>Highest MOV</p>
         <p>Lowest MOV</p>
-        <Button>ADD</Button>
+        <Button className="button button--primary button--medium">ADD</Button>
       </>
     );
   }

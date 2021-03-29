@@ -1,4 +1,4 @@
-.ParticipantTable {
+.GroupTable {
   box-sizing: border-box;
   max-width: 360px;
   width: 100%;
@@ -6,11 +6,7 @@
   padding: 6px;
 }
 
-.ParticipantTable__rows > p {
-  margin: 12px 6px;
-}
-
-.ParticipantTable__row {
+.GroupTable__row {
   display: grid;
   grid-template-columns: auto min-content;
   margin: 15px 0;
@@ -19,12 +15,12 @@
   background-color: var(--component-background);
 }
 
-.ParticipantTable__row-control {
+.GroupTable__row-control {
   height: 100%;
   margin: 0;
   border-radius: 0 4px 4px 0;
 }
 
-.ParticipantTable__row-control .button__overlay {
+.GroupTable__row-control .button__overlay {
   border-radius: 0 4px 4px 0;
 }

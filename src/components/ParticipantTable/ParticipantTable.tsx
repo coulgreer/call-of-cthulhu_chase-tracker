@@ -4,12 +4,12 @@ import Modal from "react-modal";
 import ParticipantRow from "../ParticipantRow";
 import Button from "../Button";
 
-import UniqueSequenceGenerator from "../../utils/unique-sequence-generator";
-
 import AddIcon from "../../images/baseline_add_black_24dp_x2.png";
 import RemoveIcon from "../../images/baseline_remove_circle_outline_black_24dp.png";
 
 import "./ParticipantTable.css";
+
+import UniqueSequenceGenerator from "../../utils/unique-sequence-generator";
 
 if (process.env.NODE_ENV !== "test") Modal.setAppElement("#___gatsby");
 
@@ -160,7 +160,7 @@ export default class ParticipantTable extends Component<Props, State> {
       <div className="ParticipantTable__row" key={row.key}>
         {row}
         <Button
-          className="ParticipantTable__row-control button button--primary button--small"
+          className="ParticipantTable__row-control button button--primary"
           onClick={() => this.promptParticipantRemoval(row)}
         >
           <img src={RemoveIcon} alt={`Remove: ${row.key}`} />

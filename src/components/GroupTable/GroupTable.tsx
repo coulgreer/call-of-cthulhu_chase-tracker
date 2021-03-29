@@ -3,6 +3,11 @@ import React from "react";
 import GroupRow, { Data } from "../GroupRow";
 import Button from "../Button";
 
+import AddIcon from "../../images/baseline_add_black_24dp_x2.png";
+import RemoveIcon from "../../images/baseline_remove_circle_outline_black_24dp.png";
+
+import "./GroupTable.css";
+
 import UniqueSequenceGen from "../../utils/unique-sequence-generator";
 
 interface Props {
@@ -66,26 +71,35 @@ export default class GroupTable extends React.Component<Props, State> {
     const { groups } = this.state;
 
     return groups.map((group, index) => (
-      <div className="GroupTable__row-control">
+      <div className="GroupTable__row" key={group.id}>
         <GroupRow ownedIndex={index} groups={groups} />
-        <Button onClick={() => this.handleRemoveClick(group.id)}>
-          REMOVE {group.id}
+        <Button
+          className="GroupTable__row-control button button--primary"
+          onClick={() => this.handleRemoveClick(group.id)}
+        >
+          <img src={RemoveIcon} alt={`REMOVE ${group.id}`} />
         </Button>
       </div>
     ));
   }
 
-  private renderAddButton() {
-    return <Button onClick={this.handleCreateClick}>CREATE GROUP</Button>;
+  private renderFloatingActionButton() {
+    return (
+      <Button className="button fab" onClick={this.handleCreateClick}>
+        <img src={AddIcon} alt="CREATE GROUP" />
+      </Button>
+    );
   }
 
   render() {
     const { groups } = this.state;
 
     return (
-      <div>
-        {groups.length > 0 ? this.renderRows() : this.renderWarning()}
-        {this.renderAddButton()}
+      <div className="GroupTable">
+        <div className="GroupTable__rows">
+          {groups.length > 0 ? this.renderRows() : this.renderWarning()}
+        </div>
+        {this.renderFloatingActionButton()}
       </div>
     );
   }

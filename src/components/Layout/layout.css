@@ -228,6 +228,27 @@ input[type="number"] {
   line-height: 1;
 }
 
+.input__combobox {
+  appearance: none;
+  outline: none;
+  box-sizing: border-box;
+  padding: 0 12px;
+  background-color: var(--primary);
+  color: rgba(var(--text-color--light), var(--text-emphasis--high));
+  border: none;
+  border-bottom: 1px solid
+    rgba(var(--overlay-color--on-dark), var(--state--focused));
+  border-radius: 4px 4px 0 0;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: normal;
+  line-height: 150%;
+}
+
+.input__combobox--full-width {
+  width: 100%;
+}
+
 /* Modals */
 .ReactModalPortal * {
   z-index: 2;

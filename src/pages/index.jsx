@@ -4,17 +4,18 @@ import SEO from "../components/SEO";
 import Layout from "../components/Layout";
 import TabbedDisplay from "../components/TabbedDisplay";
 import ParticipantTable from "../components/ParticipantTable";
+import GroupTable from "../components/GroupTable";
 
 export default function Home() {
-  const warningMessage =
-    "No poor souls for the chase. Still, keep your wits about you.";
-  const participantTable = <ParticipantTable warningMessage={warningMessage} />;
+  const participantTable = (
+    <ParticipantTable warningMessage="No poor souls for the chase. Still, keep your wits about you." />
+  );
 
-  const groupPlaceholder = <div />;
+  const groupTable = <GroupTable warningMessage="warning" />;
 
   const displays = [
     { title: "Participants", content: participantTable },
-    { title: "Groups", content: groupPlaceholder },
+    { title: "Groups", content: groupTable },
   ];
 
   return (

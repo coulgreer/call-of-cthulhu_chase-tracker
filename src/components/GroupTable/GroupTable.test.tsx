@@ -5,8 +5,10 @@ import userEvent from "@testing-library/user-event";
 
 import GroupTable from ".";
 
+const DEFAULT_PROPS = { warningMessage: "Warning There's an Error" };
+
 test("should render properly when no groups exist", () => {
-  const warningMessage = "Warning There's an Error";
+  const { warningMessage } = DEFAULT_PROPS;
 
   render(<GroupTable warningMessage={warningMessage} />);
 
@@ -17,7 +19,7 @@ test("should render properly when no groups exist", () => {
 });
 
 test("should render properly when a group is created", () => {
-  const warningMessage = "Warning There's an Error";
+  const { warningMessage } = DEFAULT_PROPS;
 
   render(<GroupTable warningMessage={warningMessage} />);
 
@@ -35,7 +37,7 @@ test("should render properly when a group is created", () => {
 });
 
 test("should remove pre-existing group when 'remove' button is pressed", () => {
-  const warningMessage = "Warning There's an Error";
+  const { warningMessage } = DEFAULT_PROPS;
   render(<GroupTable warningMessage={warningMessage} />);
 
   const createGroupEl = screen.getByRole("button", { name: /create group/i });
