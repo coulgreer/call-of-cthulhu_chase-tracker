@@ -45,8 +45,7 @@ export default class GroupRow extends React.Component<Props, State> {
 
     this.state = {
       isShown: false,
-      distancerName:
-        currentGroup.distancerName || GroupRow.INVALID_DISTANCER_NAME,
+      distancerName: currentGroup.distancerName,
     };
 
     this.toggleExpansion = this.toggleExpansion.bind(this);

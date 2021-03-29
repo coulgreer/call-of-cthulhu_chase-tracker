@@ -11,7 +11,9 @@ export default function Home() {
     <ParticipantTable warningMessage="No poor souls for the chase. Still, keep your wits about you." />
   );
 
-  const groupTable = <GroupTable warningMessage="warning" />;
+  const groupTable = (
+    <GroupTable warningMessage="No allegiances. No protection. Tsk, tsk..." />
+  );
 
   const displays = [
     { title: "Participants", content: participantTable },
