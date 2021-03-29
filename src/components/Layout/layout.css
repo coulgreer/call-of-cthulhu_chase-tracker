@@ -227,7 +227,12 @@ input[type="number"] {
 .input__radio.input__label {
   line-height: 1;
 }
+/* Input: combobox */
 
+/* 
+ * TODO (Coul Greer): Create a style that has an on-brand color when hovering
+ * an option.
+ */
 .input__combobox {
   appearance: none;
   outline: none;

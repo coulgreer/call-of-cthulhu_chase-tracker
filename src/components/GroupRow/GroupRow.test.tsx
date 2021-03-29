@@ -27,6 +27,12 @@ const DEFAULT_PROPS = {
   ],
 };
 
+/*
+ * TODO (Coul Greer): Implement a test to check that the warning message exists
+ * when no distancer exists for a group. There is currently a runtime error
+ * in which the warning does not appear.
+ */
+
 test("should render properly when details are not expanded", () => {
   const { groups } = DEFAULT_PROPS;
 
