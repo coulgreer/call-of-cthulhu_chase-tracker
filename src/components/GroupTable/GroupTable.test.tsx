@@ -4,6 +4,7 @@ import { screen, render } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import GroupTable from ".";
+import GroupRow from "../GroupRow";
 
 const DEFAULT_PROPS = { warningMessage: "Warning There's an Error" };
 
@@ -71,4 +72,17 @@ test("should remove pre-existing group when 'remove' button is pressed", () => {
   expect(
     screen.getByRole("button", { name: /remove group-3/i })
   ).toBeInTheDocument();
+});
+
+describe("Confirmation Tests", () => {
+  test("should render 'no distancer' warning when row is initially added", () => {
+    const { warningMessage } = DEFAULT_PROPS;
+    render(<GroupTable warningMessage={warningMessage} />);
+    userEvent.click(screen.getByRole("button", { name: /create group/i }));
+    userEvent.click(screen.getByRole("button", { name: /expand more/i }));
+
+    expect(
+      screen.getByText(GroupRow.NO_DISTANCER_WARNING_MESSAGE)
+    ).toBeVisible();
+  });
 });

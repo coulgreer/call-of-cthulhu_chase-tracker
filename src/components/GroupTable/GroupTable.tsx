@@ -40,7 +40,8 @@ export default class GroupTable extends React.Component<Props, State> {
     groups.push({
       id: `GROUP-${idNum}`,
       name: `Group ${idNum}`,
-      distancerName: "",
+      chaseName: GroupRow.DEFAULT_CHASE_NAME,
+      distancerName: GroupRow.INVALID_DISTANCER_NAME,
       pursuerNames: [],
     });
 

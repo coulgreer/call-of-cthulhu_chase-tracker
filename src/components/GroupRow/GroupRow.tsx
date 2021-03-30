@@ -22,12 +22,15 @@ interface State {
 export interface Data {
   id: string;
   name: string;
+  chaseName: string;
   distancerName: string;
   pursuerNames: string[];
 }
 
 export default class GroupRow extends React.Component<Props, State> {
   static INVALID_DISTANCER_NAME = "N/A";
+
+  static DEFAULT_CHASE_NAME = "DEFAULT Chase";
 
   static get NO_DISTANCER_WARNING_MESSAGE() {
     return "No appetite for the hunt? In due time it will come. It always does...";
@@ -65,6 +68,7 @@ export default class GroupRow extends React.Component<Props, State> {
   }
 
   private renderMainContent() {
+    const { groups, ownedIndex } = this.props;
     const { isShown } = this.state;
 
     return (
@@ -79,7 +83,10 @@ export default class GroupRow extends React.Component<Props, State> {
         </div>
         <label className="input input__label">
           Name
-          <input className="input__textbox input__textbox--full-width" />
+          <input
+            className="input__textbox input__textbox--full-width"
+            defaultValue={groups[ownedIndex].name}
+          />
         </label>
         <Button
           className="button button--primary button--small button--circular"
@@ -110,12 +117,23 @@ export default class GroupRow extends React.Component<Props, State> {
           shown &&
           ((props) => (
             <animated.div style={props} className="GroupRow__extended-display">
+              {this.renderChaseName()}
               {this.renderDistancer()}
               {this.renderPursuers()}
             </animated.div>
           ))
         }
       </Transition>
+    );
+  }
+
+  private renderChaseName() {
+    const { groups, ownedIndex } = this.props;
+    const { chaseName } = groups[ownedIndex];
+    return (
+      <h3>
+        Chase Name: <span>{chaseName}</span>
+      </h3>
     );
   }
 
@@ -167,6 +185,7 @@ export default class GroupRow extends React.Component<Props, State> {
         <h3>Members</h3>
         <p>Highest MOV</p>
         <p>Lowest MOV</p>
+        <div aria-label="Participants" />
         <Button className="button button--primary button--medium">ADD</Button>
       </>
     );
