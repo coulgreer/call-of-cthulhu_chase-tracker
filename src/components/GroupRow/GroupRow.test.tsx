@@ -45,12 +45,6 @@ const DEFAULT_PROPS = {
   ],
 };
 
-/*
- * TODO (Coul Greer): Implement a test to check that the warning message exists
- * when no distancer exists for a group. There is currently a runtime error
- * in which the warning does not appear.
- */
-
 test("should render properly when details are not expanded", () => {
   const { groups } = DEFAULT_PROPS;
 
@@ -91,8 +85,9 @@ test("should render properly when details are not expanded", () => {
 
 test("should render properly when details are expanded", () => {
   const { groups } = DEFAULT_PROPS;
+  const index = 0;
 
-  render(<GroupRow ownedIndex={0} groups={groups} />);
+  render(<GroupRow ownedIndex={index} groups={groups} />);
 
   expect(screen.getByRole("button", { name: /split/i })).toBeInTheDocument();
   expect(screen.getByRole("button", { name: /join/i })).toBeInTheDocument();
@@ -104,7 +99,25 @@ test("should render properly when details are expanded", () => {
     screen.getByRole("button", { name: /expand less/i })
   ).toBeInTheDocument();
 
-  expect(screen.getByText(/chase name/i)).toBeInTheDocument();
+  expect(
+    screen.getByText((content, element) => {
+      if (!element) return false;
+
+      const hasText = (node: Element) => {
+        if (node.textContent === null) return false;
+
+        const regex = new RegExp(`chase name: ${groups[index].chaseName}`, "i");
+
+        return regex.test(node.textContent);
+      };
+
+      const childrenDontHaveText = Array.from(element.children).every(
+        (child) => !hasText(child)
+      );
+
+      return hasText(element) && childrenDontHaveText;
+    })
+  ).toBeInTheDocument();
 
   expect(
     screen.getByRole("combobox", { name: /distancer/i })
