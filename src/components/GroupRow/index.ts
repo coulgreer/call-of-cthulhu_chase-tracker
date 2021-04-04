@@ -1,1 +1,2 @@
-export { default, Data } from "./GroupRow";
+export { default } from "./GroupRow";
+export type { Data } from "./GroupRow";

@@ -11,8 +11,10 @@ import ExpandLessIcon from "../../images/baseline_expand_less_black_24dp.png";
 import ExpandMoreIcon from "../../images/baseline_expand_more_black_24dp.png";
 
 import "./ParticipantRow.css";
+
 import UniqueSequenceGenerator from "../../utils/unique-sequence-generator";
 import { roll, Result } from "../../utils/roller";
+
 import { Participant } from "../../types";
 
 interface Props {
@@ -20,15 +22,15 @@ interface Props {
 }
 
 interface State {
-  currentName: string;
-  validName: string;
   nameWarningShown: boolean;
   expansionShown: boolean;
   modalShown: boolean;
+  selectedStatValue: string;
+  participant: Participant;
+  currentName: string;
   mainStatistics: WrappedStatistic[];
   speedStatistics: WrappedStatistic[];
   hazardStatistics: WrappedStatistic[];
-  selectedStatValue: string;
 }
 
 const SEQUENCE_START = 0;
@@ -298,7 +300,7 @@ export default class ParticipantRow extends React.Component<Props, State> {
       expansionShown: false,
       modalShown: false,
       selectedStatValue: "",
-      validName: id,
+      participant,
       currentName: id,
       mainStatistics: ParticipantRow.initializeMainStatistics(participant),
       speedStatistics: this.initializeSpeedStatistics(participant),
@@ -310,10 +312,15 @@ export default class ParticipantRow extends React.Component<Props, State> {
     const { value } = event.currentTarget;
 
     if (value.trim()) {
-      this.setState(() => ({
-        validName: value,
-        nameWarningShown: false,
-      }));
+      this.setState((state) => {
+        const { participant } = state;
+        participant.name = value;
+
+        return {
+          participant,
+          nameWarningShown: false,
+        };
+      });
     } else {
       this.setState(() => ({ nameWarningShown: true }));
     }
@@ -322,10 +329,13 @@ export default class ParticipantRow extends React.Component<Props, State> {
   }
 
   private handleNameBlur() {
-    this.setState((state) => ({
-      currentName: state.validName,
-      nameWarningShown: false,
-    }));
+    this.setState((state) => {
+      const { name } = state.participant;
+      return {
+        currentName: name,
+        nameWarningShown: false,
+      };
+    });
   }
 
   private handleMainStatisticChange(index: number, value: string) {

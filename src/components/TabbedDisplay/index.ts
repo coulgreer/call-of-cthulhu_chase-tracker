@@ -1,1 +1,2 @@
-export { default, Data } from "./TabbedDisplay";
+export { default } from "./TabbedDisplay";
+export type { Data } from "./TabbedDisplay";
