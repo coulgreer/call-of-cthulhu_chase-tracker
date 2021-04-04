@@ -4,7 +4,7 @@ import Modal from "react-modal";
 
 import Button from "../Button";
 import StatisticTable from "../StatisticTable";
-import { Data as StatisticDisplayData } from "../StatisticDisplay";
+import { WrappedStatistic } from "../StatisticDisplay";
 import DisplayFactory from "../StatisticDisplay/DisplayFactory";
 
 import ExpandLessIcon from "../../images/baseline_expand_less_black_24dp.png";
@@ -13,9 +13,10 @@ import ExpandMoreIcon from "../../images/baseline_expand_more_black_24dp.png";
 import "./ParticipantRow.css";
 import UniqueSequenceGenerator from "../../utils/unique-sequence-generator";
 import { roll, Result } from "../../utils/roller";
+import { Participant } from "../../types";
 
 interface Props {
-  defaultParticipantName: string;
+  id: string;
 }
 
 interface State {
@@ -24,21 +25,33 @@ interface State {
   nameWarningShown: boolean;
   expansionShown: boolean;
   modalShown: boolean;
-  mainStatistics: StatisticDisplayData[];
-  speedStatistics: StatisticDisplayData[];
-  hazardStatistics: StatisticDisplayData[];
+  mainStatistics: WrappedStatistic[];
+  speedStatistics: WrappedStatistic[];
+  hazardStatistics: WrappedStatistic[];
   selectedStatValue: string;
 }
 
 const SEQUENCE_START = 0;
 
 export default class ParticipantRow extends React.Component<Props, State> {
+  static get DEX_INDEX() {
+    return 0;
+  }
+
   static get DEX_TITLE() {
     return "DEX";
   }
 
+  static get SPEED_INDEX() {
+    return 1;
+  }
+
   static get SPEED_TITLE() {
     return "Speed";
+  }
+
+  static get MOV_INDEX() {
+    return 2;
   }
 
   static get MOV_TITLE() {
@@ -101,6 +114,45 @@ export default class ParticipantRow extends React.Component<Props, State> {
     return "New Stat";
   }
 
+  private static initializeMainStatistics({
+    dexterity,
+    derivedSpeed,
+    movementRate,
+  }: Participant): WrappedStatistic[] {
+    return [
+      {
+        statistic: {
+          name: ParticipantRow.DEX_TITLE,
+          score: dexterity,
+        },
+        currentValue: dexterity.toString(),
+        key: ParticipantRow.DEX_INDEX,
+      },
+      {
+        statistic: {
+          name: ParticipantRow.SPEED_TITLE,
+          score: derivedSpeed,
+        },
+        currentValue: derivedSpeed.toString(),
+        key: ParticipantRow.SPEED_INDEX,
+      },
+      {
+        statistic: {
+          name: ParticipantRow.MOV_TITLE,
+          score: movementRate,
+        },
+        currentValue: movementRate.toString(),
+        limiter: {
+          lowerLimit: Number.MIN_SAFE_INTEGER,
+          lowerWarning: 1,
+          upperWarning: 10,
+          upperLimit: Number.MAX_SAFE_INTEGER,
+        },
+        key: ParticipantRow.MOV_INDEX,
+      },
+    ];
+  }
+
   static generateSpeedModifier(value: number) {
     const degreeOfSuccess = roll(value);
 
@@ -122,22 +174,23 @@ export default class ParticipantRow extends React.Component<Props, State> {
   }
 
   /* eslint-disable no-param-reassign */
-  static manageValue(value: string, data: StatisticDisplayData) {
-    const {
-      upperLimit = Number.MAX_SAFE_INTEGER,
-      lowerLimit = Number.MIN_SAFE_INTEGER,
-    } = data;
+  static manageValue(value: string, data: WrappedStatistic) {
+    const { limiter, statistic } = data;
+
+    const upperLimit = limiter?.upperLimit || Number.MAX_SAFE_INTEGER;
+    const lowerLimit = limiter?.lowerLimit || Number.MIN_SAFE_INTEGER;
 
     if (value !== "") {
       const valueNum = Number.parseInt(value, 10);
       if (valueNum > upperLimit) {
-        data.validValue = upperLimit;
+        statistic.score = upperLimit;
       } else if (valueNum < lowerLimit) {
-        data.validValue = lowerLimit;
+        statistic.score = lowerLimit;
       } else {
-        data.validValue = valueNum;
+        statistic.score = valueNum;
       }
     }
+
     data.currentValue = value;
   }
 
@@ -145,14 +198,11 @@ export default class ParticipantRow extends React.Component<Props, State> {
 
   private hazardStatSequence: UniqueSequenceGenerator;
 
-  private speedStatisticEl: StatisticDisplayData;
-
   constructor(props: Props) {
     super(props);
 
     this.speedStatSequence = new UniqueSequenceGenerator(SEQUENCE_START);
     this.hazardStatSequence = new UniqueSequenceGenerator(SEQUENCE_START);
-    this.speedStatisticEl = { title: "", currentValue: "0", validValue: 0 };
 
     this.handleNameChange = this.handleNameChange.bind(this);
     this.handleNameBlur = this.handleNameBlur.bind(this);
@@ -182,18 +232,77 @@ export default class ParticipantRow extends React.Component<Props, State> {
     this.calculateSpeedModifier = this.calculateSpeedModifier.bind(this);
     this.handleSelectionChange = this.handleSelectionChange.bind(this);
 
-    const { defaultParticipantName } = this.props;
+    const { id } = this.props;
+    const participant: Participant = {
+      id,
+      name: id,
+      dexterity: 15,
+      movementRate: 2,
+      derivedSpeed: 0,
+      speedSkills: [
+        {
+          name: ParticipantRow.CON_TITLE,
+          score: 15,
+        },
+        {
+          name: ParticipantRow.DRIVE_TITLE,
+          score: 20,
+        },
+        {
+          name: ParticipantRow.RIDE_TITLE,
+          score: 5,
+        },
+        {
+          name: ParticipantRow.AIR_TITLE,
+          score: 1,
+        },
+        {
+          name: ParticipantRow.SEA_TITLE,
+          score: 1,
+        },
+      ],
+      hazardSkills: [
+        {
+          name: ParticipantRow.STR_TITLE,
+          score: 15,
+        },
+        {
+          name: ParticipantRow.CLIMB_TITLE,
+          score: 20,
+        },
+        {
+          name: ParticipantRow.SWIM_TITLE,
+          score: 20,
+        },
+        {
+          name: ParticipantRow.DODGE_TITLE,
+          score: 7,
+        },
+        {
+          name: ParticipantRow.BRAWL_TITLE,
+          score: 25,
+        },
+        {
+          name: ParticipantRow.HANDGUN_TITLE,
+          score: 20,
+        },
+        {
+          name: ParticipantRow.RIFLE_TITLE,
+          score: 25,
+        },
+      ],
+    };
 
     this.state = {
-      currentName: defaultParticipantName,
-      validName: defaultParticipantName,
       nameWarningShown: false,
       expansionShown: false,
-      mainStatistics: this.initializeMainStatistics(),
-      speedStatistics: this.initializeSpeedStatistics(),
-      hazardStatistics: this.initializeHazardStatistics(),
-      selectedStatValue: "",
       modalShown: false,
+      selectedStatValue: "",
+      validName: id,
+      currentName: id,
+      mainStatistics: ParticipantRow.initializeMainStatistics(participant),
+      speedStatistics: this.initializeSpeedStatistics(participant),
+      hazardStatistics: this.initializeHazardStatistics(participant),
     };
   }
 
@@ -241,44 +350,44 @@ export default class ParticipantRow extends React.Component<Props, State> {
 
   private handleHazardStatisticChange(index: number, value: string) {
     const { hazardStatistics } = this.state;
-    const data = hazardStatistics[index];
+    const wrappedStatistic = hazardStatistics[index];
 
-    ParticipantRow.manageValue(value, data);
+    ParticipantRow.manageValue(value, wrappedStatistic);
 
-    hazardStatistics[index] = data;
+    hazardStatistics[index] = wrappedStatistic;
     this.setState({ hazardStatistics });
   }
 
   private handleMainStatisticBlur(index: number) {
     const { mainStatistics } = this.state;
-    const data = mainStatistics[index];
-    const { validValue } = data;
+    const wrappedStatistic = mainStatistics[index];
+    const { score } = wrappedStatistic.statistic;
 
-    data.currentValue = validValue.toString();
-    mainStatistics[index] = data;
+    wrappedStatistic.currentValue = score.toString();
 
+    mainStatistics[index] = wrappedStatistic;
     this.setState({ mainStatistics });
   }
 
   private handleSpeedStatisticBlur(index: number) {
     const { speedStatistics } = this.state;
-    const data = speedStatistics[index];
-    const { validValue } = data;
+    const wrappedStatistic = speedStatistics[index];
+    const { score } = wrappedStatistic.statistic;
 
-    data.currentValue = validValue.toString();
-    speedStatistics[index] = data;
+    wrappedStatistic.currentValue = score.toString();
 
+    speedStatistics[index] = wrappedStatistic;
     this.setState({ speedStatistics });
   }
 
   private handleHazardStatisticBlur(index: number) {
     const { hazardStatistics } = this.state;
-    const data = hazardStatistics[index];
-    const { validValue } = data;
+    const wrappedStatistic = hazardStatistics[index];
+    const { score } = wrappedStatistic.statistic;
 
-    data.currentValue = validValue.toString();
-    hazardStatistics[index] = data;
+    wrappedStatistic.currentValue = score.toString();
 
+    hazardStatistics[index] = wrappedStatistic;
     this.setState({ hazardStatistics });
   }
 
@@ -288,117 +397,24 @@ export default class ParticipantRow extends React.Component<Props, State> {
     this.setState({ selectedStatValue: value });
   }
 
-  private initializeMainStatistics() {
-    const stats = [
-      {
-        title: ParticipantRow.DEX_TITLE,
-        currentValue: "15",
-        validValue: 15,
-        key: 1,
-      },
-      {
-        title: ParticipantRow.SPEED_TITLE,
-        currentValue: "0",
-        validValue: 0,
-        key: 2,
-      },
-      {
-        title: ParticipantRow.MOV_TITLE,
-        currentValue: "2",
-        validValue: 2,
-        lowerWarning: 1,
-        upperWarning: 10,
-        key: 3,
-      },
-    ];
-
-    [this.speedStatisticEl] = stats.filter(
-      (stat) => stat.title === ParticipantRow.SPEED_TITLE
-    );
-
-    return stats;
+  private initializeSpeedStatistics({
+    speedSkills,
+  }: Participant): WrappedStatistic[] {
+    return speedSkills.map((skill) => ({
+      statistic: skill,
+      currentValue: skill.score.toString(),
+      key: this.speedStatSequence.nextNum(),
+    }));
   }
 
-  private initializeSpeedStatistics() {
-    return [
-      {
-        title: ParticipantRow.CON_TITLE,
-        currentValue: "15",
-        validValue: 15,
-        key: this.speedStatSequence.nextNum(),
-      },
-      {
-        title: ParticipantRow.DRIVE_TITLE,
-        currentValue: "20",
-        validValue: 20,
-        key: this.speedStatSequence.nextNum(),
-      },
-      {
-        title: ParticipantRow.RIDE_TITLE,
-        currentValue: "5",
-        validValue: 5,
-        key: this.speedStatSequence.nextNum(),
-      },
-      {
-        title: ParticipantRow.AIR_TITLE,
-        currentValue: "1",
-        validValue: 1,
-        key: this.speedStatSequence.nextNum(),
-      },
-      {
-        title: ParticipantRow.SEA_TITLE,
-        currentValue: "1",
-        validValue: 1,
-        key: this.speedStatSequence.nextNum(),
-      },
-    ];
-  }
-
-  private initializeHazardStatistics() {
-    return [
-      {
-        title: ParticipantRow.STR_TITLE,
-        currentValue: "15",
-        validValue: 15,
-        key: this.hazardStatSequence.nextNum(),
-      },
-      {
-        title: ParticipantRow.CLIMB_TITLE,
-        currentValue: "20",
-        validValue: 20,
-        key: this.hazardStatSequence.nextNum(),
-      },
-      {
-        title: ParticipantRow.SWIM_TITLE,
-        currentValue: "20",
-        validValue: 20,
-        key: this.hazardStatSequence.nextNum(),
-      },
-      {
-        title: ParticipantRow.DODGE_TITLE,
-        currentValue: "7",
-        validValue: 7,
-        key: this.hazardStatSequence.nextNum(),
-      },
-      {
-        title: ParticipantRow.BRAWL_TITLE,
-        currentValue: "25",
-        validValue: 25,
-        key: this.hazardStatSequence.nextNum(),
-      },
-      {
-        title: ParticipantRow.HANDGUN_TITLE,
-        currentValue: "20",
-        validValue: 20,
-        key: this.hazardStatSequence.nextNum(),
-      },
-      {
-        title: ParticipantRow.RIFLE_TITLE,
-        currentValue: "25",
-        validValue: 25,
-        key: this.hazardStatSequence.nextNum(),
-      },
-    ];
+  private initializeHazardStatistics({
+    hazardSkills,
+  }: Participant): WrappedStatistic[] {
+    return hazardSkills.map((skill) => ({
+      statistic: skill,
+      currentValue: skill.score.toString(),
+      key: this.hazardStatSequence.nextNum(),
+    }));
   }
 
   private calculateSpeedModifier() {
@@ -407,7 +423,7 @@ export default class ParticipantRow extends React.Component<Props, State> {
     const modifier = ParticipantRow.generateSpeedModifier(
       Number.parseInt(selectedStatValue, 10)
     );
-    this.updateSpeedModifierEl(modifier);
+    this.updateSpeedModifier(modifier);
     this.closeModal();
   }
 
@@ -419,10 +435,13 @@ export default class ParticipantRow extends React.Component<Props, State> {
 
   private createSpeedStatistic() {
     const key = this.speedStatSequence.nextNum();
-    const newData = {
-      title: `${ParticipantRow.DEFAULT_STAT_NAME} #${key}`,
-      currentValue: "15",
-      validValue: 15,
+    const startingScore = 15;
+    const newData: WrappedStatistic = {
+      statistic: {
+        name: `${ParticipantRow.DEFAULT_STAT_NAME} #${key}`,
+        score: startingScore,
+      },
+      currentValue: startingScore.toString(),
       key,
     };
 
@@ -442,20 +461,23 @@ export default class ParticipantRow extends React.Component<Props, State> {
 
   private renameSpeedStatistic(index: number, value: string) {
     const { speedStatistics } = this.state;
-    const data = speedStatistics[index];
+    const wrappedStatistic = speedStatistics[index];
 
-    data.title = value;
-    speedStatistics[index] = data;
+    wrappedStatistic.statistic.name = value;
+    speedStatistics[index] = wrappedStatistic;
 
     this.setState({ speedStatistics });
   }
 
   private createHazardStatistic() {
     const key = this.hazardStatSequence.nextNum();
+    const startingScore = 15;
     const newData = {
-      title: `${ParticipantRow.DEFAULT_STAT_NAME} #${key}`,
-      currentValue: "15",
-      validValue: 15,
+      statistic: {
+        name: `${ParticipantRow.DEFAULT_STAT_NAME} #${key}`,
+        score: startingScore,
+      },
+      currentValue: startingScore.toString(),
       key,
     };
 
@@ -475,10 +497,10 @@ export default class ParticipantRow extends React.Component<Props, State> {
 
   private renameHazardStatistic(index: number, value: string) {
     const { hazardStatistics } = this.state;
-    const data = hazardStatistics[index];
+    const wrappedStatistic = hazardStatistics[index];
 
-    data.title = value;
-    hazardStatistics[index] = data;
+    wrappedStatistic.statistic.name = value;
+    hazardStatistics[index] = wrappedStatistic;
 
     this.setState({ hazardStatistics });
   }
@@ -491,9 +513,17 @@ export default class ParticipantRow extends React.Component<Props, State> {
     this.setState({ modalShown: false });
   }
 
-  private updateSpeedModifierEl(modifier: number) {
-    this.speedStatisticEl.currentValue = modifier.toString();
-    this.speedStatisticEl.validValue = modifier;
+  private updateSpeedModifier(modifier: number) {
+    this.setState((state) => {
+      const { mainStatistics } = state;
+      const wrappedStatistic = mainStatistics[ParticipantRow.SPEED_INDEX];
+
+      wrappedStatistic.statistic.score = modifier;
+      wrappedStatistic.currentValue = modifier.toString();
+
+      mainStatistics[ParticipantRow.SPEED_INDEX] = wrappedStatistic;
+      return { mainStatistics };
+    });
   }
 
   /*
@@ -515,17 +545,20 @@ export default class ParticipantRow extends React.Component<Props, State> {
       >
         <p>Select a speed skill</p>
         <form onSubmit={this.calculateSpeedModifier}>
-          {speedStatistics.map((data) => (
-            <label className="input__radio input__label" key={data.key}>
+          {speedStatistics.map((wrappedStatistic) => (
+            <label
+              className="input__radio input__label"
+              key={wrappedStatistic.key}
+            >
               <input
                 className="input__radio__checkbox"
                 type="radio"
                 name="selectedStatistic"
-                value={data.validValue}
+                value={wrappedStatistic.statistic.score}
                 onChange={this.handleSelectionChange}
               />
               <span className="input__radio__checkmark" />
-              {data.title}
+              {wrappedStatistic.statistic.name}
             </label>
           ))}
           <div className="Modal__Content__options">

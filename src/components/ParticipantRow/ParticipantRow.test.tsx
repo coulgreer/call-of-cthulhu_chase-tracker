@@ -4,17 +4,17 @@ import userEvent from "@testing-library/user-event";
 
 import ParticipantRow from ".";
 
-const name = "TEST_NAME";
+const DEFAULT_PROPS = { id: "DefaultID 1" };
 
-function renderExpandedParticipantRow(participantName: string) {
-  render(<ParticipantRow defaultParticipantName={participantName} />);
+function renderExpandedParticipantRow(id: string) {
+  render(<ParticipantRow id={id} />);
   // Need to expand the extended view due to the children elements not existing otherwise.
   userEvent.click(screen.getByRole("button", { name: /expand/i }));
 }
 
 describe("Collapse/Expand detailed data", () => {
   test("should render participant information properly when collapsed", () => {
-    render(<ParticipantRow defaultParticipantName={name} />);
+    render(<ParticipantRow id={DEFAULT_PROPS.id} />);
 
     expect(screen.getByRole("textbox", { name: /name/i })).toBeInTheDocument();
 
@@ -85,7 +85,7 @@ describe("Collapse/Expand detailed data", () => {
   });
 
   test("should render participant information properly when expanded", () => {
-    render(<ParticipantRow defaultParticipantName={name} />);
+    render(<ParticipantRow id={DEFAULT_PROPS.id} />);
 
     const buttonEl = screen.getByRole("button", { name: /expand/i });
     userEvent.click(buttonEl);
@@ -151,11 +151,9 @@ describe("Collapse/Expand detailed data", () => {
 });
 
 describe("Participant name rendering", () => {
-  const defaultName = "Default Name";
-
   test("should render given name when changed from default name", () => {
     const newName = "Test Name";
-    render(<ParticipantRow defaultParticipantName={defaultName} />);
+    render(<ParticipantRow id={DEFAULT_PROPS.id} />);
 
     const inputEl = screen.getByRole("textbox", { name: /name/i });
     userEvent.clear(inputEl);
@@ -167,7 +165,7 @@ describe("Participant name rendering", () => {
   test("should render the last valid name when name changed to empty string", () => {
     const validName = "Valid";
     const invalidName = "";
-    render(<ParticipantRow defaultParticipantName={defaultName} />);
+    render(<ParticipantRow id={DEFAULT_PROPS.id} />);
 
     const inputEl = screen.getByRole("textbox", { name: /name/i });
     userEvent.clear(inputEl);
@@ -182,7 +180,7 @@ describe("Participant name rendering", () => {
   test("should render the last valid name when name changed to invalid value with trailing and/or leading spaces", () => {
     const validName = "Valid";
     const invalidName = "    ";
-    render(<ParticipantRow defaultParticipantName={defaultName} />);
+    render(<ParticipantRow id={DEFAULT_PROPS.id} />);
 
     const inputEl = screen.getByRole("textbox", { name: /name/i });
     userEvent.clear(inputEl);
@@ -204,7 +202,7 @@ describe("Participant name rendering", () => {
 
   test("should render with a warning message when an invalid name is displayed then hide the message upon receiving a valid character", () => {
     const validName = "valid";
-    render(<ParticipantRow defaultParticipantName={defaultName} />);
+    render(<ParticipantRow id={DEFAULT_PROPS.id} />);
 
     const inputEl = screen.getByRole("textbox", { name: /name/i });
     userEvent.clear(inputEl);
@@ -225,7 +223,7 @@ describe("Participant name rendering", () => {
 
 describe("Statistic data manipulation", () => {
   test("should create speed statistic when appropriate 'create statistic' button clicked", () => {
-    renderExpandedParticipantRow(name);
+    renderExpandedParticipantRow(DEFAULT_PROPS.id);
 
     expect(screen.queryByLabelText(/new stat #6/i)).not.toBeInTheDocument();
 
@@ -237,7 +235,7 @@ describe("Statistic data manipulation", () => {
   });
 
   test("should delete given speed stat when the 'delete speed stat' is clicked", () => {
-    renderExpandedParticipantRow(name);
+    renderExpandedParticipantRow(DEFAULT_PROPS.id);
 
     expect(
       screen.getByLabelText(new RegExp(ParticipantRow.CON_TITLE, "i"))
@@ -255,7 +253,7 @@ describe("Statistic data manipulation", () => {
   });
 
   test("should create hazard stat when 'create hazard statistic' clicked", () => {
-    renderExpandedParticipantRow(name);
+    renderExpandedParticipantRow(DEFAULT_PROPS.id);
 
     expect(screen.queryByLabelText(/new stat #8/i)).not.toBeInTheDocument();
 
@@ -267,7 +265,7 @@ describe("Statistic data manipulation", () => {
   });
 
   test("should delete given hazard stat when the 'delete hazard statistic' is clicked", () => {
-    renderExpandedParticipantRow(name);
+    renderExpandedParticipantRow(DEFAULT_PROPS.id);
 
     expect(
       screen.getByLabelText(new RegExp(ParticipantRow.STR_TITLE, "i"))
@@ -286,7 +284,7 @@ describe("Statistic data manipulation", () => {
 
   describe("when a statistic is deleted", () => {
     test("should create a speed stat with the appropriate name when creating a new speed stat", () => {
-      renderExpandedParticipantRow(name);
+      renderExpandedParticipantRow(DEFAULT_PROPS.id);
 
       userEvent.click(
         screen.getByRole("button", {
@@ -303,7 +301,7 @@ describe("Statistic data manipulation", () => {
     });
 
     test("should create a hazard stat with the appropriate name when creating a new hazard stat", () => {
-      renderExpandedParticipantRow(name);
+      renderExpandedParticipantRow(DEFAULT_PROPS.id);
 
       userEvent.click(
         screen.getByRole("button", {
@@ -325,7 +323,7 @@ describe("Statistic Display event handlers", () => {
   const validInput = 11;
 
   test("should change 'main statistic' to the last valid value when changed to an invalid value and focus lost", () => {
-    render(<ParticipantRow defaultParticipantName={name} />);
+    render(<ParticipantRow id={DEFAULT_PROPS.id} />);
 
     const statisticDisplayEl = screen.getByRole("spinbutton", {
       name: ParticipantRow.DEX_TITLE,
@@ -344,7 +342,7 @@ describe("Statistic Display event handlers", () => {
   });
 
   test("should change 'speed statistic' to the last valid value when changed to an invalid value and focus lost", () => {
-    renderExpandedParticipantRow(name);
+    renderExpandedParticipantRow(DEFAULT_PROPS.id);
 
     const statisticDisplayEl = screen.getByRole("spinbutton", {
       name: ParticipantRow.CON_TITLE,
@@ -363,7 +361,7 @@ describe("Statistic Display event handlers", () => {
   });
 
   test("should change 'hazard statistic' to the last valid value when changed to an invalid value and focus lost", () => {
-    renderExpandedParticipantRow(name);
+    renderExpandedParticipantRow(DEFAULT_PROPS.id);
 
     const statisticDisplayEl = screen.getByRole("spinbutton", {
       name: ParticipantRow.STR_TITLE,
@@ -384,7 +382,7 @@ describe("Statistic Display event handlers", () => {
 
 describe("Modal", () => {
   test("should reveal modal when 'generate speed modifier' button is pressed", () => {
-    render(<ParticipantRow defaultParticipantName={name} />);
+    render(<ParticipantRow id={DEFAULT_PROPS.id} />);
 
     userEvent.click(screen.getByRole("button", { name: /generate/i }));
 
@@ -392,7 +390,7 @@ describe("Modal", () => {
   });
 
   test("should close modal when any button is pressed", () => {
-    render(<ParticipantRow defaultParticipantName={name} />);
+    render(<ParticipantRow id={DEFAULT_PROPS.id} />);
     userEvent.click(screen.getByRole("button", { name: /generate/i }));
 
     expect(screen.getByRole("dialog")).toBeInTheDocument();
@@ -406,7 +404,7 @@ describe("Modal", () => {
     test("should rename speed statistic when given a new name", () => {
       const originName = ParticipantRow.CON_TITLE;
       const newName = "NEW_TEST";
-      renderExpandedParticipantRow(name);
+      renderExpandedParticipantRow(DEFAULT_PROPS.id);
 
       expect(screen.queryByText(newName)).not.toBeInTheDocument();
       expect(screen.getByText(originName)).toBeInTheDocument();
@@ -430,7 +428,7 @@ describe("Modal", () => {
     test("should rename hazard statistic when given a new name", () => {
       const originName = ParticipantRow.STR_TITLE;
       const newName = "NEW_TEST";
-      renderExpandedParticipantRow(name);
+      renderExpandedParticipantRow(DEFAULT_PROPS.id);
 
       expect(screen.queryByText(newName)).not.toBeInTheDocument();
       expect(screen.getByText(originName)).toBeInTheDocument();
@@ -456,7 +454,7 @@ describe("Modal", () => {
 describe("Confirmation Tests", () => {
   test("should reset textbox to current name when another speed skill has been renamed", () => {
     const firstNewName = "First Name";
-    renderExpandedParticipantRow(name);
+    renderExpandedParticipantRow(DEFAULT_PROPS.id);
 
     userEvent.click(
       screen.getByRole("button", {
@@ -482,7 +480,7 @@ describe("Confirmation Tests", () => {
 
   test("should reset textbox to current name when another hazard skill has been renamed", () => {
     const firstNewName = "First Name";
-    renderExpandedParticipantRow(name);
+    renderExpandedParticipantRow(DEFAULT_PROPS.id);
 
     userEvent.click(
       screen.getByRole("button", {

@@ -1,1 +1,1 @@
-export { default, Data, Props } from "./StatisticDisplay";
+export { default, WrappedStatistic, Limiter } from "./StatisticDisplay";

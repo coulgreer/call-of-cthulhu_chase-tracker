@@ -8,8 +8,8 @@ import StatisticTable from ".";
 const DEFAULT_PROPS = {
   title: "TEST_TITLE",
   data: [
-    { title: "title1", currentValue: "1", validValue: 1, key: 1 },
-    { title: "title2", currentValue: "2", validValue: 2, key: 2 },
+    { statistic: { name: "title1", score: 1 }, currentValue: "1", key: 1 },
+    { statistic: { name: "title2", score: 2 }, currentValue: "2", key: 2 },
   ],
 };
 
@@ -26,27 +26,27 @@ test("should render properly", () => {
     screen.getByRole("button", { name: /create statistic/i })
   ).toBeInTheDocument();
 
-  expect(screen.getByLabelText(first.title)).toBeInTheDocument();
+  expect(screen.getByLabelText(first.statistic.name)).toBeInTheDocument();
   expect(
     screen.getByRole("button", {
-      name: new RegExp(`delete: ${first.title}`),
+      name: new RegExp(`delete: ${first.statistic.name}`),
     })
   ).toBeInTheDocument();
   expect(
     screen.getByRole("button", {
-      name: new RegExp(`rename: ${first.title}`),
+      name: new RegExp(`rename: ${first.statistic.name}`),
     })
   ).toBeInTheDocument();
 
-  expect(screen.getByLabelText(second.title)).toBeInTheDocument();
+  expect(screen.getByLabelText(second.statistic.name)).toBeInTheDocument();
   expect(
     screen.getByRole("button", {
-      name: new RegExp(`delete: ${second.title}`),
+      name: new RegExp(`delete: ${second.statistic.name}`),
     })
   ).toBeInTheDocument();
   expect(
     screen.getByRole("button", {
-      name: new RegExp(`rename: ${second.title}`),
+      name: new RegExp(`rename: ${second.statistic.name}`),
     })
   ).toBeInTheDocument();
 });
@@ -71,13 +71,17 @@ test("should use provided callback", () => {
   expect(handleCreateClick).toBeCalledTimes(1);
 
   userEvent.click(
-    screen.getByRole("button", { name: new RegExp(`delete: ${first.title}`) })
+    screen.getByRole("button", {
+      name: new RegExp(`delete: ${first.statistic.name}`),
+    })
   );
 
   expect(handleDeleteClick).toBeCalledTimes(1);
 
   userEvent.click(
-    screen.getByRole("button", { name: new RegExp(`rename: ${first.title}`) })
+    screen.getByRole("button", {
+      name: new RegExp(`rename: ${first.statistic.name}`),
+    })
   );
   userEvent.click(screen.getByRole("button", { name: /^rename$/i }));
 
@@ -93,7 +97,9 @@ test("should properly display modal", () => {
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
 
   userEvent.click(
-    screen.getByRole("button", { name: new RegExp(`rename: ${first.title}`) })
+    screen.getByRole("button", {
+      name: new RegExp(`rename: ${first.statistic.name}`),
+    })
   );
 
   expect(screen.getByRole("dialog")).toBeInTheDocument();
@@ -106,7 +112,9 @@ test("should close modal when cancel button is pressed", () => {
   );
 
   userEvent.click(
-    screen.getByRole("button", { name: new RegExp(`rename: ${first.title}`) })
+    screen.getByRole("button", {
+      name: new RegExp(`rename: ${first.statistic.name}`),
+    })
   );
   userEvent.click(screen.getByRole("button", { name: /cancel/i }));
 
@@ -120,7 +128,9 @@ test("should close modal when accept button is pressed", () => {
   );
 
   userEvent.click(
-    screen.getByRole("button", { name: new RegExp(`rename: ${first.title}`) })
+    screen.getByRole("button", {
+      name: new RegExp(`rename: ${first.statistic.name}`),
+    })
   );
   userEvent.click(screen.getByRole("button", { name: /^rename$/i }));
 

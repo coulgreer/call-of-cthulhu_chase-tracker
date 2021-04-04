@@ -3,7 +3,7 @@ import React from "react";
 import Modal from "react-modal";
 
 import Button from "../Button";
-import { Data } from "../StatisticDisplay";
+import { WrappedStatistic } from "../StatisticDisplay";
 import DisplayFactory from "../StatisticDisplay/DisplayFactory";
 
 import AddIcon from "../../images/baseline_add_black_24dp_x2.png";
@@ -14,7 +14,7 @@ import "./StatisticTable.css";
 
 interface Props {
   title: string;
-  data: Data[];
+  data: WrappedStatistic[];
   onDeleteClick?: (index: number) => void;
   onCreateClick?: () => void;
   onRenameStatistic?: (index: number, value: string) => void;
@@ -63,12 +63,13 @@ export default class StatisticTable extends React.Component<Props, State> {
 
   private handlePromptRenameClick(index: number) {
     const { data } = this.props;
+    const { statistic } = data[index];
 
     this.setState({
       modalShown: true,
       selectedIndex: index,
-      currentNewName: data[index].title,
-      validNewName: data[index].title,
+      currentNewName: statistic.name,
+      validNewName: statistic.name,
     });
   }
 
@@ -109,29 +110,36 @@ export default class StatisticTable extends React.Component<Props, State> {
     return (
       <>
         <h4>{title}</h4>
-        {data.map((datum, index) => (
-          <div className="StatisticTable__statistics-controls" key={datum.key}>
-            <Button
-              className="button button--small button--tertiary-on-light"
-              onClick={() => this.handleDeleteClick(index)}
+        {data.map((datum, index) => {
+          const { statistic } = datum;
+
+          return (
+            <div
+              className="StatisticTable__statistics-controls"
+              key={datum.key}
             >
-              <img src={DeleteIcon} alt={`delete: ${datum.title}`} />
-            </Button>
-            <Button
-              className="button button--small button--tertiary-on-light"
-              onClick={() => this.handlePromptRenameClick(index)}
-            >
-              <img src={EditIcon} alt={`rename: ${datum.title}`} />
-            </Button>
-            {DisplayFactory.createStatisticDisplay(
-              "StatisticDisplay--horizontal",
-              datum,
-              (value) => this.handleStatisticValueChange(index, value),
-              () => this.handleStatisticValueBlur(index),
-              "input__textbox--on-light"
-            )}
-          </div>
-        ))}
+              <Button
+                className="button button--small button--tertiary-on-light"
+                onClick={() => this.handleDeleteClick(index)}
+              >
+                <img src={DeleteIcon} alt={`delete: ${statistic.name}`} />
+              </Button>
+              <Button
+                className="button button--small button--tertiary-on-light"
+                onClick={() => this.handlePromptRenameClick(index)}
+              >
+                <img src={EditIcon} alt={`rename: ${statistic.name}`} />
+              </Button>
+              {DisplayFactory.createStatisticDisplay(
+                "StatisticDisplay--horizontal",
+                datum,
+                (value) => this.handleStatisticValueChange(index, value),
+                () => this.handleStatisticValueBlur(index),
+                "input__textbox--on-light"
+              )}
+            </div>
+          );
+        })}
         <Button
           className="button button--small button--primary"
           onClick={this.handleCreateClick}

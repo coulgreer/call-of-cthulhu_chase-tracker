@@ -2,9 +2,9 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import StatisticDisplay, { Props } from ".";
+import StatisticDisplay from ".";
 
-const DEFAULT_PROPS: Props = {
+const DEFAULT_PROPS = {
   className: "",
   title: "TEST_TITLE",
   currentValue: "5",
@@ -91,19 +91,18 @@ describe("Threshold class names", () => {
   const currentValueNum = Number.parseInt(DEFAULT_PROPS.currentValue, 10);
 
   test("should render display without any additional classNames when thresholds are not provided and currentValue does not equal MAX_SAFE_INTEGER or MIN_SAFE_INTEGER", () => {
-    const upperLimit = currentValueNum + 2;
-    const upperWarning = currentValueNum + 1;
-    const lowerWarning = currentValueNum - 1;
-    const lowerLimit = currentValueNum - 2;
+    const limiter = {
+      upperLimit: currentValueNum + 2,
+      upperWarning: currentValueNum + 1,
+      lowerWarning: currentValueNum - 1,
+      lowerLimit: currentValueNum - 2,
+    };
 
     render(
       <StatisticDisplay
         title={DEFAULT_PROPS.title}
         currentValue={DEFAULT_PROPS.currentValue}
-        upperLimit={upperLimit}
-        upperWarning={upperWarning}
-        lowerWarning={lowerWarning}
-        lowerLimit={lowerLimit}
+        limiter={limiter}
       />
     );
 
@@ -116,14 +115,18 @@ describe("Threshold class names", () => {
 
   test("should throw error when upper warning and upper limit are equal", () => {
     const threshold = currentValueNum + 1;
+    const limiter = {
+      lowerLimit: DEFAULT_PROPS.lowerLimit,
+      upperWarning: threshold,
+      upperLimit: threshold,
+    };
 
     expect(() => {
       render(
         <StatisticDisplay
           title={DEFAULT_PROPS.title}
           currentValue={DEFAULT_PROPS.currentValue}
-          upperWarning={threshold}
-          upperLimit={threshold}
+          limiter={limiter}
         />
       );
     }).toThrow();
@@ -132,14 +135,18 @@ describe("Threshold class names", () => {
   test("should throw error when upper warning threshold is greater than upper limit threshold", () => {
     const upperWarning = currentValueNum + 2;
     const upperLimit = upperWarning - 1;
+    const limiter = {
+      lowerLimit: DEFAULT_PROPS.lowerLimit,
+      upperWarning,
+      upperLimit,
+    };
 
     expect(() => {
       render(
         <StatisticDisplay
           title={DEFAULT_PROPS.title}
           currentValue={DEFAULT_PROPS.currentValue}
-          upperWarning={upperWarning}
-          upperLimit={upperLimit}
+          limiter={limiter}
         />
       );
     }).toThrow();
@@ -147,14 +154,18 @@ describe("Threshold class names", () => {
 
   test("should throw error when lower warning and lower limit are equal", () => {
     const threshold = currentValueNum - 1;
+    const limiter = {
+      lowerLimit: threshold,
+      lowerWarning: threshold,
+      upperLimit: DEFAULT_PROPS.upperLimit,
+    };
 
     expect(() => {
       render(
         <StatisticDisplay
           title={DEFAULT_PROPS.title}
           currentValue={DEFAULT_PROPS.currentValue}
-          lowerWarning={threshold}
-          lowerLimit={threshold}
+          limiter={limiter}
         />
       );
     }).toThrow();
@@ -163,34 +174,37 @@ describe("Threshold class names", () => {
   test("should throw error when lower warning threshold is less than lower limit threshold", () => {
     const lowerWarning = currentValueNum - 2;
     const lowerLimit = lowerWarning + 1;
+    const limiter = {
+      upperLimit: DEFAULT_PROPS.upperLimit,
+      lowerWarning,
+      lowerLimit,
+    };
 
     expect(() => {
       render(
         <StatisticDisplay
           title={DEFAULT_PROPS.title}
           currentValue={DEFAULT_PROPS.currentValue}
-          lowerWarning={lowerWarning}
-          lowerLimit={lowerLimit}
+          limiter={limiter}
         />
       );
     }).toThrow();
   });
 
   test("should throw error when lower bound and upper bound intercept", () => {
-    const upperLimit = 7;
-    const upperWarning = 3;
-    const lowerWarning = 5;
-    const lowerLimit = 2;
+    const limiter = {
+      upperLimit: 7,
+      upperWarning: 3,
+      lowerWarning: 5,
+      lowerLimit: 2,
+    };
 
     expect(() => {
       render(
         <StatisticDisplay
           title={DEFAULT_PROPS.title}
           currentValue={DEFAULT_PROPS.currentValue}
-          upperLimit={upperLimit}
-          upperWarning={upperWarning}
-          lowerWarning={lowerWarning}
-          lowerLimit={lowerLimit}
+          limiter={limiter}
         />
       );
     }).toThrow();
@@ -200,6 +214,7 @@ describe("Threshold class names", () => {
     const lowerWarning = -7;
     const lowerLimit = lowerWarning - 2;
     const upperLimit = lowerWarning + 3;
+    const limiter = { lowerLimit, lowerWarning, upperLimit };
 
     test("should render statistics with an additional className when value is inside threshold", () => {
       const currentValue = (lowerWarning - 1).toString();
@@ -208,9 +223,7 @@ describe("Threshold class names", () => {
         <StatisticDisplay
           title={DEFAULT_PROPS.title}
           currentValue={currentValue}
-          upperLimit={upperLimit}
-          lowerWarning={lowerWarning}
-          lowerLimit={lowerLimit}
+          limiter={limiter}
         />
       );
 
@@ -228,9 +241,7 @@ describe("Threshold class names", () => {
         <StatisticDisplay
           title={DEFAULT_PROPS.title}
           currentValue={currentValue}
-          upperLimit={upperLimit}
-          lowerWarning={lowerWarning}
-          lowerLimit={lowerLimit}
+          limiter={limiter}
         />
       );
 
@@ -248,9 +259,7 @@ describe("Threshold class names", () => {
         <StatisticDisplay
           title={DEFAULT_PROPS.title}
           currentValue={currentValue}
-          upperLimit={upperLimit}
-          lowerWarning={lowerWarning}
-          lowerLimit={lowerLimit}
+          limiter={limiter}
         />
       );
 
@@ -265,6 +274,7 @@ describe("Threshold class names", () => {
   describe("Lower Limit threshold", () => {
     const lowerLimit = -19;
     const upperLimit = lowerLimit + 4;
+    const limiter = { upperLimit, lowerLimit };
 
     test("should render statistics with an additional className when value is at threshold", () => {
       const currentValue = lowerLimit.toString();
@@ -273,8 +283,7 @@ describe("Threshold class names", () => {
         <StatisticDisplay
           title={DEFAULT_PROPS.title}
           currentValue={currentValue}
-          upperLimit={upperLimit}
-          lowerLimit={lowerLimit}
+          limiter={limiter}
         />
       );
 
@@ -292,8 +301,7 @@ describe("Threshold class names", () => {
         <StatisticDisplay
           title={DEFAULT_PROPS.title}
           currentValue={currentValue}
-          upperLimit={upperLimit}
-          lowerLimit={lowerLimit}
+          limiter={limiter}
         />
       );
 
@@ -312,8 +320,7 @@ describe("Threshold class names", () => {
           <StatisticDisplay
             title={DEFAULT_PROPS.title}
             currentValue={currentValue}
-            upperLimit={upperLimit}
-            lowerLimit={lowerLimit}
+            limiter={limiter}
           />
         );
       }).toThrow();
@@ -324,6 +331,7 @@ describe("Threshold class names", () => {
     const upperWarning = 7;
     const upperLimit = upperWarning + 2;
     const lowerLimit = upperWarning - 2;
+    const limiter = { upperLimit, upperWarning, lowerLimit };
 
     test("should render statistics with an additional className when value is inside threshold", () => {
       const currentValue = (upperWarning + 1).toString();
@@ -332,9 +340,7 @@ describe("Threshold class names", () => {
         <StatisticDisplay
           title={DEFAULT_PROPS.title}
           currentValue={currentValue}
-          upperLimit={upperLimit}
-          upperWarning={upperWarning}
-          lowerLimit={lowerLimit}
+          limiter={limiter}
         />
       );
 
@@ -352,9 +358,7 @@ describe("Threshold class names", () => {
         <StatisticDisplay
           title={DEFAULT_PROPS.title}
           currentValue={currentValue}
-          upperLimit={upperLimit}
-          upperWarning={upperWarning}
-          lowerLimit={lowerLimit}
+          limiter={limiter}
         />
       );
 
@@ -372,9 +376,7 @@ describe("Threshold class names", () => {
         <StatisticDisplay
           title={DEFAULT_PROPS.title}
           currentValue={currentValue}
-          upperLimit={upperLimit}
-          upperWarning={upperWarning}
-          lowerLimit={lowerLimit}
+          limiter={limiter}
         />
       );
 
@@ -389,6 +391,7 @@ describe("Threshold class names", () => {
   describe("Upper Limit threshold", () => {
     const upperLimit = 19;
     const lowerLimit = upperLimit - 4;
+    const limiter = { upperLimit, lowerLimit };
 
     test("should render statistics with an additional className when value is at threshold", () => {
       const currentValue = upperLimit.toString();
@@ -397,8 +400,7 @@ describe("Threshold class names", () => {
         <StatisticDisplay
           title={DEFAULT_PROPS.title}
           currentValue={currentValue}
-          upperLimit={upperLimit}
-          lowerLimit={lowerLimit}
+          limiter={limiter}
         />
       );
 
@@ -416,8 +418,7 @@ describe("Threshold class names", () => {
         <StatisticDisplay
           title={DEFAULT_PROPS.title}
           currentValue={currentValue}
-          upperLimit={upperLimit}
-          lowerLimit={lowerLimit}
+          limiter={limiter}
         />
       );
 
@@ -436,8 +437,7 @@ describe("Threshold class names", () => {
           <StatisticDisplay
             title={DEFAULT_PROPS.title}
             currentValue={currentValue}
-            upperLimit={upperLimit}
-            lowerLimit={lowerLimit}
+            limiter={limiter}
           />
         );
       }).toThrow();

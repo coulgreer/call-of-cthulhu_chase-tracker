@@ -63,15 +63,9 @@ export default class ParticipantTable extends Component<Props, State> {
   }
 
   private createParticipant() {
-    const defaultParticipantName = `${
-      ParticipantTable.DEFAULT_NAME
-    } #${this.sequnceGenerator.nextNum()}`;
-    const newRow = (
-      <ParticipantRow
-        key={defaultParticipantName}
-        defaultParticipantName={defaultParticipantName}
-      />
-    );
+    const idNum = this.sequnceGenerator.nextNum();
+    const id = `${ParticipantTable.DEFAULT_NAME} #${idNum}`;
+    const newRow = <ParticipantRow key={id} id={id} />;
 
     this.setState((state) => ({
       participantRows: [...state.participantRows, newRow],
@@ -86,10 +80,7 @@ export default class ParticipantTable extends Component<Props, State> {
   }
 
   private removeParticipantFromSequence(row: ReactElement) {
-    const idNum = Number.parseInt(
-      row.props.defaultParticipantName.match(/[0-9]+$/)[0],
-      10
-    );
+    const idNum = Number.parseInt(row.props.id.match(/[0-9]+$/)[0], 10);
     this.sequnceGenerator.remove(idNum);
   }
 
