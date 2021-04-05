@@ -18,7 +18,8 @@ import { roll, Result } from "../../utils/roller";
 import { Participant } from "../../types";
 
 interface Props {
-  id: string;
+  participant: Participant;
+  onParticipantChange?: (p: Participant) => void;
 }
 
 interface State {
@@ -26,7 +27,6 @@ interface State {
   expansionShown: boolean;
   modalShown: boolean;
   selectedStatValue: string;
-  participant: Participant;
   currentName: string;
   mainStatistics: WrappedStatistic[];
   speedStatistics: WrappedStatistic[];
@@ -234,74 +234,14 @@ export default class ParticipantRow extends React.Component<Props, State> {
     this.calculateSpeedModifier = this.calculateSpeedModifier.bind(this);
     this.handleSelectionChange = this.handleSelectionChange.bind(this);
 
-    const { id } = this.props;
-    const participant: Participant = {
-      id,
-      name: id,
-      dexterity: 15,
-      movementRate: 2,
-      derivedSpeed: 0,
-      speedSkills: [
-        {
-          name: ParticipantRow.CON_TITLE,
-          score: 15,
-        },
-        {
-          name: ParticipantRow.DRIVE_TITLE,
-          score: 20,
-        },
-        {
-          name: ParticipantRow.RIDE_TITLE,
-          score: 5,
-        },
-        {
-          name: ParticipantRow.AIR_TITLE,
-          score: 1,
-        },
-        {
-          name: ParticipantRow.SEA_TITLE,
-          score: 1,
-        },
-      ],
-      hazardSkills: [
-        {
-          name: ParticipantRow.STR_TITLE,
-          score: 15,
-        },
-        {
-          name: ParticipantRow.CLIMB_TITLE,
-          score: 20,
-        },
-        {
-          name: ParticipantRow.SWIM_TITLE,
-          score: 20,
-        },
-        {
-          name: ParticipantRow.DODGE_TITLE,
-          score: 7,
-        },
-        {
-          name: ParticipantRow.BRAWL_TITLE,
-          score: 25,
-        },
-        {
-          name: ParticipantRow.HANDGUN_TITLE,
-          score: 20,
-        },
-        {
-          name: ParticipantRow.RIFLE_TITLE,
-          score: 25,
-        },
-      ],
-    };
+    const { participant } = this.props;
 
     this.state = {
       nameWarningShown: false,
       expansionShown: false,
       modalShown: false,
       selectedStatValue: "",
-      participant,
-      currentName: id,
+      currentName: participant.name,
       mainStatistics: ParticipantRow.initializeMainStatistics(participant),
       speedStatistics: this.initializeSpeedStatistics(participant),
       hazardStatistics: this.initializeHazardStatistics(participant),
@@ -309,33 +249,25 @@ export default class ParticipantRow extends React.Component<Props, State> {
   }
 
   private handleNameChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const { onParticipantChange } = this.props;
     const { value } = event.currentTarget;
 
     if (value.trim()) {
-      this.setState((state) => {
-        const { participant } = state;
-        participant.name = value;
-
-        return {
-          participant,
-          nameWarningShown: false,
-        };
-      });
+      const { participant } = this.props;
+      participant.name = value;
+      if (onParticipantChange) onParticipantChange(participant);
+      this.setState({ nameWarningShown: false });
     } else {
-      this.setState(() => ({ nameWarningShown: true }));
+      this.setState({ nameWarningShown: true });
     }
 
-    this.setState(() => ({ currentName: value }));
+    this.setState({ currentName: value });
   }
 
   private handleNameBlur() {
-    this.setState((state) => {
-      const { name } = state.participant;
-      return {
-        currentName: name,
-        nameWarningShown: false,
-      };
-    });
+    const { participant } = this.props;
+
+    this.setState({ currentName: participant.name, nameWarningShown: false });
   }
 
   private handleMainStatisticChange(index: number, value: string) {

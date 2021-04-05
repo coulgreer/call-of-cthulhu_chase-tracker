@@ -1,4 +1,4 @@
-import React, { Component, ReactElement } from "react";
+import React, { Component } from "react";
 import Modal from "react-modal";
 
 import ParticipantRow from "../ParticipantRow";
@@ -11,6 +11,8 @@ import "./ParticipantTable.css";
 
 import UniqueSequenceGenerator from "../../utils/unique-sequence-generator";
 
+import { Participant } from "../../types";
+
 if (process.env.NODE_ENV !== "test") Modal.setAppElement("#___gatsby");
 
 interface Props {
@@ -18,9 +20,9 @@ interface Props {
 }
 
 interface State {
-  participantRows: ReactElement[];
+  participants: Participant[];
   modalShown: boolean;
-  selectedRow: ReactElement | null;
+  selectedParticipant: Participant | null;
 }
 
 export default class ParticipantTable extends Component<Props, State> {
@@ -37,9 +39,9 @@ export default class ParticipantTable extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      participantRows: [],
+      participants: [],
       modalShown: false,
-      selectedRow: null,
+      selectedParticipant: null,
     };
 
     this.sequnceGenerator = new UniqueSequenceGenerator(
@@ -51,12 +53,25 @@ export default class ParticipantTable extends Component<Props, State> {
     this.closeModal = this.closeModal.bind(this);
   }
 
-  private deleteSelectedParticipant() {
-    const { selectedRow } = this.state;
+  private onParticipantChange(target: Participant) {
+    this.setState((state) => {
+      const { participants } = state;
+      const targetIndex = participants.findIndex(
+        (participant) => participant.id === target.id
+      );
 
-    if (selectedRow) {
-      this.removeParticipantFromSequence(selectedRow);
-      this.removeParticipantFromTable(selectedRow);
+      participants[targetIndex] = target;
+
+      return { participants };
+    });
+  }
+
+  private deleteSelectedParticipant() {
+    const { selectedParticipant } = this.state;
+
+    if (selectedParticipant) {
+      this.removeParticipantFromSequence(selectedParticipant);
+      this.removeParticipantFromTable(selectedParticipant);
     }
 
     this.closeModal();
@@ -65,33 +80,99 @@ export default class ParticipantTable extends Component<Props, State> {
   private createParticipant() {
     const idNum = this.sequnceGenerator.nextNum();
     const id = `${ParticipantTable.DEFAULT_NAME} #${idNum}`;
-    const newRow = <ParticipantRow key={id} id={id} />;
+    const newParticipant = {
+      id,
+      name: id,
+      dexterity: 15,
+      movementRate: 2,
+      derivedSpeed: 0,
+      speedSkills: [
+        {
+          name: ParticipantRow.CON_TITLE,
+          score: 15,
+        },
+        {
+          name: ParticipantRow.DRIVE_TITLE,
+          score: 20,
+        },
+        {
+          name: ParticipantRow.RIDE_TITLE,
+          score: 5,
+        },
+        {
+          name: ParticipantRow.AIR_TITLE,
+          score: 1,
+        },
+        {
+          name: ParticipantRow.SEA_TITLE,
+          score: 1,
+        },
+      ],
+      hazardSkills: [
+        {
+          name: ParticipantRow.STR_TITLE,
+          score: 15,
+        },
+        {
+          name: ParticipantRow.CLIMB_TITLE,
+          score: 20,
+        },
+        {
+          name: ParticipantRow.SWIM_TITLE,
+          score: 20,
+        },
+        {
+          name: ParticipantRow.DODGE_TITLE,
+          score: 7,
+        },
+        {
+          name: ParticipantRow.BRAWL_TITLE,
+          score: 25,
+        },
+        {
+          name: ParticipantRow.HANDGUN_TITLE,
+          score: 20,
+        },
+        {
+          name: ParticipantRow.RIFLE_TITLE,
+          score: 25,
+        },
+      ],
+    };
 
     this.setState((state) => ({
-      participantRows: [...state.participantRows, newRow],
+      participants: [...state.participants, newParticipant],
     }));
   }
 
-  private promptParticipantRemoval(row: ReactElement) {
+  private promptParticipantRemoval(participant: Participant) {
     this.setState({
       modalShown: true,
-      selectedRow: row,
+      selectedParticipant: participant,
     });
   }
 
-  private removeParticipantFromSequence(row: ReactElement) {
-    const idNum = Number.parseInt(row.props.id.match(/[0-9]+$/)[0], 10);
+  private removeParticipantFromSequence(participant: Participant) {
+    const results = participant.id.match(/[0-9]+$/);
+
+    if (!results) {
+      throw Error(
+        `The given participant ID -- ${participant.id} -- should be formatted with trailing digits.`
+      );
+    }
+
+    const idNum = Number.parseInt(results[0], 10);
     this.sequnceGenerator.remove(idNum);
   }
 
-  private removeParticipantFromTable(row: ReactElement) {
-    const { participantRows } = this.state;
+  private removeParticipantFromTable(participant: Participant) {
+    const { participants } = this.state;
 
     this.setState(() => {
-      const targetIndex = participantRows.indexOf(row);
-      participantRows.splice(targetIndex, 1);
+      const targetIndex = participants.indexOf(participant);
+      participants.splice(targetIndex, 1);
 
-      return { selectedRow: null };
+      return { selectedParticipant: null };
     });
   }
 
@@ -146,25 +227,28 @@ export default class ParticipantTable extends Component<Props, State> {
   }
 
   private renderParticipants() {
-    const { participantRows } = this.state;
-    return participantRows.map((row) => (
-      <div className="ParticipantTable__row" key={row.key}>
-        {row}
+    const { participants } = this.state;
+    return participants.map((participant) => (
+      <div className="ParticipantTable__row" key={participant.id}>
+        <ParticipantRow
+          participant={participant}
+          onParticipantChange={() => this.onParticipantChange(participant)}
+        />
         <Button
           className="ParticipantTable__row-control button button--primary"
-          onClick={() => this.promptParticipantRemoval(row)}
+          onClick={() => this.promptParticipantRemoval(participant)}
         >
-          <img src={RemoveIcon} alt={`Remove: ${row.key}`} />
+          <img src={RemoveIcon} alt={`Remove: ${participant.id}`} />
         </Button>
       </div>
     ));
   }
 
   render() {
-    const { participantRows } = this.state;
+    const { participants } = this.state;
 
     const rowsElement =
-      participantRows.length < ParticipantTable.minimumParticipants
+      participants.length < ParticipantTable.minimumParticipants
         ? this.renderWarningMessage()
         : this.renderParticipants();
 
