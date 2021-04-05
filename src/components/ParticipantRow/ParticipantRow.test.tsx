@@ -6,6 +6,10 @@ import ParticipantRow from ".";
 
 import { Participant } from "../../types";
 
+/**
+ * TODO (Coul Greer): Refactor both ParticipantRow and ParticipantTable with
+ * their respective test files as well.
+ */
 const DEFAULT_PROPS: {
   participant: Participant;
   onParticipantChange: (participant: Participant) => void;
