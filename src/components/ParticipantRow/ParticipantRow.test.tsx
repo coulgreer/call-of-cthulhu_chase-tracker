@@ -6,13 +6,15 @@ import ParticipantRow from ".";
 
 import { Participant } from "../../types";
 
-/**
- * TODO (Coul Greer): Refactor both ParticipantRow and ParticipantTable with
- * their respective test files as well.
- */
+const [
+  dexterityName,
+  speedName,
+  movementName,
+] = ParticipantRow.MAIN_STATISTICS_NAMES;
+
 const DEFAULT_PROPS: {
   participant: Participant;
-  onParticipantChange: (participant: Participant) => void;
+  onParticipantChange: (p: Participant) => void;
 } = {
   participant: {
     id: "DefaultID 1",
@@ -20,65 +22,35 @@ const DEFAULT_PROPS: {
     dexterity: 15,
     movementRate: 2,
     derivedSpeed: 0,
-    speedSkills: [
-      {
-        name: ParticipantRow.CON_TITLE,
-        score: 15,
-      },
-      {
-        name: ParticipantRow.DRIVE_TITLE,
-        score: 20,
-      },
-      {
-        name: ParticipantRow.RIDE_TITLE,
-        score: 5,
-      },
-      {
-        name: ParticipantRow.AIR_TITLE,
-        score: 1,
-      },
-      {
-        name: ParticipantRow.SEA_TITLE,
-        score: 1,
-      },
-    ],
-    hazardSkills: [
-      {
-        name: ParticipantRow.STR_TITLE,
-        score: 15,
-      },
-      {
-        name: ParticipantRow.CLIMB_TITLE,
-        score: 20,
-      },
-      {
-        name: ParticipantRow.SWIM_TITLE,
-        score: 20,
-      },
-      {
-        name: ParticipantRow.DODGE_TITLE,
-        score: 7,
-      },
-      {
-        name: ParticipantRow.BRAWL_TITLE,
-        score: 25,
-      },
-      {
-        name: ParticipantRow.HANDGUN_TITLE,
-        score: 20,
-      },
-      {
-        name: ParticipantRow.RIFLE_TITLE,
-        score: 25,
-      },
-    ],
+    speedSkills: ParticipantRow.DEFAULT_SPEED_STATISTICS,
+    hazardSkills: ParticipantRow.DEFAULT_HAZARD_STATISTICS,
   },
   onParticipantChange: jest.fn(),
 };
 
 describe("Collapse/Expand detailed data", () => {
+  const { participant } = DEFAULT_PROPS;
+
+  const [
+    constitution,
+    driveAuto,
+    ride,
+    aircraft,
+    boat,
+  ] = participant.speedSkills;
+
+  const [
+    strength,
+    climb,
+    swim,
+    dodge,
+    brawl,
+    handgun,
+    rifle,
+  ] = participant.hazardSkills;
+
   test("should render participant information properly when collapsed", () => {
-    render(<ParticipantRow participant={DEFAULT_PROPS.participant} />);
+    render(<ParticipantRow participant={participant} />);
 
     expect(screen.getByRole("textbox", { name: /name/i })).toBeInTheDocument();
 
@@ -86,11 +58,9 @@ describe("Collapse/Expand detailed data", () => {
       screen.queryByText(ParticipantRow.WARNING_MESSAGE)
     ).not.toBeVisible();
 
-    expect(screen.getByLabelText(ParticipantRow.DEX_TITLE)).toBeInTheDocument();
-    expect(screen.getByLabelText(ParticipantRow.MOV_TITLE)).toBeInTheDocument();
-    expect(
-      screen.getByLabelText(ParticipantRow.SPEED_TITLE)
-    ).toBeInTheDocument();
+    expect(screen.getByLabelText(dexterityName)).toBeInTheDocument();
+    expect(screen.getByLabelText(speedName)).toBeInTheDocument();
+    expect(screen.getByLabelText(movementName)).toBeInTheDocument();
 
     expect(
       screen.getByRole("button", { name: /generate/i })
@@ -101,47 +71,23 @@ describe("Collapse/Expand detailed data", () => {
     expect(
       screen.queryByRole("heading", { name: /speed stats/i })
     ).not.toBeInTheDocument();
-    expect(
-      screen.queryByLabelText(ParticipantRow.CON_TITLE)
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByLabelText(ParticipantRow.DRIVE_TITLE)
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByLabelText(ParticipantRow.RIDE_TITLE)
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByLabelText(ParticipantRow.AIR_TITLE)
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByLabelText(ParticipantRow.SEA_TITLE)
-    ).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(constitution.name)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(driveAuto.name)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(ride.name)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(aircraft.name)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(boat.name)).not.toBeInTheDocument();
 
     expect(
       screen.queryByRole("heading", { name: /hazard stats/i })
     ).not.toBeInTheDocument();
 
-    expect(
-      screen.queryByLabelText(ParticipantRow.STR_TITLE)
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByLabelText(ParticipantRow.CLIMB_TITLE)
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByLabelText(ParticipantRow.SWIM_TITLE)
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByLabelText(ParticipantRow.DODGE_TITLE)
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByLabelText(ParticipantRow.BRAWL_TITLE)
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByLabelText(ParticipantRow.HANDGUN_TITLE)
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByLabelText(ParticipantRow.RIFLE_TITLE)
-    ).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(strength.name)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(climb.name)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(swim.name)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(dodge.name)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(brawl.name)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(handgun.name)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(rifle.name)).not.toBeInTheDocument();
 
     expect(
       screen.queryAllByRole("button", { name: /create statistic/i }).length
@@ -149,7 +95,7 @@ describe("Collapse/Expand detailed data", () => {
   });
 
   test("should render participant information properly when expanded", () => {
-    render(<ParticipantRow participant={DEFAULT_PROPS.participant} />);
+    render(<ParticipantRow participant={participant} />);
 
     userEvent.click(screen.getByRole("button", { name: /expand/i }));
 
@@ -159,11 +105,9 @@ describe("Collapse/Expand detailed data", () => {
       screen.queryByText(ParticipantRow.WARNING_MESSAGE)
     ).not.toBeVisible();
 
-    expect(screen.getByLabelText(ParticipantRow.DEX_TITLE)).toBeInTheDocument();
-    expect(screen.getByLabelText(ParticipantRow.MOV_TITLE)).toBeInTheDocument();
-    expect(
-      screen.getByLabelText(ParticipantRow.SPEED_TITLE)
-    ).toBeInTheDocument();
+    expect(screen.getByLabelText(dexterityName)).toBeInTheDocument();
+    expect(screen.getByLabelText(movementName)).toBeInTheDocument();
+    expect(screen.getByLabelText(speedName)).toBeInTheDocument();
 
     expect(
       screen.getByRole("button", { name: /generate/i })
@@ -173,39 +117,23 @@ describe("Collapse/Expand detailed data", () => {
       screen.getByRole("heading", { name: /speed stats/i })
     ).toBeInTheDocument();
 
-    expect(screen.getByLabelText(ParticipantRow.CON_TITLE)).toBeInTheDocument();
-    expect(
-      screen.getByLabelText(ParticipantRow.DRIVE_TITLE)
-    ).toBeInTheDocument();
-    expect(
-      screen.getByLabelText(ParticipantRow.RIDE_TITLE)
-    ).toBeInTheDocument();
-    expect(screen.getByLabelText(ParticipantRow.AIR_TITLE)).toBeInTheDocument();
-    expect(screen.getByLabelText(ParticipantRow.SEA_TITLE)).toBeInTheDocument();
+    expect(screen.getByLabelText(constitution.name)).toBeInTheDocument();
+    expect(screen.getByLabelText(driveAuto.name)).toBeInTheDocument();
+    expect(screen.getByLabelText(ride.name)).toBeInTheDocument();
+    expect(screen.getByLabelText(aircraft.name)).toBeInTheDocument();
+    expect(screen.getByLabelText(boat.name)).toBeInTheDocument();
 
     expect(
       screen.getByRole("heading", { name: /hazard stats/i })
     ).toBeInTheDocument();
 
-    expect(screen.getByLabelText(ParticipantRow.STR_TITLE)).toBeInTheDocument();
-    expect(
-      screen.getByLabelText(ParticipantRow.CLIMB_TITLE)
-    ).toBeInTheDocument();
-    expect(
-      screen.getByLabelText(ParticipantRow.SWIM_TITLE)
-    ).toBeInTheDocument();
-    expect(
-      screen.getByLabelText(ParticipantRow.DODGE_TITLE)
-    ).toBeInTheDocument();
-    expect(
-      screen.getByLabelText(ParticipantRow.BRAWL_TITLE)
-    ).toBeInTheDocument();
-    expect(
-      screen.getByLabelText(ParticipantRow.HANDGUN_TITLE)
-    ).toBeInTheDocument();
-    expect(
-      screen.getByLabelText(ParticipantRow.RIFLE_TITLE)
-    ).toBeInTheDocument();
+    expect(screen.getByLabelText(strength.name)).toBeInTheDocument();
+    expect(screen.getByLabelText(climb.name)).toBeInTheDocument();
+    expect(screen.getByLabelText(swim.name)).toBeInTheDocument();
+    expect(screen.getByLabelText(dodge.name)).toBeInTheDocument();
+    expect(screen.getByLabelText(brawl.name)).toBeInTheDocument();
+    expect(screen.getByLabelText(handgun.name)).toBeInTheDocument();
+    expect(screen.getByLabelText(rifle.name)).toBeInTheDocument();
 
     expect(
       screen.getAllByRole("button", { name: /create statistic/i }).length
@@ -291,7 +219,7 @@ describe("Statistic Display event handlers", () => {
     render(<ParticipantRow participant={DEFAULT_PROPS.participant} />);
 
     const statisticDisplayEl = screen.getByRole("spinbutton", {
-      name: ParticipantRow.DEX_TITLE,
+      name: dexterityName,
     });
     userEvent.clear(statisticDisplayEl);
     userEvent.type(statisticDisplayEl, validInput.toString());

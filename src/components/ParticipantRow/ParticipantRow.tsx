@@ -36,76 +36,20 @@ interface State {
 const SEQUENCE_START = 0;
 
 export default class ParticipantRow extends React.Component<Props, State> {
-  static get DEX_INDEX() {
-    return 0;
+  static get MAIN_STATISTICS_NAMES() {
+    return ["DEX", "Speed", "MOV"];
   }
 
-  static get DEX_TITLE() {
-    return "DEX";
+  static get DEXTERITY_INDEX() {
+    return 0;
   }
 
   static get SPEED_INDEX() {
     return 1;
   }
 
-  static get SPEED_TITLE() {
-    return "Speed";
-  }
-
-  static get MOV_INDEX() {
+  static get MOVEMENT_RATING_INDEX() {
     return 2;
-  }
-
-  static get MOV_TITLE() {
-    return "MOV";
-  }
-
-  static get CON_TITLE() {
-    return "CON";
-  }
-
-  static get DRIVE_TITLE() {
-    return "Drive Auto";
-  }
-
-  static get RIDE_TITLE() {
-    return "Ride";
-  }
-
-  static get AIR_TITLE() {
-    return "Pilot (Aircraft)";
-  }
-
-  static get SEA_TITLE() {
-    return "Pilot (Boat)";
-  }
-
-  static get STR_TITLE() {
-    return "STR";
-  }
-
-  static get CLIMB_TITLE() {
-    return "Climb";
-  }
-
-  static get SWIM_TITLE() {
-    return "Swim";
-  }
-
-  static get DODGE_TITLE() {
-    return "Dodge";
-  }
-
-  static get BRAWL_TITLE() {
-    return "Fighting (Brawl)";
-  }
-
-  static get HANDGUN_TITLE() {
-    return "Firearms (Handgun)";
-  }
-
-  static get RIFLE_TITLE() {
-    return "Firearms (Rifle)";
   }
 
   static get WARNING_MESSAGE() {
@@ -116,6 +60,64 @@ export default class ParticipantRow extends React.Component<Props, State> {
     return "New Stat";
   }
 
+  static get DEFAULT_SPEED_STATISTICS() {
+    return [
+      {
+        name: "CON",
+        score: 15,
+      },
+      {
+        name: "Drive Auto",
+        score: 20,
+      },
+      {
+        name: "Ride",
+        score: 5,
+      },
+      {
+        name: "Pilot (Aircraft)",
+        score: 1,
+      },
+      {
+        name: "Pilot (Boat)",
+        score: 1,
+      },
+    ];
+  }
+
+  static get DEFAULT_HAZARD_STATISTICS() {
+    return [
+      {
+        name: "STR",
+        score: 15,
+      },
+      {
+        name: "Climb",
+        score: 20,
+      },
+      {
+        name: "Swim",
+        score: 20,
+      },
+      {
+        name: "Dodge",
+        score: 7,
+      },
+      {
+        name: "Fighting (Brawl)",
+        score: 25,
+      },
+      {
+        name: "Firearms (Handgun)",
+        score: 20,
+      },
+      {
+        name: "Firearms (Rifle)",
+        score: 25,
+      },
+    ];
+  }
+
   private static initializeMainStatistics({
     dexterity,
     derivedSpeed,
@@ -124,15 +126,19 @@ export default class ParticipantRow extends React.Component<Props, State> {
     return [
       {
         statistic: {
-          name: ParticipantRow.DEX_TITLE,
+          name:
+            ParticipantRow.MAIN_STATISTICS_NAMES[
+              ParticipantRow.DEXTERITY_INDEX
+            ],
           score: dexterity,
         },
         currentValue: dexterity.toString(),
-        key: ParticipantRow.DEX_INDEX,
+        key: ParticipantRow.DEXTERITY_INDEX,
       },
       {
         statistic: {
-          name: ParticipantRow.SPEED_TITLE,
+          name:
+            ParticipantRow.MAIN_STATISTICS_NAMES[ParticipantRow.SPEED_INDEX],
           score: derivedSpeed,
         },
         currentValue: derivedSpeed.toString(),
@@ -140,7 +146,10 @@ export default class ParticipantRow extends React.Component<Props, State> {
       },
       {
         statistic: {
-          name: ParticipantRow.MOV_TITLE,
+          name:
+            ParticipantRow.MAIN_STATISTICS_NAMES[
+              ParticipantRow.MOVEMENT_RATING_INDEX
+            ],
           score: movementRate,
         },
         currentValue: movementRate.toString(),
@@ -150,7 +159,7 @@ export default class ParticipantRow extends React.Component<Props, State> {
           upperWarning: 10,
           upperLimit: Number.MAX_SAFE_INTEGER,
         },
-        key: ParticipantRow.MOV_INDEX,
+        key: ParticipantRow.MOVEMENT_RATING_INDEX,
       },
     ];
   }
@@ -176,7 +185,7 @@ export default class ParticipantRow extends React.Component<Props, State> {
   }
 
   /* eslint-disable no-param-reassign */
-  static manageValue(value: string, data: WrappedStatistic) {
+  static updateValue(value: string, data: WrappedStatistic) {
     const { limiter, statistic } = data;
 
     const upperLimit = limiter?.upperLimit || Number.MAX_SAFE_INTEGER;
@@ -271,55 +280,65 @@ export default class ParticipantRow extends React.Component<Props, State> {
   }
 
   private handleMainStatisticChange(index: number, value: string) {
-    const { mainStatistics } = this.state;
-    const data = mainStatistics[index];
+    this.setState((state) => {
+      const { mainStatistics } = state;
+      const wrappedStatistic = mainStatistics[index];
 
-    ParticipantRow.manageValue(value, data);
+      ParticipantRow.updateValue(value, wrappedStatistic);
+      mainStatistics[index] = wrappedStatistic;
 
-    mainStatistics[index] = data;
-    this.setState({ mainStatistics });
+      return { mainStatistics };
+    });
   }
 
   private handleSpeedStatisticChange(index: number, value: string) {
-    const { speedStatistics } = this.state;
-    const data = speedStatistics[index];
+    this.setState((state) => {
+      const { speedStatistics } = state;
+      const wrappedStatistic = speedStatistics[index];
 
-    ParticipantRow.manageValue(value, data);
+      ParticipantRow.updateValue(value, wrappedStatistic);
+      speedStatistics[index] = wrappedStatistic;
 
-    speedStatistics[index] = data;
-    this.setState({ speedStatistics });
+      return { speedStatistics };
+    });
   }
 
   private handleHazardStatisticChange(index: number, value: string) {
-    const { hazardStatistics } = this.state;
-    const wrappedStatistic = hazardStatistics[index];
+    this.setState((state) => {
+      const { hazardStatistics } = state;
+      const wrappedStatistic = hazardStatistics[index];
 
-    ParticipantRow.manageValue(value, wrappedStatistic);
+      ParticipantRow.updateValue(value, wrappedStatistic);
+      hazardStatistics[index] = wrappedStatistic;
 
-    hazardStatistics[index] = wrappedStatistic;
-    this.setState({ hazardStatistics });
+      return { hazardStatistics };
+    });
   }
 
   private handleMainStatisticBlur(index: number) {
-    const { mainStatistics } = this.state;
-    const wrappedStatistic = mainStatistics[index];
-    const { score } = wrappedStatistic.statistic;
+    this.setState((state) => {
+      const { mainStatistics } = state;
+      const wrappedStatistic = mainStatistics[index];
+      const { score } = wrappedStatistic.statistic;
 
-    wrappedStatistic.currentValue = score.toString();
+      wrappedStatistic.currentValue = score.toString();
+      mainStatistics[index] = wrappedStatistic;
 
-    mainStatistics[index] = wrappedStatistic;
-    this.setState({ mainStatistics });
+      return { mainStatistics };
+    });
   }
 
   private handleSpeedStatisticBlur(index: number) {
-    const { speedStatistics } = this.state;
-    const wrappedStatistic = speedStatistics[index];
-    const { score } = wrappedStatistic.statistic;
+    this.setState((state) => {
+      const { speedStatistics } = state;
+      const wrappedStatistic = speedStatistics[index];
+      const { score } = wrappedStatistic.statistic;
 
-    wrappedStatistic.currentValue = score.toString();
+      wrappedStatistic.currentValue = score.toString();
+      speedStatistics[index] = wrappedStatistic;
 
-    speedStatistics[index] = wrappedStatistic;
-    this.setState({ speedStatistics });
+      return { speedStatistics };
+    });
   }
 
   private handleHazardStatisticBlur(index: number) {
@@ -393,22 +412,26 @@ export default class ParticipantRow extends React.Component<Props, State> {
   }
 
   private deleteSpeedStatistic(index: number) {
-    const { speedStatistics } = this.state;
-    const [removedData] = speedStatistics.splice(index, 1);
+    this.setState((state) => {
+      const { speedStatistics } = state;
+      const [removedData] = speedStatistics.splice(index, 1);
 
-    this.speedStatSequence.remove(removedData.key);
+      this.speedStatSequence.remove(removedData.key);
 
-    this.setState({ speedStatistics });
+      return { speedStatistics };
+    });
   }
 
   private renameSpeedStatistic(index: number, value: string) {
-    const { speedStatistics } = this.state;
-    const wrappedStatistic = speedStatistics[index];
+    this.setState((state) => {
+      const { speedStatistics } = state;
+      const wrappedStatistic = speedStatistics[index];
 
-    wrappedStatistic.statistic.name = value;
-    speedStatistics[index] = wrappedStatistic;
+      wrappedStatistic.statistic.name = value;
+      speedStatistics[index] = wrappedStatistic;
 
-    this.setState({ speedStatistics });
+      return { speedStatistics };
+    });
   }
 
   private createHazardStatistic() {
@@ -429,22 +452,26 @@ export default class ParticipantRow extends React.Component<Props, State> {
   }
 
   private deleteHazardStatistic(index: number) {
-    const { hazardStatistics } = this.state;
-    const [removedData] = hazardStatistics.splice(index, 1);
+    this.setState((state) => {
+      const { hazardStatistics } = state;
+      const [removedData] = hazardStatistics.splice(index, 1);
 
-    this.hazardStatSequence.remove(removedData.key);
+      this.hazardStatSequence.remove(removedData.key);
 
-    this.setState({ hazardStatistics });
+      return { hazardStatistics };
+    });
   }
 
   private renameHazardStatistic(index: number, value: string) {
-    const { hazardStatistics } = this.state;
-    const wrappedStatistic = hazardStatistics[index];
+    this.setState((state) => {
+      const { hazardStatistics } = state;
+      const wrappedStatistic = hazardStatistics[index];
 
-    wrappedStatistic.statistic.name = value;
-    hazardStatistics[index] = wrappedStatistic;
+      wrappedStatistic.statistic.name = value;
+      hazardStatistics[index] = wrappedStatistic;
 
-    this.setState({ hazardStatistics });
+      return { hazardStatistics };
+    });
   }
 
   private openModal() {

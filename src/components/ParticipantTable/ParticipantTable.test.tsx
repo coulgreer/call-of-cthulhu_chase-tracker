@@ -1,5 +1,4 @@
 import React from "react";
-import Modal from "react-modal";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom/extend-expect";
@@ -7,31 +6,17 @@ import "@testing-library/jest-dom/extend-expect";
 import ParticipantTable from ".";
 import ParticipantRow from "../ParticipantRow";
 
-function renderParticipantTableWithModal(
-  warningMessage: string = "Unexpected WARNING"
-) {
-  const div = document.createElement("div");
-  document.body.appendChild(div);
-
-  Modal.setAppElement(div);
-
-  return render(<ParticipantTable warningMessage={warningMessage} />, {
-    container: div,
-  });
-}
+const WARNING_MESSAGE =
+  "Shame. No prey for the chase. Still, keep your wits about you.";
 
 describe("Warning Message prop", () => {
   test("should render with an error message when no participants exist", () => {
-    const WARNING_MESSAGE =
-      "Shame. No prey for the chase. Still, keep your wits about you.";
-
     render(<ParticipantTable warningMessage={WARNING_MESSAGE} />);
 
     expect(screen.getByText(WARNING_MESSAGE)).toBeInTheDocument();
   });
 
   test("should render a participant instead of an error message when a participant exists", () => {
-    const WARNING_MESSAGE = "This should not show.";
     render(<ParticipantTable warningMessage={WARNING_MESSAGE} />);
 
     userEvent.click(screen.getByRole("button", { name: /add participant/i }));
@@ -45,7 +30,7 @@ describe("Warning Message prop", () => {
 
 describe("Participant Removal", () => {
   test("should remove the designated participant", () => {
-    renderParticipantTableWithModal();
+    render(<ParticipantTable warningMessage={WARNING_MESSAGE} />);
 
     const addButton = screen.getByRole("button", { name: /add participant/i });
     userEvent.click(addButton);
@@ -73,7 +58,7 @@ describe("Participant Removal", () => {
   });
 
   test("should preserve all participants when removal is canceled via button", () => {
-    renderParticipantTableWithModal();
+    render(<ParticipantTable warningMessage={WARNING_MESSAGE} />);
 
     const addButton = screen.getByRole("button", { name: /add participant/i });
     userEvent.click(addButton);
@@ -98,7 +83,7 @@ describe("Participant Removal", () => {
   });
 
   test("should preserve all participants when removal is canceled via 'esc' key", () => {
-    renderParticipantTableWithModal("This should not show.");
+    render(<ParticipantTable warningMessage={WARNING_MESSAGE} />);
 
     const addButton = screen.getByRole("button", { name: /add participant/i });
     userEvent.click(addButton);
@@ -127,7 +112,7 @@ describe("Participant Removal", () => {
 });
 
 test("should have the appropriate default participant name when a participant has been removed", () => {
-  renderParticipantTableWithModal("TESTING");
+  render(<ParticipantTable warningMessage={WARNING_MESSAGE} />);
 
   const addButton = screen.getByRole("button", { name: /add participant/i });
   userEvent.click(addButton);
@@ -169,20 +154,25 @@ describe("Participant manipulation", () => {
   const validInput = 11;
 
   function renderTableWithExpandedRow() {
-    renderParticipantTableWithModal("This should not show.");
+    render(<ParticipantTable warningMessage={WARNING_MESSAGE} />);
 
     userEvent.click(screen.getByRole("button", { name: /add participant/i }));
     userEvent.click(screen.getByRole("button", { name: /expand/i }));
   }
 
   describe("Naming Hazard Skill", () => {
+    const [
+      primaryStat,
+      secondaryStat,
+    ] = ParticipantRow.DEFAULT_HAZARD_STATISTICS;
+
     test("should reset textbox to current name when another hazard skill has been renamed", () => {
       const firstNewName = "First Name";
       renderTableWithExpandedRow();
 
       userEvent.click(
         screen.getByRole("button", {
-          name: new RegExp(`rename: ${ParticipantRow.STR_TITLE}`),
+          name: new RegExp(`rename: ${primaryStat.name}`),
         })
       );
 
@@ -193,17 +183,17 @@ describe("Participant manipulation", () => {
 
       userEvent.click(
         screen.getByRole("button", {
-          name: new RegExp(`rename: ${ParticipantRow.CLIMB_TITLE}`),
+          name: new RegExp(`rename: ${secondaryStat.name}`),
         })
       );
 
       expect(screen.getByRole("textbox", { name: /new name/i })).toHaveValue(
-        ParticipantRow.CLIMB_TITLE
+        secondaryStat.name
       );
     });
 
     test("should rename hazard statistic when given a new name", () => {
-      const originName = ParticipantRow.STR_TITLE;
+      const originName = primaryStat.name;
       const newName = "NEW_TEST";
       renderTableWithExpandedRow();
 
@@ -230,7 +220,7 @@ describe("Participant manipulation", () => {
       renderTableWithExpandedRow();
 
       const statisticDisplayEl = screen.getByRole("spinbutton", {
-        name: ParticipantRow.STR_TITLE,
+        name: primaryStat.name,
       });
       userEvent.clear(statisticDisplayEl);
       userEvent.type(statisticDisplayEl, validInput.toString());
@@ -250,7 +240,7 @@ describe("Participant manipulation", () => {
 
       userEvent.click(
         screen.getByRole("button", {
-          name: new RegExp(`delete: ${ParticipantRow.STR_TITLE}`, "i"),
+          name: new RegExp(`delete: ${primaryStat.name}`, "i"),
         })
       );
       userEvent.click(
@@ -264,13 +254,18 @@ describe("Participant manipulation", () => {
   });
 
   describe("Naming Speed Skill", () => {
+    const [
+      primaryStat,
+      secondaryStat,
+    ] = ParticipantRow.DEFAULT_SPEED_STATISTICS;
+
     test("should reset textbox to current name when another speed skill has been renamed", () => {
       const firstNewName = "First Name";
       renderTableWithExpandedRow();
 
       userEvent.click(
         screen.getByRole("button", {
-          name: new RegExp(`rename: ${ParticipantRow.CON_TITLE}`),
+          name: new RegExp(`rename: ${primaryStat.name}`),
         })
       );
 
@@ -281,17 +276,17 @@ describe("Participant manipulation", () => {
 
       userEvent.click(
         screen.getByRole("button", {
-          name: new RegExp(`rename: ${ParticipantRow.DRIVE_TITLE}`),
+          name: new RegExp(`rename: ${secondaryStat.name}`),
         })
       );
 
       expect(screen.getByRole("textbox", { name: /new name/i })).toHaveValue(
-        ParticipantRow.DRIVE_TITLE
+        secondaryStat.name
       );
     });
 
     test("should rename speed statistic when given a new name", () => {
-      const originName = ParticipantRow.CON_TITLE;
+      const originName = primaryStat.name;
       const newName = "NEW_TEST";
       renderTableWithExpandedRow();
 
@@ -318,7 +313,7 @@ describe("Participant manipulation", () => {
       renderTableWithExpandedRow();
 
       const statisticDisplayEl = screen.getByRole("spinbutton", {
-        name: ParticipantRow.CON_TITLE,
+        name: primaryStat.name,
       });
       userEvent.clear(statisticDisplayEl);
       userEvent.type(statisticDisplayEl, validInput.toString());
@@ -338,7 +333,7 @@ describe("Participant manipulation", () => {
 
       userEvent.click(
         screen.getByRole("button", {
-          name: new RegExp(`delete: ${ParticipantRow.CON_TITLE}`, "i"),
+          name: new RegExp(`delete: ${primaryStat.name}`, "i"),
         })
       );
       userEvent.click(
@@ -367,19 +362,18 @@ describe("Participant manipulation", () => {
     test("should delete given hazard stat when the 'delete hazard statistic' is clicked", () => {
       renderTableWithExpandedRow();
 
-      expect(
-        screen.getByLabelText(new RegExp(ParticipantRow.STR_TITLE, "i"))
-      ).toBeInTheDocument();
+      const [hazardStat] = ParticipantRow.DEFAULT_HAZARD_STATISTICS;
+      const { name } = hazardStat;
+
+      expect(screen.getByLabelText(name)).toBeInTheDocument();
 
       userEvent.click(
         screen.getByRole("button", {
-          name: new RegExp(`delete: ${ParticipantRow.STR_TITLE}`, "i"),
+          name: new RegExp(`delete: ${name}`, "i"),
         })
       );
 
-      expect(
-        screen.queryByLabelText(new RegExp(ParticipantRow.STR_TITLE, "i"))
-      ).not.toBeInTheDocument();
+      expect(screen.queryByLabelText(name)).not.toBeInTheDocument();
     });
 
     test("should create speed statistic when appropriate 'create statistic' button clicked", () => {
@@ -397,26 +391,25 @@ describe("Participant manipulation", () => {
     test("should delete given speed stat when the 'delete speed stat' is clicked", () => {
       renderTableWithExpandedRow();
 
-      expect(
-        screen.getByLabelText(new RegExp(ParticipantRow.CON_TITLE, "i"))
-      ).toBeInTheDocument();
+      const [speedStat] = ParticipantRow.DEFAULT_SPEED_STATISTICS;
+      const { name } = speedStat;
+
+      expect(screen.getByLabelText(name)).toBeInTheDocument();
 
       userEvent.click(
         screen.getByRole("button", {
-          name: new RegExp(`delete: ${ParticipantRow.CON_TITLE}`, "i"),
+          name: new RegExp(`delete: ${name}`, "i"),
         })
       );
 
-      expect(
-        screen.queryByLabelText(new RegExp(ParticipantRow.CON_TITLE, "i"))
-      ).not.toBeInTheDocument();
+      expect(screen.queryByLabelText(name)).not.toBeInTheDocument();
     });
   });
 });
 
 describe("Confirmation Tests", () => {
   test("should properly remove and add back participants when their numbers would sort differently between numerical and alphabetical", () => {
-    renderParticipantTableWithModal("TESTING");
+    render(<ParticipantTable warningMessage={WARNING_MESSAGE} />);
 
     const addButton = screen.getByRole("button", { name: /add participant/i });
 

@@ -20,15 +20,15 @@ interface Props {
 }
 
 interface State {
-  participants: Participant[];
   modalShown: boolean;
   selectedParticipant: Participant | null;
+  participants: Participant[];
 }
+
+const SEQUENCE_START = 0;
 
 export default class ParticipantTable extends Component<Props, State> {
   private static minimumParticipants = 1;
-
-  private static startingNumber = 0;
 
   static get DEFAULT_NAME() {
     return "Participant";
@@ -44,9 +44,7 @@ export default class ParticipantTable extends Component<Props, State> {
       selectedParticipant: null,
     };
 
-    this.sequnceGenerator = new UniqueSequenceGenerator(
-      ParticipantTable.startingNumber
-    );
+    this.sequnceGenerator = new UniqueSequenceGenerator(SEQUENCE_START);
 
     this.createParticipant = this.createParticipant.bind(this);
     this.deleteSelectedParticipant = this.deleteSelectedParticipant.bind(this);
@@ -86,58 +84,8 @@ export default class ParticipantTable extends Component<Props, State> {
       dexterity: 15,
       movementRate: 2,
       derivedSpeed: 0,
-      speedSkills: [
-        {
-          name: ParticipantRow.CON_TITLE,
-          score: 15,
-        },
-        {
-          name: ParticipantRow.DRIVE_TITLE,
-          score: 20,
-        },
-        {
-          name: ParticipantRow.RIDE_TITLE,
-          score: 5,
-        },
-        {
-          name: ParticipantRow.AIR_TITLE,
-          score: 1,
-        },
-        {
-          name: ParticipantRow.SEA_TITLE,
-          score: 1,
-        },
-      ],
-      hazardSkills: [
-        {
-          name: ParticipantRow.STR_TITLE,
-          score: 15,
-        },
-        {
-          name: ParticipantRow.CLIMB_TITLE,
-          score: 20,
-        },
-        {
-          name: ParticipantRow.SWIM_TITLE,
-          score: 20,
-        },
-        {
-          name: ParticipantRow.DODGE_TITLE,
-          score: 7,
-        },
-        {
-          name: ParticipantRow.BRAWL_TITLE,
-          score: 25,
-        },
-        {
-          name: ParticipantRow.HANDGUN_TITLE,
-          score: 20,
-        },
-        {
-          name: ParticipantRow.RIFLE_TITLE,
-          score: 25,
-        },
-      ],
+      speedSkills: ParticipantRow.DEFAULT_SPEED_STATISTICS,
+      hazardSkills: ParticipantRow.DEFAULT_HAZARD_STATISTICS,
     };
 
     this.setState((state) => ({
