@@ -114,10 +114,10 @@ export default class ParticipantTable extends Component<Props, State> {
   }
 
   private removeParticipantFromTable(participant: Participant) {
-    const { participants } = this.state;
-
-    this.setState(() => {
+    this.setState((state) => {
+      const { participants } = state;
       const targetIndex = participants.indexOf(participant);
+
       participants.splice(targetIndex, 1);
 
       return { selectedParticipant: null };
