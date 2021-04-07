@@ -1,6 +1,6 @@
 import React from "react";
 
-import GroupRow, { Data } from "../GroupRow";
+import GroupRow from "../GroupRow";
 import Button from "../Button";
 
 import AddIcon from "../../images/baseline_add_black_24dp_x2.png";
@@ -10,12 +10,14 @@ import "./GroupTable.css";
 
 import UniqueSequenceGen from "../../utils/unique-sequence-generator";
 
+import { Group } from "../../types";
+
 interface Props {
   warningMessage: string;
 }
 
 interface State {
-  groups: Data[];
+  groups: Group[];
 }
 
 export default class GroupTable extends React.Component<Props, State> {
@@ -34,32 +36,37 @@ export default class GroupTable extends React.Component<Props, State> {
   }
 
   private handleCreateClick() {
-    const { groups } = this.state;
     const idNum = this.sequenceGenerator.nextNum();
 
-    groups.push({
-      id: `GROUP-${idNum}`,
-      name: `Group ${idNum}`,
-      chaseName: GroupRow.DEFAULT_CHASE_NAME,
-      distancerName: GroupRow.INVALID_DISTANCER_NAME,
-      pursuerNames: [],
-    });
+    this.setState((state) => {
+      const { groups } = state;
 
-    this.setState({ groups });
+      groups.push({
+        id: `GROUP-${idNum}`,
+        name: `Group ${idNum}`,
+        distancerName: GroupRow.INVALID_DISTANCER_NAME,
+        pursuersNames: [],
+        participants: [],
+      });
+
+      return { groups };
+    });
   }
 
   private handleRemoveClick(id: string) {
-    const { groups } = this.state;
-    const targetIndex = groups.findIndex((group) => group.id === id);
+    this.setState((state) => {
+      const { groups } = state;
+      const targetIndex = groups.findIndex((group) => group.id === id);
 
-    const groupId = groups[targetIndex].id;
-    const results = groupId.match(new RegExp(/\d+$/)) || [];
-    const result = results[0];
-    this.sequenceGenerator.remove(Number.parseInt(result, 10));
+      const groupId = groups[targetIndex].id;
+      const results = groupId.match(new RegExp(/\d+$/)) || [];
+      const result = results[0];
 
-    groups.splice(targetIndex, 1);
+      this.sequenceGenerator.remove(Number.parseInt(result, 10));
+      groups.splice(targetIndex, 1);
 
-    this.setState({ groups });
+      return { groups };
+    });
   }
 
   private renderWarning() {

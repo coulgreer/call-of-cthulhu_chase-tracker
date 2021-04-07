@@ -5,5 +5,5 @@ export default interface Group {
   name: string;
   distancerName: string;
   pursuersNames: string[];
-  participants: Participant;
+  participants: Participant[];
 }

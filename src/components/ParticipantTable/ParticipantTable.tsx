@@ -78,19 +78,22 @@ export default class ParticipantTable extends Component<Props, State> {
   private createParticipant() {
     const idNum = this.sequnceGenerator.nextNum();
     const id = `${ParticipantTable.DEFAULT_NAME} #${idNum}`;
-    const newParticipant = {
-      id,
-      name: id,
-      dexterity: 15,
-      movementRate: 2,
-      derivedSpeed: 0,
-      speedSkills: ParticipantRow.DEFAULT_SPEED_STATISTICS,
-      hazardSkills: ParticipantRow.DEFAULT_HAZARD_STATISTICS,
-    };
 
-    this.setState((state) => ({
-      participants: [...state.participants, newParticipant],
-    }));
+    this.setState((state) => {
+      const { participants } = state;
+
+      participants.push({
+        id,
+        name: id,
+        dexterity: 15,
+        movementRate: 2,
+        derivedSpeed: 0,
+        speedSkills: ParticipantRow.DEFAULT_SPEED_STATISTICS,
+        hazardSkills: ParticipantRow.DEFAULT_HAZARD_STATISTICS,
+      });
+
+      return { participants };
+    });
   }
 
   private promptParticipantRemoval(participant: Participant) {

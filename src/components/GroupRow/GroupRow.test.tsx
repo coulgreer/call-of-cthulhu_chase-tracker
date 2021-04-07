@@ -5,42 +5,42 @@ import userEvent from "@testing-library/user-event";
 
 import GroupRow from ".";
 
+import { Group } from "../../types";
+
 const group0Name = "Group 0";
 const group1Name = "Group 1";
 const group2Name = "Group 2";
 const group3Name = "Group 3";
 
-const chaseName = "TEST CHASE";
-
-const DEFAULT_PROPS = {
+const DEFAULT_PROPS: { groups: Group[] } = {
   groups: [
     {
       id: "0",
       name: group0Name,
-      chaseName,
       distancerName: GroupRow.INVALID_DISTANCER_NAME,
-      pursuerNames: [],
+      pursuersNames: [],
+      participants: [],
     },
     {
       id: "1",
       name: group1Name,
-      chaseName,
       distancerName: GroupRow.INVALID_DISTANCER_NAME,
-      pursuerNames: [group2Name],
+      pursuersNames: [group2Name],
+      participants: [],
     },
     {
       id: "2",
       name: group2Name,
-      chaseName,
       distancerName: group1Name,
-      pursuerNames: [group3Name],
+      pursuersNames: [group3Name],
+      participants: [],
     },
     {
       id: "3",
       name: group3Name,
-      chaseName,
       distancerName: group2Name,
-      pursuerNames: [],
+      pursuersNames: [],
+      participants: [],
     },
   ],
 };
@@ -106,7 +106,10 @@ test("should render properly when details are expanded", () => {
       const hasText = (node: Element) => {
         if (node.textContent === null) return false;
 
-        const regex = new RegExp(`chase name: ${groups[index].chaseName}`, "i");
+        const regex = new RegExp(
+          `chase name: ${GroupRow.DEFAULT_CHASE_NAME}`,
+          "i"
+        );
 
         return regex.test(node.textContent);
       };

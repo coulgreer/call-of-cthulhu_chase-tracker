@@ -9,22 +9,16 @@ import ExpandMoreIcon from "../../images/baseline_expand_more_black_24dp.png";
 
 import "./GroupRow.css";
 
+import { Group } from "../../types";
+
 interface Props {
   ownedIndex: number;
-  groups: Data[];
+  groups: Group[];
 }
 
 interface State {
   isShown: boolean;
   distancerName: string;
-}
-
-export interface Data {
-  id: string;
-  name: string;
-  chaseName: string;
-  distancerName: string;
-  pursuerNames: string[];
 }
 
 export default class GroupRow extends React.Component<Props, State> {
@@ -117,7 +111,7 @@ export default class GroupRow extends React.Component<Props, State> {
           shown &&
           ((props) => (
             <animated.div style={props} className="GroupRow__extended-display">
-              {this.renderChaseName()}
+              {GroupRow.renderChaseName()}
               {this.renderDistancer()}
               {this.renderPursuers()}
             </animated.div>
@@ -127,12 +121,10 @@ export default class GroupRow extends React.Component<Props, State> {
     );
   }
 
-  private renderChaseName() {
-    const { groups, ownedIndex } = this.props;
-    const { chaseName } = groups[ownedIndex];
+  static renderChaseName() {
     return (
       <h3>
-        Chase Name: <span>{chaseName}</span>
+        Chase Name: <span>{GroupRow.DEFAULT_CHASE_NAME}</span>
       </h3>
     );
   }
@@ -178,7 +170,7 @@ export default class GroupRow extends React.Component<Props, State> {
         <div aria-label={pursuerLabel} />
         <p
           className="centered error"
-          hidden={groups[ownedIndex].pursuerNames.length > 0}
+          hidden={groups[ownedIndex].pursuersNames.length > 0}
         >
           {GroupRow.NO_PURSUER_WARNING_MESSAGE}
         </p>
