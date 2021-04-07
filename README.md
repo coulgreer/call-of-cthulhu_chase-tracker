@@ -16,11 +16,11 @@ Check out the web app at: https://callofcthulhu-chasetracker.herokuapp.com/
 
 - Track individual participants data
 - Lovecraftian aesthetic
-- dark mode
+- Dark mode
 
 ## Roadmap
 
-- Grouping participants into "chasers" and "pursuers"
+- Grouping participants into "Distancers" and "Pursuers"
 - Track chase events
 - Track turn count
 - Tracking actions per turn
