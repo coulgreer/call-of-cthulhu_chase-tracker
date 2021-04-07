@@ -5,50 +5,72 @@ import userEvent from "@testing-library/user-event";
 
 import GroupRow from ".";
 
-import { Group } from "../../types";
+import { Group, Participant } from "../../types";
 
-const group0Name = "Group 0";
-const group1Name = "Group 1";
-const group2Name = "Group 2";
-const group3Name = "Group 3";
+function createParticipant(id: string): Participant {
+  return {
+    id,
+    name: id,
+    dexterity: 15,
+    movementRate: 3,
+    derivedSpeed: 1,
+    speedSkills: [],
+    hazardSkills: [],
+  };
+}
+
+const isolatedGroupName = "Group 0";
+const distancingGroupName = "Group 1";
+const distancingAndPursuingGroupName = "Group 2";
+const pursuingGroupName = "Group 3";
 
 const DEFAULT_PROPS: { groups: Group[] } = {
   groups: [
     {
       id: "0",
-      name: group0Name,
+      name: isolatedGroupName,
       distancerName: GroupRow.INVALID_DISTANCER_NAME,
       pursuersNames: [],
       participants: [],
     },
     {
       id: "1",
-      name: group1Name,
+      name: distancingGroupName,
       distancerName: GroupRow.INVALID_DISTANCER_NAME,
-      pursuersNames: [group2Name],
-      participants: [],
+      pursuersNames: [distancingAndPursuingGroupName],
+      participants: [createParticipant("Participant 00")],
     },
     {
       id: "2",
-      name: group2Name,
-      distancerName: group1Name,
-      pursuersNames: [group3Name],
-      participants: [],
+      name: distancingAndPursuingGroupName,
+      distancerName: distancingGroupName,
+      pursuersNames: [pursuingGroupName],
+      participants: [
+        createParticipant("Participant 01"),
+        createParticipant("Participant 02"),
+      ],
     },
     {
       id: "3",
-      name: group3Name,
-      distancerName: group2Name,
+      name: pursuingGroupName,
+      distancerName: distancingAndPursuingGroupName,
       pursuersNames: [],
-      participants: [],
+      participants: [
+        createParticipant("Participant 03"),
+        createParticipant("Participant 04"),
+        createParticipant("Participant 05"),
+      ],
     },
   ],
 };
 
+const isolatedGroupIndex = 0;
+const centralGroupIndex = 2;
+
 test("should render properly when details are not expanded", () => {
   const { groups } = DEFAULT_PROPS;
 
-  render(<GroupRow ownedIndex={0} groups={groups} />);
+  render(<GroupRow ownedIndex={isolatedGroupIndex} groups={groups} />);
 
   expect(screen.getByRole("button", { name: /split/i })).toBeInTheDocument();
   expect(screen.getByRole("button", { name: /join/i })).toBeInTheDocument();
@@ -83,11 +105,10 @@ test("should render properly when details are not expanded", () => {
   ).not.toBeInTheDocument();
 });
 
-test("should render properly when details are expanded", () => {
+test("should render properly when at least one participant exists in the group", () => {
   const { groups } = DEFAULT_PROPS;
-  const index = 0;
 
-  render(<GroupRow ownedIndex={index} groups={groups} />);
+  render(<GroupRow ownedIndex={centralGroupIndex} groups={groups} />);
 
   expect(screen.getByRole("button", { name: /split/i })).toBeInTheDocument();
   expect(screen.getByRole("button", { name: /join/i })).toBeInTheDocument();
@@ -125,14 +146,7 @@ test("should render properly when details are expanded", () => {
   expect(
     screen.getByRole("combobox", { name: /distancer/i })
   ).toBeInTheDocument();
-  expect(
-    screen.getByText(GroupRow.NO_DISTANCER_WARNING_MESSAGE)
-  ).toBeInTheDocument();
-
   expect(screen.getByLabelText(/pursuer\(s\)/i)).toBeInTheDocument();
-  expect(
-    screen.getByText(GroupRow.NO_PURSUER_WARNING_MESSAGE)
-  ).toBeInTheDocument();
 
   expect(screen.getByRole("heading", { name: /members/i })).toBeInTheDocument();
   expect(screen.getByText(/highest mov/i)).toBeInTheDocument();
@@ -141,46 +155,85 @@ test("should render properly when details are expanded", () => {
   expect(screen.getByRole("button", { name: /add/i })).toBeInTheDocument();
 });
 
-describe("Warning Messages", () => {
-  test("should show warning message when a group does not have a distancer", () => {
-    const { groups } = DEFAULT_PROPS;
+describe("Warnings", () => {
+  describe("Participant", () => {
+    test("should render properly when no participants exist in the group", () => {
+      const { groups } = DEFAULT_PROPS;
 
-    render(<GroupRow ownedIndex={1} groups={groups} />);
-    userEvent.click(screen.getByRole("button", { name: /expand more/i }));
+      render(<GroupRow ownedIndex={isolatedGroupIndex} groups={groups} />);
 
-    expect(
-      screen.getByText(GroupRow.NO_DISTANCER_WARNING_MESSAGE)
-    ).toBeVisible();
+      userEvent.click(screen.getByRole("button", { name: /expand more/i }));
+
+      expect(
+        screen.getByText(GroupRow.NO_PARTICIPANT_WARNING_MESSAGE)
+      ).toBeInTheDocument();
+    });
+
+    test("should render properly when at least one participant exists in the group", () => {
+      const { groups } = DEFAULT_PROPS;
+
+      const targetIndex = centralGroupIndex;
+      const { participants } = groups[targetIndex];
+      const [first] = participants;
+
+      render(<GroupRow ownedIndex={targetIndex} groups={groups} />);
+
+      userEvent.click(screen.getByRole("button", { name: /expand more/i }));
+
+      expect(
+        screen.queryByText(GroupRow.NO_PARTICIPANT_WARNING_MESSAGE)
+      ).not.toBeInTheDocument();
+
+      expect(screen.getByText(first.name)).toBeInTheDocument();
+      expect(screen.getAllByText(first.movementRate).length > 0).toBeTruthy();
+    });
   });
 
-  test("should hide warning and display current distancer when a group has a distancer", () => {
-    const { groups } = DEFAULT_PROPS;
+  describe("Distancer", () => {
+    test("should show warning message when a group does not have a distancer", () => {
+      const { groups } = DEFAULT_PROPS;
 
-    render(<GroupRow ownedIndex={2} groups={groups} />);
-    userEvent.click(screen.getByRole("button", { name: /expand more/i }));
+      render(<GroupRow ownedIndex={1} groups={groups} />);
+      userEvent.click(screen.getByRole("button", { name: /expand more/i }));
 
-    expect(
-      screen.getByText(GroupRow.NO_DISTANCER_WARNING_MESSAGE)
-    ).not.toBeVisible();
+      expect(
+        screen.getByText(GroupRow.NO_DISTANCER_WARNING_MESSAGE)
+      ).toBeVisible();
+    });
+
+    test("should hide warning and display current distancer when a group has a distancer", () => {
+      const { groups } = DEFAULT_PROPS;
+
+      render(<GroupRow ownedIndex={centralGroupIndex} groups={groups} />);
+      userEvent.click(screen.getByRole("button", { name: /expand more/i }));
+
+      expect(
+        screen.getByText(GroupRow.NO_DISTANCER_WARNING_MESSAGE)
+      ).not.toBeVisible();
+    });
   });
 
-  test("should show warning message when a group does not have at least one pursuer", () => {
-    const { groups } = DEFAULT_PROPS;
+  describe("Pursuer", () => {
+    test("should show warning message when a group does not have at least one pursuer", () => {
+      const { groups } = DEFAULT_PROPS;
 
-    render(<GroupRow ownedIndex={3} groups={groups} />);
-    userEvent.click(screen.getByRole("button", { name: /expand more/i }));
+      render(<GroupRow ownedIndex={3} groups={groups} />);
+      userEvent.click(screen.getByRole("button", { name: /expand more/i }));
 
-    expect(screen.getByText(GroupRow.NO_PURSUER_WARNING_MESSAGE)).toBeVisible();
-  });
+      expect(
+        screen.getByText(GroupRow.NO_PURSUER_WARNING_MESSAGE)
+      ).toBeVisible();
+    });
 
-  test("should hide warning and display current pursuer(s) when a group has any pursuers", () => {
-    const { groups } = DEFAULT_PROPS;
+    test("should hide warning and display current pursuer(s) when a group has any pursuers", () => {
+      const { groups } = DEFAULT_PROPS;
 
-    render(<GroupRow ownedIndex={2} groups={groups} />);
-    userEvent.click(screen.getByRole("button", { name: /expand more/i }));
+      render(<GroupRow ownedIndex={centralGroupIndex} groups={groups} />);
+      userEvent.click(screen.getByRole("button", { name: /expand more/i }));
 
-    expect(
-      screen.getByText(GroupRow.NO_PURSUER_WARNING_MESSAGE)
-    ).not.toBeVisible();
+      expect(
+        screen.getByText(GroupRow.NO_PURSUER_WARNING_MESSAGE)
+      ).not.toBeVisible();
+    });
   });
 });

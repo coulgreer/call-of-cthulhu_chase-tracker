@@ -87,7 +87,7 @@ export default class ParticipantTable extends Component<Props, State> {
         name: id,
         dexterity: 15,
         movementRate: 2,
-        derivedSpeed: 0,
+        derivedSpeed: 1,
         speedSkills: ParticipantRow.DEFAULT_SPEED_STATISTICS,
         hazardSkills: ParticipantRow.DEFAULT_HAZARD_STATISTICS,
       });

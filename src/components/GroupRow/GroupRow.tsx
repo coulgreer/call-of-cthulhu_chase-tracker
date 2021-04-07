@@ -34,6 +34,10 @@ export default class GroupRow extends React.Component<Props, State> {
     return "These little birds fly free. They haven't noticed, yet.";
   }
 
+  static get NO_PARTICIPANT_WARNING_MESSAGE() {
+    return "An emptiness, yet to be filled. This *thing* lacks purpose.";
+  }
+
   constructor(props: Props) {
     super(props);
 
@@ -114,6 +118,7 @@ export default class GroupRow extends React.Component<Props, State> {
               {GroupRow.renderChaseName()}
               {this.renderDistancer()}
               {this.renderPursuers()}
+              {this.renderMembers()}
             </animated.div>
           ))
         }
@@ -174,10 +179,31 @@ export default class GroupRow extends React.Component<Props, State> {
         >
           {GroupRow.NO_PURSUER_WARNING_MESSAGE}
         </p>
+      </>
+    );
+  }
+
+  private renderMembers() {
+    const { groups, ownedIndex } = this.props;
+    const currentGroup = groups[ownedIndex];
+
+    return (
+      <>
         <h3>Members</h3>
         <p>Highest MOV</p>
         <p>Lowest MOV</p>
-        <div aria-label="Participants" />
+        <div aria-label="Participants">
+          {currentGroup.participants.length > 0 ? (
+            currentGroup.participants.map((participant) => (
+              <div>
+                <p>{participant.name}</p>
+                <p>{participant.movementRate}</p>
+              </div>
+            ))
+          ) : (
+            <p>{GroupRow.NO_PARTICIPANT_WARNING_MESSAGE}</p>
+          )}
+        </div>
         <Button className="button button--primary button--medium">ADD</Button>
       </>
     );
