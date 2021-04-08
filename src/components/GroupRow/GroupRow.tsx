@@ -167,15 +167,18 @@ export default class GroupRow extends React.Component<Props, State> {
 
   private renderPursuers() {
     const { ownedIndex, groups } = this.props;
+    const currentGroup = groups[ownedIndex];
     const pursuerLabel = "Pursuer(s)";
 
     return (
       <>
         <h5>{pursuerLabel}</h5>
-        <div aria-label={pursuerLabel} />
+        <div aria-label={pursuerLabel}>
+          <p>{currentGroup.pursuersNames}</p>
+        </div>
         <p
           className="centered error"
-          hidden={groups[ownedIndex].pursuersNames.length > 0}
+          hidden={currentGroup.pursuersNames.length > 0}
         >
           {GroupRow.NO_PURSUER_WARNING_MESSAGE}
         </p>

@@ -146,6 +146,7 @@ test("should render properly when at least one participant exists in the group",
   expect(
     screen.getByRole("combobox", { name: /distancer/i })
   ).toBeInTheDocument();
+
   expect(screen.getByLabelText(/pursuer\(s\)/i)).toBeInTheDocument();
 
   expect(screen.getByRole("heading", { name: /members/i })).toBeInTheDocument();
@@ -185,7 +186,7 @@ describe("Warnings", () => {
       ).not.toBeInTheDocument();
 
       expect(screen.getByText(first.name)).toBeInTheDocument();
-      expect(screen.getAllByText(first.movementRate).length > 0).toBeTruthy();
+      expect(screen.getAllByText(first.movementRate).length).toBeGreaterThan(0);
     });
   });
 
@@ -228,12 +229,18 @@ describe("Warnings", () => {
     test("should hide warning and display current pursuer(s) when a group has any pursuers", () => {
       const { groups } = DEFAULT_PROPS;
 
-      render(<GroupRow ownedIndex={centralGroupIndex} groups={groups} />);
+      const targetIndex = centralGroupIndex;
+      const { pursuersNames } = groups[targetIndex];
+      const [first] = pursuersNames;
+
+      render(<GroupRow ownedIndex={targetIndex} groups={groups} />);
       userEvent.click(screen.getByRole("button", { name: /expand more/i }));
 
       expect(
         screen.getByText(GroupRow.NO_PURSUER_WARNING_MESSAGE)
       ).not.toBeVisible();
+
+      expect(screen.getAllByText(first).length).toEqual(2);
     });
   });
 });
