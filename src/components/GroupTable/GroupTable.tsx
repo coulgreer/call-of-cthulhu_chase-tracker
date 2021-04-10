@@ -20,6 +20,11 @@ interface State {
   groups: Group[];
 }
 
+/**
+ * TODO (Coul Greer): Add a 'add relationship' and 'remove relationship'
+ * event listener. This should make the table re-reneder and
+ * subsequentally the rows.
+ */
 export default class GroupTable extends React.Component<Props, State> {
   private sequenceGenerator;
 
@@ -44,8 +49,8 @@ export default class GroupTable extends React.Component<Props, State> {
       groups.push({
         id: `GROUP-${idNum}`,
         name: `Group ${idNum}`,
-        distancerName: GroupRow.INVALID_DISTANCER_NAME,
-        pursuersNames: [],
+        distancerId: GroupRow.INVALID_DISTANCER_NAME,
+        pursuersIds: [],
         participants: [],
       });
 

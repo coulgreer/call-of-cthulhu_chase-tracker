@@ -90,8 +90,8 @@ describe("Collapse/Expand detailed data", () => {
     expect(screen.queryByLabelText(rifle.name)).not.toBeInTheDocument();
 
     expect(
-      screen.queryAllByRole("button", { name: /create statistic/i }).length
-    ).toBe(0);
+      screen.queryAllByRole("button", { name: /create statistic/i })
+    ).toHaveLength(0);
   });
 
   test("should render participant information properly when expanded", () => {
@@ -136,8 +136,8 @@ describe("Collapse/Expand detailed data", () => {
     expect(screen.getByLabelText(rifle.name)).toBeInTheDocument();
 
     expect(
-      screen.getAllByRole("button", { name: /create statistic/i }).length
-    ).toBe(2);
+      screen.getAllByRole("button", { name: /create statistic/i })
+    ).toHaveLength(2);
   });
 });
 

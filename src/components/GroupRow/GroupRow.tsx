@@ -14,6 +14,7 @@ import { Group } from "../../types";
 interface Props {
   ownedIndex: number;
   groups: Group[];
+  onDistancerBlur?: (target: Group, distancer: Group) => void;
 }
 
 interface State {
@@ -46,7 +47,7 @@ export default class GroupRow extends React.Component<Props, State> {
 
     this.state = {
       isShown: false,
-      distancerName: currentGroup.distancerName,
+      distancerName: currentGroup.distancerId,
     };
 
     this.toggleExpansion = this.toggleExpansion.bind(this);
@@ -54,7 +55,13 @@ export default class GroupRow extends React.Component<Props, State> {
   }
 
   private handleDistancerBlur(evt: React.ChangeEvent<HTMLSelectElement>) {
+    const { groups, ownedIndex, onDistancerBlur } = this.props;
     const { value } = evt.currentTarget;
+    const distancer = groups.find((group) => group.id === value);
+
+    if (onDistancerBlur && distancer) {
+      onDistancerBlur(groups[ownedIndex], distancer);
+    }
 
     this.setState({ distancerName: value });
   }
@@ -150,7 +157,7 @@ export default class GroupRow extends React.Component<Props, State> {
             {groups.map(
               (group, index) =>
                 ownedIndex !== index && (
-                  <option value={group.name}>{group.name}</option>
+                  <option value={group.id}>{group.name}</option>
                 )
             )}
           </select>
@@ -173,12 +180,14 @@ export default class GroupRow extends React.Component<Props, State> {
     return (
       <>
         <h5>{pursuerLabel}</h5>
-        <div aria-label={pursuerLabel}>
-          <p>{currentGroup.pursuersNames}</p>
-        </div>
+        <ul aria-label={pursuerLabel}>
+          {currentGroup.pursuersIds.map((pursuerId) => (
+            <li>{pursuerId}</li>
+          ))}
+        </ul>
         <p
           className="centered error"
-          hidden={currentGroup.pursuersNames.length > 0}
+          hidden={currentGroup.pursuersIds.length > 0}
         >
           {GroupRow.NO_PURSUER_WARNING_MESSAGE}
         </p>

@@ -24,27 +24,27 @@ const distancingGroupName = "Group 1";
 const distancingAndPursuingGroupName = "Group 2";
 const pursuingGroupName = "Group 3";
 
-const DEFAULT_PROPS: { groups: Group[] } = {
+const DEFAULT_PROPS: { groups: Group[]; handleDistancerBlur: () => void } = {
   groups: [
     {
       id: "0",
       name: isolatedGroupName,
-      distancerName: GroupRow.INVALID_DISTANCER_NAME,
-      pursuersNames: [],
+      distancerId: GroupRow.INVALID_DISTANCER_NAME,
+      pursuersIds: [],
       participants: [],
     },
     {
       id: "1",
       name: distancingGroupName,
-      distancerName: GroupRow.INVALID_DISTANCER_NAME,
-      pursuersNames: [distancingAndPursuingGroupName],
+      distancerId: GroupRow.INVALID_DISTANCER_NAME,
+      pursuersIds: [distancingAndPursuingGroupName],
       participants: [createParticipant("Participant 00")],
     },
     {
       id: "2",
       name: distancingAndPursuingGroupName,
-      distancerName: distancingGroupName,
-      pursuersNames: [pursuingGroupName],
+      distancerId: distancingGroupName,
+      pursuersIds: [pursuingGroupName],
       participants: [
         createParticipant("Participant 01"),
         createParticipant("Participant 02"),
@@ -53,8 +53,8 @@ const DEFAULT_PROPS: { groups: Group[] } = {
     {
       id: "3",
       name: pursuingGroupName,
-      distancerName: distancingAndPursuingGroupName,
-      pursuersNames: [],
+      distancerId: distancingAndPursuingGroupName,
+      pursuersIds: [],
       participants: [
         createParticipant("Participant 03"),
         createParticipant("Participant 04"),
@@ -62,6 +62,7 @@ const DEFAULT_PROPS: { groups: Group[] } = {
       ],
     },
   ],
+  handleDistancerBlur: jest.fn(),
 };
 
 const isolatedGroupIndex = 0;
@@ -106,9 +107,15 @@ test("should render properly when details are not expanded", () => {
 });
 
 test("should render properly when at least one participant exists in the group", () => {
-  const { groups } = DEFAULT_PROPS;
+  const { groups, handleDistancerBlur } = DEFAULT_PROPS;
 
-  render(<GroupRow ownedIndex={centralGroupIndex} groups={groups} />);
+  render(
+    <GroupRow
+      ownedIndex={centralGroupIndex}
+      groups={groups}
+      onDistancerBlur={handleDistancerBlur}
+    />
+  );
 
   expect(screen.getByRole("button", { name: /split/i })).toBeInTheDocument();
   expect(screen.getByRole("button", { name: /join/i })).toBeInTheDocument();
@@ -143,11 +150,13 @@ test("should render properly when at least one participant exists in the group",
     })
   ).toBeInTheDocument();
 
-  expect(
-    screen.getByRole("combobox", { name: /distancer/i })
-  ).toBeInTheDocument();
+  const distancerEl = screen.getByRole("combobox", { name: /distancer/i });
+  userEvent.selectOptions(distancerEl, isolatedGroupName);
+  distancerEl.blur();
+  expect(handleDistancerBlur).toBeCalled();
 
   expect(screen.getByLabelText(/pursuer\(s\)/i)).toBeInTheDocument();
+  expect(screen.getAllByRole("listitem")).toHaveLength(1);
 
   expect(screen.getByRole("heading", { name: /members/i })).toBeInTheDocument();
   expect(screen.getByText(/highest mov/i)).toBeInTheDocument();
@@ -229,18 +238,14 @@ describe("Warnings", () => {
     test("should hide warning and display current pursuer(s) when a group has any pursuers", () => {
       const { groups } = DEFAULT_PROPS;
 
-      const targetIndex = centralGroupIndex;
-      const { pursuersNames } = groups[targetIndex];
-      const [first] = pursuersNames;
-
-      render(<GroupRow ownedIndex={targetIndex} groups={groups} />);
+      render(<GroupRow ownedIndex={centralGroupIndex} groups={groups} />);
       userEvent.click(screen.getByRole("button", { name: /expand more/i }));
 
       expect(
         screen.getByText(GroupRow.NO_PURSUER_WARNING_MESSAGE)
       ).not.toBeVisible();
 
-      expect(screen.getAllByText(first).length).toEqual(2);
+      expect(screen.getAllByRole("listitem")).toHaveLength(1);
     });
   });
 });
