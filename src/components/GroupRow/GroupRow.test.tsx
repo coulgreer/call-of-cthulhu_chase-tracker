@@ -29,14 +29,14 @@ const DEFAULT_PROPS: { groups: Group[]; handleDistancerBlur: () => void } = {
     {
       id: "0",
       name: isolatedGroupName,
-      distancerId: GroupRow.INVALID_DISTANCER_NAME,
+      distancerId: GroupRow.INVALID_DISTANCER_ID,
       pursuersIds: [],
       participants: [],
     },
     {
       id: "1",
       name: distancingGroupName,
-      distancerId: GroupRow.INVALID_DISTANCER_NAME,
+      distancerId: GroupRow.INVALID_DISTANCER_ID,
       pursuersIds: [distancingAndPursuingGroupName],
       participants: [createParticipant("Participant 00")],
     },

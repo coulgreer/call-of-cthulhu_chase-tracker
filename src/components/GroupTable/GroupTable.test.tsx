@@ -1,6 +1,6 @@
 import React from "react";
 
-import { screen, render } from "@testing-library/react";
+import { screen, render, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import GroupTable from ".";
@@ -72,6 +72,84 @@ test("should remove pre-existing group when 'remove' button is pressed", () => {
   expect(
     screen.getByRole("button", { name: /remove group-3/i })
   ).toBeInTheDocument();
+});
+
+test("should update pursuers list when another group makes it its distancer", () => {
+  const { warningMessage } = DEFAULT_PROPS;
+  render(<GroupTable warningMessage={warningMessage} />);
+  const name1 = "GROUP-1";
+  const name2 = "GROUP-2";
+  const name3 = "GROUP-3";
+
+  const createGroupEl = screen.getByRole("button", { name: /create group/i });
+  userEvent.click(createGroupEl);
+  userEvent.click(createGroupEl);
+  userEvent.click(createGroupEl);
+
+  expect(screen.queryByRole("listitem")).not.toBeInTheDocument();
+
+  const [firstRow, secondRow, thirdRow] = screen.getAllByRole("row");
+  userEvent.click(
+    within(firstRow).getByRole("button", { name: /expand more/i })
+  );
+  userEvent.click(
+    within(secondRow).getByRole("button", { name: /expand more/i })
+  );
+  userEvent.click(
+    within(thirdRow).getByRole("button", { name: /expand more/i })
+  );
+
+  const firstDistancerEl = within(firstRow).getByRole("combobox", {
+    name: /distancer/i,
+  });
+  const secondDistancerEl = within(secondRow).getByRole("combobox", {
+    name: /distancer/i,
+  });
+  const thirdDistancerEl = within(thirdRow).getByRole("combobox", {
+    name: /distancer/i,
+  });
+
+  userEvent.selectOptions(firstDistancerEl, name2);
+  firstDistancerEl.blur();
+
+  expect(firstDistancerEl).toHaveValue(name2);
+  expect(
+    within(secondRow)
+      .getAllByRole("listitem")
+      .filter((listitem) => listitem.textContent === name1)
+  ).toHaveLength(1);
+
+  userEvent.selectOptions(secondDistancerEl, name3);
+  secondDistancerEl.blur();
+
+  expect(secondDistancerEl).toHaveValue(name3);
+  expect(
+    within(thirdRow)
+      .getAllByRole("listitem")
+      .filter((listitem) => listitem.textContent === name2)
+  ).toHaveLength(1);
+
+  userEvent.selectOptions(thirdDistancerEl, name1);
+  thirdDistancerEl.blur();
+
+  expect(thirdDistancerEl).toHaveValue(name1);
+  expect(
+    within(firstRow)
+      .getAllByRole("listitem")
+      .filter((listitem) => listitem.textContent === name3)
+  ).toHaveLength(1);
+
+  // Change one row's distancer to a new value.
+  userEvent.selectOptions(firstDistancerEl, name3);
+  firstDistancerEl.blur();
+
+  expect(firstDistancerEl).toHaveValue(name3);
+  expect(
+    within(thirdRow)
+      .getAllByRole("listitem")
+      .filter((listitem) => listitem.textContent === name1)
+  ).toHaveLength(1);
+  expect(within(secondRow).queryByRole("listitem")).not.toBeInTheDocument();
 });
 
 describe("Confirmation Tests", () => {

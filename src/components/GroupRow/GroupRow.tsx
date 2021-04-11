@@ -19,11 +19,10 @@ interface Props {
 
 interface State {
   isShown: boolean;
-  distancerName: string;
 }
 
 export default class GroupRow extends React.Component<Props, State> {
-  static INVALID_DISTANCER_NAME = "N/A";
+  static INVALID_DISTANCER_ID = "N/A";
 
   static DEFAULT_CHASE_NAME = "DEFAULT Chase";
 
@@ -42,12 +41,8 @@ export default class GroupRow extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
-    const { groups, ownedIndex } = this.props;
-    const currentGroup = groups[ownedIndex];
-
     this.state = {
       isShown: false,
-      distancerName: currentGroup.distancerId,
     };
 
     this.toggleExpansion = this.toggleExpansion.bind(this);
@@ -59,11 +54,9 @@ export default class GroupRow extends React.Component<Props, State> {
     const { value } = evt.currentTarget;
     const distancer = groups.find((group) => group.id === value);
 
-    if (onDistancerBlur && distancer) {
+    if (onDistancerBlur !== undefined && distancer) {
       onDistancerBlur(groups[ownedIndex], distancer);
     }
-
-    this.setState({ distancerName: value });
   }
 
   private toggleExpansion() {
@@ -143,7 +136,8 @@ export default class GroupRow extends React.Component<Props, State> {
 
   private renderDistancer() {
     const { ownedIndex, groups } = this.props;
-    const { distancerName } = this.state;
+
+    const currentGroup = groups[ownedIndex];
 
     return (
       <>
@@ -153,7 +147,7 @@ export default class GroupRow extends React.Component<Props, State> {
             className="input input__combobox input__combobox--full-width"
             onBlur={this.handleDistancerBlur}
           >
-            <option value={GroupRow.INVALID_DISTANCER_NAME}>[N/A]</option>
+            <option value={GroupRow.INVALID_DISTANCER_ID}>[N/A]</option>
             {groups.map(
               (group, index) =>
                 ownedIndex !== index && (
@@ -164,7 +158,7 @@ export default class GroupRow extends React.Component<Props, State> {
         </label>
         <p
           className="centered error"
-          hidden={distancerName !== GroupRow.INVALID_DISTANCER_NAME}
+          hidden={currentGroup.distancerId !== GroupRow.INVALID_DISTANCER_ID}
         >
           {GroupRow.NO_DISTANCER_WARNING_MESSAGE}
         </p>

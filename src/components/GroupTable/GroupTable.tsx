@@ -38,6 +38,7 @@ export default class GroupTable extends React.Component<Props, State> {
     this.sequenceGenerator = new UniqueSequenceGen(0);
 
     this.handleCreateClick = this.handleCreateClick.bind(this);
+    this.handleDistancerBlur = this.handleDistancerBlur.bind(this);
   }
 
   private handleCreateClick() {
@@ -49,7 +50,7 @@ export default class GroupTable extends React.Component<Props, State> {
       groups.push({
         id: `GROUP-${idNum}`,
         name: `Group ${idNum}`,
-        distancerId: GroupRow.INVALID_DISTANCER_NAME,
+        distancerId: GroupRow.INVALID_DISTANCER_ID,
         pursuersIds: [],
         participants: [],
       });
@@ -74,6 +75,44 @@ export default class GroupTable extends React.Component<Props, State> {
     });
   }
 
+  private handleDistancerBlur(current: Group, newDistancer: Group) {
+    const oldDistancerId = current.distancerId;
+
+    if (oldDistancerId !== GroupRow.INVALID_DISTANCER_ID) {
+      this.setState((state) => {
+        const { groups } = state;
+
+        const oldDistancerIndex = groups.findIndex(
+          (group) => group.id === oldDistancerId
+        );
+        const oldDistancer = groups[oldDistancerIndex];
+
+        const { pursuersIds } = oldDistancer;
+        const currentIndex = pursuersIds.findIndex(
+          (pursuerId) => pursuerId === current.id
+        );
+
+        oldDistancer.pursuersIds.splice(currentIndex, 1);
+
+        return { groups };
+      });
+    }
+
+    this.setState((state) => {
+      const { groups } = state;
+
+      const currentIndex = groups.findIndex((group) => group.id === current.id);
+      groups[currentIndex].distancerId = newDistancer.id;
+
+      const newDistancerIndex = groups.findIndex(
+        (group) => group.id === newDistancer.id
+      );
+      groups[newDistancerIndex].pursuersIds.push(current.id);
+
+      return { groups };
+    });
+  }
+
   private renderWarning() {
     const { warningMessage } = this.props;
 
@@ -85,7 +124,11 @@ export default class GroupTable extends React.Component<Props, State> {
 
     return groups.map((group, index) => (
       <tr className="GroupTable__row" key={group.id}>
-        <GroupRow ownedIndex={index} groups={groups} />
+        <GroupRow
+          onDistancerBlur={this.handleDistancerBlur}
+          ownedIndex={index}
+          groups={groups}
+        />
         <Button
           className="GroupTable__row-control button button--primary"
           onClick={() => this.handleRemoveClick(group.id)}
