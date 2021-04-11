@@ -84,7 +84,7 @@ export default class GroupTable extends React.Component<Props, State> {
     const { groups } = this.state;
 
     return groups.map((group, index) => (
-      <div className="GroupTable__row" key={group.id}>
+      <tr className="GroupTable__row" key={group.id}>
         <GroupRow ownedIndex={index} groups={groups} />
         <Button
           className="GroupTable__row-control button button--primary"
@@ -92,7 +92,7 @@ export default class GroupTable extends React.Component<Props, State> {
         >
           <img src={RemoveIcon} alt={`REMOVE ${group.id}`} />
         </Button>
-      </div>
+      </tr>
     ));
   }
 
@@ -108,12 +108,14 @@ export default class GroupTable extends React.Component<Props, State> {
     const { groups } = this.state;
 
     return (
-      <div className="GroupTable">
-        <div className="GroupTable__rows">
-          {groups.length > 0 ? this.renderRows() : this.renderWarning()}
-        </div>
+      <>
+        {groups.length > 0 ? (
+          <table className="GroupTable">{this.renderRows()}</table>
+        ) : (
+          this.renderWarning()
+        )}
         {this.renderFloatingActionButton()}
-      </div>
+      </>
     );
   }
 }

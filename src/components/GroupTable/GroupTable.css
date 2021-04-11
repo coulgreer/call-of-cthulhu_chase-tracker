@@ -6,10 +6,6 @@
   padding: 6px;
 }
 
-.GroupTable__rows > p {
-  margin: 12px 6px;
-}
-
 .GroupTable__row {
   display: grid;
   grid-template-columns: auto min-content;
