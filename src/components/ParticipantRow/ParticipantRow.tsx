@@ -570,7 +570,7 @@ export default class ParticipantRow extends React.Component<Props, State> {
           />
         </label>
         <p
-          className="error"
+          className="error  text--small"
           style={{
             visibility: nameWarningShown ? "visible" : "hidden",
           }}

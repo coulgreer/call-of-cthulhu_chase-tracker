@@ -1,5 +1,6 @@
 .TabbedDisplay__displays {
   margin: 0 12px;
+  padding: 24px 6px;
 }
 
 .TabbedDisplay__tabs {

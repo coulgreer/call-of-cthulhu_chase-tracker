@@ -128,9 +128,9 @@ export default class GroupRow extends React.Component<Props, State> {
 
   static renderChaseName() {
     return (
-      <h3>
+      <h6>
         Chase Name: <span>{GroupRow.DEFAULT_CHASE_NAME}</span>
-      </h3>
+      </h6>
     );
   }
 
@@ -157,7 +157,7 @@ export default class GroupRow extends React.Component<Props, State> {
           </select>
         </label>
         <p
-          className="centered error"
+          className="centered error text--small"
           hidden={currentGroup.distancerId !== GroupRow.INVALID_DISTANCER_ID}
         >
           {GroupRow.NO_DISTANCER_WARNING_MESSAGE}
@@ -180,7 +180,7 @@ export default class GroupRow extends React.Component<Props, State> {
           ))}
         </ul>
         <p
-          className="centered error"
+          className="centered error text--small"
           hidden={currentGroup.pursuersIds.length > 0}
         >
           {GroupRow.NO_PURSUER_WARNING_MESSAGE}
@@ -195,7 +195,7 @@ export default class GroupRow extends React.Component<Props, State> {
 
     return (
       <>
-        <h3>Members</h3>
+        <h5>Members</h5>
         <p>Highest MOV</p>
         <p>Lowest MOV</p>
         <div aria-label="Participants">
@@ -207,7 +207,9 @@ export default class GroupRow extends React.Component<Props, State> {
               </div>
             ))
           ) : (
-            <p>{GroupRow.NO_PARTICIPANT_WARNING_MESSAGE}</p>
+            <p className="centered error text--small">
+              {GroupRow.NO_PARTICIPANT_WARNING_MESSAGE}
+            </p>
           )}
         </div>
         <Button className="button button--primary button--medium">ADD</Button>
