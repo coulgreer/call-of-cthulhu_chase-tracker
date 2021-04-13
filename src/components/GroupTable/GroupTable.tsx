@@ -18,13 +18,9 @@ interface Props {
 
 interface State {
   groups: Group[];
+  selectedGroupIndex: number;
 }
 
-/**
- * TODO (Coul Greer): Add a 'add relationship' and 'remove relationship'
- * event listener. This should make the table re-reneder and
- * subsequentally the rows.
- */
 export default class GroupTable extends React.Component<Props, State> {
   private sequenceGenerator;
 
@@ -33,6 +29,7 @@ export default class GroupTable extends React.Component<Props, State> {
 
     this.state = {
       groups: [],
+      selectedGroupIndex: -1,
     };
 
     this.sequenceGenerator = new UniqueSequenceGen(0);
@@ -113,6 +110,10 @@ export default class GroupTable extends React.Component<Props, State> {
     });
   }
 
+  private handleKeyPress(selectedIndex: number) {
+    this.setState({ selectedGroupIndex: selectedIndex });
+  }
+
   private renderWarning() {
     const { warningMessage } = this.props;
 
@@ -120,22 +121,32 @@ export default class GroupTable extends React.Component<Props, State> {
   }
 
   private renderRows() {
-    const { groups } = this.state;
+    const { groups, selectedGroupIndex } = this.state;
 
     return groups.map((group, index) => (
-      <tr className="GroupTable__row" key={group.id}>
+      <div
+        role="row"
+        tabIndex={0}
+        aria-label={group.id}
+        className="GroupTable__row"
+        key={group.id}
+      >
         <GroupRow
           onDistancerBlur={this.handleDistancerBlur}
+          onKeyPress={() => this.handleKeyPress(index)}
           ownedIndex={index}
           groups={groups}
+          isFocused={index === selectedGroupIndex}
         />
-        <Button
-          className="GroupTable__row-control button button--primary"
-          onClick={() => this.handleRemoveClick(group.id)}
-        >
-          <img src={RemoveIcon} alt={`REMOVE ${group.id}`} />
-        </Button>
-      </tr>
+        <div role="gridcell">
+          <Button
+            className="GroupTable__row-control button button--primary"
+            onClick={() => this.handleRemoveClick(group.id)}
+          >
+            <img src={RemoveIcon} alt={`REMOVE ${group.id}`} />
+          </Button>
+        </div>
+      </div>
     ));
   }
 
@@ -153,7 +164,9 @@ export default class GroupTable extends React.Component<Props, State> {
     return (
       <>
         {groups.length > 0 ? (
-          <table className="GroupTable">{this.renderRows()}</table>
+          <div role="grid" className="GroupTable">
+            {this.renderRows()}
+          </div>
         ) : (
           this.renderWarning()
         )}

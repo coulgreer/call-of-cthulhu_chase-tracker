@@ -1,6 +1,7 @@
 import React from "react";
 
 import { Transition, animated } from "react-spring/renderprops";
+import FocusTrap from "focus-trap-react";
 
 import Button from "../Button";
 
@@ -14,7 +15,9 @@ import { Group } from "../../types";
 interface Props {
   ownedIndex: number;
   groups: Group[];
+  isFocused: boolean;
   onDistancerBlur?: (target: Group, distancer: Group) => void;
+  onKeyPress: () => void;
 }
 
 interface State {
@@ -47,6 +50,7 @@ export default class GroupRow extends React.Component<Props, State> {
 
     this.toggleExpansion = this.toggleExpansion.bind(this);
     this.handleDistancerBlur = this.handleDistancerBlur.bind(this);
+    this.handleKeyPress = this.handleKeyPress.bind(this);
   }
 
   private handleDistancerBlur(evt: React.ChangeEvent<HTMLSelectElement>) {
@@ -57,6 +61,12 @@ export default class GroupRow extends React.Component<Props, State> {
     if (onDistancerBlur !== undefined && distancer) {
       onDistancerBlur(groups[ownedIndex], distancer);
     }
+  }
+
+  private handleKeyPress(evt: React.KeyboardEvent<HTMLDivElement>) {
+    const { onKeyPress } = this.props;
+
+    if (evt.key === "Enter") onKeyPress();
   }
 
   private toggleExpansion() {
@@ -198,31 +208,40 @@ export default class GroupRow extends React.Component<Props, State> {
         <h5>Members</h5>
         <p>Highest MOV</p>
         <p>Lowest MOV</p>
-        <div aria-label="Participants">
-          {currentGroup.participants.length > 0 ? (
-            currentGroup.participants.map((participant) => (
-              <div>
+        {currentGroup.participants.length > 0 ? (
+          <ul aria-label="Participants">
+            {currentGroup.participants.map((participant) => (
+              <li>
                 <p>{participant.name}</p>
                 <p>{participant.movementRate}</p>
-              </div>
-            ))
-          ) : (
-            <p className="centered error text--small">
-              {GroupRow.NO_PARTICIPANT_WARNING_MESSAGE}
-            </p>
-          )}
-        </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="centered error text--small">
+            {GroupRow.NO_PARTICIPANT_WARNING_MESSAGE}
+          </p>
+        )}
         <Button className="button button--primary button--medium">ADD</Button>
       </>
     );
   }
 
   render() {
+    const { isFocused } = this.props;
+
     return (
-      <div className="GroupRow">
-        {this.renderMainContent()}
-        {this.renderExpandedContent()}
-      </div>
+      <FocusTrap active={isFocused}>
+        <div
+          role="gridcell"
+          tabIndex={0}
+          className="GroupRow"
+          onKeyPress={this.handleKeyPress}
+        >
+          {this.renderMainContent()}
+          {this.renderExpandedContent()}
+        </div>
+      </FocusTrap>
     );
   }
 }

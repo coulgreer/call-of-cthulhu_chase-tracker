@@ -36,6 +36,7 @@
     "@fontsource/fraunces": "^4.2.5",
     "@fontsource/open-sans": "^4.2.2",
     "clsx": "^1.1.1",
+    "focus-trap-react": "^8.4.2",
     "gatsby": "^2.32.11",
     "gatsby-plugin-react-helmet": "^3.10.0",
     "prop-types": "^15.7.2",
