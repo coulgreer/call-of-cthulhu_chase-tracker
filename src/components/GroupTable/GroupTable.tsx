@@ -110,7 +110,7 @@ export default class GroupTable extends React.Component<Props, State> {
     });
   }
 
-  private handleKeyPress(selectedIndex: number) {
+  private handleKeyDown(selectedIndex: number) {
     this.setState({ selectedGroupIndex: selectedIndex });
   }
 
@@ -128,12 +128,12 @@ export default class GroupTable extends React.Component<Props, State> {
         role="row"
         tabIndex={0}
         aria-label={group.id}
-        className="GroupTable__row"
+        className="GroupTable__row-container"
         key={group.id}
       >
         <GroupRow
           onDistancerBlur={this.handleDistancerBlur}
-          onKeyPress={() => this.handleKeyPress(index)}
+          onKeyDown={() => this.handleKeyDown(index)}
           ownedIndex={index}
           groups={groups}
           isFocused={index === selectedGroupIndex}
@@ -162,16 +162,16 @@ export default class GroupTable extends React.Component<Props, State> {
     const { groups } = this.state;
 
     return (
-      <>
+      <section className="GroupTable">
         {groups.length > 0 ? (
-          <div role="grid" className="GroupTable">
+          <div role="grid" className="GroupTable__container">
             {this.renderRows()}
           </div>
         ) : (
           this.renderWarning()
         )}
         {this.renderFloatingActionButton()}
-      </>
+      </section>
     );
   }
 }

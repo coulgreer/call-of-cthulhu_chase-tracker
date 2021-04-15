@@ -17,7 +17,7 @@ interface Props {
   groups: Group[];
   isFocused: boolean;
   onDistancerBlur?: (target: Group, distancer: Group) => void;
-  onKeyPress: () => void;
+  onKeyDown: () => void;
 }
 
 interface State {
@@ -50,7 +50,7 @@ export default class GroupRow extends React.Component<Props, State> {
 
     this.toggleExpansion = this.toggleExpansion.bind(this);
     this.handleDistancerBlur = this.handleDistancerBlur.bind(this);
-    this.handleKeyPress = this.handleKeyPress.bind(this);
+    this.handleKeyDown = this.handleKeyDown.bind(this);
   }
 
   private handleDistancerBlur(evt: React.ChangeEvent<HTMLSelectElement>) {
@@ -63,8 +63,8 @@ export default class GroupRow extends React.Component<Props, State> {
     }
   }
 
-  private handleKeyPress(evt: React.KeyboardEvent<HTMLDivElement>) {
-    const { onKeyPress } = this.props;
+  private handleKeyDown(evt: React.KeyboardEvent<HTMLDivElement>) {
+    const { onKeyDown: onKeyPress } = this.props;
 
     if (evt.key === "Enter") onKeyPress();
   }
@@ -80,8 +80,8 @@ export default class GroupRow extends React.Component<Props, State> {
     const { isShown } = this.state;
 
     return (
-      <div className="GroupRow__main-display">
-        <div className="GroupRow__merge-controls">
+      <div className="GroupRow__main-container">
+        <div className="GroupRow__merge-control-container">
           <Button className="button button--small button--secondary">
             SPLIT
           </Button>
@@ -97,6 +97,7 @@ export default class GroupRow extends React.Component<Props, State> {
           />
         </label>
         <Button
+          aria-expanded={isShown}
           className="button button--primary button--small button--circular"
           onClick={this.toggleExpansion}
         >
@@ -124,7 +125,10 @@ export default class GroupRow extends React.Component<Props, State> {
         {(shown) =>
           shown &&
           ((props) => (
-            <animated.div style={props} className="GroupRow__extended-display">
+            <animated.div
+              style={props}
+              className="GroupRow__extended-container"
+            >
               {GroupRow.renderChaseName()}
               {this.renderDistancer()}
               {this.renderPursuers()}
@@ -138,9 +142,11 @@ export default class GroupRow extends React.Component<Props, State> {
 
   static renderChaseName() {
     return (
-      <h6>
-        Chase Name: <span>{GroupRow.DEFAULT_CHASE_NAME}</span>
-      </h6>
+      <div className="GroupRow__section-container">
+        <h2 className="GroupRow__title" aria-label="Chase name">
+          Chase Name: <em>{GroupRow.DEFAULT_CHASE_NAME}</em>
+        </h2>
+      </div>
     );
   }
 
@@ -150,18 +156,22 @@ export default class GroupRow extends React.Component<Props, State> {
     const currentGroup = groups[ownedIndex];
 
     return (
-      <>
+      <div className="GroupRow__section-container">
         <label className="input input__label">
           Distancer
           <select
             className="input input__combobox input__combobox--full-width"
             onBlur={this.handleDistancerBlur}
           >
-            <option value={GroupRow.INVALID_DISTANCER_ID}>[N/A]</option>
+            <option key="default" value={GroupRow.INVALID_DISTANCER_ID}>
+              [N/A]
+            </option>
             {groups.map(
               (group, index) =>
                 ownedIndex !== index && (
-                  <option value={group.id}>{group.name}</option>
+                  <option key={group.id} value={group.id}>
+                    {group.name}
+                  </option>
                 )
             )}
           </select>
@@ -172,7 +182,7 @@ export default class GroupRow extends React.Component<Props, State> {
         >
           {GroupRow.NO_DISTANCER_WARNING_MESSAGE}
         </p>
-      </>
+      </div>
     );
   }
 
@@ -182,8 +192,8 @@ export default class GroupRow extends React.Component<Props, State> {
     const pursuerLabel = "Pursuer(s)";
 
     return (
-      <>
-        <h5>{pursuerLabel}</h5>
+      <div className="GroupRow__section-container">
+        <h2 className="GroupRow__title">{pursuerLabel}</h2>
         <ul aria-label={pursuerLabel}>
           {currentGroup.pursuersIds.map((pursuerId) => (
             <li>{pursuerId}</li>
@@ -195,7 +205,7 @@ export default class GroupRow extends React.Component<Props, State> {
         >
           {GroupRow.NO_PURSUER_WARNING_MESSAGE}
         </p>
-      </>
+      </div>
     );
   }
 
@@ -204,10 +214,12 @@ export default class GroupRow extends React.Component<Props, State> {
     const currentGroup = groups[ownedIndex];
 
     return (
-      <>
-        <h5>Members</h5>
-        <p>Highest MOV</p>
-        <p>Lowest MOV</p>
+      <div className="GroupRow__section-container">
+        <h2 className="GroupRow__title">Members</h2>
+        <div className="GroupRow__pursuer-movement">
+          <p className="text--small">Highest MOV</p>
+          <p className="text--small">Lowest MOV</p>
+        </div>
         {currentGroup.participants.length > 0 ? (
           <ul aria-label="Participants">
             {currentGroup.participants.map((participant) => (
@@ -223,20 +235,21 @@ export default class GroupRow extends React.Component<Props, State> {
           </p>
         )}
         <Button className="button button--primary button--medium">ADD</Button>
-      </>
+      </div>
     );
   }
 
   render() {
-    const { isFocused } = this.props;
+    const { ownedIndex, groups, isFocused } = this.props;
 
     return (
       <FocusTrap active={isFocused}>
         <div
           role="gridcell"
           tabIndex={0}
+          aria-label={`${groups[ownedIndex].name} editor`}
           className="GroupRow"
-          onKeyPress={this.handleKeyPress}
+          onKeyDown={this.handleKeyDown}
         >
           {this.renderMainContent()}
           {this.renderExpandedContent()}

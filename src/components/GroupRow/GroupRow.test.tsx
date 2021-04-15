@@ -27,7 +27,7 @@ const pursuingGroupName = "Group 3";
 const DEFAULT_PROPS: {
   groups: Group[];
   handleDistancerBlur: () => void;
-  handleKeyPress: () => void;
+  handleKeyDown: () => void;
   isFocused: boolean;
 } = {
   groups: [
@@ -68,7 +68,7 @@ const DEFAULT_PROPS: {
     },
   ],
   handleDistancerBlur: jest.fn(),
-  handleKeyPress: jest.fn(),
+  handleKeyDown: jest.fn(),
   isFocused: false,
 };
 
@@ -76,11 +76,11 @@ const isolatedGroupIndex = 0;
 const centralGroupIndex = 2;
 
 test("should render properly when details are not expanded", () => {
-  const { groups, isFocused, handleKeyPress } = DEFAULT_PROPS;
+  const { groups, isFocused, handleKeyDown } = DEFAULT_PROPS;
 
   render(
     <GroupRow
-      onKeyPress={handleKeyPress}
+      onKeyDown={handleKeyDown}
       ownedIndex={isolatedGroupIndex}
       groups={groups}
       isFocused={isFocused}
@@ -123,14 +123,14 @@ test("should render properly when details are not expanded", () => {
 test("should render properly when at least one participant exists in the group", () => {
   const {
     groups,
-    handleKeyPress,
+    handleKeyDown,
     handleDistancerBlur,
     isFocused,
   } = DEFAULT_PROPS;
 
   render(
     <GroupRow
-      onKeyPress={handleKeyPress}
+      onKeyDown={handleKeyDown}
       onDistancerBlur={handleDistancerBlur}
       ownedIndex={centralGroupIndex}
       groups={groups}
@@ -149,7 +149,7 @@ test("should render properly when at least one participant exists in the group",
   ).toBeInTheDocument();
 
   userEvent.type(screen.getAllByRole("gridcell")[0], "{enter}");
-  expect(handleKeyPress).toBeCalled();
+  expect(handleKeyDown).toBeCalled();
 
   expect(
     screen.getByText((content, element) => {
@@ -196,11 +196,11 @@ test("should render properly when at least one participant exists in the group",
 describe("Warnings", () => {
   describe("Participant", () => {
     test("should render properly when no participants exist in the group", () => {
-      const { groups, isFocused, handleKeyPress } = DEFAULT_PROPS;
+      const { groups, isFocused, handleKeyDown } = DEFAULT_PROPS;
 
       render(
         <GroupRow
-          onKeyPress={handleKeyPress}
+          onKeyDown={handleKeyDown}
           ownedIndex={isolatedGroupIndex}
           groups={groups}
           isFocused={isFocused}
@@ -215,7 +215,7 @@ describe("Warnings", () => {
     });
 
     test("should render properly when at least one participant exists in the group", () => {
-      const { groups, isFocused, handleKeyPress } = DEFAULT_PROPS;
+      const { groups, isFocused, handleKeyDown } = DEFAULT_PROPS;
 
       const targetIndex = centralGroupIndex;
       const { participants } = groups[targetIndex];
@@ -223,7 +223,7 @@ describe("Warnings", () => {
 
       render(
         <GroupRow
-          onKeyPress={handleKeyPress}
+          onKeyDown={handleKeyDown}
           ownedIndex={targetIndex}
           groups={groups}
           isFocused={isFocused}
@@ -243,11 +243,11 @@ describe("Warnings", () => {
 
   describe("Distancer", () => {
     test("should show warning message when a group does not have a distancer", () => {
-      const { groups, isFocused, handleKeyPress } = DEFAULT_PROPS;
+      const { groups, isFocused, handleKeyDown } = DEFAULT_PROPS;
 
       render(
         <GroupRow
-          onKeyPress={handleKeyPress}
+          onKeyDown={handleKeyDown}
           ownedIndex={1}
           groups={groups}
           isFocused={isFocused}
@@ -261,11 +261,11 @@ describe("Warnings", () => {
     });
 
     test("should hide warning and display current distancer when a group has a distancer", () => {
-      const { groups, isFocused, handleKeyPress } = DEFAULT_PROPS;
+      const { groups, isFocused, handleKeyDown } = DEFAULT_PROPS;
 
       render(
         <GroupRow
-          onKeyPress={handleKeyPress}
+          onKeyDown={handleKeyDown}
           ownedIndex={centralGroupIndex}
           groups={groups}
           isFocused={isFocused}
@@ -281,11 +281,11 @@ describe("Warnings", () => {
 
   describe("Pursuer", () => {
     test("should show warning message when a group does not have at least one pursuer", () => {
-      const { groups, isFocused, handleKeyPress } = DEFAULT_PROPS;
+      const { groups, isFocused, handleKeyDown } = DEFAULT_PROPS;
 
       render(
         <GroupRow
-          onKeyPress={handleKeyPress}
+          onKeyDown={handleKeyDown}
           ownedIndex={3}
           groups={groups}
           isFocused={isFocused}
@@ -299,11 +299,11 @@ describe("Warnings", () => {
     });
 
     test("should hide warning and display current pursuer(s) when a group has any pursuers", () => {
-      const { groups, isFocused, handleKeyPress } = DEFAULT_PROPS;
+      const { groups, isFocused, handleKeyDown } = DEFAULT_PROPS;
 
       render(
         <GroupRow
-          onKeyPress={handleKeyPress}
+          onKeyDown={handleKeyDown}
           ownedIndex={centralGroupIndex}
           groups={groups}
           isFocused={isFocused}

@@ -1,8 +1,12 @@
-.GroupRow__main-display {
+.GroupRow {
+  margin-bottom: 1rem;
+}
+
+.GroupRow__main-container {
   padding: 4px;
 }
 
-.GroupRow__extended-display {
+.GroupRow__extended-container {
   background-color: rgba(245, 246, 247, 0.87);
   color: rgba(var(--text-color--dark), var(--text-emphasis--high));
   padding: 6px;
@@ -10,7 +14,20 @@
   box-shadow: inset 0 0 12px #121212;
 }
 
-.GroupRow__merge-controls {
+.GroupRow__merge-control-container {
   display: flex;
   justify-content: space-evenly;
+}
+
+.GroupRow__pursuer-movement {
+  display: flex;
+  justify-content: space-around;
+}
+
+.GroupRow__section-container {
+  margin: 4px 6px 12px;
+}
+
+.GroupRow__title {
+  font-weight: 700;
 }

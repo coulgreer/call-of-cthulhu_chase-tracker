@@ -67,40 +67,41 @@ h3,
 h4,
 h5,
 h6 {
-  margin: 3rem 0 1.38rem;
+  margin: 0 0 1.38rem;
   font-family: "Fraunces", serif;
 }
 
 h1 {
-  font-size: 2.986rem;
+  font-size: 1.476rem;
 }
 
 h2 {
-  font-size: 2.488rem;
+  font-size: 1.383rem;
 }
 
 h3 {
-  font-size: 2.074rem;
+  font-size: 1.296rem;
 }
 
 h4 {
-  font-size: 1.728rem;
+  font-size: 1.215rem;
 }
 
 h5 {
-  font-size: 1.44rem;
+  font-size: 1.138rem;
 }
 
 h6 {
-  font-size: 1.2rem;
+  font-size: 1.067rem;
 }
 
 .text--small {
-  font-size: 0.833rem;
+  font-size: 0.937rem;
 }
 
 p {
   line-height: 150%;
+  margin: 0 0 1rem;
 }
 
 button {
@@ -231,6 +232,7 @@ input[type="number"] {
 .input__radio.input__label {
   line-height: 1;
 }
+
 /* Input: combobox */
 
 /* 
@@ -240,9 +242,11 @@ input[type="number"] {
 .input__combobox {
   appearance: none;
   outline: none;
+  cursor: pointer;
   box-sizing: border-box;
   padding: 0 12px;
-  background-color: var(--primary);
+  background: url(../../images/expand_more_white_24dp.svg) no-repeat right
+    var(--primary);
   color: rgba(var(--text-color--light), var(--text-emphasis--high));
   border: none;
   border-bottom: 1px solid

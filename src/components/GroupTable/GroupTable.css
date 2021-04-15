@@ -1,12 +1,15 @@
 .GroupTable {
   box-sizing: border-box;
-  max-width: 360px;
   width: 100%;
-  margin: 0 auto 96px;
-  padding: 6px;
+  padding: 2rem 1rem 96px;
 }
 
-.GroupTable__row {
+.GroupTable__container {
+  max-width: 360px;
+  margin: 0 auto;
+}
+
+.GroupTable__row-container {
   display: grid;
   grid-template-columns: auto min-content;
   margin: 15px 0;
