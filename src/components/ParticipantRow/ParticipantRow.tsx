@@ -7,8 +7,8 @@ import StatisticTable from "../StatisticTable";
 import { WrappedStatistic } from "../StatisticDisplay";
 import DisplayFactory from "../StatisticDisplay/DisplayFactory";
 
-import ExpandLessIcon from "../../images/baseline_expand_less_black_24dp.png";
-import ExpandMoreIcon from "../../images/baseline_expand_more_black_24dp.png";
+import ExpandLessIcon from "../../images/expand_less_black_24dp.svg";
+import ExpandMoreIcon from "../../images/expand_more_black_24dp.svg";
 
 import "./ParticipantRow.css";
 

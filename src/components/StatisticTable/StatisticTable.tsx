@@ -6,9 +6,9 @@ import Button from "../Button";
 import { WrappedStatistic } from "../StatisticDisplay";
 import DisplayFactory from "../StatisticDisplay/DisplayFactory";
 
-import AddIcon from "../../images/baseline_add_black_24dp_x2.png";
-import DeleteIcon from "../../images/baseline_delete_black_24dp.png";
-import EditIcon from "../../images/baseline_edit_black_24dp.png";
+import AddIcon from "../../images/add_black_24dp.svg";
+import DeleteIcon from "../../images/delete_black_24dp.svg";
+import EditIcon from "../../images/edit_black_24dp.svg";
 
 import "./StatisticTable.css";
 

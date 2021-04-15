@@ -3,8 +3,8 @@ import React from "react";
 import GroupRow from "../GroupRow";
 import Button from "../Button";
 
-import AddIcon from "../../images/baseline_add_black_24dp_x2.png";
-import RemoveIcon from "../../images/baseline_remove_circle_outline_black_24dp.png";
+import AddIcon from "../../images/add_black_24dp.svg";
+import RemoveIcon from "../../images/remove_circle_black_24dp.svg";
 
 import "./GroupTable.css";
 
@@ -143,7 +143,7 @@ export default class GroupTable extends React.Component<Props, State> {
             className="GroupTable__row-control button button--primary"
             onClick={() => this.handleRemoveClick(group.id)}
           >
-            <img src={RemoveIcon} alt={`REMOVE ${group.id}`} />
+            <img src={RemoveIcon} alt={`Remove ${group.id}`} />
           </Button>
         </div>
       </div>
@@ -153,7 +153,7 @@ export default class GroupTable extends React.Component<Props, State> {
   private renderFloatingActionButton() {
     return (
       <Button className="button fab" onClick={this.handleCreateClick}>
-        <img src={AddIcon} alt="CREATE GROUP" />
+        <img src={AddIcon} alt="Create Group" width="44" />
       </Button>
     );
   }

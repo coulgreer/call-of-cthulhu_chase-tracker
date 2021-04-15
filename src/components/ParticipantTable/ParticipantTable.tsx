@@ -4,8 +4,8 @@ import Modal from "react-modal";
 import ParticipantRow from "../ParticipantRow";
 import Button from "../Button";
 
-import AddIcon from "../../images/baseline_add_black_24dp_x2.png";
-import RemoveIcon from "../../images/baseline_remove_circle_outline_black_24dp.png";
+import AddIcon from "../../images/add_black_24dp.svg";
+import RemoveIcon from "../../images/remove_circle_black_24dp.svg";
 
 import "./ParticipantTable.css";
 
@@ -134,7 +134,7 @@ export default class ParticipantTable extends Component<Props, State> {
   private renderFloatingActionButton() {
     return (
       <Button className="button fab" onClick={this.createParticipant}>
-        <img src={AddIcon} alt="Add Participant" />
+        <img src={AddIcon} alt="Add Participant" width="44" />
       </Button>
     );
   }
