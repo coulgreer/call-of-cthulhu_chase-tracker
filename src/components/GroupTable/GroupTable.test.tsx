@@ -8,58 +8,81 @@ import GroupRow from "../GroupRow";
 
 const DEFAULT_PROPS = { warningMessage: "Warning There's an Error" };
 
-test("should render properly when no groups exist", () => {
-  const { warningMessage } = DEFAULT_PROPS;
+describe("Prop Rendering", () => {
+  describe("Default Props", () => {
+    test("should render properly when no groups exist", () => {
+      render(<GroupTable />);
 
-  render(<GroupTable warningMessage={warningMessage} />);
+      expect(
+        screen.getByText(GroupTable.DEFAULT_WARNING_MESSAGE)
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /create group/i })
+      ).toBeInTheDocument();
+    });
 
-  expect(screen.getByText(warningMessage)).toBeInTheDocument();
-  expect(
-    screen.getByRole("button", { name: /create group/i })
-  ).toBeInTheDocument();
-});
+    test("should render properly when a group is created", () => {
+      render(<GroupTable />);
 
-test("should render properly when a group is created", () => {
-  const { warningMessage } = DEFAULT_PROPS;
+      userEvent.click(
+        screen.getByRole("button", {
+          name: /create group/i,
+        })
+      );
 
-  render(<GroupTable warningMessage={warningMessage} />);
-
-  const createGroupEl = screen.getByRole("button", { name: /create group/i });
-
-  expect(screen.getByText(warningMessage)).toBeInTheDocument();
-  expect(createGroupEl).toBeInTheDocument();
-
-  userEvent.click(createGroupEl);
-
-  expect(screen.queryByText(warningMessage)).not.toBeInTheDocument();
-  expect(
-    screen.getByRole("button", { name: /remove group/i })
-  ).toBeInTheDocument();
-});
-
-test("should remove pre-existing group when 'remove' button is pressed", () => {
-  const { warningMessage } = DEFAULT_PROPS;
-  render(<GroupTable warningMessage={warningMessage} />);
-
-  const createGroupEl = screen.getByRole("button", { name: /create group/i });
-  userEvent.click(createGroupEl);
-  userEvent.click(createGroupEl);
-  userEvent.click(createGroupEl);
-
-  expect(
-    screen.getByRole("button", { name: /remove group-1/i })
-  ).toBeInTheDocument();
-
-  const removeGroupEl = screen.getByRole("button", {
-    name: /remove group-2/i,
+      expect(
+        screen.queryByText(GroupTable.DEFAULT_WARNING_MESSAGE)
+      ).not.toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /remove group/i })
+      ).toBeInTheDocument();
+    });
   });
-  expect(removeGroupEl).toBeInTheDocument();
 
-  expect(
-    screen.getByRole("button", { name: /remove group-3/i })
-  ).toBeInTheDocument();
+  describe("Given Props", () => {
+    test("should render properly when no groups exist", () => {
+      const { warningMessage } = DEFAULT_PROPS;
 
-  userEvent.click(removeGroupEl);
+      render(<GroupTable warningMessage={warningMessage} />);
+
+      expect(screen.getByText(warningMessage)).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /create group/i })
+      ).toBeInTheDocument();
+    });
+
+    test("should render properly when a group is created", () => {
+      const { warningMessage } = DEFAULT_PROPS;
+
+      render(<GroupTable warningMessage={warningMessage} />);
+
+      userEvent.click(
+        screen.getByRole("button", {
+          name: /create group/i,
+        })
+      );
+
+      expect(screen.queryByText(warningMessage)).not.toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /remove group/i })
+      ).toBeInTheDocument();
+    });
+  });
+});
+
+test("should remove pre-existing group when its associated 'remove' button is pressed", () => {
+  render(<GroupTable />);
+
+  const createGroupEl = screen.getByRole("button", { name: /create group/i });
+  userEvent.click(createGroupEl);
+  userEvent.click(createGroupEl);
+  userEvent.click(createGroupEl);
+
+  userEvent.click(
+    screen.getByRole("button", {
+      name: /remove group-2/i,
+    })
+  );
 
   expect(
     screen.getByRole("button", { name: /remove group-1/i })
@@ -75,8 +98,7 @@ test("should remove pre-existing group when 'remove' button is pressed", () => {
 });
 
 test("should update pursuers list when another group makes it its distancer", () => {
-  const { warningMessage } = DEFAULT_PROPS;
-  render(<GroupTable warningMessage={warningMessage} />);
+  render(<GroupTable />);
   const name1 = "GROUP-1";
   const name2 = "GROUP-2";
   const name3 = "GROUP-3";
@@ -153,8 +175,7 @@ test("should update pursuers list when another group makes it its distancer", ()
 
 describe("Focus Trap", () => {
   test("should trap focus when 'enter' key is pressed", () => {
-    const { warningMessage } = DEFAULT_PROPS;
-    render(<GroupTable warningMessage={warningMessage} />);
+    render(<GroupTable />);
 
     const createGroupEl = screen.getByRole("button", { name: /create group/i });
     userEvent.click(createGroupEl);
@@ -180,8 +201,7 @@ describe("Focus Trap", () => {
   });
 
   test("should release focus trap when 'esc' key is pressed", () => {
-    const { warningMessage } = DEFAULT_PROPS;
-    render(<GroupTable warningMessage={warningMessage} />);
+    render(<GroupTable />);
 
     const createGroupEl = screen.getByRole("button", { name: /create group/i });
     userEvent.click(createGroupEl);

@@ -13,7 +13,7 @@ import UniqueSequenceGen from "../../utils/unique-sequence-generator";
 import { Group } from "../../types";
 
 interface Props {
-  warningMessage: string;
+  warningMessage?: string;
 }
 
 interface State {
@@ -23,6 +23,10 @@ interface State {
 
 export default class GroupTable extends React.Component<Props, State> {
   private sequenceGenerator;
+
+  static get DEFAULT_WARNING_MESSAGE() {
+    return "No participants exist in this table";
+  }
 
   constructor(props: Props) {
     super(props);
@@ -115,7 +119,7 @@ export default class GroupTable extends React.Component<Props, State> {
   }
 
   private renderWarning() {
-    const { warningMessage } = this.props;
+    const { warningMessage = GroupTable.DEFAULT_WARNING_MESSAGE } = this.props;
 
     return <p className="centered">{warningMessage}</p>;
   }
