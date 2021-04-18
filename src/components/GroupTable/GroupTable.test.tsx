@@ -5,69 +5,73 @@ import userEvent from "@testing-library/user-event";
 
 import GroupTable from ".";
 import GroupRow from "../GroupRow";
+import { Participant } from "../../types";
 
-const DEFAULT_PROPS = { warningMessage: "Warning There's an Error" };
+const DEFAULT_PROPS: { warningMessage: string; participants: Participant[] } = {
+  warningMessage: "Warning There's an Error",
+  participants: [
+    {
+      id: "p1",
+      name: "Participant 1",
+      dexterity: 15,
+      movementRate: 6,
+      derivedSpeed: 1,
+      speedSkills: [],
+      hazardSkills: [],
+    },
+    {
+      id: "p2",
+      name: "Participant 2",
+      dexterity: 50,
+      movementRate: 8,
+      derivedSpeed: 2,
+      speedSkills: [],
+      hazardSkills: [],
+    },
+  ],
+};
 
 describe("Prop Rendering", () => {
-  describe("Default Props", () => {
-    test("should render properly when no groups exist", () => {
-      render(<GroupTable />);
+  test("should render properly when ommitting all optional props", () => {
+    render(<GroupTable />);
 
-      expect(
-        screen.getByText(GroupTable.DEFAULT_WARNING_MESSAGE)
-      ).toBeInTheDocument();
-      expect(
-        screen.getByRole("button", { name: /create group/i })
-      ).toBeInTheDocument();
-    });
-
-    test("should render properly when a group is created", () => {
-      render(<GroupTable />);
-
-      userEvent.click(
-        screen.getByRole("button", {
-          name: /create group/i,
-        })
-      );
-
-      expect(
-        screen.queryByText(GroupTable.DEFAULT_WARNING_MESSAGE)
-      ).not.toBeInTheDocument();
-      expect(
-        screen.getByRole("button", { name: /remove group/i })
-      ).toBeInTheDocument();
-    });
+    expect(
+      screen.getByText(GroupTable.DEFAULT_WARNING_MESSAGE)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /create group/i })
+    ).toBeInTheDocument();
   });
 
-  describe("Given Props", () => {
-    test("should render properly when no groups exist", () => {
-      const { warningMessage } = DEFAULT_PROPS;
+  test("should render properly when including all optional props", () => {
+    const { warningMessage, participants } = DEFAULT_PROPS;
 
-      render(<GroupTable warningMessage={warningMessage} />);
+    render(
+      <GroupTable warningMessage={warningMessage} participants={participants} />
+    );
 
-      expect(screen.getByText(warningMessage)).toBeInTheDocument();
-      expect(
-        screen.getByRole("button", { name: /create group/i })
-      ).toBeInTheDocument();
-    });
-
-    test("should render properly when a group is created", () => {
-      const { warningMessage } = DEFAULT_PROPS;
-
-      render(<GroupTable warningMessage={warningMessage} />);
-
-      userEvent.click(
-        screen.getByRole("button", {
-          name: /create group/i,
-        })
-      );
-
-      expect(screen.queryByText(warningMessage)).not.toBeInTheDocument();
-      expect(
-        screen.getByRole("button", { name: /remove group/i })
-      ).toBeInTheDocument();
-    });
+    expect(screen.getByText(warningMessage)).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /create group/i })
+    ).toBeInTheDocument();
   });
+});
+
+test("should render properly when a group is created", () => {
+  render(<GroupTable />);
+
+  userEvent.click(
+    screen.getByRole("button", {
+      name: /create group/i,
+    })
+  );
+
+  expect(
+    screen.queryByText(GroupTable.DEFAULT_WARNING_MESSAGE)
+  ).not.toBeInTheDocument();
+  expect(
+    screen.getByRole("button", { name: /remove group/i })
+  ).toBeInTheDocument();
 });
 
 test("should remove pre-existing group when its associated 'remove' button is pressed", () => {

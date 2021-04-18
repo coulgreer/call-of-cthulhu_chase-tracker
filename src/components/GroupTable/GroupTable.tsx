@@ -10,9 +10,10 @@ import "./GroupTable.css";
 
 import UniqueSequenceGen from "../../utils/unique-sequence-generator";
 
-import { Group } from "../../types";
+import { Group, Participant } from "../../types";
 
 interface Props {
+  participants?: Participant[];
   warningMessage?: string;
 }
 
