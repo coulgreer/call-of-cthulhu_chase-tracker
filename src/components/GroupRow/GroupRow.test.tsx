@@ -75,128 +75,10 @@ const DEFAULT_PROPS: {
 const isolatedGroupIndex = 0;
 const centralGroupIndex = 2;
 
-test("should render properly when details are not expanded", () => {
-  const { groups, isFocused, handleKeyDown } = DEFAULT_PROPS;
-
-  render(
-    <GroupRow
-      onKeyDown={handleKeyDown}
-      ownedIndex={isolatedGroupIndex}
-      groups={groups}
-      isFocused={isFocused}
-    />
-  );
-
-  expect(screen.getByRole("button", { name: /split/i })).toBeInTheDocument();
-  expect(screen.getByRole("button", { name: /join/i })).toBeInTheDocument();
-  expect(screen.getByRole("textbox", { name: /name/i })).toBeInTheDocument();
-
-  expect(
-    screen.getByRole("button", { name: /expand more/i })
-  ).toBeInTheDocument();
-
-  expect(screen.queryByText(/chase name/i)).not.toBeInTheDocument();
-
-  expect(
-    screen.queryByRole("combobox", { name: /distancer/i })
-  ).not.toBeInTheDocument();
-  expect(
-    screen.queryByText(GroupRow.NO_DISTANCER_WARNING_MESSAGE)
-  ).not.toBeInTheDocument();
-
-  expect(screen.queryByLabelText(/pursuer\(s\)/i)).not.toBeInTheDocument();
-  expect(
-    screen.queryByText(GroupRow.NO_PURSUER_WARNING_MESSAGE)
-  ).not.toBeInTheDocument();
-
-  expect(
-    screen.queryByRole("heading", { name: /members/i })
-  ).not.toBeInTheDocument();
-  expect(screen.queryByText(/highest mov/i)).not.toBeInTheDocument();
-  expect(screen.queryByText(/lowest mov/i)).not.toBeInTheDocument();
-  expect(screen.queryByRole("list")).not.toBeInTheDocument();
-  expect(
-    screen.queryByRole("button", { name: /add/i })
-  ).not.toBeInTheDocument();
-});
-
-test("should render properly when at least one participant exists in the group", () => {
-  const {
-    groups,
-    handleKeyDown,
-    handleDistancerBlur,
-    isFocused,
-  } = DEFAULT_PROPS;
-
-  render(
-    <GroupRow
-      onKeyDown={handleKeyDown}
-      onDistancerBlur={handleDistancerBlur}
-      ownedIndex={centralGroupIndex}
-      groups={groups}
-      isFocused={isFocused}
-    />
-  );
-
-  expect(screen.getByRole("button", { name: /split/i })).toBeInTheDocument();
-  expect(screen.getByRole("button", { name: /join/i })).toBeInTheDocument();
-  expect(screen.getByRole("textbox", { name: /name/i })).toBeInTheDocument();
-
-  userEvent.click(screen.getByRole("button", { name: /expand more/i }));
-
-  expect(
-    screen.getByRole("button", { name: /expand less/i })
-  ).toBeInTheDocument();
-
-  userEvent.type(screen.getAllByRole("gridcell")[0], "{enter}");
-  expect(handleKeyDown).toBeCalled();
-
-  expect(
-    screen.getByText((content, element) => {
-      if (!element) return false;
-
-      const hasText = (node: Element) => {
-        if (node.textContent === null) return false;
-
-        const regex = new RegExp(
-          `chase name: ${GroupRow.DEFAULT_CHASE_NAME}`,
-          "i"
-        );
-
-        return regex.test(node.textContent);
-      };
-
-      const childrenDontHaveText = Array.from(element.children).every(
-        (child) => !hasText(child)
-      );
-
-      return hasText(element) && childrenDontHaveText;
-    })
-  ).toBeInTheDocument();
-
-  const distancerEl = screen.getByRole("combobox", { name: /distancer/i });
-  userEvent.selectOptions(distancerEl, isolatedGroupName);
-  distancerEl.blur();
-  expect(handleDistancerBlur).toBeCalled();
-
-  expect(
-    within(screen.getByLabelText(/pursuer\(s\)/i)).getAllByRole("listitem")
-  ).toHaveLength(1);
-
-  expect(screen.getByText(/highest mov/i)).toBeInTheDocument();
-  expect(screen.getByText(/lowest mov/i)).toBeInTheDocument();
-  expect(
-    within(screen.getByRole("list", { name: /participants/i })).getAllByRole(
-      "listitem"
-    )
-  ).toHaveLength(2);
-  expect(screen.getByRole("button", { name: /add/i })).toBeInTheDocument();
-});
-
-describe("Warnings", () => {
-  describe("Participant", () => {
-    test("should render properly when no participants exist in the group", () => {
-      const { groups, isFocused, handleKeyDown } = DEFAULT_PROPS;
+describe("Prop Rendering", () => {
+  describe("when expanded", () => {
+    test("should render properly when ommitting optional props", () => {
+      const { groups, handleKeyDown, isFocused } = DEFAULT_PROPS;
 
       render(
         <GroupRow
@@ -210,21 +92,201 @@ describe("Warnings", () => {
       userEvent.click(screen.getByRole("button", { name: /expand more/i }));
 
       expect(
-        screen.getByText(GroupRow.NO_PARTICIPANT_WARNING_MESSAGE)
+        screen.getByRole("button", { name: /split/i })
       ).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /join/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("textbox", { name: /name/i })
+      ).toBeInTheDocument();
+
+      expect(
+        screen.getByRole("button", { name: /expand less/i })
+      ).toBeInTheDocument();
+
+      expect(
+        screen.getByText((content, element) => {
+          if (!element) return false;
+
+          const hasText = (node: Element) => {
+            if (node.textContent === null) return false;
+
+            const regex = new RegExp(
+              `chase name: ${GroupRow.DEFAULT_CHASE_NAME}`,
+              "i"
+            );
+
+            return regex.test(node.textContent);
+          };
+
+          const childrenDontHaveText = Array.from(element.children).every(
+            (child) => !hasText(child)
+          );
+
+          return hasText(element) && childrenDontHaveText;
+        })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("combobox", { name: /distancer/i })
+      ).toBeInTheDocument();
+      expect(screen.getByLabelText(/pursuer\(s\)/i)).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { name: /members/i })
+      ).toBeInTheDocument();
+      expect(screen.getByRole("list")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /add/i })).toBeInTheDocument();
     });
+  });
 
-    test("should render properly when at least one participant exists in the group", () => {
-      const { groups, isFocused, handleKeyDown } = DEFAULT_PROPS;
+  test("should render properly when collapsed", () => {
+    const { groups, handleKeyDown, isFocused } = DEFAULT_PROPS;
 
-      const targetIndex = centralGroupIndex;
-      const { participants } = groups[targetIndex];
+    render(
+      <GroupRow
+        onKeyDown={handleKeyDown}
+        ownedIndex={isolatedGroupIndex}
+        groups={groups}
+        isFocused={isFocused}
+      />
+    );
+
+    expect(screen.getByRole("button", { name: /split/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /join/i })).toBeInTheDocument();
+    expect(screen.getByRole("textbox", { name: /name/i })).toBeInTheDocument();
+
+    expect(
+      screen.getByRole("button", { name: /expand more/i })
+    ).toBeInTheDocument();
+
+    expect(screen.queryByText(/chase name/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("combobox", { name: /distancer/i })
+    ).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/pursuer\(s\)/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: /members/i })
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText(/highest mov/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/lowest mov/i)).not.toBeInTheDocument();
+    expect(screen.queryByRole("list")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /add/i })
+    ).not.toBeInTheDocument();
+  });
+});
+
+describe("Participant display", () => {
+  test("should render participant properly when no participants exist in the group", () => {
+    const { groups, isFocused, handleKeyDown } = DEFAULT_PROPS;
+
+    render(
+      <GroupRow
+        onKeyDown={handleKeyDown}
+        ownedIndex={isolatedGroupIndex}
+        groups={groups}
+        isFocused={isFocused}
+      />
+    );
+
+    userEvent.click(screen.getByRole("button", { name: /expand more/i }));
+
+    expect(screen.getByText(/highest mov : N\/A/i)).toBeInTheDocument();
+    expect(screen.getByText(/lowest mov : N\/A/i)).toBeInTheDocument();
+
+    expect(
+      screen.getByText(GroupRow.NO_PARTICIPANT_WARNING_MESSAGE)
+    ).toBeInTheDocument();
+
+    expect(screen.queryByRole("listitem")).not.toBeInTheDocument();
+
+    expect(screen.getByRole("button", { name: /add/i })).toBeInTheDocument();
+  });
+
+  test("should render participant properly when at least one participant exists in the group", () => {
+    const { isFocused, handleKeyDown } = DEFAULT_PROPS;
+
+    const participants: Participant[] = [
+      {
+        id: "p1",
+        name: "Participant 1",
+        dexterity: 15,
+        movementRate: 6,
+        derivedSpeed: 1,
+        speedSkills: [],
+        hazardSkills: [],
+      },
+    ];
+
+    const groups: Group[] = [
+      {
+        id: "0",
+        name: "Group 0",
+        distancerId: GroupRow.INVALID_DISTANCER_ID,
+        pursuersIds: [],
+        participants,
+      },
+    ];
+
+    const [first] = participants;
+
+    render(
+      <GroupRow
+        onKeyDown={handleKeyDown}
+        ownedIndex={0}
+        groups={groups}
+        isFocused={isFocused}
+      />
+    );
+
+    userEvent.click(screen.getByRole("button", { name: /expand more/i }));
+
+    expect(
+      screen.queryByText(GroupRow.NO_PARTICIPANT_WARNING_MESSAGE)
+    ).not.toBeInTheDocument();
+
+    expect(
+      within(screen.getByRole("list", { name: /participants/i })).getAllByRole(
+        "listitem"
+      )
+    ).toHaveLength(participants.length);
+
+    expect(screen.getByText(first.name)).toBeInTheDocument();
+    expect(screen.getByText(first.movementRate)).toBeInTheDocument();
+
+    expect(screen.getByRole("button", { name: /add/i })).toBeInTheDocument();
+  });
+
+  describe("Boundary Movement Rating", () => {
+    test("should render properly when one participant exists in the group", () => {
+      const { isFocused, handleKeyDown } = DEFAULT_PROPS;
+
+      const participants: Participant[] = [
+        {
+          id: "p1",
+          name: "Participant 1",
+          dexterity: 15,
+          movementRate: 6,
+          derivedSpeed: 1,
+          speedSkills: [],
+          hazardSkills: [],
+        },
+      ];
+
+      const groups: Group[] = [
+        {
+          id: "0",
+          name: "Group 0",
+          distancerId: GroupRow.INVALID_DISTANCER_ID,
+          pursuersIds: [],
+          participants,
+        },
+      ];
+
       const [first] = participants;
 
       render(
         <GroupRow
           onKeyDown={handleKeyDown}
-          ownedIndex={targetIndex}
+          ownedIndex={0}
           groups={groups}
           isFocused={isFocused}
         />
@@ -233,14 +295,84 @@ describe("Warnings", () => {
       userEvent.click(screen.getByRole("button", { name: /expand more/i }));
 
       expect(
-        screen.queryByText(GroupRow.NO_PARTICIPANT_WARNING_MESSAGE)
-      ).not.toBeInTheDocument();
+        screen.getByText(new RegExp(`highest mov : ${first.movementRate}`, "i"))
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(new RegExp(`lowest mov : ${first.movementRate}`, "i"))
+      ).toBeInTheDocument();
 
-      expect(screen.getByText(first.name)).toBeInTheDocument();
-      expect(screen.getAllByText(first.movementRate).length).toBeGreaterThan(0);
+      expect(
+        within(
+          screen.getByRole("list", { name: /participants/i })
+        ).getAllByRole("listitem")
+      ).toHaveLength(participants.length);
+    });
+
+    test("should render properly when at least two participants exist with differing movement ratings", () => {
+      const { handleKeyDown, isFocused } = DEFAULT_PROPS;
+
+      const lowestMOV = 6;
+      const highestMOV = 8;
+
+      const participants: Participant[] = [
+        {
+          id: "p1",
+          name: "Participant 1",
+          dexterity: 15,
+          movementRate: lowestMOV,
+          derivedSpeed: 1,
+          speedSkills: [],
+          hazardSkills: [],
+        },
+        {
+          id: "p2",
+          name: "Participant 2",
+          dexterity: 50,
+          movementRate: highestMOV,
+          derivedSpeed: 2,
+          speedSkills: [],
+          hazardSkills: [],
+        },
+      ];
+
+      const groups: Group[] = [
+        {
+          id: "0",
+          name: "Group 0",
+          distancerId: GroupRow.INVALID_DISTANCER_ID,
+          pursuersIds: [],
+          participants,
+        },
+      ];
+
+      render(
+        <GroupRow
+          onKeyDown={handleKeyDown}
+          ownedIndex={0}
+          groups={groups}
+          isFocused={isFocused}
+        />
+      );
+
+      userEvent.click(screen.getByRole("button", { name: /expand more/i }));
+
+      expect(
+        screen.getByText(new RegExp(`highest mov : ${highestMOV}`, "i"))
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(new RegExp(`lowest mov : ${lowestMOV}`, "i"))
+      ).toBeInTheDocument();
+
+      expect(
+        within(
+          screen.getByRole("list", { name: /participants/i })
+        ).getAllByRole("listitem")
+      ).toHaveLength(participants.length);
     });
   });
+});
 
+describe("Warnings", () => {
   describe("Distancer", () => {
     test("should show warning message when a group does not have a distancer", () => {
       const { groups, isFocused, handleKeyDown } = DEFAULT_PROPS;

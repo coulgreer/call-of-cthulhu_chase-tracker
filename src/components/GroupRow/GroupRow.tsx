@@ -69,6 +69,36 @@ export default class GroupRow extends React.Component<Props, State> {
     if (evt.key === "Enter") onKeyPress();
   }
 
+  private getHighestMov() {
+    const { groups, ownedIndex } = this.props;
+    const { participants } = groups[ownedIndex];
+
+    if (participants.length <= 0) return "N/A";
+
+    let result = participants[0].movementRate;
+
+    participants.forEach((participant) => {
+      if (participant.movementRate > result) result = participant.movementRate;
+    });
+
+    return result.toString();
+  }
+
+  private getLowestMov() {
+    const { groups, ownedIndex } = this.props;
+    const { participants } = groups[ownedIndex];
+
+    if (participants.length <= 0) return "N/A";
+
+    let result = participants[0].movementRate;
+
+    participants.forEach((participant) => {
+      if (participant.movementRate < result) result = participant.movementRate;
+    });
+
+    return result.toString();
+  }
+
   private toggleExpansion() {
     this.setState((state) => ({
       isShown: !state.isShown,
@@ -217,8 +247,8 @@ export default class GroupRow extends React.Component<Props, State> {
       <div className="GroupRow__section-container">
         <h2 className="GroupRow__title">Members</h2>
         <div className="GroupRow__pursuer-movement">
-          <p className="text--small">Highest MOV</p>
-          <p className="text--small">Lowest MOV</p>
+          <p className="text--small">{`Highest MOV : ${this.getHighestMov()}`}</p>
+          <p className="text--small">{`Lowest MOV : ${this.getLowestMov()}`}</p>
         </div>
         {currentGroup.participants.length > 0 ? (
           <ul aria-label="Participants">
