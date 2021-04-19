@@ -135,6 +135,76 @@ describe("Prop Rendering", () => {
       expect(screen.getByRole("list")).toBeInTheDocument();
       expect(screen.getByRole("button", { name: /add/i })).toBeInTheDocument();
     });
+
+    test("should render properly when including optional props", () => {
+      const {
+        groups,
+        handleKeyDown,
+        handleDistancerBlur,
+        isFocused,
+      } = DEFAULT_PROPS;
+
+      render(
+        <GroupRow
+          onKeyDown={handleKeyDown}
+          onDistancerBlur={handleDistancerBlur}
+          ownedIndex={isolatedGroupIndex}
+          groups={groups}
+          isFocused={isFocused}
+        />
+      );
+
+      userEvent.click(screen.getByRole("button", { name: /expand more/i }));
+
+      expect(
+        screen.getByRole("button", { name: /split/i })
+      ).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /join/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("textbox", { name: /name/i })
+      ).toBeInTheDocument();
+
+      expect(
+        screen.getByRole("button", { name: /expand less/i })
+      ).toBeInTheDocument();
+
+      expect(
+        screen.getByText((content, element) => {
+          if (!element) return false;
+
+          const hasText = (node: Element) => {
+            if (node.textContent === null) return false;
+
+            const regex = new RegExp(
+              `chase name: ${GroupRow.DEFAULT_CHASE_NAME}`,
+              "i"
+            );
+
+            return regex.test(node.textContent);
+          };
+
+          const childrenDontHaveText = Array.from(element.children).every(
+            (child) => !hasText(child)
+          );
+
+          return hasText(element) && childrenDontHaveText;
+        })
+      ).toBeInTheDocument();
+
+      const distancerEl = screen.getByRole("combobox", { name: /distancer/i });
+      userEvent.click(distancerEl);
+      distancerEl.blur();
+
+      expect(handleDistancerBlur).toBeCalled();
+
+      expect(screen.getByLabelText(/pursuer\(s\)/i)).toBeInTheDocument();
+
+      expect(
+        screen.getByRole("heading", { name: /members/i })
+      ).toBeInTheDocument();
+      expect(screen.getByRole("list")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /add/i })).toBeInTheDocument();
+    });
   });
 
   test("should render properly when collapsed", () => {

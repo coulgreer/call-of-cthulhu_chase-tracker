@@ -16,7 +16,7 @@ interface Props {
   ownedIndex: number;
   groups: Group[];
   isFocused: boolean;
-  onDistancerBlur?: (target: Group, distancer: Group) => void;
+  onDistancerBlur?: (target: Group, distancer: Group | undefined) => void;
   onKeyDown: () => void;
 }
 
@@ -58,7 +58,7 @@ export default class GroupRow extends React.Component<Props, State> {
     const { value } = evt.currentTarget;
     const distancer = groups.find((group) => group.id === value);
 
-    if (onDistancerBlur !== undefined && distancer) {
+    if (onDistancerBlur !== undefined) {
       onDistancerBlur(groups[ownedIndex], distancer);
     }
   }
