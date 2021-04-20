@@ -77,52 +77,52 @@ export default class GroupTable extends React.Component<Props, State> {
     });
   }
 
-  private handleDistancerBlur(current: Group, newDistancer: Group | undefined) {
-    const oldDistancerId = current.distancerId;
-
-    if (oldDistancerId !== GroupRow.INVALID_DISTANCER_ID) {
-      this.updateOldDistancer(current.id, oldDistancerId);
-    }
-
-    this.update(current.id, newDistancer?.id);
-  }
-
   private handleKeyDown(selectedIndex: number) {
     this.setState({ selectedGroupIndex: selectedIndex });
   }
 
-  private updateOldDistancer(currentGroupId: string, oldDistancerId: string) {
+  private handleDistancerBlur(target: Group, distancer: Group | undefined) {
+    if (target.distancerId !== GroupRow.INVALID_DISTANCER_ID) {
+      this.removeDistancerFrom(target);
+    }
+
+    this.addDistancer(target, distancer);
+  }
+
+  private removeDistancerFrom({ id: targetId, distancerId }: Group) {
     this.setState((state) => {
       const { groups } = state;
 
-      const oldDistancerIndex = groups.findIndex(
-        (group) => group.id === oldDistancerId
+      const distancerIndex = groups.findIndex(
+        (group) => group.id === distancerId
       );
-      const oldDistancer = groups[oldDistancerIndex];
+      const distancer = groups[distancerIndex];
 
-      const { pursuersIds } = oldDistancer;
+      const { pursuersIds } = distancer;
       const currentIndex = pursuersIds.findIndex(
-        (pursuerId) => pursuerId === currentGroupId
+        (pursuerId) => pursuerId === targetId
       );
 
-      oldDistancer.pursuersIds.splice(currentIndex, 1);
+      distancer.pursuersIds.splice(currentIndex, 1);
 
       return { groups };
     });
   }
 
-  private update(currentId: string, newDistancerId: string | undefined) {
+  private addDistancer({ id: targetId }: Group, distancer: Group | undefined) {
+    const distancerId = distancer?.id;
+
     this.setState((state) => {
       const { groups } = state;
 
-      const currentIndex = groups.findIndex((group) => group.id === currentId);
-      groups[currentIndex].distancerId =
-        newDistancerId || GroupRow.INVALID_DISTANCER_ID;
+      const targetIndex = groups.findIndex((group) => group.id === targetId);
+      groups[targetIndex].distancerId =
+        distancerId || GroupRow.INVALID_DISTANCER_ID;
 
-      const newDistancerIndex = groups.findIndex(
-        (group) => group.id === newDistancerId
+      const distancerIndex = groups.findIndex(
+        (group) => group.id === distancerId
       );
-      groups[newDistancerIndex].pursuersIds.push(currentId);
+      groups[distancerIndex].pursuersIds.push(targetId);
 
       return { groups };
     });
