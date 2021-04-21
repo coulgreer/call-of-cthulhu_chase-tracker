@@ -70,35 +70,98 @@ test("should render properly when a group is created", () => {
     screen.queryByText(GroupTable.DEFAULT_WARNING_MESSAGE)
   ).not.toBeInTheDocument();
   expect(
-    screen.getByRole("button", { name: /remove group/i })
+    screen.getByRole("button", { name: /delete group/i })
   ).toBeInTheDocument();
 });
+describe("Delete Group", () => {
+  test("should delete pre-existing group when its associated 'delete' button is pressed", () => {
+    render(<GroupTable />);
 
-test("should remove pre-existing group when its associated 'remove' button is pressed", () => {
-  render(<GroupTable />);
+    const createGroupEl = screen.getByRole("button", { name: /create group/i });
+    userEvent.click(createGroupEl);
+    userEvent.click(createGroupEl);
+    userEvent.click(createGroupEl);
 
-  const createGroupEl = screen.getByRole("button", { name: /create group/i });
-  userEvent.click(createGroupEl);
-  userEvent.click(createGroupEl);
-  userEvent.click(createGroupEl);
+    userEvent.click(
+      screen.getByRole("button", {
+        name: /delete group-2/i,
+      })
+    );
 
-  userEvent.click(
-    screen.getByRole("button", {
-      name: /remove group-2/i,
-    })
-  );
+    userEvent.click(screen.getByRole("button", { name: /^delete$/i }));
 
-  expect(
-    screen.getByRole("button", { name: /remove group-1/i })
-  ).toBeInTheDocument();
-  expect(
-    screen.queryByRole("button", {
-      name: /remove group-2/i,
-    })
-  ).not.toBeInTheDocument();
-  expect(
-    screen.getByRole("button", { name: /remove group-3/i })
-  ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /delete group-1/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", {
+        name: /delete group-2/i,
+      })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /delete group-3/i })
+    ).toBeInTheDocument();
+  });
+
+  describe("when deletion is canceled", () => {
+    test("should preserve group when 'esc' is pressed", () => {
+      render(<GroupTable />);
+
+      const createGroupEl = screen.getByRole("button", {
+        name: /create group/i,
+      });
+      userEvent.click(createGroupEl);
+      userEvent.click(createGroupEl);
+      userEvent.click(createGroupEl);
+
+      userEvent.click(
+        screen.getByRole("button", {
+          name: /delete group-2/i,
+        })
+      );
+
+      userEvent.keyboard("{esc}");
+
+      expect(
+        screen.getByRole("button", { name: /delete group-1/i })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /delete group-2/i })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /delete group-3/i })
+      ).toBeInTheDocument();
+    });
+
+    test("should preserve group when 'cancel' button is clicked", () => {
+      render(<GroupTable />);
+
+      const createGroupEl = screen.getByRole("button", {
+        name: /create group/i,
+      });
+      userEvent.click(createGroupEl);
+      userEvent.click(createGroupEl);
+      userEvent.click(createGroupEl);
+
+      userEvent.click(
+        screen.getByRole("button", {
+          name: /delete group-2/i,
+        })
+      );
+
+      userEvent.click(screen.getByRole("button", { name: /cancel/i }));
+
+      expect(
+        screen.getByRole("button", { name: /delete group-1/i })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /delete group-2/i })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /delete group-3/i })
+      ).toBeInTheDocument();
+    });
+  });
 });
 
 test("should update pursuers list when another group makes it its distancer", () => {
@@ -175,54 +238,6 @@ test("should update pursuers list when another group makes it its distancer", ()
       .filter((listitem) => listitem.textContent === name1)
   ).toHaveLength(1);
   expect(within(secondRow).queryByRole("listitem")).not.toBeInTheDocument();
-});
-
-describe("Focus Trap", () => {
-  test("should trap focus when 'enter' key is pressed", () => {
-    render(<GroupTable />);
-
-    const createGroupEl = screen.getByRole("button", { name: /create group/i });
-    userEvent.click(createGroupEl);
-
-    userEvent.click(screen.getByRole("button", { name: /expand more/i }));
-
-    const gridcellEl = screen.getAllByRole("gridcell")[0];
-    const rowEl = screen.getByRole("row");
-
-    gridcellEl.focus();
-    userEvent.tab({ shift: true });
-
-    expect(rowEl).toHaveFocus();
-
-    userEvent.type(gridcellEl, "{enter}");
-
-    expect(gridcellEl).toHaveFocus();
-
-    userEvent.tab({ shift: true });
-
-    expect(rowEl).not.toHaveFocus();
-    expect(gridcellEl).not.toHaveFocus();
-  });
-
-  test("should release focus trap when 'esc' key is pressed", () => {
-    render(<GroupTable />);
-
-    const createGroupEl = screen.getByRole("button", { name: /create group/i });
-    userEvent.click(createGroupEl);
-
-    userEvent.click(screen.getByRole("button", { name: /expand more/i }));
-
-    const gridcellEl = screen.getAllByRole("gridcell")[0];
-    userEvent.type(gridcellEl, "{enter}");
-    userEvent.type(gridcellEl, "{esc}");
-
-    expect(gridcellEl).toHaveFocus();
-
-    userEvent.tab({ shift: true });
-
-    expect(screen.getByRole("row")).toHaveFocus();
-    expect(gridcellEl).not.toHaveFocus();
-  });
 });
 
 describe("Confirmation Tests", () => {

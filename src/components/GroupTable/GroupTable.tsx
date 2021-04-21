@@ -1,4 +1,5 @@
 import React from "react";
+import Modal from "react-modal";
 
 import GroupRow from "../GroupRow";
 import Button from "../Button";
@@ -19,7 +20,8 @@ interface Props {
 
 interface State {
   groups: Group[];
-  selectedGroupIndex: number;
+  selectedIndex: number;
+  modalShown: boolean;
 }
 
 export default class GroupTable extends React.Component<Props, State> {
@@ -34,13 +36,16 @@ export default class GroupTable extends React.Component<Props, State> {
 
     this.state = {
       groups: [],
-      selectedGroupIndex: -1,
+      selectedIndex: -1,
+      modalShown: false,
     };
 
     this.sequenceGenerator = new UniqueSequenceGen(0);
 
     this.handleCreateClick = this.handleCreateClick.bind(this);
     this.handleDistancerBlur = this.handleDistancerBlur.bind(this);
+    this.handleDeleteClick = this.handleDeleteClick.bind(this);
+    this.closeModal = this.closeModal.bind(this);
   }
 
   private handleCreateClick() {
@@ -61,24 +66,32 @@ export default class GroupTable extends React.Component<Props, State> {
     });
   }
 
-  private handleRemoveClick(id: string) {
-    this.setState((state) => {
-      const { groups } = state;
-      const targetIndex = groups.findIndex((group) => group.id === id);
+  private handlePromptDeleteClick(index: number) {
+    this.setState({
+      modalShown: true,
+      selectedIndex: index,
+    });
+  }
 
-      const groupId = groups[targetIndex].id;
+  private handleDeleteClick() {
+    this.setState((state) => {
+      const { groups, selectedIndex } = state;
+
+      const groupId = groups[selectedIndex].id;
       const results = groupId.match(new RegExp(/\d+$/)) || [];
       const result = results[0];
 
       this.sequenceGenerator.remove(Number.parseInt(result, 10));
-      groups.splice(targetIndex, 1);
+      groups.splice(selectedIndex, 1);
 
       return { groups };
     });
+
+    this.closeModal();
   }
 
   private handleKeyDown(selectedIndex: number) {
-    this.setState({ selectedGroupIndex: selectedIndex });
+    this.setState({ selectedIndex });
   }
 
   private handleDistancerBlur(target: Group, distancer: Group | undefined) {
@@ -128,6 +141,10 @@ export default class GroupTable extends React.Component<Props, State> {
     });
   }
 
+  private closeModal() {
+    this.setState({ modalShown: false });
+  }
+
   private renderWarning() {
     const { warningMessage = GroupTable.DEFAULT_WARNING_MESSAGE } = this.props;
 
@@ -135,7 +152,7 @@ export default class GroupTable extends React.Component<Props, State> {
   }
 
   private renderRows() {
-    const { groups, selectedGroupIndex } = this.state;
+    const { groups } = this.state;
 
     return groups.map((group, index) => (
       <div
@@ -147,17 +164,15 @@ export default class GroupTable extends React.Component<Props, State> {
       >
         <GroupRow
           onDistancerBlur={this.handleDistancerBlur}
-          onKeyDown={() => this.handleKeyDown(index)}
           ownedIndex={index}
           groups={groups}
-          isFocused={index === selectedGroupIndex}
         />
         <div role="gridcell">
           <Button
             className="GroupTable__row-control button button--primary"
-            onClick={() => this.handleRemoveClick(group.id)}
+            onClick={() => this.handlePromptDeleteClick(index)}
           >
-            <img src={RemoveIcon} alt={`Remove ${group.id}`} />
+            <img src={RemoveIcon} alt={`Delete ${group.id}`} />
           </Button>
         </div>
       </div>
@@ -169,6 +184,38 @@ export default class GroupTable extends React.Component<Props, State> {
       <Button className="button fab" onClick={this.handleCreateClick}>
         <img src={AddIcon} alt="Create Group" width="44" />
       </Button>
+    );
+  }
+
+  private renderDeletionModal() {
+    const { modalShown } = this.state;
+
+    return (
+      <Modal
+        className="Modal__Content"
+        overlayClassName="Modal__Overlay"
+        contentLabel="Confirm Removal"
+        isOpen={modalShown}
+        onRequestClose={this.closeModal}
+      >
+        <p className="Modal__Content__text">
+          Would you like to delete this group?
+        </p>
+        <div className="Modal__Content__options">
+          <Button
+            className="button button--tertiary-on-dark button--medium"
+            onClick={this.closeModal}
+          >
+            CANCEL
+          </Button>
+          <Button
+            className="button button--secondary button--medium"
+            onClick={this.handleDeleteClick}
+          >
+            DELETE
+          </Button>
+        </div>
+      </Modal>
     );
   }
 
@@ -185,6 +232,7 @@ export default class GroupTable extends React.Component<Props, State> {
           this.renderWarning()
         )}
         {this.renderFloatingActionButton()}
+        {this.renderDeletionModal()}
       </section>
     );
   }

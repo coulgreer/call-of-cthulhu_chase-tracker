@@ -27,8 +27,6 @@ const pursuingGroupName = "Group 3";
 const DEFAULT_PROPS: {
   groups: Group[];
   handleDistancerBlur: () => void;
-  handleKeyDown: () => void;
-  isFocused: boolean;
 } = {
   groups: [
     {
@@ -68,8 +66,6 @@ const DEFAULT_PROPS: {
     },
   ],
   handleDistancerBlur: jest.fn(),
-  handleKeyDown: jest.fn(),
-  isFocused: false,
 };
 
 const isolatedGroupIndex = 0;
@@ -78,16 +74,9 @@ const centralGroupIndex = 2;
 describe("Prop Rendering", () => {
   describe("when expanded", () => {
     test("should render properly when ommitting optional props", () => {
-      const { groups, handleKeyDown, isFocused } = DEFAULT_PROPS;
+      const { groups } = DEFAULT_PROPS;
 
-      render(
-        <GroupRow
-          onKeyDown={handleKeyDown}
-          ownedIndex={isolatedGroupIndex}
-          groups={groups}
-          isFocused={isFocused}
-        />
-      );
+      render(<GroupRow ownedIndex={isolatedGroupIndex} groups={groups} />);
 
       userEvent.click(screen.getByRole("button", { name: /expand more/i }));
 
@@ -137,20 +126,13 @@ describe("Prop Rendering", () => {
     });
 
     test("should render properly when including optional props", () => {
-      const {
-        groups,
-        handleKeyDown,
-        handleDistancerBlur,
-        isFocused,
-      } = DEFAULT_PROPS;
+      const { groups, handleDistancerBlur } = DEFAULT_PROPS;
 
       render(
         <GroupRow
-          onKeyDown={handleKeyDown}
           onDistancerBlur={handleDistancerBlur}
           ownedIndex={isolatedGroupIndex}
           groups={groups}
-          isFocused={isFocused}
         />
       );
 
@@ -208,16 +190,9 @@ describe("Prop Rendering", () => {
   });
 
   test("should render properly when collapsed", () => {
-    const { groups, handleKeyDown, isFocused } = DEFAULT_PROPS;
+    const { groups } = DEFAULT_PROPS;
 
-    render(
-      <GroupRow
-        onKeyDown={handleKeyDown}
-        ownedIndex={isolatedGroupIndex}
-        groups={groups}
-        isFocused={isFocused}
-      />
-    );
+    render(<GroupRow ownedIndex={isolatedGroupIndex} groups={groups} />);
 
     expect(screen.getByRole("button", { name: /split/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /join/i })).toBeInTheDocument();
@@ -246,16 +221,9 @@ describe("Prop Rendering", () => {
 
 describe("Participant display", () => {
   test("should render participant properly when no participants exist in the group", () => {
-    const { groups, isFocused, handleKeyDown } = DEFAULT_PROPS;
+    const { groups } = DEFAULT_PROPS;
 
-    render(
-      <GroupRow
-        onKeyDown={handleKeyDown}
-        ownedIndex={isolatedGroupIndex}
-        groups={groups}
-        isFocused={isFocused}
-      />
-    );
+    render(<GroupRow ownedIndex={isolatedGroupIndex} groups={groups} />);
 
     userEvent.click(screen.getByRole("button", { name: /expand more/i }));
 
@@ -272,8 +240,6 @@ describe("Participant display", () => {
   });
 
   test("should render participant properly when at least one participant exists in the group", () => {
-    const { isFocused, handleKeyDown } = DEFAULT_PROPS;
-
     const participants: Participant[] = [
       {
         id: "p1",
@@ -298,14 +264,7 @@ describe("Participant display", () => {
 
     const [first] = participants;
 
-    render(
-      <GroupRow
-        onKeyDown={handleKeyDown}
-        ownedIndex={0}
-        groups={groups}
-        isFocused={isFocused}
-      />
-    );
+    render(<GroupRow ownedIndex={0} groups={groups} />);
 
     userEvent.click(screen.getByRole("button", { name: /expand more/i }));
 
@@ -327,8 +286,6 @@ describe("Participant display", () => {
 
   describe("Boundary Movement Rating", () => {
     test("should render properly when one participant exists in the group", () => {
-      const { isFocused, handleKeyDown } = DEFAULT_PROPS;
-
       const participants: Participant[] = [
         {
           id: "p1",
@@ -353,14 +310,7 @@ describe("Participant display", () => {
 
       const [first] = participants;
 
-      render(
-        <GroupRow
-          onKeyDown={handleKeyDown}
-          ownedIndex={0}
-          groups={groups}
-          isFocused={isFocused}
-        />
-      );
+      render(<GroupRow ownedIndex={0} groups={groups} />);
 
       userEvent.click(screen.getByRole("button", { name: /expand more/i }));
 
@@ -379,8 +329,6 @@ describe("Participant display", () => {
     });
 
     test("should render properly when at least two participants exist with differing movement ratings", () => {
-      const { handleKeyDown, isFocused } = DEFAULT_PROPS;
-
       const lowestMOV = 6;
       const highestMOV = 8;
 
@@ -415,14 +363,7 @@ describe("Participant display", () => {
         },
       ];
 
-      render(
-        <GroupRow
-          onKeyDown={handleKeyDown}
-          ownedIndex={0}
-          groups={groups}
-          isFocused={isFocused}
-        />
-      );
+      render(<GroupRow ownedIndex={0} groups={groups} />);
 
       userEvent.click(screen.getByRole("button", { name: /expand more/i }));
 
@@ -445,16 +386,9 @@ describe("Participant display", () => {
 describe("Warnings", () => {
   describe("Distancer", () => {
     test("should show warning message when a group does not have a distancer", () => {
-      const { groups, isFocused, handleKeyDown } = DEFAULT_PROPS;
+      const { groups } = DEFAULT_PROPS;
 
-      render(
-        <GroupRow
-          onKeyDown={handleKeyDown}
-          ownedIndex={1}
-          groups={groups}
-          isFocused={isFocused}
-        />
-      );
+      render(<GroupRow ownedIndex={1} groups={groups} />);
       userEvent.click(screen.getByRole("button", { name: /expand more/i }));
 
       expect(
@@ -463,16 +397,9 @@ describe("Warnings", () => {
     });
 
     test("should hide warning and display current distancer when a group has a distancer", () => {
-      const { groups, isFocused, handleKeyDown } = DEFAULT_PROPS;
+      const { groups } = DEFAULT_PROPS;
 
-      render(
-        <GroupRow
-          onKeyDown={handleKeyDown}
-          ownedIndex={centralGroupIndex}
-          groups={groups}
-          isFocused={isFocused}
-        />
-      );
+      render(<GroupRow ownedIndex={centralGroupIndex} groups={groups} />);
       userEvent.click(screen.getByRole("button", { name: /expand more/i }));
 
       expect(
@@ -483,16 +410,9 @@ describe("Warnings", () => {
 
   describe("Pursuer", () => {
     test("should show warning message when a group does not have at least one pursuer", () => {
-      const { groups, isFocused, handleKeyDown } = DEFAULT_PROPS;
+      const { groups } = DEFAULT_PROPS;
 
-      render(
-        <GroupRow
-          onKeyDown={handleKeyDown}
-          ownedIndex={3}
-          groups={groups}
-          isFocused={isFocused}
-        />
-      );
+      render(<GroupRow ownedIndex={3} groups={groups} />);
       userEvent.click(screen.getByRole("button", { name: /expand more/i }));
 
       expect(
@@ -501,16 +421,9 @@ describe("Warnings", () => {
     });
 
     test("should hide warning and display current pursuer(s) when a group has any pursuers", () => {
-      const { groups, isFocused, handleKeyDown } = DEFAULT_PROPS;
+      const { groups } = DEFAULT_PROPS;
 
-      render(
-        <GroupRow
-          onKeyDown={handleKeyDown}
-          ownedIndex={centralGroupIndex}
-          groups={groups}
-          isFocused={isFocused}
-        />
-      );
+      render(<GroupRow ownedIndex={centralGroupIndex} groups={groups} />);
       userEvent.click(screen.getByRole("button", { name: /expand more/i }));
 
       expect(

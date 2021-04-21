@@ -1,7 +1,5 @@
 import React from "react";
-
 import { Transition, animated } from "react-spring/renderprops";
-import FocusTrap from "focus-trap-react";
 
 import Button from "../Button";
 
@@ -15,9 +13,7 @@ import { Group } from "../../types";
 interface Props {
   ownedIndex: number;
   groups: Group[];
-  isFocused: boolean;
   onDistancerBlur?: (target: Group, distancer: Group | undefined) => void;
-  onKeyDown: () => void;
 }
 
 interface State {
@@ -50,7 +46,6 @@ export default class GroupRow extends React.Component<Props, State> {
 
     this.toggleExpansion = this.toggleExpansion.bind(this);
     this.handleDistancerBlur = this.handleDistancerBlur.bind(this);
-    this.handleKeyDown = this.handleKeyDown.bind(this);
   }
 
   private handleDistancerBlur(evt: React.ChangeEvent<HTMLSelectElement>) {
@@ -61,12 +56,6 @@ export default class GroupRow extends React.Component<Props, State> {
     if (onDistancerBlur !== undefined) {
       onDistancerBlur(groups[ownedIndex], distancer);
     }
-  }
-
-  private handleKeyDown(evt: React.KeyboardEvent<HTMLDivElement>) {
-    const { onKeyDown: onKeyPress } = this.props;
-
-    if (evt.key === "Enter") onKeyPress();
   }
 
   private getHighestMov() {
@@ -270,21 +259,18 @@ export default class GroupRow extends React.Component<Props, State> {
   }
 
   render() {
-    const { ownedIndex, groups, isFocused } = this.props;
+    const { ownedIndex, groups } = this.props;
 
     return (
-      <FocusTrap active={isFocused}>
-        <div
-          role="gridcell"
-          tabIndex={0}
-          aria-label={`${groups[ownedIndex].name} editor`}
-          className="GroupRow"
-          onKeyDown={this.handleKeyDown}
-        >
-          {this.renderMainContent()}
-          {this.renderExpandedContent()}
-        </div>
-      </FocusTrap>
+      <div
+        role="gridcell"
+        tabIndex={0}
+        aria-label={`${groups[ownedIndex].name} editor`}
+        className="GroupRow"
+      >
+        {this.renderMainContent()}
+        {this.renderExpandedContent()}
+      </div>
     );
   }
 }
