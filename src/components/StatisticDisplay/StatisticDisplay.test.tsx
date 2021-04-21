@@ -58,17 +58,19 @@ test("should render statistics properly when textbox class is provided", () => {
 });
 
 test("should call onChange handler when anything is changed in input", () => {
+  const { title, currentValue, onStatisticChange } = DEFAULT_PROPS;
+
   render(
     <StatisticDisplay
-      title={DEFAULT_PROPS.title}
-      currentValue={DEFAULT_PROPS.currentValue}
-      onStatisticChange={DEFAULT_PROPS.onStatisticChange}
+      title={title}
+      currentValue={currentValue}
+      onStatisticChange={onStatisticChange}
     />
   );
 
-  userEvent.type(screen.getByLabelText(DEFAULT_PROPS.title), "a");
+  userEvent.type(screen.getByRole("spinbutton", { name: title }), "3");
 
-  expect(DEFAULT_PROPS.onStatisticChange).toBeCalled();
+  expect(onStatisticChange).toBeCalled();
 });
 
 test("should call onBlur handler when input is deselected", () => {
