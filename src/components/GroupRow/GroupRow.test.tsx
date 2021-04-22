@@ -224,7 +224,6 @@ describe("Participant display", () => {
     const { groups } = DEFAULT_PROPS;
 
     render(<GroupRow ownedIndex={isolatedGroupIndex} groups={groups} />);
-
     userEvent.click(screen.getByRole("button", { name: /expand more/i }));
 
     expect(screen.getByText(/highest mov : N\/A/i)).toBeInTheDocument();
@@ -265,7 +264,6 @@ describe("Participant display", () => {
     const [first] = participants;
 
     render(<GroupRow ownedIndex={0} groups={groups} />);
-
     userEvent.click(screen.getByRole("button", { name: /expand more/i }));
 
     expect(
@@ -308,24 +306,31 @@ describe("Participant display", () => {
         },
       ];
 
-      const [first] = participants;
+      const [firstParticipant] = participants;
 
       render(<GroupRow ownedIndex={0} groups={groups} />);
-
       userEvent.click(screen.getByRole("button", { name: /expand more/i }));
 
-      expect(
-        screen.getByText(new RegExp(`highest mov : ${first.movementRate}`, "i"))
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText(new RegExp(`lowest mov : ${first.movementRate}`, "i"))
-      ).toBeInTheDocument();
+      const listEl = screen.getByRole("list", { name: /participants/i });
 
       expect(
-        within(
-          screen.getByRole("list", { name: /participants/i })
-        ).getAllByRole("listitem")
-      ).toHaveLength(participants.length);
+        screen.getByText(
+          new RegExp(`highest mov : ${firstParticipant.movementRate}`, "i")
+        )
+      ).not.toHaveClass(GroupRow.HIGHEST_MOVEMENT_CLASS_NAME);
+      expect(
+        screen.getByText(
+          new RegExp(`lowest mov : ${firstParticipant.movementRate}`, "i")
+        )
+      ).not.toHaveClass(GroupRow.LOWEST_MOVEMENT_CLASS_NAME);
+      expect(within(listEl).getByText(firstParticipant.name)).not.toHaveClass(
+        GroupRow.HIGHEST_MOVEMENT_CLASS_NAME
+      );
+      expect(within(listEl).getByText(firstParticipant.name)).not.toHaveClass(
+        GroupRow.LOWEST_MOVEMENT_CLASS_NAME
+      );
+
+      expect(within(listEl).getAllByRole("listitem")).toHaveLength(1);
     });
 
     test("should render properly when at least two participants exist with differing movement ratings", () => {
@@ -353,6 +358,8 @@ describe("Participant display", () => {
         },
       ];
 
+      const [lowestMovParticipant, highestMovParticipant] = participants;
+
       const groups: Group[] = [
         {
           id: "0",
@@ -364,15 +371,23 @@ describe("Participant display", () => {
       ];
 
       render(<GroupRow ownedIndex={0} groups={groups} />);
-
       userEvent.click(screen.getByRole("button", { name: /expand more/i }));
+
+      const listEl = screen.getByRole("list", { name: /participants/i });
 
       expect(
         screen.getByText(new RegExp(`highest mov : ${highestMOV}`, "i"))
-      ).toBeInTheDocument();
+      ).toHaveClass(GroupRow.HIGHEST_MOVEMENT_CLASS_NAME);
+      expect(within(listEl).getByText(highestMovParticipant.name)).toHaveClass(
+        GroupRow.HIGHEST_MOVEMENT_CLASS_NAME
+      );
+
+      expect(within(listEl).getByText(lowestMovParticipant.name)).toHaveClass(
+        GroupRow.LOWEST_MOVEMENT_CLASS_NAME
+      );
       expect(
         screen.getByText(new RegExp(`lowest mov : ${lowestMOV}`, "i"))
-      ).toBeInTheDocument();
+      ).toHaveClass(GroupRow.LOWEST_MOVEMENT_CLASS_NAME);
 
       expect(
         within(

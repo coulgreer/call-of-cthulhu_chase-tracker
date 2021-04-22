@@ -1,4 +1,5 @@
 import React from "react";
+import clsx from "clsx";
 import { Transition, animated } from "react-spring/renderprops";
 
 import Button from "../Button";
@@ -21,9 +22,13 @@ interface State {
 }
 
 export default class GroupRow extends React.Component<Props, State> {
-  static INVALID_DISTANCER_ID = "N/A";
+  static get INVALID_DISTANCER_ID() {
+    return "N/A";
+  }
 
-  static DEFAULT_CHASE_NAME = "DEFAULT Chase";
+  static get DEFAULT_CHASE_NAME() {
+    return "DEFAULT Chase";
+  }
 
   static get NO_DISTANCER_WARNING_MESSAGE() {
     return "No appetite for the hunt? In due time it will come. It always does...";
@@ -37,12 +42,27 @@ export default class GroupRow extends React.Component<Props, State> {
     return "An emptiness, yet to be filled. This *thing* lacks purpose.";
   }
 
+  static get HIGHEST_MOVEMENT_CLASS_NAME() {
+    return "GroupRow--highest";
+  }
+
+  static get LOWEST_MOVEMENT_CLASS_NAME() {
+    return "GroupRow--lowest";
+  }
+
+  private lowestMovementRating: string;
+
+  private highestMovementRating: string;
+
   constructor(props: Props) {
     super(props);
 
     this.state = {
       isShown: false,
     };
+
+    this.lowestMovementRating = "";
+    this.highestMovementRating = "";
 
     this.toggleExpansion = this.toggleExpansion.bind(this);
     this.handleDistancerBlur = this.handleDistancerBlur.bind(this);
@@ -86,6 +106,10 @@ export default class GroupRow extends React.Component<Props, State> {
     });
 
     return result.toString();
+  }
+
+  private areBoundariesEqual() {
+    return this.highestMovementRating === this.lowestMovementRating;
   }
 
   private toggleExpansion() {
@@ -232,21 +256,46 @@ export default class GroupRow extends React.Component<Props, State> {
     const { groups, ownedIndex } = this.props;
     const currentGroup = groups[ownedIndex];
 
+    this.lowestMovementRating = this.getLowestMov();
+    this.highestMovementRating = this.getHighestMov();
+
     return (
       <div className="GroupRow__section-container">
         <h2 className="GroupRow__title">Members</h2>
         <div className="GroupRow__pursuer-movement">
-          <p className="text--small">{`Highest MOV : ${this.getHighestMov()}`}</p>
-          <p className="text--small">{`Lowest MOV : ${this.getLowestMov()}`}</p>
+          <p
+            className={`text--small ${clsx(
+              !this.areBoundariesEqual() && GroupRow.LOWEST_MOVEMENT_CLASS_NAME
+            )}`}
+          >{`Highest MOV : ${this.highestMovementRating}`}</p>
+          <p
+            className={`text--small ${clsx(
+              !this.areBoundariesEqual() && GroupRow.HIGHEST_MOVEMENT_CLASS_NAME
+            )}`}
+          >{`Lowest MOV : ${this.lowestMovementRating}`}</p>
         </div>
         {currentGroup.participants.length > 0 ? (
           <ul aria-label="Participants">
-            {currentGroup.participants.map((participant) => (
-              <li>
-                <p>{participant.name}</p>
-                <p>{participant.movementRate}</p>
-              </li>
-            ))}
+            {currentGroup.participants.map((participant) => {
+              const mov = participant.movementRate;
+              const movStr = mov.toString();
+
+              let style = "";
+              if (!this.areBoundariesEqual()) {
+                if (this.highestMovementRating === movStr) {
+                  style = GroupRow.HIGHEST_MOVEMENT_CLASS_NAME;
+                } else if (this.lowestMovementRating === movStr) {
+                  style = GroupRow.LOWEST_MOVEMENT_CLASS_NAME;
+                }
+              }
+
+              return (
+                <li className={style}>
+                  {participant.name}
+                  <span>{mov}</span>
+                </li>
+              );
+            })}
           </ul>
         ) : (
           <p className="centered error text--small">
