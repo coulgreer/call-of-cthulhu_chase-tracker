@@ -9,7 +9,7 @@ import ExpandMoreIcon from "../../images/expand_more_black_24dp.svg";
 
 import "./GroupRow.css";
 
-import { Group } from "../../types";
+import { Group, Participant } from "../../types";
 
 interface Props {
   ownedIndex: number;
@@ -64,8 +64,14 @@ export default class GroupRow extends React.Component<Props, State> {
     this.lowestMovementRating = "";
     this.highestMovementRating = "";
 
-    this.toggleExpansion = this.toggleExpansion.bind(this);
+    this.handleExpandClick = this.handleExpandClick.bind(this);
     this.handleDistancerBlur = this.handleDistancerBlur.bind(this);
+  }
+
+  private handleExpandClick() {
+    this.setState((state) => ({
+      isShown: !state.isShown,
+    }));
   }
 
   private handleDistancerBlur(evt: React.ChangeEvent<HTMLSelectElement>) {
@@ -78,7 +84,24 @@ export default class GroupRow extends React.Component<Props, State> {
     }
   }
 
-  private getHighestMov() {
+  private getBoundaryClassName(participant: Participant) {
+    const { movementRate } = participant;
+    const movementStr = movementRate.toString();
+
+    if (this.areBoundariesEqual()) return "";
+
+    if (this.highestMovementRating === movementStr) {
+      return GroupRow.HIGHEST_MOVEMENT_CLASS_NAME;
+    }
+
+    if (this.lowestMovementRating === movementStr) {
+      return GroupRow.LOWEST_MOVEMENT_CLASS_NAME;
+    }
+
+    return "";
+  }
+
+  private findHighestMovementRate() {
     const { groups, ownedIndex } = this.props;
     const { participants } = groups[ownedIndex];
 
@@ -93,7 +116,7 @@ export default class GroupRow extends React.Component<Props, State> {
     return result.toString();
   }
 
-  private getLowestMov() {
+  private findLowestMovementRate() {
     const { groups, ownedIndex } = this.props;
     const { participants } = groups[ownedIndex];
 
@@ -110,12 +133,6 @@ export default class GroupRow extends React.Component<Props, State> {
 
   private areBoundariesEqual() {
     return this.highestMovementRating === this.lowestMovementRating;
-  }
-
-  private toggleExpansion() {
-    this.setState((state) => ({
-      isShown: !state.isShown,
-    }));
   }
 
   private renderMainContent() {
@@ -142,7 +159,7 @@ export default class GroupRow extends React.Component<Props, State> {
         <Button
           aria-expanded={isShown}
           className="button button--primary button--small button--circular"
-          onClick={this.toggleExpansion}
+          onClick={this.handleExpandClick}
         >
           {isShown ? (
             <img src={ExpandLessIcon} alt="expand less" />
@@ -256,8 +273,8 @@ export default class GroupRow extends React.Component<Props, State> {
     const { groups, ownedIndex } = this.props;
     const currentGroup = groups[ownedIndex];
 
-    this.lowestMovementRating = this.getLowestMov();
-    this.highestMovementRating = this.getHighestMov();
+    this.lowestMovementRating = this.findLowestMovementRate();
+    this.highestMovementRating = this.findHighestMovementRate();
 
     return (
       <div className="GroupRow__section-container">
@@ -265,37 +282,23 @@ export default class GroupRow extends React.Component<Props, State> {
         <div className="GroupRow__pursuer-movement">
           <p
             className={`text--small ${clsx(
-              !this.areBoundariesEqual() && GroupRow.LOWEST_MOVEMENT_CLASS_NAME
+              !this.areBoundariesEqual() && GroupRow.HIGHEST_MOVEMENT_CLASS_NAME
             )}`}
           >{`Highest MOV : ${this.highestMovementRating}`}</p>
           <p
             className={`text--small ${clsx(
-              !this.areBoundariesEqual() && GroupRow.HIGHEST_MOVEMENT_CLASS_NAME
+              !this.areBoundariesEqual() && GroupRow.LOWEST_MOVEMENT_CLASS_NAME
             )}`}
           >{`Lowest MOV : ${this.lowestMovementRating}`}</p>
         </div>
         {currentGroup.participants.length > 0 ? (
           <ul aria-label="Participants">
-            {currentGroup.participants.map((participant) => {
-              const mov = participant.movementRate;
-              const movStr = mov.toString();
-
-              let style = "";
-              if (!this.areBoundariesEqual()) {
-                if (this.highestMovementRating === movStr) {
-                  style = GroupRow.HIGHEST_MOVEMENT_CLASS_NAME;
-                } else if (this.lowestMovementRating === movStr) {
-                  style = GroupRow.LOWEST_MOVEMENT_CLASS_NAME;
-                }
-              }
-
-              return (
-                <li className={style}>
-                  {participant.name}
-                  <span>{mov}</span>
-                </li>
-              );
-            })}
+            {currentGroup.participants.map((participant) => (
+              <li className={this.getBoundaryClassName(participant)}>
+                {participant.name}
+                <span>{participant.movementRate}</span>
+              </li>
+            ))}
           </ul>
         ) : (
           <p className="centered error text--small">
