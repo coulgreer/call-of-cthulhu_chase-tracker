@@ -31,3 +31,9 @@ test("should use callback when button clicked", () => {
 
   expect(newText).toEqual(`${oldText}!`);
 });
+
+test("should disable button when disabled is true", () => {
+  render(<Button disabled />);
+
+  expect(screen.getByRole("button")).toBeDisabled();
+});

@@ -1,6 +1,7 @@
 import React from "react";
 import clsx from "clsx";
 import { Transition, animated } from "react-spring/renderprops";
+import Modal from "react-modal";
 
 import Button from "../Button";
 
@@ -14,11 +15,15 @@ import { Group, Participant } from "../../types";
 interface Props {
   ownedIndex: number;
   groups: Group[];
+  participants?: Participant[];
   onDistancerBlur?: (target: Group, distancer: Group | undefined) => void;
+  handleSubmit?: (group: Group) => void;
 }
 
 interface State {
-  isShown: boolean;
+  selectedParticipantsIds: string[];
+  expansionShown: boolean;
+  modalShown: boolean;
 }
 
 export default class GroupRow extends React.Component<Props, State> {
@@ -42,6 +47,10 @@ export default class GroupRow extends React.Component<Props, State> {
     return "An emptiness, yet to be filled. This *thing* lacks purpose.";
   }
 
+  static get NO_AVAILABLE_PARTICIPANT_WARNING_MESSAGE() {
+    return "A place void of life... past or present. All claimed. None free.";
+  }
+
   static get HIGHEST_MOVEMENT_CLASS_NAME() {
     return "GroupRow--highest";
   }
@@ -58,19 +67,30 @@ export default class GroupRow extends React.Component<Props, State> {
     super(props);
 
     this.state = {
-      isShown: false,
+      selectedParticipantsIds: [],
+      expansionShown: false,
+      modalShown: false,
     };
 
     this.lowestMovementRating = "";
     this.highestMovementRating = "";
 
+    // Event handlers
     this.handleExpandClick = this.handleExpandClick.bind(this);
     this.handleDistancerBlur = this.handleDistancerBlur.bind(this);
+    this.handleAddClick = this.handleAddClick.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleCheckboxChange = this.handleCheckboxChange.bind(this);
+    this.closeModal = this.closeModal.bind(this);
+
+    // Helpers
+    this.findParticipantById = this.findParticipantById.bind(this);
+    this.isAvailable = this.isAvailable.bind(this);
   }
 
   private handleExpandClick() {
     this.setState((state) => ({
-      isShown: !state.isShown,
+      expansionShown: !state.expansionShown,
     }));
   }
 
@@ -79,9 +99,48 @@ export default class GroupRow extends React.Component<Props, State> {
     const { value } = evt.currentTarget;
     const distancer = groups.find((group) => group.id === value);
 
-    if (onDistancerBlur !== undefined) {
-      onDistancerBlur(groups[ownedIndex], distancer);
-    }
+    if (onDistancerBlur) onDistancerBlur(groups[ownedIndex], distancer);
+  }
+
+  private handleAddClick() {
+    this.setState({ modalShown: true });
+  }
+
+  private handleSubmit() {
+    const { groups, ownedIndex, handleSubmit } = this.props;
+    const { selectedParticipantsIds } = this.state;
+    const { participants: currentParticipants } = groups[ownedIndex];
+
+    const selectedParticipants = selectedParticipantsIds
+      .map(this.findParticipantById)
+      .filter((participant): participant is Participant => !!participant);
+
+    groups[ownedIndex].participants = selectedParticipants.concat(
+      currentParticipants
+    );
+
+    if (handleSubmit) handleSubmit(groups[ownedIndex]);
+
+    this.setState({ selectedParticipantsIds: [] });
+
+    this.closeModal();
+  }
+
+  private handleCheckboxChange(evt: React.FormEvent<HTMLInputElement>) {
+    const { value, checked } = evt.currentTarget;
+
+    this.setState((state) => {
+      const { selectedParticipantsIds } = state;
+
+      if (checked) {
+        selectedParticipantsIds.push(value);
+      } else {
+        const targetIndex = selectedParticipantsIds.indexOf(value);
+        selectedParticipantsIds.splice(targetIndex, 1);
+      }
+
+      return { selectedParticipantsIds };
+    });
   }
 
   private getBoundaryClassName(participant: Participant) {
@@ -99,6 +158,10 @@ export default class GroupRow extends React.Component<Props, State> {
     }
 
     return "";
+  }
+
+  private closeModal() {
+    this.setState({ modalShown: false });
   }
 
   private findHighestMovementRate() {
@@ -135,9 +198,33 @@ export default class GroupRow extends React.Component<Props, State> {
     return this.highestMovementRating === this.lowestMovementRating;
   }
 
+  private findParticipantById(id: string) {
+    const { participants } = this.props;
+
+    if (!participants) return undefined;
+
+    const index = participants.findIndex(
+      (participant) => id === participant.id
+    );
+
+    return participants[index];
+  }
+
+  private isAvailable(participant: Participant) {
+    const { groups, ownedIndex } = this.props;
+    const { participants: ownedParticipants } = groups[ownedIndex];
+    let isAvailable = true;
+
+    ownedParticipants.forEach((ownedParticipant) => {
+      if (ownedParticipant.id === participant.id) isAvailable = false;
+    });
+
+    return isAvailable;
+  }
+
   private renderMainContent() {
     const { groups, ownedIndex } = this.props;
-    const { isShown } = this.state;
+    const { expansionShown } = this.state;
 
     return (
       <div className="GroupRow__main-container">
@@ -157,11 +244,11 @@ export default class GroupRow extends React.Component<Props, State> {
           />
         </label>
         <Button
-          aria-expanded={isShown}
+          aria-expanded={expansionShown}
           className="button button--primary button--small button--circular"
           onClick={this.handleExpandClick}
         >
-          {isShown ? (
+          {expansionShown ? (
             <img src={ExpandLessIcon} alt="expand less" />
           ) : (
             <img src={ExpandMoreIcon} alt="expand more" />
@@ -172,12 +259,12 @@ export default class GroupRow extends React.Component<Props, State> {
   }
 
   private renderExpandedContent() {
-    const { isShown } = this.state;
+    const { expansionShown } = this.state;
 
     return (
       <Transition
         native
-        items={isShown}
+        items={expansionShown}
         from={{ height: 0, overflow: "hidden" }}
         enter={{ height: "auto" }}
         leave={{ height: 0 }}
@@ -305,8 +392,65 @@ export default class GroupRow extends React.Component<Props, State> {
             {GroupRow.NO_PARTICIPANT_WARNING_MESSAGE}
           </p>
         )}
-        <Button className="button button--primary button--medium">ADD</Button>
+        <Button
+          className="button button--primary button--medium"
+          onClick={this.handleAddClick}
+        >
+          ADD
+        </Button>
       </div>
+    );
+  }
+
+  private renderParticipantModal() {
+    const { participants } = this.props;
+    const { modalShown } = this.state;
+
+    const availableParticipants = participants?.filter(this.isAvailable) || [];
+
+    return (
+      <Modal
+        className="Modal__Content"
+        overlayClassName="Modal__Overlay"
+        contentLabel="Confirm Removal"
+        isOpen={modalShown}
+        onRequestClose={this.closeModal}
+      >
+        <p className="Modal__Content__text">
+          Who would you like to add to this group?
+        </p>
+        <form onSubmit={this.handleSubmit}>
+          {availableParticipants.length > 0 ? (
+            availableParticipants.map((participant) => (
+              <label>
+                <input
+                  type="checkbox"
+                  value={participant.id}
+                  onChange={this.handleCheckboxChange}
+                />
+                {participant.name}
+              </label>
+            ))
+          ) : (
+            <p>{GroupRow.NO_AVAILABLE_PARTICIPANT_WARNING_MESSAGE}</p>
+          )}
+          <div className="Modal__Content__options">
+            <Button
+              className="button button--tertiary-on-dark button--medium"
+              onClick={this.closeModal}
+            >
+              CANCEL
+            </Button>
+            <Button
+              className="button button--secondary button--medium"
+              type="submit"
+              disabled={!(availableParticipants.length > 0)}
+            >
+              ADD
+            </Button>
+          </div>
+        </form>
+      </Modal>
     );
   }
 
@@ -322,6 +466,7 @@ export default class GroupRow extends React.Component<Props, State> {
       >
         {this.renderMainContent()}
         {this.renderExpandedContent()}
+        {this.renderParticipantModal()}
       </div>
     );
   }

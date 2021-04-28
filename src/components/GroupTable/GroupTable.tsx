@@ -25,11 +25,11 @@ interface State {
 }
 
 export default class GroupTable extends React.Component<Props, State> {
-  private sequenceGenerator;
-
   static get DEFAULT_WARNING_MESSAGE() {
     return "No participants exist in this table";
   }
+
+  private sequenceGenerator;
 
   constructor(props: Props) {
     super(props);
@@ -45,6 +45,7 @@ export default class GroupTable extends React.Component<Props, State> {
     this.handleCreateClick = this.handleCreateClick.bind(this);
     this.handleDistancerBlur = this.handleDistancerBlur.bind(this);
     this.handleDeleteClick = this.handleDeleteClick.bind(this);
+    this.handleGroupChange = this.handleGroupChange.bind(this);
     this.closeModal = this.closeModal.bind(this);
   }
 
@@ -90,10 +91,6 @@ export default class GroupTable extends React.Component<Props, State> {
     this.closeModal();
   }
 
-  private handleKeyDown(selectedIndex: number) {
-    this.setState({ selectedIndex });
-  }
-
   private handleDistancerBlur(target: Group, distancer: Group | undefined) {
     if (target.distancerId !== GroupRow.INVALID_DISTANCER_ID) {
       this.removeDistancerFrom(target);
@@ -102,18 +99,52 @@ export default class GroupTable extends React.Component<Props, State> {
     this.addDistancer(target, distancer);
   }
 
+  private handleGroupChange(newGroup: Group) {
+    this.setState((state) => {
+      const { groups } = state;
+
+      const index = groups.findIndex((group) =>
+        GroupTable.areGroupsEqual(group, newGroup)
+      );
+
+      groups.splice(index, 1, newGroup);
+
+      return { groups };
+    });
+  }
+
+  // TODO (Coul Greer): Check for order of class members to eliminate this issue or learn more about its working
+  static areGroupsEqual(group1: Group, group2: Group): boolean;
+  static areGroupsEqual(groupId1: string, groupId2: string): boolean;
+  // eslint-disable-next-line react/sort-comp
+  static areGroupsEqual(g1: any, g2: any) {
+    if (GroupTable.isGroup(g1) && GroupTable.isGroup(g2)) {
+      return g1.id === g2.id;
+    }
+
+    return g1 === g2;
+  }
+
+  static isGroup(object: any): object is Group {
+    return (object as Group).id !== undefined;
+  }
+
+  private closeModal() {
+    this.setState({ modalShown: false });
+  }
+
   private removeDistancerFrom({ id: targetId, distancerId }: Group) {
     this.setState((state) => {
       const { groups } = state;
 
-      const distancerIndex = groups.findIndex(
-        (group) => group.id === distancerId
+      const distancerIndex = groups.findIndex((group) =>
+        GroupTable.areGroupsEqual(group.id, distancerId)
       );
       const distancer = groups[distancerIndex];
 
       const { pursuersIds } = distancer;
-      const currentIndex = pursuersIds.findIndex(
-        (pursuerId) => pursuerId === targetId
+      const currentIndex = pursuersIds.findIndex((pursuerId) =>
+        GroupTable.areGroupsEqual(pursuerId, targetId)
       );
 
       distancer.pursuersIds.splice(currentIndex, 1);
@@ -123,26 +154,23 @@ export default class GroupTable extends React.Component<Props, State> {
   }
 
   private addDistancer({ id: targetId }: Group, distancer: Group | undefined) {
-    const distancerId = distancer?.id;
+    const distancerId = distancer?.id || GroupRow.INVALID_DISTANCER_ID;
 
     this.setState((state) => {
       const { groups } = state;
 
-      const targetIndex = groups.findIndex((group) => group.id === targetId);
-      groups[targetIndex].distancerId =
-        distancerId || GroupRow.INVALID_DISTANCER_ID;
+      const targetIndex = groups.findIndex((group) =>
+        GroupTable.areGroupsEqual(group.id, targetId)
+      );
+      groups[targetIndex].distancerId = distancerId;
 
-      const distancerIndex = groups.findIndex(
-        (group) => group.id === distancerId
+      const distancerIndex = groups.findIndex((group) =>
+        GroupTable.areGroupsEqual(group.id, distancerId)
       );
       groups[distancerIndex].pursuersIds.push(targetId);
 
       return { groups };
     });
-  }
-
-  private closeModal() {
-    this.setState({ modalShown: false });
   }
 
   private renderWarning() {
@@ -152,6 +180,7 @@ export default class GroupTable extends React.Component<Props, State> {
   }
 
   private renderRows() {
+    const { participants } = this.props;
     const { groups } = this.state;
 
     return groups.map((group, index) => (
@@ -164,8 +193,10 @@ export default class GroupTable extends React.Component<Props, State> {
       >
         <GroupRow
           onDistancerBlur={this.handleDistancerBlur}
+          handleSubmit={this.handleGroupChange}
           ownedIndex={index}
           groups={groups}
+          participants={participants}
         />
         <div role="gridcell">
           <Button

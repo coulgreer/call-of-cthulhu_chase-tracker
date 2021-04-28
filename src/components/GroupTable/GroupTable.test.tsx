@@ -23,8 +23,17 @@ const DEFAULT_PROPS: { warningMessage: string; participants: Participant[] } = {
       id: "p2",
       name: "Participant 2",
       dexterity: 50,
-      movementRate: 8,
+      movementRate: 7,
       derivedSpeed: 2,
+      speedSkills: [],
+      hazardSkills: [],
+    },
+    {
+      id: "p3",
+      name: "Participant 3",
+      dexterity: 75,
+      movementRate: 8,
+      derivedSpeed: 3,
       speedSkills: [],
       hazardSkills: [],
     },
@@ -73,6 +82,35 @@ test("should render properly when a group is created", () => {
     screen.getByRole("button", { name: /delete group/i })
   ).toBeInTheDocument();
 });
+
+test("should update group when row adds at least one participant", () => {
+  const { participants } = DEFAULT_PROPS;
+  const [first, , third] = participants;
+
+  render(<GroupTable participants={participants} />);
+  userEvent.click(
+    screen.getByRole("button", {
+      name: /create group/i,
+    })
+  );
+
+  const rowEl = screen.getAllByRole("gridcell")[0];
+
+  userEvent.click(within(rowEl).getByRole("button", { name: /expand more/i }));
+  userEvent.click(within(rowEl).getByRole("button", { name: /add/i }));
+  userEvent.click(
+    screen.getByRole("checkbox", { name: new RegExp(first.name) })
+  );
+  userEvent.click(
+    screen.getByRole("checkbox", { name: new RegExp(third.name) })
+  );
+  userEvent.click(
+    within(screen.getByRole("dialog")).getByRole("button", { name: /add/i })
+  );
+
+  expect(within(rowEl).getAllByRole("listitem")).toHaveLength(2);
+});
+
 describe("Delete Group", () => {
   test("should delete pre-existing group when its associated 'delete' button is pressed", () => {
     render(<GroupTable />);

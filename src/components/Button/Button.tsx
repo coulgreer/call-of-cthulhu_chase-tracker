@@ -7,14 +7,16 @@ interface Props {
   onClick?(evt: React.MouseEvent<HTMLElement>): void;
   className?: string;
   children?: ReactNode;
+  disabled?: boolean;
 }
 
-function Button({ type, onClick, className, children }: Props) {
+function Button({ type, onClick, className, children, disabled }: Props) {
   return (
     <button
       type={type === "submit" ? "submit" : "button"}
       onClick={onClick}
       className={className}
+      disabled={disabled}
     >
       <span data-testid="overlay" className="button__overlay" />
       {children}
@@ -29,6 +31,7 @@ Button.defaultProps = {
   },
   className: "button",
   children: null,
+  disabled: false,
 };
 
 export default Button;

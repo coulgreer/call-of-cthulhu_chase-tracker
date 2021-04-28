@@ -26,7 +26,9 @@ const pursuingGroupName = "Group 3";
 
 const DEFAULT_PROPS: {
   groups: Group[];
+  participants: Participant[];
   handleDistancerBlur: () => void;
+  handleSubmit: (g: Group) => void;
 } = {
   groups: [
     {
@@ -65,7 +67,37 @@ const DEFAULT_PROPS: {
       ],
     },
   ],
+  participants: [
+    {
+      id: "p1",
+      name: "Participant 1",
+      dexterity: 15,
+      movementRate: 3,
+      derivedSpeed: 1,
+      speedSkills: [],
+      hazardSkills: [],
+    },
+    {
+      id: "p2",
+      name: "Participant 2",
+      dexterity: 50,
+      movementRate: 6,
+      derivedSpeed: 2,
+      speedSkills: [],
+      hazardSkills: [],
+    },
+    {
+      id: "p3",
+      name: "Participant 3",
+      dexterity: 75,
+      movementRate: 8,
+      derivedSpeed: 3,
+      speedSkills: [],
+      hazardSkills: [],
+    },
+  ],
   handleDistancerBlur: jest.fn(),
+  handleSubmit: jest.fn(),
 };
 
 const isolatedGroupIndex = 0;
@@ -395,6 +427,105 @@ describe("Participant display", () => {
         ).getAllByRole("listitem")
       ).toHaveLength(participants.length);
     });
+  });
+
+  test("should trigger 'handleSubmit' and close modal", () => {
+    const { groups, participants, handleSubmit } = DEFAULT_PROPS;
+
+    const [first, second, third] = participants;
+
+    render(
+      <GroupRow
+        ownedIndex={isolatedGroupIndex}
+        groups={groups}
+        participants={participants}
+        handleSubmit={handleSubmit}
+      />
+    );
+    userEvent.click(screen.getByRole("button", { name: /expand more/i }));
+
+    userEvent.click(screen.getByRole("button", { name: /add/i }));
+
+    userEvent.click(
+      screen.getByRole("checkbox", { name: new RegExp(first.name) })
+    );
+    expect(
+      screen.getByRole("checkbox", { name: new RegExp(second.name) })
+    ).toBeInTheDocument();
+    userEvent.click(
+      screen.getByRole("checkbox", { name: new RegExp(third.name) })
+    );
+
+    userEvent.click(
+      within(screen.getByRole("dialog")).getByRole("button", { name: /add/i })
+    );
+
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(handleSubmit).toBeCalled();
+  });
+
+  test("should render properly when no participants are available", () => {
+    const { groups } = DEFAULT_PROPS;
+
+    render(<GroupRow ownedIndex={isolatedGroupIndex} groups={groups} />);
+
+    userEvent.click(screen.getByRole("button", { name: /expand more/i }));
+
+    userEvent.click(screen.getByRole("button", { name: /add/i }));
+
+    expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
+    expect(
+      screen.getByText(GroupRow.NO_AVAILABLE_PARTICIPANT_WARNING_MESSAGE)
+    ).toBeInTheDocument();
+    expect(
+      within(screen.getByRole("dialog")).getByRole("button", { name: /add/i })
+    ).toBeDisabled();
+  });
+
+  test("should exclude participants already owned by the given group", () => {
+    const participant1Name = "Part 1";
+    const participant1 = createParticipant(participant1Name);
+
+    const participant2Name = "Part 2";
+    const participant2 = createParticipant(participant2Name);
+
+    const participant3Name = "Part 3";
+    const participant3 = createParticipant(participant3Name);
+
+    const groups = [
+      {
+        id: "g-1",
+        name: "Group 1",
+        distancerId: GroupRow.INVALID_DISTANCER_ID,
+        pursuersIds: [],
+        participants: [participant2],
+      },
+    ];
+    const participants = [participant1, participant2, participant3];
+
+    render(
+      <GroupRow ownedIndex={0} groups={groups} participants={participants} />
+    );
+    userEvent.click(screen.getByRole("button", { name: /expand more/i }));
+
+    userEvent.click(screen.getByRole("button", { name: /add/i }));
+
+    const modalEl = screen.getByRole("dialog");
+    expect(
+      within(modalEl).getByRole("checkbox", {
+        name: new RegExp(participant1Name),
+      })
+    ).toBeInTheDocument();
+    expect(
+      within(modalEl).queryByRole("checkbox", {
+        name: new RegExp(participant2Name),
+      })
+    ).not.toBeInTheDocument();
+    expect(
+      within(modalEl).getByRole("checkbox", {
+        name: new RegExp(participant3Name),
+      })
+    ).toBeInTheDocument();
   });
 });
 
