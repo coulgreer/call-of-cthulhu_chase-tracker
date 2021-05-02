@@ -379,9 +379,13 @@ export default class GroupRow extends React.Component<Props, State> {
           >{`Lowest MOV : ${this.lowestMovementRating}`}</p>
         </div>
         {currentGroup.participants.length > 0 ? (
-          <ul aria-label="Participants">
+          <ul className="list" aria-label="Participants">
             {currentGroup.participants.map((participant) => (
-              <li className={this.getBoundaryClassName(participant)}>
+              <li
+                className={`${this.getBoundaryClassName(
+                  participant
+                )} list__item`}
+              >
                 {participant.name}
                 <span>{participant.movementRate}</span>
               </li>

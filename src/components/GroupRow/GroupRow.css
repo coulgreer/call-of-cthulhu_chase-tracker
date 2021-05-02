@@ -7,7 +7,7 @@
 }
 
 .GroupRow__extended-container {
-  background-color: rgba(245, 246, 247, 0.87);
+  background-color: rgba(245, 246, 247, var(--text-emphasis--high));
   color: rgba(var(--text-color--dark), var(--text-emphasis--high));
   padding: 6px;
   margin: 0 4px;
@@ -30,4 +30,14 @@
 
 .GroupRow__title {
   font-weight: 700;
+}
+
+.GroupRow--highest {
+  color: rgba(var(--text-color--light), var(--text-emphasis--high));
+  background-color: rgba(var(--sweet-brown), var(--text-emphasis--high));
+}
+
+.GroupRow--lowest {
+  color: #121212;
+  background-color: rgba(var(--little-boy-blue), var(--text-emphasis--high));
 }

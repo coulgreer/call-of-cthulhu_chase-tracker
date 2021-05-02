@@ -18,13 +18,16 @@
 
   --secondary: rgb(240, 219, 130);
   --secondary-variant: rgb(232, 196, 46);
-
   --overlay-color--on-surface: 240, 219, 130;
   --overlay-color--on-dark: 245, 246, 247;
   --overlay-color--on-light: 20, 28, 23;
 
   --state--hovered: 0.04;
   --state--focused: 0.12;
+
+  /* COLORS: Highlights */
+  --sweet-brown: 173, 53, 44;
+  --little-boy-blue: 101, 157, 220;
 }
 
 html,
@@ -304,6 +307,15 @@ input[type="number"] {
 img {
   max-width: 100%;
   height: auto;
+}
+
+.list {
+  padding: 0;
+  list-style-type: none;
+}
+
+.list__item {
+  padding: 3px 6px;
 }
 
 .error {
