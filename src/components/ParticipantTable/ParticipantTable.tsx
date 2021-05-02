@@ -9,23 +9,22 @@ import RemoveIcon from "../../images/remove_circle_black_24dp.svg";
 
 import "./ParticipantTable.css";
 
-import UniqueSequenceGenerator from "../../utils/unique-sequence-generator";
-
 import { Participant } from "../../types";
 
 if (process.env.NODE_ENV !== "test") Modal.setAppElement("#___gatsby");
 
 interface Props {
-  warningMessage: string;
+  participants: Participant[];
+  warningMessage?: string;
+  onCreateParticipantClick?: () => void;
+  onDeleteParticipantClick?: (p: Participant) => void;
+  onParticipantChange?: (p: Participant) => void;
 }
 
 interface State {
   modalShown: boolean;
   selectedParticipant: Participant | null;
-  participants: Participant[];
 }
-
-const SEQUENCE_START = 0;
 
 export default class ParticipantTable extends Component<Props, State> {
   private static minimumParticipants = 1;
@@ -34,96 +33,51 @@ export default class ParticipantTable extends Component<Props, State> {
     return "Participant";
   }
 
-  private sequnceGenerator;
+  static get DEFAULT_WARNING_MESSAGE() {
+    return "No participants exist in this table";
+  }
 
   constructor(props: Props) {
     super(props);
     this.state = {
-      participants: [],
       modalShown: false,
       selectedParticipant: null,
     };
-
-    this.sequnceGenerator = new UniqueSequenceGenerator(SEQUENCE_START);
 
     this.createParticipant = this.createParticipant.bind(this);
     this.deleteSelectedParticipant = this.deleteSelectedParticipant.bind(this);
     this.closeModal = this.closeModal.bind(this);
   }
 
-  private onParticipantChange(target: Participant) {
-    this.setState((state) => {
-      const { participants } = state;
-      const targetIndex = participants.findIndex(
-        (participant) => participant.id === target.id
-      );
+  private handleParticipantChange(target: Participant) {
+    const { onParticipantChange } = this.props;
 
-      participants[targetIndex] = target;
-
-      return { participants };
-    });
-  }
-
-  private deleteSelectedParticipant() {
-    const { selectedParticipant } = this.state;
-
-    if (selectedParticipant) {
-      this.removeParticipantFromSequence(selectedParticipant);
-      this.removeParticipantFromTable(selectedParticipant);
-    }
-
-    this.closeModal();
+    if (onParticipantChange) onParticipantChange(target);
   }
 
   private createParticipant() {
-    const idNum = this.sequnceGenerator.nextNum();
-    const id = `${ParticipantTable.DEFAULT_NAME} #${idNum}`;
+    const { onCreateParticipantClick } = this.props;
 
-    this.setState((state) => {
-      const { participants } = state;
+    if (onCreateParticipantClick) onCreateParticipantClick();
+  }
 
-      participants.push({
-        id,
-        name: id,
-        dexterity: 15,
-        movementRate: 2,
-        derivedSpeed: 1,
-        speedSkills: ParticipantRow.DEFAULT_SPEED_STATISTICS,
-        hazardSkills: ParticipantRow.DEFAULT_HAZARD_STATISTICS,
-      });
+  private deleteSelectedParticipant() {
+    const { onDeleteParticipantClick } = this.props;
+    const { selectedParticipant } = this.state;
 
-      return { participants };
-    });
+    if (onDeleteParticipantClick && selectedParticipant) {
+      onDeleteParticipantClick(selectedParticipant);
+    }
+
+    this.setState({ selectedParticipant: null });
+
+    this.closeModal();
   }
 
   private promptParticipantRemoval(participant: Participant) {
     this.setState({
       modalShown: true,
       selectedParticipant: participant,
-    });
-  }
-
-  private removeParticipantFromSequence(participant: Participant) {
-    const results = participant.id.match(/[0-9]+$/);
-
-    if (!results) {
-      throw Error(
-        `The given participant ID -- ${participant.id} -- should be formatted with trailing digits.`
-      );
-    }
-
-    const idNum = Number.parseInt(results[0], 10);
-    this.sequnceGenerator.remove(idNum);
-  }
-
-  private removeParticipantFromTable(participant: Participant) {
-    this.setState((state) => {
-      const { participants } = state;
-      const targetIndex = participants.indexOf(participant);
-
-      participants.splice(targetIndex, 1);
-
-      return { selectedParticipant: null };
     });
   }
 
@@ -172,18 +126,21 @@ export default class ParticipantTable extends Component<Props, State> {
   }
 
   private renderWarningMessage() {
-    const { warningMessage } = this.props;
+    const {
+      warningMessage = ParticipantTable.DEFAULT_WARNING_MESSAGE,
+    } = this.props;
 
     return <p className="centered">{warningMessage}</p>;
   }
 
   private renderParticipants() {
-    const { participants } = this.state;
+    const { participants } = this.props;
+
     return participants.map((participant) => (
-      <div className="ParticipantTable__row" key={participant.id}>
+      <div className="ParticipantTable__row" role="row" key={participant.id}>
         <ParticipantRow
           participant={participant}
-          onParticipantChange={() => this.onParticipantChange(participant)}
+          onParticipantChange={() => this.handleParticipantChange(participant)}
         />
         <Button
           className="ParticipantTable__row-control button button--primary"
@@ -196,16 +153,21 @@ export default class ParticipantTable extends Component<Props, State> {
   }
 
   render() {
-    const { participants } = this.state;
-
-    const rowsElement =
-      participants.length < ParticipantTable.minimumParticipants
-        ? this.renderWarningMessage()
-        : this.renderParticipants();
+    const { participants } = this.props;
 
     return (
       <div className="ParticipantTable">
-        <div className="ParticipantTable__rows">{rowsElement}</div>
+        {participants.length < ParticipantTable.minimumParticipants ? (
+          this.renderWarningMessage()
+        ) : (
+          <div
+            className="ParticipantTable__rows"
+            role="grid"
+            aria-label="Participants"
+          >
+            {this.renderParticipants()}
+          </div>
+        )}
         {this.renderFloatingActionButton()}
         {this.renderRemovalModal()}
       </div>

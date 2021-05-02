@@ -5,96 +5,179 @@ import userEvent from "@testing-library/user-event";
 
 import GroupTable from ".";
 import GroupRow from "../GroupRow";
-import { Participant } from "../../types";
 
-const DEFAULT_PROPS: { warningMessage: string; participants: Participant[] } = {
-  warningMessage: "Warning There's an Error",
-  participants: [
+import { Group, Participant } from "../../types";
+
+function createParticipant(id: string): Participant {
+  return {
+    id,
+    name: id,
+    dexterity: 15,
+    movementRate: 3,
+    derivedSpeed: 1,
+    speedSkills: [],
+    hazardSkills: [],
+  };
+}
+
+const isolatedGroupName = "Group 0";
+const distancingGroupName = "Group 1";
+const distancingAndPursuingGroupName = "Group 2";
+const pursuingGroupName = "Group 3";
+
+const participant1 = createParticipant("Participant 00");
+const participant2 = createParticipant("Participant 01");
+const participant3 = createParticipant("Participant 02");
+const participant4 = createParticipant("Participant 03");
+const participant5 = createParticipant("Participant 04");
+const participant6 = createParticipant("Participant 05");
+const participant7 = createParticipant("Participant 06");
+
+const DEFAULT_PROPS: {
+  groups: Group[];
+  participants: Participant[];
+  warningMessage: string;
+  handleCreateGroupClick: () => void;
+  handleDeleteGroupClick: (i: number) => void;
+  handleGroupUpdate: (g: Group) => void;
+  handleDistancerBlur: (t: Group, d: Group | undefined) => void;
+} = {
+  groups: [
     {
-      id: "p1",
-      name: "Participant 1",
-      dexterity: 15,
-      movementRate: 6,
-      derivedSpeed: 1,
-      speedSkills: [],
-      hazardSkills: [],
+      id: "0",
+      name: isolatedGroupName,
+      distancerId: GroupRow.INVALID_DISTANCER_ID,
+      pursuersIds: [],
+      participants: [],
     },
     {
-      id: "p2",
-      name: "Participant 2",
-      dexterity: 50,
-      movementRate: 7,
-      derivedSpeed: 2,
-      speedSkills: [],
-      hazardSkills: [],
+      id: "1",
+      name: distancingGroupName,
+      distancerId: GroupRow.INVALID_DISTANCER_ID,
+      pursuersIds: [distancingAndPursuingGroupName],
+      participants: [participant1],
     },
     {
-      id: "p3",
-      name: "Participant 3",
-      dexterity: 75,
-      movementRate: 8,
-      derivedSpeed: 3,
-      speedSkills: [],
-      hazardSkills: [],
+      id: "2",
+      name: distancingAndPursuingGroupName,
+      distancerId: distancingGroupName,
+      pursuersIds: [pursuingGroupName],
+      participants: [participant2, participant3],
+    },
+    {
+      id: "3",
+      name: pursuingGroupName,
+      distancerId: distancingAndPursuingGroupName,
+      pursuersIds: [],
+      participants: [participant4, participant5, participant6],
     },
   ],
+  participants: [
+    participant1,
+    participant2,
+    participant3,
+    participant4,
+    participant5,
+    participant6,
+    participant7,
+  ],
+  warningMessage: "Warning There's an Error",
+  handleCreateGroupClick: jest.fn(),
+  handleDeleteGroupClick: jest.fn(),
+  handleGroupUpdate: jest.fn(),
+  handleDistancerBlur: jest.fn(),
 };
 
 describe("Prop Rendering", () => {
-  test("should render properly when ommitting all optional props", () => {
-    render(<GroupTable />);
+  describe("when no groups exist", () => {
+    const empty: Group[] = [];
 
-    expect(
-      screen.getByText(GroupTable.DEFAULT_WARNING_MESSAGE)
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /create group/i })
-    ).toBeInTheDocument();
+    test("should render properly when ommitting all optional props", () => {
+      render(<GroupTable groups={empty} />);
+
+      expect(
+        screen.getByText(GroupTable.DEFAULT_WARNING_MESSAGE)
+      ).toBeInTheDocument();
+      expect(screen.queryAllByRole("row")).toHaveLength(0);
+      expect(
+        screen.getByRole("button", { name: /create group/i })
+      ).toBeInTheDocument();
+    });
+
+    test("should render properly when including all optional props", () => {
+      const {
+        warningMessage,
+        participants,
+        handleCreateGroupClick,
+        handleDeleteGroupClick,
+        handleGroupUpdate,
+        handleDistancerBlur,
+      } = DEFAULT_PROPS;
+
+      render(
+        <GroupTable
+          warningMessage={warningMessage}
+          groups={empty}
+          participants={participants}
+          onCreateGroupClick={handleCreateGroupClick}
+          onDeleteGroupClick={handleDeleteGroupClick}
+          onGroupUpdate={handleGroupUpdate}
+          onDistancerBlur={handleDistancerBlur}
+        />
+      );
+
+      expect(screen.getByText(warningMessage)).toBeInTheDocument();
+      expect(screen.queryAllByRole("row")).toHaveLength(0);
+      expect(
+        screen.getByRole("button", { name: /create group/i })
+      ).toBeInTheDocument();
+    });
   });
 
-  test("should render properly when including all optional props", () => {
-    const { warningMessage, participants } = DEFAULT_PROPS;
+  describe("when at least one group exists", () => {
+    test("should render properly when ommitting all optional props", () => {
+      const { groups } = DEFAULT_PROPS;
 
-    render(
-      <GroupTable warningMessage={warningMessage} participants={participants} />
-    );
+      render(<GroupTable groups={groups} />);
 
-    expect(screen.getByText(warningMessage)).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /create group/i })
-    ).toBeInTheDocument();
+      expect(
+        screen.queryByText(GroupTable.DEFAULT_WARNING_MESSAGE)
+      ).not.toBeInTheDocument();
+      expect(screen.getAllByRole("row")).toHaveLength(groups.length);
+      expect(
+        screen.getByRole("button", { name: /create group/i })
+      ).toBeInTheDocument();
+    });
   });
 });
 
-test("should render properly when a group is created", () => {
-  render(<GroupTable />);
+test("should trigger creation of a group", () => {
+  const { groups } = DEFAULT_PROPS;
+  const onCreateGroupClick = jest.fn();
 
-  userEvent.click(
-    screen.getByRole("button", {
-      name: /create group/i,
-    })
+  render(
+    <GroupTable groups={groups} onCreateGroupClick={onCreateGroupClick} />
   );
 
-  expect(
-    screen.queryByText(GroupTable.DEFAULT_WARNING_MESSAGE)
-  ).not.toBeInTheDocument();
-  expect(
-    screen.getByRole("button", { name: /delete group/i })
-  ).toBeInTheDocument();
+  userEvent.click(screen.getByRole("button", { name: /create group/i }));
+
+  expect(onCreateGroupClick).toBeCalled();
 });
 
-test("should update group when row adds at least one participant", () => {
-  const { participants } = DEFAULT_PROPS;
+test("should trigger update on group change", () => {
+  const { groups, participants } = DEFAULT_PROPS;
   const [first, , third] = participants;
+  const onGroupUpdate = jest.fn();
 
-  render(<GroupTable participants={participants} />);
-  userEvent.click(
-    screen.getByRole("button", {
-      name: /create group/i,
-    })
+  render(
+    <GroupTable
+      groups={groups}
+      participants={participants}
+      onGroupUpdate={onGroupUpdate}
+    />
   );
 
-  const rowEl = screen.getAllByRole("gridcell")[0];
+  const [rowEl] = screen.getAllByRole("row");
 
   userEvent.click(within(rowEl).getByRole("button", { name: /expand more/i }));
   userEvent.click(within(rowEl).getByRole("button", { name: /add/i }));
@@ -108,110 +191,88 @@ test("should update group when row adds at least one participant", () => {
     within(screen.getByRole("dialog")).getByRole("button", { name: /add/i })
   );
 
-  expect(within(rowEl).getAllByRole("listitem")).toHaveLength(2);
+  expect(onGroupUpdate).toBeCalled();
 });
 
 describe("Delete Group", () => {
-  test("should delete pre-existing group when its associated 'delete' button is pressed", () => {
-    render(<GroupTable />);
+  test("should trigger deletion of given group", () => {
+    const { groups } = DEFAULT_PROPS;
+    const [group] = groups;
+    const onDeleteGroupClick = jest.fn();
 
-    const createGroupEl = screen.getByRole("button", { name: /create group/i });
-    userEvent.click(createGroupEl);
-    userEvent.click(createGroupEl);
-    userEvent.click(createGroupEl);
+    render(
+      <GroupTable groups={groups} onDeleteGroupClick={onDeleteGroupClick} />
+    );
 
     userEvent.click(
       screen.getByRole("button", {
-        name: /delete group-2/i,
+        name: new RegExp(`delete ${group.id}`, "i"),
       })
     );
 
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+
     userEvent.click(screen.getByRole("button", { name: /^delete$/i }));
 
-    expect(
-      screen.getByRole("button", { name: /delete group-1/i })
-    ).toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", {
-        name: /delete group-2/i,
-      })
-    ).not.toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /delete group-3/i })
-    ).toBeInTheDocument();
+    expect(onDeleteGroupClick).toBeCalled();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
-  describe("when deletion is canceled", () => {
-    test("should preserve group when 'esc' is pressed", () => {
-      render(<GroupTable />);
+  describe("when canceling", () => {
+    test("should abort deletion when 'esc' is pressed", () => {
+      const { groups } = DEFAULT_PROPS;
+      const [group] = groups;
+      const onDeleteGroupClick = jest.fn();
 
-      const createGroupEl = screen.getByRole("button", {
-        name: /create group/i,
-      });
-      userEvent.click(createGroupEl);
-      userEvent.click(createGroupEl);
-      userEvent.click(createGroupEl);
+      render(
+        <GroupTable groups={groups} onDeleteGroupClick={onDeleteGroupClick} />
+      );
 
       userEvent.click(
         screen.getByRole("button", {
-          name: /delete group-2/i,
+          name: new RegExp(`delete ${group.id}`, "i"),
         })
       );
+
+      expect(screen.getByRole("dialog")).toBeInTheDocument();
 
       userEvent.keyboard("{esc}");
 
-      expect(
-        screen.getByRole("button", { name: /delete group-1/i })
-      ).toBeInTheDocument();
-      expect(
-        screen.getByRole("button", { name: /delete group-2/i })
-      ).toBeInTheDocument();
-      expect(
-        screen.getByRole("button", { name: /delete group-3/i })
-      ).toBeInTheDocument();
+      expect(onDeleteGroupClick).not.toBeCalled();
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     });
 
-    test("should preserve group when 'cancel' button is clicked", () => {
-      render(<GroupTable />);
+    test("should abort deletion when 'cancel' button is clicked", () => {
+      const { groups } = DEFAULT_PROPS;
+      const [group] = groups;
+      const onDeleteGroupClick = jest.fn();
 
-      const createGroupEl = screen.getByRole("button", {
-        name: /create group/i,
-      });
-      userEvent.click(createGroupEl);
-      userEvent.click(createGroupEl);
-      userEvent.click(createGroupEl);
+      render(
+        <GroupTable groups={groups} onDeleteGroupClick={onDeleteGroupClick} />
+      );
 
       userEvent.click(
         screen.getByRole("button", {
-          name: /delete group-2/i,
+          name: new RegExp(`delete ${group.id}`, "i"),
         })
       );
 
+      expect(screen.getByRole("dialog")).toBeInTheDocument();
+
       userEvent.click(screen.getByRole("button", { name: /cancel/i }));
 
-      expect(
-        screen.getByRole("button", { name: /delete group-1/i })
-      ).toBeInTheDocument();
-      expect(
-        screen.getByRole("button", { name: /delete group-2/i })
-      ).toBeInTheDocument();
-      expect(
-        screen.getByRole("button", { name: /delete group-3/i })
-      ).toBeInTheDocument();
+      expect(onDeleteGroupClick).not.toBeCalled();
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     });
   });
 });
 
-test("should update pursuers list when another group makes it its distancer", () => {
-  render(<GroupTable />);
-  const name1 = "GROUP-1";
-  const name2 = "GROUP-2";
-  const name3 = "GROUP-3";
+test("should trigger distancer change", () => {
+  const { groups } = DEFAULT_PROPS;
+  const [group1, group2, group3] = groups;
+  const onDistancerBlur = jest.fn();
 
-  const createGroupEl = screen.getByRole("button", { name: /create group/i });
-  userEvent.click(createGroupEl);
-  userEvent.click(createGroupEl);
-  userEvent.click(createGroupEl);
+  render(<GroupTable groups={groups} onDistancerBlur={onDistancerBlur} />);
 
   expect(screen.queryByRole("listitem")).not.toBeInTheDocument();
 
@@ -236,57 +297,37 @@ test("should update pursuers list when another group makes it its distancer", ()
     name: /distancer/i,
   });
 
-  userEvent.selectOptions(firstDistancerEl, name2);
+  userEvent.selectOptions(firstDistancerEl, group2.name);
   firstDistancerEl.blur();
 
-  expect(firstDistancerEl).toHaveValue(name2);
-  expect(
-    within(secondRow)
-      .getAllByRole("listitem")
-      .filter((listitem) => listitem.textContent === name1)
-  ).toHaveLength(1);
+  expect(firstDistancerEl).toHaveValue(group2.id);
 
-  userEvent.selectOptions(secondDistancerEl, name3);
+  userEvent.selectOptions(secondDistancerEl, group3.name);
   secondDistancerEl.blur();
 
-  expect(secondDistancerEl).toHaveValue(name3);
-  expect(
-    within(thirdRow)
-      .getAllByRole("listitem")
-      .filter((listitem) => listitem.textContent === name2)
-  ).toHaveLength(1);
+  expect(secondDistancerEl).toHaveValue(group3.id);
 
-  userEvent.selectOptions(thirdDistancerEl, name1);
+  userEvent.selectOptions(thirdDistancerEl, group1.name);
   thirdDistancerEl.blur();
 
-  expect(thirdDistancerEl).toHaveValue(name1);
-  expect(
-    within(firstRow)
-      .getAllByRole("listitem")
-      .filter((listitem) => listitem.textContent === name3)
-  ).toHaveLength(1);
+  expect(thirdDistancerEl).toHaveValue(group1.id);
 
-  userEvent.selectOptions(firstDistancerEl, name3);
-  firstDistancerEl.blur();
-
-  expect(firstDistancerEl).toHaveValue(name3);
-  expect(
-    within(thirdRow)
-      .getAllByRole("listitem")
-      .filter((listitem) => listitem.textContent === name1)
-  ).toHaveLength(1);
-  expect(within(secondRow).queryByRole("listitem")).not.toBeInTheDocument();
+  expect(onDistancerBlur).toBeCalledTimes(3);
 });
 
 describe("Confirmation Tests", () => {
   test("should render 'no distancer' warning when row is initially added", () => {
-    const { warningMessage } = DEFAULT_PROPS;
-    render(<GroupTable warningMessage={warningMessage} />);
-    userEvent.click(screen.getByRole("button", { name: /create group/i }));
-    userEvent.click(screen.getByRole("button", { name: /expand more/i }));
+    const { groups, warningMessage } = DEFAULT_PROPS;
+    render(<GroupTable groups={groups} warningMessage={warningMessage} />);
+
+    const [first] = groups;
+    const firstRow = screen.getByRole("row", { name: first.id });
+    userEvent.click(
+      within(firstRow).getByRole("button", { name: /expand more/i })
+    );
 
     expect(
-      screen.getByText(GroupRow.NO_DISTANCER_WARNING_MESSAGE)
+      within(firstRow).getByText(GroupRow.NO_DISTANCER_WARNING_MESSAGE)
     ).toBeVisible();
   });
 });

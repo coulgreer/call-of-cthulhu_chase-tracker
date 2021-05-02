@@ -9,62 +9,47 @@ import RemoveIcon from "../../images/remove_circle_black_24dp.svg";
 
 import "./GroupTable.css";
 
-import UniqueSequenceGen from "../../utils/unique-sequence-generator";
-
 import { Group, Participant } from "../../types";
 
 interface Props {
+  groups: Group[];
   participants?: Participant[];
   warningMessage?: string;
+  onCreateGroupClick?: () => void;
+  onDeleteGroupClick?: (i: number) => void;
+  onGroupUpdate?: (g: Group) => void;
+  onDistancerBlur?: (t: Group, d: Group | undefined) => void;
 }
 
 interface State {
-  groups: Group[];
   selectedIndex: number;
   modalShown: boolean;
 }
 
 export default class GroupTable extends React.Component<Props, State> {
   static get DEFAULT_WARNING_MESSAGE() {
-    return "No participants exist in this table";
+    return "No groups exist in this table";
   }
-
-  private sequenceGenerator;
 
   constructor(props: Props) {
     super(props);
 
     this.state = {
-      groups: [],
       selectedIndex: -1,
       modalShown: false,
     };
 
-    this.sequenceGenerator = new UniqueSequenceGen(0);
-
     this.handleCreateClick = this.handleCreateClick.bind(this);
     this.handleDistancerBlur = this.handleDistancerBlur.bind(this);
     this.handleDeleteClick = this.handleDeleteClick.bind(this);
-    this.handleGroupChange = this.handleGroupChange.bind(this);
+    this.handleGroupUpdate = this.handleGroupUpdate.bind(this);
     this.closeModal = this.closeModal.bind(this);
   }
 
   private handleCreateClick() {
-    const idNum = this.sequenceGenerator.nextNum();
+    const { onCreateGroupClick } = this.props;
 
-    this.setState((state) => {
-      const { groups } = state;
-
-      groups.push({
-        id: `GROUP-${idNum}`,
-        name: `Group ${idNum}`,
-        distancerId: GroupRow.INVALID_DISTANCER_ID,
-        pursuersIds: [],
-        participants: [],
-      });
-
-      return { groups };
-    });
+    if (onCreateGroupClick) onCreateGroupClick();
   }
 
   private handlePromptDeleteClick(index: number) {
@@ -75,42 +60,24 @@ export default class GroupTable extends React.Component<Props, State> {
   }
 
   private handleDeleteClick() {
-    this.setState((state) => {
-      const { groups, selectedIndex } = state;
+    const { onDeleteGroupClick } = this.props;
+    const { selectedIndex } = this.state;
 
-      const groupId = groups[selectedIndex].id;
-      const results = groupId.match(new RegExp(/\d+$/)) || [];
-      const result = results[0];
-
-      this.sequenceGenerator.remove(Number.parseInt(result, 10));
-      groups.splice(selectedIndex, 1);
-
-      return { groups };
-    });
+    if (onDeleteGroupClick) onDeleteGroupClick(selectedIndex);
 
     this.closeModal();
   }
 
   private handleDistancerBlur(target: Group, distancer: Group | undefined) {
-    if (target.distancerId !== GroupRow.INVALID_DISTANCER_ID) {
-      this.removeDistancerFrom(target);
-    }
+    const { onDistancerBlur } = this.props;
 
-    this.addDistancer(target, distancer);
+    if (onDistancerBlur) onDistancerBlur(target, distancer);
   }
 
-  private handleGroupChange(newGroup: Group) {
-    this.setState((state) => {
-      const { groups } = state;
+  private handleGroupUpdate(newGroup: Group) {
+    const { onGroupUpdate } = this.props;
 
-      const index = groups.findIndex((group) =>
-        GroupTable.areGroupsEqual(group, newGroup)
-      );
-
-      groups.splice(index, 1, newGroup);
-
-      return { groups };
-    });
+    if (onGroupUpdate) onGroupUpdate(newGroup);
   }
 
   // TODO (Coul Greer): Check for order of class members to eliminate this issue or learn more about its working
@@ -133,46 +100,6 @@ export default class GroupTable extends React.Component<Props, State> {
     this.setState({ modalShown: false });
   }
 
-  private removeDistancerFrom({ id: targetId, distancerId }: Group) {
-    this.setState((state) => {
-      const { groups } = state;
-
-      const distancerIndex = groups.findIndex((group) =>
-        GroupTable.areGroupsEqual(group.id, distancerId)
-      );
-      const distancer = groups[distancerIndex];
-
-      const { pursuersIds } = distancer;
-      const currentIndex = pursuersIds.findIndex((pursuerId) =>
-        GroupTable.areGroupsEqual(pursuerId, targetId)
-      );
-
-      distancer.pursuersIds.splice(currentIndex, 1);
-
-      return { groups };
-    });
-  }
-
-  private addDistancer({ id: targetId }: Group, distancer: Group | undefined) {
-    const distancerId = distancer?.id || GroupRow.INVALID_DISTANCER_ID;
-
-    this.setState((state) => {
-      const { groups } = state;
-
-      const targetIndex = groups.findIndex((group) =>
-        GroupTable.areGroupsEqual(group.id, targetId)
-      );
-      groups[targetIndex].distancerId = distancerId;
-
-      const distancerIndex = groups.findIndex((group) =>
-        GroupTable.areGroupsEqual(group.id, distancerId)
-      );
-      groups[distancerIndex].pursuersIds.push(targetId);
-
-      return { groups };
-    });
-  }
-
   private renderWarning() {
     const { warningMessage = GroupTable.DEFAULT_WARNING_MESSAGE } = this.props;
 
@@ -180,8 +107,7 @@ export default class GroupTable extends React.Component<Props, State> {
   }
 
   private renderRows() {
-    const { participants } = this.props;
-    const { groups } = this.state;
+    const { groups, participants } = this.props;
 
     return groups.map((group, index) => (
       <div
@@ -193,7 +119,7 @@ export default class GroupTable extends React.Component<Props, State> {
       >
         <GroupRow
           onDistancerBlur={this.handleDistancerBlur}
-          handleSubmit={this.handleGroupChange}
+          handleSubmit={this.handleGroupUpdate}
           ownedIndex={index}
           groups={groups}
           participants={participants}
@@ -251,12 +177,16 @@ export default class GroupTable extends React.Component<Props, State> {
   }
 
   render() {
-    const { groups } = this.state;
+    const { groups } = this.props;
 
     return (
       <section className="GroupTable">
         {groups.length > 0 ? (
-          <div role="grid" className="GroupTable__container">
+          <div
+            className="GroupTable__container"
+            role="grid"
+            aria-label="Groups"
+          >
             {this.renderRows()}
           </div>
         ) : (
