@@ -1,26 +1,25 @@
 :root {
   /* COLORS: Text */
-  --text-color--dark: 9, 11, 14;
-  --text-color--light: 245, 246, 247;
+  --rich-black-fogra-39: 9, 11, 14;
+  --cultured: 245, 246, 247;
 
   --text-emphasis--high: 0.87;
   --text-emphasis--medium: 0.6;
   --text-emphasis--disable: 0.38;
 
-  --error: rgb(207, 102, 121);
+  --cinnamon-satin: 207, 102, 121;
 
   /* COLORS: Brand */
-  --background: rgb(20, 28, 23);
-  --component-background: rgba(143, 204, 184, 0.24);
+  --dark-jungle-green: 20, 28, 23;
+  --component-background: rgba(var(--middle-blue-green), 0.24);
 
-  --primary: rgb(143, 204, 184);
-  --primary-variant: rgb(38, 78, 57);
+  /* Brand: Primary */
+  --middle-blue-green: 143, 204, 184;
+  --brunswick-green: 38, 78, 57;
 
-  --secondary: rgb(240, 219, 130);
-  --secondary-variant: rgb(232, 196, 46);
-  --overlay-color--on-surface: 240, 219, 130;
-  --overlay-color--on-dark: 245, 246, 247;
-  --overlay-color--on-light: 20, 28, 23;
+  /* Brand: Secondary */
+  --buff: 240, 219, 130;
+  --jonquil: 232, 196, 46;
 
   --state--hovered: 0.04;
   --state--focused: 0.12;
@@ -28,6 +27,7 @@
   /* COLORS: Highlights */
   --sweet-brown: 173, 53, 44;
   --little-boy-blue: 101, 157, 220;
+  --deep-saffron: 255, 158, 68;
 }
 
 html,
@@ -45,8 +45,8 @@ html {
 body {
   font-weight: 400;
   font-family: "Open Sans", sans-serif;
-  background-color: var(--background);
-  color: rgba(var(--text-color--light), var(--text-emphasis--high));
+  background-color: rgb(var(--dark-jungle-green));
+  color: rgba(var(--cultured), var(--text-emphasis--high));
 }
 
 #___gatsby {
@@ -55,13 +55,13 @@ body {
 }
 
 ::selection {
-  background-color: var(--secondary-variant);
-  color: rgba(var(--text-color--light), var(--text-emphasis--high));
+  background-color: rgb(var(--jonquil));
+  color: rgba(var(--cultured), var(--text-emphasis--high));
 }
 
 ::-moz-selection {
-  background-color: var(--secondary-variant);
-  color: rgba(var(--text-color--light), var(--text-emphasis--high));
+  background-color: rgb(var(--jonquil));
+  color: rgba(var(--cultured), var(--text-emphasis--high));
 }
 
 h1,
@@ -142,11 +142,10 @@ input[type="number"] {
 .input__textbox {
   box-sizing: border-box;
   padding: 0 0.25ch;
-  background-color: rgba(var(--overlay-color--on-dark), var(--state--hovered));
-  color: rgba(var(--text-color--light), var(--text-emphasis--high));
+  background-color: rgba(var(--cultured), var(--state--hovered));
+  color: rgba(var(--cultured), var(--text-emphasis--high));
   border: none;
-  border-bottom: 1px solid
-    rgba(var(--overlay-color--on-dark), var(--state--focused));
+  border-bottom: 1px solid rgba(var(--cultured), var(--state--focused));
   border-radius: 4px 4px 0 0;
   font-family: inherit;
   font-size: 1rem;
@@ -155,7 +154,7 @@ input[type="number"] {
 }
 
 .input__textbox:focus {
-  border-bottom: 2px solid var(--secondary-variant);
+  border-bottom: 2px solid rgb(var(--jonquil));
   outline: none;
 }
 
@@ -168,20 +167,20 @@ input[type="number"] {
 }
 
 .input__textbox--on-light {
-  background-color: var(--primary);
-  color: rgba(var(--text-color--light), var(--text-emphasis--high));
+  background-color: rgb(var(--middle-blue-green));
+  color: rgba(var(--cultured), var(--text-emphasis--high));
   border-bottom: 1px solid
-    rgba(var(--overlay-color--on-light), var(--state--focused));
+    rgba(var(--rich-black-fogra-39), var(--state--focused));
 }
 
 .input__textbox--upper-limit,
 .input__textbox--upper-warning {
-  color: var(--secondary);
+  color: rgb(var(--buff));
 }
 
 .input__textbox--lower-limit,
 .input__textbox--lower-warning {
-  color: rgba(255, 158, 68, 0.87);
+  color: rgba(var(--deep-saffron), var(--text-emphasis--high));
 }
 
 /* Input: radio */
@@ -205,13 +204,13 @@ input[type="number"] {
   height: 16px;
   margin-right: 16px;
   border-radius: 50%;
-  border: 2px solid var(--secondary);
+  border: 2px solid rgb(var(--buff));
 }
 
 .input__radio__checkbox:focus + .input__radio__checkmark,
 .input__radio:hover .input__radio__checkmark {
   border-radius: 100%;
-  box-shadow: 0 0 2px #fff, 0 0 6px var(--secondary);
+  box-shadow: 0 0 2px #fff, 0 0 6px rgb(var(--buff));
 }
 
 .input__radio__checkmark::after {
@@ -221,7 +220,7 @@ input[type="number"] {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background-color: var(--secondary);
+  background-color: rgb(var(--buff));
   opacity: 0;
   transform: scale(0);
 }
@@ -249,11 +248,10 @@ input[type="number"] {
   box-sizing: border-box;
   padding: 0 12px;
   background: url(../../images/expand_more_white_24dp.svg) no-repeat right
-    var(--primary);
-  color: rgba(var(--text-color--light), var(--text-emphasis--high));
+    rgb(var(--middle-blue-green));
+  color: rgba(var(--cultured), var(--text-emphasis--high));
   border: none;
-  border-bottom: 1px solid
-    rgba(var(--overlay-color--on-dark), var(--state--focused));
+  border-bottom: 1px solid rgba(var(--cultured), var(--state--focused));
   border-radius: 4px 4px 0 0;
   font-family: inherit;
   font-size: 1rem;
@@ -281,7 +279,7 @@ input[type="number"] {
   padding: 6px;
   max-width: 360px;
   overflow: hidden;
-  background-color: var(--background);
+  background-color: rgb(var(--dark-jungle-green));
 }
 
 .Modal__Content__text {
@@ -300,7 +298,10 @@ input[type="number"] {
   top: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(9, 11, 14, 0.87);
+  background-color: rgba(
+    var(--rich-black-fogra-39),
+    var(--text-emphasis--high)
+  );
 }
 
 /* Miscellaneous */
@@ -321,7 +322,7 @@ img {
 .error {
   margin: 6px 0 10px;
   font-weight: bold;
-  color: var(--error);
+  color: rgb(var(--cinnamon-satin));
   opacity: 60%;
 }
 

@@ -25,19 +25,19 @@
 }
 
 .button--primary {
-  background-color: var(--secondary);
+  background-color: rgb(var(--buff));
 }
 
 .button--secondary {
   background: none;
-  color: var(--secondary);
-  border: 1px solid var(--secondary);
+  color: rgb(var(--buff));
+  border: 1px solid rgb(var(--buff));
 }
 
 .button--tertiary-on-dark,
 .button--tertiary-on-light {
   background: none;
-  color: var(--secondary);
+  color: rgb(var(--buff));
 }
 
 .button__overlay {
@@ -50,50 +50,38 @@
 }
 
 .button--primary:hover .button__overlay {
-  background-color: rgba(var(--overlay-color--on-dark), var(--state--hovered));
+  background-color: rgba(var(--cultured), var(--state--hovered));
 }
 
 .button--primary:focus .button__overlay {
-  background-color: rgba(var(--overlay-color--on-dark), var(--state--focused));
-  border: 1px solid rgba(var(--text-color--light), var(--text-emphasis--high));
+  background-color: rgba(var(--cultured), var(--state--focused));
+  border: 1px solid rgba(var(--cultured), var(--text-emphasis--high));
 }
 
 .button--secondary:hover .button__overlay {
-  background-color: rgba(
-    var(--overlay-color--on-surface),
-    var(--state--hovered)
-  );
+  background-color: rgba(var(--buff), var(--state--hovered));
 }
 
 .button--secondary:focus .button__overlay {
-  background-color: rgba(
-    var(--overlay-color--on-surface),
-    var(--state--focused)
-  );
+  background-color: rgba(var(--buff), var(--state--focused));
   border-radius: 4px;
 }
 
 .button--tertiary-on-dark:hover .button__overlay {
-  background-color: rgba(
-    var(--overlay-color--on-surface),
-    var(--state--hovered)
-  );
+  background-color: rgba(var(--buff), var(--state--hovered));
 }
 
 .button--tertiary-on-dark:focus .button__overlay {
-  background-color: rgba(
-    var(--overlay-color--on-surface),
-    var(--state--focused)
-  );
+  background-color: rgba(var(--buff), var(--state--focused));
   border-radius: 4px;
 }
 
 .button--tertiary-on-light:hover .button__overlay {
-  background-color: rgba(var(--overlay-color--on-light), var(--state--hovered));
+  background-color: rgba(var(--rich-black-fogra-39), var(--state--hovered));
 }
 
 .button--tertiary-on-light:focus .button__overlay {
-  background-color: rgba(var(--overlay-color--on-light), var(--state--focused));
+  background-color: rgba(var(--rich-black-fogra-39), var(--state--focused));
   border-radius: 4px;
 }
 
@@ -111,17 +99,17 @@
   min-height: 72px;
   margin: 12px;
   box-shadow: 4px 6px 6px #121212;
-  background-color: var(--secondary-variant);
+  background-color: rgb(var(--jonquil));
   border-radius: 50%;
 }
 
 .fab:hover .button__overlay {
-  background-color: rgba(var(--overlay-color--on-dark), var(--state--hovered));
+  background-color: rgba(var(--cultured), var(--state--hovered));
   border-radius: 50%;
 }
 
 .fab:focus .button__overlay {
-  background-color: rgba(var(--overlay-color--on-dark), var(--state--focused));
+  background-color: rgba(var(--cultured), var(--state--focused));
   border-radius: 50%;
-  border: 1px solid rgba(var(--text-color--light), var(--text-emphasis--high));
+  border: 1px solid rgba(var(--cultured), var(--text-emphasis--high));
 }
