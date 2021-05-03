@@ -179,7 +179,9 @@ test("should trigger update on group change", () => {
 
   const [rowEl] = screen.getAllByRole("row");
 
-  userEvent.click(within(rowEl).getByRole("button", { name: /expand more/i }));
+  userEvent.click(
+    within(rowEl).getByRole("button", { name: /group details/i })
+  );
   userEvent.click(within(rowEl).getByRole("button", { name: /add/i }));
   userEvent.click(
     screen.getByRole("checkbox", { name: new RegExp(first.name) })
@@ -278,13 +280,13 @@ test("should trigger distancer change", () => {
 
   const [firstRow, secondRow, thirdRow] = screen.getAllByRole("row");
   userEvent.click(
-    within(firstRow).getByRole("button", { name: /expand more/i })
+    within(firstRow).getByRole("button", { name: /group details/i })
   );
   userEvent.click(
-    within(secondRow).getByRole("button", { name: /expand more/i })
+    within(secondRow).getByRole("button", { name: /group details/i })
   );
   userEvent.click(
-    within(thirdRow).getByRole("button", { name: /expand more/i })
+    within(thirdRow).getByRole("button", { name: /group details/i })
   );
 
   const firstDistancerEl = within(firstRow).getByRole("combobox", {
@@ -323,7 +325,7 @@ describe("Confirmation Tests", () => {
     const [first] = groups;
     const firstRow = screen.getByRole("row", { name: first.id });
     userEvent.click(
-      within(firstRow).getByRole("button", { name: /expand more/i })
+      within(firstRow).getByRole("button", { name: /group details/i })
     );
 
     expect(

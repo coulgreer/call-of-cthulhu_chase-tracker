@@ -104,123 +104,6 @@ const isolatedGroupIndex = 0;
 const centralGroupIndex = 2;
 
 describe("Prop Rendering", () => {
-  describe("when expanded", () => {
-    test("should render properly when ommitting optional props", () => {
-      const { groups } = DEFAULT_PROPS;
-
-      render(<GroupRow ownedIndex={isolatedGroupIndex} groups={groups} />);
-
-      userEvent.click(screen.getByRole("button", { name: /expand more/i }));
-
-      expect(
-        screen.getByRole("button", { name: /split/i })
-      ).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: /join/i })).toBeInTheDocument();
-      expect(
-        screen.getByRole("textbox", { name: /name/i })
-      ).toBeInTheDocument();
-
-      expect(
-        screen.getByRole("button", { name: /expand less/i })
-      ).toBeInTheDocument();
-
-      expect(
-        screen.getByText((content, element) => {
-          if (!element) return false;
-
-          const hasText = (node: Element) => {
-            if (node.textContent === null) return false;
-
-            const regex = new RegExp(
-              `chase name: ${GroupRow.DEFAULT_CHASE_NAME}`,
-              "i"
-            );
-
-            return regex.test(node.textContent);
-          };
-
-          const childrenDontHaveText = Array.from(element.children).every(
-            (child) => !hasText(child)
-          );
-
-          return hasText(element) && childrenDontHaveText;
-        })
-      ).toBeInTheDocument();
-      expect(
-        screen.getByRole("combobox", { name: /distancer/i })
-      ).toBeInTheDocument();
-      expect(screen.getByLabelText(/pursuer\(s\)/i)).toBeInTheDocument();
-      expect(
-        screen.getByRole("heading", { name: /members/i })
-      ).toBeInTheDocument();
-      expect(screen.getByRole("list")).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: /add/i })).toBeInTheDocument();
-    });
-
-    test("should render properly when including optional props", () => {
-      const { groups, handleDistancerBlur } = DEFAULT_PROPS;
-
-      render(
-        <GroupRow
-          onDistancerBlur={handleDistancerBlur}
-          ownedIndex={isolatedGroupIndex}
-          groups={groups}
-        />
-      );
-
-      userEvent.click(screen.getByRole("button", { name: /expand more/i }));
-
-      expect(
-        screen.getByRole("button", { name: /split/i })
-      ).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: /join/i })).toBeInTheDocument();
-      expect(
-        screen.getByRole("textbox", { name: /name/i })
-      ).toBeInTheDocument();
-
-      expect(
-        screen.getByRole("button", { name: /expand less/i })
-      ).toBeInTheDocument();
-
-      expect(
-        screen.getByText((content, element) => {
-          if (!element) return false;
-
-          const hasText = (node: Element) => {
-            if (node.textContent === null) return false;
-
-            const regex = new RegExp(
-              `chase name: ${GroupRow.DEFAULT_CHASE_NAME}`,
-              "i"
-            );
-
-            return regex.test(node.textContent);
-          };
-
-          const childrenDontHaveText = Array.from(element.children).every(
-            (child) => !hasText(child)
-          );
-
-          return hasText(element) && childrenDontHaveText;
-        })
-      ).toBeInTheDocument();
-
-      const distancerEl = screen.getByRole("combobox", { name: /distancer/i });
-      userEvent.click(distancerEl);
-      distancerEl.blur();
-
-      expect(handleDistancerBlur).toBeCalled();
-
-      expect(screen.getByLabelText(/pursuer\(s\)/i)).toBeInTheDocument();
-
-      expect(
-        screen.getByRole("heading", { name: /members/i })
-      ).toBeInTheDocument();
-      expect(screen.getByRole("list")).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: /add/i })).toBeInTheDocument();
-    });
-  });
-
   test("should render properly when collapsed", () => {
     const { groups } = DEFAULT_PROPS;
 
@@ -231,90 +114,186 @@ describe("Prop Rendering", () => {
     expect(screen.getByRole("textbox", { name: /name/i })).toBeInTheDocument();
 
     expect(
-      screen.getByRole("button", { name: /expand more/i })
+      screen.getByRole("button", { name: /group details/i })
     ).toBeInTheDocument();
 
     expect(screen.queryByText(/chase name/i)).not.toBeInTheDocument();
     expect(
       screen.queryByRole("combobox", { name: /distancer/i })
     ).not.toBeInTheDocument();
-    expect(screen.queryByLabelText(/pursuer\(s\)/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: /pursuer\(s\)/i })
+    ).not.toBeInTheDocument();
     expect(
       screen.queryByRole("heading", { name: /members/i })
     ).not.toBeInTheDocument();
-    expect(screen.queryByText(/highest mov/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/lowest mov/i)).not.toBeInTheDocument();
-    expect(screen.queryByRole("list")).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: /add/i })
-    ).not.toBeInTheDocument();
+  });
+
+  describe("when expanded", () => {
+    test("should render properly when ommitting all optional props", () => {
+      const { groups } = DEFAULT_PROPS;
+
+      render(<GroupRow ownedIndex={isolatedGroupIndex} groups={groups} />);
+      userEvent.click(screen.getByRole("button", { name: /group details/i }));
+
+      expect(
+        screen.getByRole("gridcell", {
+          name: new RegExp(`${groups[isolatedGroupIndex].name}`, "i"),
+        })
+      ).toBeInTheDocument();
+
+      expect(
+        screen.getByRole("button", { name: /split/i })
+      ).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /join/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("textbox", { name: /name/i })
+      ).toBeInTheDocument();
+
+      expect(
+        screen.getByText((content, element) => {
+          if (!element) return false;
+
+          const hasText = (node: Element) => {
+            if (node.textContent === null) return false;
+
+            const regex = new RegExp(
+              `chase name: ${GroupRow.DEFAULT_CHASE_NAME}`,
+              "i"
+            );
+
+            return regex.test(node.textContent);
+          };
+
+          const childrenDontHaveText = Array.from(element.children).every(
+            (child) => !hasText(child)
+          );
+
+          return hasText(element) && childrenDontHaveText;
+        })
+      ).toBeInTheDocument();
+
+      expect(
+        screen.getByRole("combobox", { name: /distancer/i })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(GroupRow.NO_DISTANCER_WARNING_MESSAGE)
+      ).toBeInTheDocument();
+
+      expect(
+        screen.getByRole("heading", { name: /pursuer\(s\)/i })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(GroupRow.NO_PURSUER_WARNING_MESSAGE)
+      ).toBeInTheDocument();
+
+      expect(
+        screen.getByRole("heading", { name: /members/i })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(GroupRow.NO_MEMBER_WARNING_MESSAGE)
+      ).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /add/i })).toBeInTheDocument();
+    });
+
+    test("should render properly when including all optional props", () => {
+      const {
+        groups,
+        participants,
+        handleDistancerBlur,
+        handleSubmit,
+      } = DEFAULT_PROPS;
+
+      render(
+        <GroupRow
+          ownedIndex={isolatedGroupIndex}
+          groups={groups}
+          participants={participants}
+          onDistancerBlur={handleDistancerBlur}
+          onSubmit={handleSubmit}
+        />
+      );
+      userEvent.click(screen.getByRole("button", { name: /group details/i }));
+
+      expect(
+        screen.getByRole("gridcell", {
+          name: new RegExp(`${groups[isolatedGroupIndex].name}`, "i"),
+        })
+      ).toBeInTheDocument();
+
+      expect(
+        screen.getByRole("button", { name: /split/i })
+      ).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /join/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("textbox", { name: /name/i })
+      ).toBeInTheDocument();
+
+      expect(
+        screen.getByText((content, element) => {
+          if (!element) return false;
+
+          const hasText = (node: Element) => {
+            if (node.textContent === null) return false;
+
+            const regex = new RegExp(
+              `chase name: ${GroupRow.DEFAULT_CHASE_NAME}`,
+              "i"
+            );
+
+            return regex.test(node.textContent);
+          };
+
+          const childrenDontHaveText = Array.from(element.children).every(
+            (child) => !hasText(child)
+          );
+
+          return hasText(element) && childrenDontHaveText;
+        })
+      ).toBeInTheDocument();
+
+      userEvent.click(screen.getByRole("combobox", { name: /distancer/i }));
+
+      expect(
+        screen.getByRole("heading", { name: /pursuer\(s\)/i })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(GroupRow.NO_PURSUER_WARNING_MESSAGE)
+      ).toBeInTheDocument();
+
+      expect(
+        screen.getByRole("heading", { name: /members/i })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(GroupRow.NO_MEMBER_WARNING_MESSAGE)
+      ).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /add/i })).toBeInTheDocument();
+    });
+
+    // TODO (Coul Greer): Test if the 'add' button is disabled when no participants exist for selection
   });
 });
 
-describe("Participant display", () => {
-  test("should render participant properly when no participants exist in the group", () => {
-    const { groups } = DEFAULT_PROPS;
+describe("Member Display", () => {
+  describe("Boundary Movement Ratings", () => {
+    test("should render members properly when none exist on the group", () => {
+      const { groups } = DEFAULT_PROPS;
 
-    render(<GroupRow ownedIndex={isolatedGroupIndex} groups={groups} />);
-    userEvent.click(screen.getByRole("button", { name: /expand more/i }));
+      render(<GroupRow ownedIndex={isolatedGroupIndex} groups={groups} />);
+      userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
-    expect(screen.getByText(/highest mov : N\/A/i)).toBeInTheDocument();
-    expect(screen.getByText(/lowest mov : N\/A/i)).toBeInTheDocument();
+      expect(screen.getByText(/highest mov : N\/A/i)).toBeInTheDocument();
+      expect(screen.getByText(/lowest mov : N\/A/i)).toBeInTheDocument();
 
-    expect(
-      screen.getByText(GroupRow.NO_PARTICIPANT_WARNING_MESSAGE)
-    ).toBeInTheDocument();
+      expect(
+        screen.getByText(GroupRow.NO_MEMBER_WARNING_MESSAGE)
+      ).toBeInTheDocument();
 
-    expect(screen.queryByRole("listitem")).not.toBeInTheDocument();
+      expect(screen.queryByRole("list")).not.toBeInTheDocument();
 
-    expect(screen.getByRole("button", { name: /add/i })).toBeInTheDocument();
-  });
+      expect(screen.getByRole("button", { name: /add/i })).toBeInTheDocument();
+    });
 
-  test("should render participant properly when at least one participant exists in the group", () => {
-    const participants: Participant[] = [
-      {
-        id: "p1",
-        name: "Participant 1",
-        dexterity: 15,
-        movementRate: 6,
-        derivedSpeed: 1,
-        speedSkills: [],
-        hazardSkills: [],
-      },
-    ];
-
-    const groups: Group[] = [
-      {
-        id: "0",
-        name: "Group 0",
-        distancerId: GroupRow.INVALID_DISTANCER_ID,
-        pursuersIds: [],
-        participants,
-      },
-    ];
-
-    const [first] = participants;
-
-    render(<GroupRow ownedIndex={0} groups={groups} />);
-    userEvent.click(screen.getByRole("button", { name: /expand more/i }));
-
-    expect(
-      screen.queryByText(GroupRow.NO_PARTICIPANT_WARNING_MESSAGE)
-    ).not.toBeInTheDocument();
-
-    expect(
-      within(screen.getByRole("list", { name: /participants/i })).getAllByRole(
-        "listitem"
-      )
-    ).toHaveLength(participants.length);
-
-    expect(screen.getByText(first.name)).toBeInTheDocument();
-    expect(screen.getByText(first.movementRate)).toBeInTheDocument();
-
-    expect(screen.getByRole("button", { name: /add/i })).toBeInTheDocument();
-  });
-
-  describe("Boundary Movement Rating", () => {
     test("should render properly when one participant exists in the group", () => {
       const participants: Participant[] = [
         {
@@ -341,9 +320,9 @@ describe("Participant display", () => {
       const [firstParticipant] = participants;
 
       render(<GroupRow ownedIndex={0} groups={groups} />);
-      userEvent.click(screen.getByRole("button", { name: /expand more/i }));
+      userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
-      const listEl = screen.getByRole("list", { name: /participants/i });
+      const listEl = screen.getByRole("list", { name: /members/i });
 
       expect(
         screen.getByText(
@@ -403,9 +382,9 @@ describe("Participant display", () => {
       ];
 
       render(<GroupRow ownedIndex={0} groups={groups} />);
-      userEvent.click(screen.getByRole("button", { name: /expand more/i }));
+      userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
-      const listEl = screen.getByRole("list", { name: /participants/i });
+      const listEl = screen.getByRole("list", { name: /members/i });
 
       expect(
         screen.getByText(new RegExp(`highest mov : ${highestMOV}`, "i"))
@@ -422,9 +401,9 @@ describe("Participant display", () => {
       ).toHaveClass(GroupRow.LOWEST_MOVEMENT_CLASS_NAME);
 
       expect(
-        within(
-          screen.getByRole("list", { name: /participants/i })
-        ).getAllByRole("listitem")
+        within(screen.getByRole("list", { name: /members/i })).getAllByRole(
+          "listitem"
+        )
       ).toHaveLength(participants.length);
     });
   });
@@ -439,10 +418,10 @@ describe("Participant display", () => {
         ownedIndex={isolatedGroupIndex}
         groups={groups}
         participants={participants}
-        handleSubmit={handleSubmit}
+        onSubmit={handleSubmit}
       />
     );
-    userEvent.click(screen.getByRole("button", { name: /expand more/i }));
+    userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
     userEvent.click(screen.getByRole("button", { name: /add/i }));
 
@@ -469,7 +448,7 @@ describe("Participant display", () => {
 
     render(<GroupRow ownedIndex={isolatedGroupIndex} groups={groups} />);
 
-    userEvent.click(screen.getByRole("button", { name: /expand more/i }));
+    userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
     userEvent.click(screen.getByRole("button", { name: /add/i }));
 
@@ -506,7 +485,7 @@ describe("Participant display", () => {
     render(
       <GroupRow ownedIndex={0} groups={groups} participants={participants} />
     );
-    userEvent.click(screen.getByRole("button", { name: /expand more/i }));
+    userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
     userEvent.click(screen.getByRole("button", { name: /add/i }));
 
@@ -535,7 +514,7 @@ describe("Warnings", () => {
       const { groups } = DEFAULT_PROPS;
 
       render(<GroupRow ownedIndex={1} groups={groups} />);
-      userEvent.click(screen.getByRole("button", { name: /expand more/i }));
+      userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
       expect(
         screen.getByText(GroupRow.NO_DISTANCER_WARNING_MESSAGE)
@@ -546,7 +525,7 @@ describe("Warnings", () => {
       const { groups } = DEFAULT_PROPS;
 
       render(<GroupRow ownedIndex={centralGroupIndex} groups={groups} />);
-      userEvent.click(screen.getByRole("button", { name: /expand more/i }));
+      userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
       expect(
         screen.getByText(GroupRow.NO_DISTANCER_WARNING_MESSAGE)
@@ -559,22 +538,22 @@ describe("Warnings", () => {
       const { groups } = DEFAULT_PROPS;
 
       render(<GroupRow ownedIndex={3} groups={groups} />);
-      userEvent.click(screen.getByRole("button", { name: /expand more/i }));
+      userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
       expect(
         screen.getByText(GroupRow.NO_PURSUER_WARNING_MESSAGE)
-      ).toBeVisible();
+      ).toBeInTheDocument();
     });
 
     test("should hide warning and display current pursuer(s) when a group has any pursuers", () => {
       const { groups } = DEFAULT_PROPS;
 
       render(<GroupRow ownedIndex={centralGroupIndex} groups={groups} />);
-      userEvent.click(screen.getByRole("button", { name: /expand more/i }));
+      userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
       expect(
-        screen.getByText(GroupRow.NO_PURSUER_WARNING_MESSAGE)
-      ).not.toBeVisible();
+        screen.queryByText(GroupRow.NO_PURSUER_WARNING_MESSAGE)
+      ).not.toBeInTheDocument();
 
       expect(
         within(

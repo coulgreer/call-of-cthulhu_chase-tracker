@@ -1,7 +1,9 @@
 import React from "react";
+
 import clsx from "clsx";
 import { Transition, animated } from "react-spring/renderprops";
 import Modal from "react-modal";
+import { nanoid } from "nanoid";
 
 import Button from "../Button";
 
@@ -17,7 +19,7 @@ interface Props {
   groups: Group[];
   participants?: Participant[];
   onDistancerBlur?: (target: Group, distancer: Group | undefined) => void;
-  handleSubmit?: (group: Group) => void;
+  onSubmit?: (group: Group) => void;
 }
 
 interface State {
@@ -26,6 +28,7 @@ interface State {
   modalShown: boolean;
 }
 
+// TODO (Coul Greer): Fix the styling of the 'add member' modal to be stacked.
 export default class GroupRow extends React.Component<Props, State> {
   static get INVALID_DISTANCER_ID() {
     return "N/A";
@@ -43,7 +46,7 @@ export default class GroupRow extends React.Component<Props, State> {
     return "These little birds fly free. They haven't noticed, yet.";
   }
 
-  static get NO_PARTICIPANT_WARNING_MESSAGE() {
+  static get NO_MEMBER_WARNING_MESSAGE() {
     return "An emptiness, yet to be filled. This *thing* lacks purpose.";
   }
 
@@ -59,6 +62,12 @@ export default class GroupRow extends React.Component<Props, State> {
     return "GroupRow--lowest";
   }
 
+  static get EXPANSION_PREFIX() {
+    return "group-row-expansion";
+  }
+
+  private id;
+
   private lowestMovementRating: string;
 
   private highestMovementRating: string;
@@ -71,6 +80,8 @@ export default class GroupRow extends React.Component<Props, State> {
       expansionShown: false,
       modalShown: false,
     };
+
+    this.id = nanoid();
 
     this.lowestMovementRating = "";
     this.highestMovementRating = "";
@@ -107,7 +118,7 @@ export default class GroupRow extends React.Component<Props, State> {
   }
 
   private handleSubmit() {
-    const { groups, ownedIndex, handleSubmit } = this.props;
+    const { groups, ownedIndex, onSubmit } = this.props;
     const { selectedParticipantsIds } = this.state;
     const { participants: currentParticipants } = groups[ownedIndex];
 
@@ -119,7 +130,7 @@ export default class GroupRow extends React.Component<Props, State> {
       currentParticipants
     );
 
-    if (handleSubmit) handleSubmit(groups[ownedIndex]);
+    if (onSubmit) onSubmit(groups[ownedIndex]);
 
     this.setState({ selectedParticipantsIds: [] });
 
@@ -244,14 +255,15 @@ export default class GroupRow extends React.Component<Props, State> {
           />
         </label>
         <Button
-          aria-expanded={expansionShown}
           className="button button--primary button--small button--circular"
+          aria-expanded={expansionShown}
+          aria-controls={`${GroupRow.EXPANSION_PREFIX}-${this.id}`}
           onClick={this.handleExpandClick}
         >
           {expansionShown ? (
-            <img src={ExpandLessIcon} alt="expand less" />
+            <img src={ExpandLessIcon} alt="Group Details" />
           ) : (
-            <img src={ExpandMoreIcon} alt="expand more" />
+            <img src={ExpandMoreIcon} alt="Group Details" />
           )}
         </Button>
       </div>
@@ -273,6 +285,7 @@ export default class GroupRow extends React.Component<Props, State> {
           shown &&
           ((props) => (
             <animated.div
+              id={`${GroupRow.EXPANSION_PREFIX}-${this.id}`}
               style={props}
               className="GroupRow__extended-container"
             >
@@ -336,22 +349,24 @@ export default class GroupRow extends React.Component<Props, State> {
   private renderPursuers() {
     const { ownedIndex, groups } = this.props;
     const currentGroup = groups[ownedIndex];
-    const pursuerLabel = "Pursuer(s)";
+    const pursuerLabelId = `group-row-pursuer-heading-${this.id}`;
 
     return (
       <div className="GroupRow__section-container">
-        <h2 className="GroupRow__title">{pursuerLabel}</h2>
-        <ul aria-label={pursuerLabel}>
-          {currentGroup.pursuersIds.map((pursuerId) => (
-            <li>{pursuerId}</li>
-          ))}
-        </ul>
-        <p
-          className="centered error text--small"
-          hidden={currentGroup.pursuersIds.length > 0}
-        >
-          {GroupRow.NO_PURSUER_WARNING_MESSAGE}
-        </p>
+        <h2 id={pursuerLabelId} className="GroupRow__title">
+          Pursuer(s)
+        </h2>
+        {currentGroup.pursuersIds.length > 0 ? (
+          <ul aria-labelledby={pursuerLabelId}>
+            {currentGroup.pursuersIds.map((pursuerId) => (
+              <li>{pursuerId}</li>
+            ))}
+          </ul>
+        ) : (
+          <p className="centered error text--small">
+            {GroupRow.NO_PURSUER_WARNING_MESSAGE}
+          </p>
+        )}
       </div>
     );
   }
@@ -379,7 +394,7 @@ export default class GroupRow extends React.Component<Props, State> {
           >{`Lowest MOV : ${this.lowestMovementRating}`}</p>
         </div>
         {currentGroup.participants.length > 0 ? (
-          <ul className="list" aria-label="Participants">
+          <ul className="list" aria-label="Members">
             {currentGroup.participants.map((participant) => (
               <li
                 className={`${this.getBoundaryClassName(
@@ -393,7 +408,7 @@ export default class GroupRow extends React.Component<Props, State> {
           </ul>
         ) : (
           <p className="centered error text--small">
-            {GroupRow.NO_PARTICIPANT_WARNING_MESSAGE}
+            {GroupRow.NO_MEMBER_WARNING_MESSAGE}
           </p>
         )}
         <Button
@@ -426,7 +441,7 @@ export default class GroupRow extends React.Component<Props, State> {
         <form onSubmit={this.handleSubmit}>
           {availableParticipants.length > 0 ? (
             availableParticipants.map((participant) => (
-              <label>
+              <label key={participant.id}>
                 <input
                   type="checkbox"
                   value={participant.id}
@@ -463,10 +478,10 @@ export default class GroupRow extends React.Component<Props, State> {
 
     return (
       <div
-        role="gridcell"
-        tabIndex={0}
-        aria-label={`${groups[ownedIndex].name} editor`}
         className="GroupRow"
+        tabIndex={0}
+        role="gridcell"
+        aria-label={`${groups[ownedIndex].name} Editor`}
       >
         {this.renderMainContent()}
         {this.renderExpandedContent()}

@@ -1,40 +1,26 @@
-import React, { ReactNode } from "react";
+import React from "react";
 
 import "./Button.css";
 
-interface Props {
-  type?: "button" | "submit";
-  onClick?(evt: React.MouseEvent<HTMLElement>): void;
-  className?: string;
-  children?: ReactNode;
-  disabled?: boolean;
-  role?: string;
-}
-
-function Button({ type, onClick, className, children, disabled, role }: Props) {
+function Button({
+  type = "button",
+  className = "button",
+  ...props
+}: React.HTMLProps<HTMLButtonElement>) {
   return (
     <button
       type={type === "submit" ? "submit" : "button"}
-      onClick={onClick}
+      onClick={props.onClick}
       className={className}
-      disabled={disabled}
-      role={role}
+      disabled={props.disabled}
+      role={props.role}
+      aria-expanded={props["aria-expanded"]}
+      aria-controls={props["aria-controls"]}
     >
       <span data-testid="overlay" className="button__overlay" />
-      {children}
+      {props.children}
     </button>
   );
 }
-
-Button.defaultProps = {
-  type: "button",
-  onClick: () => {
-    // do nothing
-  },
-  className: "button",
-  children: null,
-  disabled: false,
-  role: undefined,
-};
 
 export default Button;

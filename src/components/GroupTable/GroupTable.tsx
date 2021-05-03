@@ -111,15 +111,15 @@ export default class GroupTable extends React.Component<Props, State> {
 
     return groups.map((group, index) => (
       <div
-        role="row"
-        tabIndex={0}
-        aria-label={group.id}
         className="GroupTable__row-container"
+        tabIndex={0}
+        role="row"
+        aria-label={group.id}
         key={group.id}
       >
         <GroupRow
           onDistancerBlur={this.handleDistancerBlur}
-          handleSubmit={this.handleGroupUpdate}
+          onSubmit={this.handleGroupUpdate}
           ownedIndex={index}
           groups={groups}
           participants={participants}

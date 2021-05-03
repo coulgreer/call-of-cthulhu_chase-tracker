@@ -12,7 +12,9 @@ import ParticipantRow from "../ParticipantRow";
 function createAnExpandedGroupRow() {
   userEvent.click(screen.getByRole("tab", { name: /groups/i }));
   userEvent.click(screen.getByRole("button", { name: /create group/i }));
-  userEvent.click(screen.getByRole("button", { name: /expand more/i }));
+
+  const expandEls = screen.getAllByRole("button", { name: /group details/i });
+  userEvent.click(expandEls[expandEls.length - 1]);
 }
 
 function createAnExpandedParticipantRow() {
