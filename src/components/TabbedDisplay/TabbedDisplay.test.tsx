@@ -23,14 +23,10 @@ function createAnExpandedParticipantRow() {
   userEvent.click(screen.getByRole("button", { name: /expand/i }));
 }
 
-/*
- * TODO (Coul Greer): Ensure that any expected changes cause the new participant data to update the
- * associated particpant object. For example, name change, dexterity score change, hazard skill changes,
- * etc.
- */
-
 test("should render properly", () => {
   render(<TabbedDisplay />);
+
+  expect(screen.getByRole("main")).toBeInTheDocument();
 
   expect(screen.getByRole("tab", { name: /participants/i })).toHaveClass(
     "TabbedDisplay__tab--enabled"
@@ -56,6 +52,12 @@ test("should switch displays when tab is clicked", () => {
   ).not.toBeInTheDocument();
   expect(screen.getByRole("tabpanel", { name: /groups/i })).toBeVisible();
 });
+
+/*
+ * TODO (Coul Greer): Ensure that any expected changes cause the new participant data to update the
+ * associated particpant object. For example, name change, dexterity score change, hazard skill changes,
+ * etc.
+ */
 
 describe("ParticipantTable Event Handlers", () => {
   test("should render properly when a participant is created", () => {

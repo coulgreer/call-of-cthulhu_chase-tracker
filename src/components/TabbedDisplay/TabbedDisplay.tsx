@@ -256,7 +256,7 @@ export default class TabbedDisplay extends React.Component<Props, State> {
     ];
 
     return (
-      <div className="TabbedDisplay">
+      <main className="TabbedDisplay">
         <div className="TabbedDisplay__tabs" role="tablist">
           {displays.map((display, index) => (
             <Button
@@ -288,7 +288,7 @@ export default class TabbedDisplay extends React.Component<Props, State> {
             );
           })}
         </div>
-      </div>
+      </main>
     );
   }
 }
