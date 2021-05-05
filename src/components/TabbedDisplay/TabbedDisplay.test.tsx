@@ -23,6 +23,12 @@ function createAnExpandedParticipantRow() {
   userEvent.click(screen.getByRole("button", { name: /expand/i }));
 }
 
+/*
+ * TODO (Coul Greer): Ensure that any expected changes cause the new participant data to update the
+ * associated particpant object. For example, name change, dexterity score change, hazard skill changes,
+ * etc.
+ */
+
 test("should render properly", () => {
   render(<TabbedDisplay />);
 
@@ -619,5 +625,37 @@ describe("GroupTable Event Handlers", () => {
         screen.getByText(GroupRow.NO_DISTANCER_WARNING_MESSAGE)
       ).toBeVisible();
     });
+  });
+});
+
+describe("Confirmation Tests", () => {
+  test("should update movement in both group and participant tables", () => {
+    const newMov = 20;
+
+    render(<TabbedDisplay />);
+    createAnExpandedParticipantRow();
+    createAnExpandedGroupRow();
+
+    userEvent.click(screen.getByRole("tab", { name: /groups/i }));
+    userEvent.click(screen.getByRole("button", { name: /add/i }));
+    userEvent.click(screen.getByRole("checkbox"));
+    userEvent.click(
+      within(screen.getByRole("dialog")).getByRole("button", { name: /add/i })
+    );
+
+    userEvent.click(screen.getByRole("tab", { name: /participants/i }));
+
+    const movEl = screen.getByRole("spinbutton", { name: /mov/i });
+    userEvent.clear(movEl);
+    userEvent.type(movEl, newMov.toString());
+
+    userEvent.click(screen.getByRole("tab", { name: /groups/i }));
+
+    expect(
+      screen.getByText(new RegExp(`lowest mov : ${newMov}`, "i"))
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(new RegExp(`highest mov : ${newMov}`, "i"))
+    ).toBeInTheDocument();
   });
 });

@@ -57,11 +57,11 @@ export default class TabbedDisplay extends React.Component<Props, State> {
 
   private handleParticipantChange(target: Participant) {
     this.setState((state) => {
-      const { participants } = state;
+      const participants = [...state.participants];
+
       const targetIndex = participants.findIndex(
         (participant) => participant.id === target.id
       );
-
       participants[targetIndex] = target;
 
       return { participants };

@@ -6,12 +6,6 @@ import ParticipantRow from ".";
 
 import { Participant } from "../../types";
 
-const [
-  dexterityName,
-  speedName,
-  movementName,
-] = ParticipantRow.MAIN_STATISTICS_NAMES;
-
 const DEFAULT_PROPS: {
   participant: Participant;
   onParticipantChange: (p: Participant) => void;
@@ -58,9 +52,9 @@ describe("Collapse/Expand detailed data", () => {
       screen.queryByText(ParticipantRow.WARNING_MESSAGE)
     ).not.toBeVisible();
 
-    expect(screen.getByLabelText(dexterityName)).toBeInTheDocument();
-    expect(screen.getByLabelText(speedName)).toBeInTheDocument();
-    expect(screen.getByLabelText(movementName)).toBeInTheDocument();
+    expect(screen.getByLabelText(/dex/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/speed/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/speed/i)).toBeInTheDocument();
 
     expect(
       screen.getByRole("button", { name: /generate/i })
@@ -105,9 +99,9 @@ describe("Collapse/Expand detailed data", () => {
       screen.queryByText(ParticipantRow.WARNING_MESSAGE)
     ).not.toBeVisible();
 
-    expect(screen.getByLabelText(dexterityName)).toBeInTheDocument();
-    expect(screen.getByLabelText(movementName)).toBeInTheDocument();
-    expect(screen.getByLabelText(speedName)).toBeInTheDocument();
+    expect(screen.getByLabelText(/dex/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/mov/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/speed/i)).toBeInTheDocument();
 
     expect(
       screen.getByRole("button", { name: /generate/i })
@@ -218,9 +212,7 @@ describe("Statistic Display event handlers", () => {
   test("should change 'main statistic' to the last valid value when changed to an invalid value and focus lost", () => {
     render(<ParticipantRow participant={DEFAULT_PROPS.participant} />);
 
-    const statisticDisplayEl = screen.getByRole("spinbutton", {
-      name: dexterityName,
-    });
+    const statisticDisplayEl = screen.getByRole("spinbutton", { name: /dex/i });
     userEvent.clear(statisticDisplayEl);
     userEvent.type(statisticDisplayEl, validInput.toString());
     userEvent.clear(statisticDisplayEl);

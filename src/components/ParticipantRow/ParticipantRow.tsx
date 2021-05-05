@@ -28,7 +28,9 @@ interface State {
   modalShown: boolean;
   selectedStatValue: string;
   currentName: string;
-  mainStatistics: WrappedStatistic[];
+  dexterity: WrappedStatistic;
+  movementRate: WrappedStatistic;
+  derivedSpeed: WrappedStatistic;
   speedStatistics: WrappedStatistic[];
   hazardStatistics: WrappedStatistic[];
 }
@@ -36,22 +38,6 @@ interface State {
 const SEQUENCE_START = 0;
 
 export default class ParticipantRow extends React.Component<Props, State> {
-  static get MAIN_STATISTICS_NAMES() {
-    return ["DEX", "Speed", "MOV"];
-  }
-
-  static get DEXTERITY_INDEX() {
-    return 0;
-  }
-
-  static get SPEED_INDEX() {
-    return 1;
-  }
-
-  static get MOVEMENT_RATING_INDEX() {
-    return 2;
-  }
-
   static get WARNING_MESSAGE() {
     return "Even Elder Ones have a title. You ought follow suit.";
   }
@@ -118,53 +104,49 @@ export default class ParticipantRow extends React.Component<Props, State> {
     ];
   }
 
-  private static initializeMainStatistics({
+  private static initializeDexterity({
     dexterity,
-    derivedSpeed,
-    movementRate,
-  }: Participant): WrappedStatistic[] {
-    return [
-      {
-        statistic: {
-          name:
-            ParticipantRow.MAIN_STATISTICS_NAMES[
-              ParticipantRow.DEXTERITY_INDEX
-            ],
-          score: dexterity,
-        },
-        currentValue: dexterity.toString(),
-        key: ParticipantRow.DEXTERITY_INDEX,
+  }: Participant): WrappedStatistic {
+    return {
+      statistic: {
+        name: "DEX",
+        score: dexterity,
       },
-      {
-        statistic: {
-          name:
-            ParticipantRow.MAIN_STATISTICS_NAMES[ParticipantRow.SPEED_INDEX],
-          score: derivedSpeed,
-        },
-        currentValue: derivedSpeed.toString(),
-        key: ParticipantRow.SPEED_INDEX,
-      },
-      {
-        statistic: {
-          name:
-            ParticipantRow.MAIN_STATISTICS_NAMES[
-              ParticipantRow.MOVEMENT_RATING_INDEX
-            ],
-          score: movementRate,
-        },
-        currentValue: movementRate.toString(),
-        limiter: {
-          lowerLimit: Number.MIN_SAFE_INTEGER,
-          lowerWarning: 1,
-          upperWarning: 10,
-          upperLimit: Number.MAX_SAFE_INTEGER,
-        },
-        key: ParticipantRow.MOVEMENT_RATING_INDEX,
-      },
-    ];
+      currentValue: dexterity.toString(),
+    };
   }
 
-  static generateSpeedModifier(value: number) {
+  private static initializeMovementRate({
+    movementRate,
+  }: Participant): WrappedStatistic {
+    return {
+      statistic: {
+        name: "MOV",
+        score: movementRate,
+      },
+      currentValue: movementRate.toString(),
+      limiter: {
+        lowerLimit: Number.MIN_SAFE_INTEGER,
+        lowerWarning: 1,
+        upperWarning: 10,
+        upperLimit: Number.MAX_SAFE_INTEGER,
+      },
+    };
+  }
+
+  private static initializeDerivedSpeed({
+    derivedSpeed,
+  }: Participant): WrappedStatistic {
+    return {
+      statistic: {
+        name: "Speed",
+        score: derivedSpeed,
+      },
+      currentValue: derivedSpeed.toString(),
+    };
+  }
+
+  private static generateSpeedModifier(value: number) {
     const degreeOfSuccess = roll(value);
 
     switch (degreeOfSuccess) {
@@ -184,25 +166,28 @@ export default class ParticipantRow extends React.Component<Props, State> {
     }
   }
 
-  /* eslint-disable no-param-reassign */
-  static updateValue(value: string, data: WrappedStatistic) {
-    const { limiter, statistic } = data;
-
+  private static parseValidValue(
+    value: string,
+    { limiter, statistic: { score } }: WrappedStatistic
+  ) {
     const upperLimit = limiter?.upperLimit || Number.MAX_SAFE_INTEGER;
     const lowerLimit = limiter?.lowerLimit || Number.MIN_SAFE_INTEGER;
 
     if (value !== "") {
       const valueNum = Number.parseInt(value, 10);
+
       if (valueNum > upperLimit) {
-        statistic.score = upperLimit;
-      } else if (valueNum < lowerLimit) {
-        statistic.score = lowerLimit;
-      } else {
-        statistic.score = valueNum;
+        return upperLimit;
       }
+
+      if (valueNum < lowerLimit) {
+        return lowerLimit;
+      }
+
+      return valueNum;
     }
 
-    data.currentValue = value;
+    return score;
   }
 
   private speedStatSequence: UniqueSequenceGenerator;
@@ -251,7 +236,9 @@ export default class ParticipantRow extends React.Component<Props, State> {
       modalShown: false,
       selectedStatValue: "",
       currentName: participant.name,
-      mainStatistics: ParticipantRow.initializeMainStatistics(participant),
+      dexterity: ParticipantRow.initializeDexterity(participant),
+      movementRate: ParticipantRow.initializeMovementRate(participant),
+      derivedSpeed: ParticipantRow.initializeDerivedSpeed(participant),
       speedStatistics: this.initializeSpeedStatistics(participant),
       hazardStatistics: this.initializeHazardStatistics(participant),
     };
@@ -279,15 +266,42 @@ export default class ParticipantRow extends React.Component<Props, State> {
     this.setState({ currentName: participant.name, nameWarningShown: false });
   }
 
-  private handleMainStatisticChange(index: number, value: string) {
+  private handleDexterityChange(value: string) {
     this.setState((state) => {
-      const { mainStatistics } = state;
-      const wrappedStatistic = mainStatistics[index];
+      const { dexterity } = state;
+      const { statistic } = dexterity;
 
-      ParticipantRow.updateValue(value, wrappedStatistic);
-      mainStatistics[index] = wrappedStatistic;
+      statistic.score = ParticipantRow.parseValidValue(value, dexterity);
 
-      return { mainStatistics };
+      dexterity.currentValue = value;
+
+      return { dexterity };
+    });
+  }
+
+  private handleDerivedSpeedChange(value: string) {
+    this.setState((state) => {
+      const { derivedSpeed } = state;
+      const { statistic } = derivedSpeed;
+
+      statistic.score = ParticipantRow.parseValidValue(value, derivedSpeed);
+
+      derivedSpeed.currentValue = value;
+
+      return { derivedSpeed };
+    });
+  }
+
+  private handleMovementRateChange(value: string) {
+    this.setState((state) => {
+      const { movementRate } = state;
+      const { statistic } = movementRate;
+
+      statistic.score = ParticipantRow.parseValidValue(value, movementRate);
+
+      movementRate.currentValue = value;
+
+      return { movementRate };
     });
   }
 
@@ -295,10 +309,13 @@ export default class ParticipantRow extends React.Component<Props, State> {
     this.setState((state) => {
       const { speedStatistics } = state;
       const wrappedStatistic = speedStatistics[index];
+      const { statistic } = wrappedStatistic;
 
-      ParticipantRow.updateValue(value, wrappedStatistic);
+      statistic.score = ParticipantRow.parseValidValue(value, wrappedStatistic);
+
+      wrappedStatistic.currentValue = value;
+
       speedStatistics[index] = wrappedStatistic;
-
       return { speedStatistics };
     });
   }
@@ -307,24 +324,68 @@ export default class ParticipantRow extends React.Component<Props, State> {
     this.setState((state) => {
       const { hazardStatistics } = state;
       const wrappedStatistic = hazardStatistics[index];
+      const { statistic } = wrappedStatistic;
 
-      ParticipantRow.updateValue(value, wrappedStatistic);
+      statistic.score = ParticipantRow.parseValidValue(value, wrappedStatistic);
+
+      wrappedStatistic.currentValue = value;
+
       hazardStatistics[index] = wrappedStatistic;
-
       return { hazardStatistics };
     });
   }
 
-  private handleMainStatisticBlur(index: number) {
-    this.setState((state) => {
-      const { mainStatistics } = state;
-      const wrappedStatistic = mainStatistics[index];
-      const { score } = wrappedStatistic.statistic;
+  private handleDexterityBlur() {
+    this.setState((state, props) => {
+      const { participant, onParticipantChange } = props;
+      const { dexterity } = state;
 
-      wrappedStatistic.currentValue = score.toString();
-      mainStatistics[index] = wrappedStatistic;
+      const {
+        statistic: { score },
+      } = dexterity;
 
-      return { mainStatistics };
+      participant.dexterity = score;
+      if (onParticipantChange) onParticipantChange(participant);
+
+      dexterity.currentValue = score.toString();
+
+      return { dexterity };
+    });
+  }
+
+  private handleDerivedSpeedBlur() {
+    this.setState((state, props) => {
+      const { participant, onParticipantChange } = props;
+      const { derivedSpeed } = state;
+
+      const {
+        statistic: { score },
+      } = derivedSpeed;
+
+      participant.derivedSpeed = score;
+      if (onParticipantChange) onParticipantChange(participant);
+
+      derivedSpeed.currentValue = score.toString();
+
+      return { derivedSpeed };
+    });
+  }
+
+  private handleMovementRateBlur() {
+    this.setState((state, props) => {
+      const { participant, onParticipantChange } = props;
+      const { movementRate } = state;
+
+      const {
+        statistic: { score },
+      } = movementRate;
+
+      participant.movementRate = score;
+      if (onParticipantChange) onParticipantChange(participant);
+
+      movementRate.currentValue = score.toString();
+
+      return { movementRate };
     });
   }
 
@@ -347,8 +408,8 @@ export default class ParticipantRow extends React.Component<Props, State> {
     const { score } = wrappedStatistic.statistic;
 
     wrappedStatistic.currentValue = score.toString();
-
     hazardStatistics[index] = wrappedStatistic;
+
     this.setState({ hazardStatistics });
   }
 
@@ -484,14 +545,12 @@ export default class ParticipantRow extends React.Component<Props, State> {
 
   private updateSpeedModifier(modifier: number) {
     this.setState((state) => {
-      const { mainStatistics } = state;
-      const wrappedStatistic = mainStatistics[ParticipantRow.SPEED_INDEX];
+      const { derivedSpeed } = state;
 
-      wrappedStatistic.statistic.score = modifier;
-      wrappedStatistic.currentValue = modifier.toString();
+      derivedSpeed.statistic.score = modifier;
+      derivedSpeed.currentValue = modifier.toString();
 
-      mainStatistics[ParticipantRow.SPEED_INDEX] = wrappedStatistic;
-      return { mainStatistics };
+      return { derivedSpeed };
     });
   }
 
@@ -554,7 +613,9 @@ export default class ParticipantRow extends React.Component<Props, State> {
       expansionShown,
       nameWarningShown,
       currentName,
-      mainStatistics,
+      dexterity,
+      movementRate,
+      derivedSpeed,
     } = this.state;
 
     return (
@@ -579,13 +640,23 @@ export default class ParticipantRow extends React.Component<Props, State> {
         </p>
         <div className="ParticipantRow__footer">
           <div className="ParticipantRow__main-characteristics">
-            {mainStatistics.map((data, index) =>
-              DisplayFactory.createStatisticDisplay(
-                "StatisticDisplay--vertical",
-                data,
-                (value) => this.handleMainStatisticChange(index, value),
-                () => this.handleMainStatisticBlur(index)
-              )
+            {DisplayFactory.createStatisticDisplay(
+              "StatisticDisplay--vertical",
+              dexterity,
+              (value) => this.handleDexterityChange(value),
+              () => this.handleDexterityBlur()
+            )}
+            {DisplayFactory.createStatisticDisplay(
+              "StatisticDisplay--vertical",
+              derivedSpeed,
+              (value) => this.handleDerivedSpeedChange(value),
+              () => this.handleDerivedSpeedBlur()
+            )}
+            {DisplayFactory.createStatisticDisplay(
+              "StatisticDisplay--vertical",
+              movementRate,
+              (value) => this.handleMovementRateChange(value),
+              () => this.handleMovementRateBlur()
             )}
             <Button
               className="button button--secondary button--small"
