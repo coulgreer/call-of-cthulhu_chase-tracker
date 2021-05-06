@@ -92,212 +92,531 @@ describe("ParticipantTable Event Handlers", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
+  test("should have the appropriate default participant name when a participant has been removed", () => {
+    render(<TabbedDisplay />);
+    userEvent.click(screen.getByRole("tab", { name: /participants/i }));
+
+    const addButton = screen.getByRole("button", {
+      name: /add participant/i,
+    });
+    userEvent.click(addButton);
+    userEvent.click(addButton);
+    userEvent.click(addButton);
+    userEvent.click(addButton);
+    userEvent.click(
+      screen.getByRole("button", {
+        name: new RegExp(`remove: ${ParticipantTable.DEFAULT_NAME} #2`, "i"),
+      })
+    );
+    userEvent.click(screen.getByRole("button", { name: /delete/i }));
+    userEvent.click(
+      screen.getByRole("button", {
+        name: new RegExp(`remove: ${ParticipantTable.DEFAULT_NAME} #4`, "i"),
+      })
+    );
+    userEvent.click(screen.getByRole("button", { name: /delete/i }));
+    userEvent.click(addButton);
+
+    expect(
+      screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #1`)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #2`)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #3`)
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #4`)
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #5`)
+    ).not.toBeInTheDocument();
+  });
+
   describe("Skills", () => {
-    const validInput = 11;
+    const validScore = 11;
+    const invalidScore = "invalid";
 
-    describe("Naming Hazard Skill", () => {
-      const [
-        primaryStat,
-        secondaryStat,
-      ] = ParticipantRow.DEFAULT_HAZARD_STATISTICS;
+    describe("Core Skills", () => {
+      describe("when changing to valid score", () => {
+        test("should update dexterity score on participant", () => {
+          render(<TabbedDisplay />);
+          createAnExpandedParticipantRow();
 
-      test("should reset textbox to current name when another hazard skill has been renamed", () => {
-        const firstNewName = "First Name";
+          const dexterityEl = screen.getByRole("spinbutton", { name: /dex/i });
+          userEvent.clear(dexterityEl);
+          userEvent.type(dexterityEl, validScore.toString());
+          dexterityEl.blur();
 
-        render(<TabbedDisplay />);
-        createAnExpandedParticipantRow();
-
-        userEvent.click(
-          screen.getByRole("button", {
-            name: new RegExp(`rename: ${primaryStat.name}`),
-          })
-        );
-
-        const renameInputEl = screen.getByRole("textbox", {
-          name: /new name/i,
+          expect(dexterityEl).toHaveValue(validScore);
+          expect(dexterityEl).toHaveDisplayValue(validScore.toString());
         });
-        userEvent.clear(renameInputEl);
-        userEvent.type(renameInputEl, firstNewName);
-        userEvent.click(screen.getByRole("button", { name: /^rename$/i }));
 
-        userEvent.click(
-          screen.getByRole("button", {
-            name: new RegExp(`rename: ${secondaryStat.name}`),
-          })
-        );
+        test("should update derived speed value on participant", () => {
+          render(<TabbedDisplay />);
+          createAnExpandedParticipantRow();
 
-        expect(screen.getByRole("textbox", { name: /new name/i })).toHaveValue(
-          secondaryStat.name
-        );
+          const speedEl = screen.getByRole("spinbutton", { name: /speed/i });
+          userEvent.clear(speedEl);
+          userEvent.type(speedEl, validScore.toString());
+          speedEl.blur();
+
+          expect(speedEl).toHaveValue(validScore);
+          expect(speedEl).toHaveDisplayValue(validScore.toString());
+        });
+
+        test("should update movement rate value on participant", () => {
+          render(<TabbedDisplay />);
+          createAnExpandedParticipantRow();
+
+          const movementEl = screen.getByRole("spinbutton", { name: /mov/i });
+          userEvent.clear(movementEl);
+          userEvent.type(movementEl, validScore.toString());
+          movementEl.blur();
+
+          expect(movementEl).toHaveValue(validScore);
+          expect(movementEl).toHaveDisplayValue(validScore.toString());
+        });
       });
 
-      test("should rename hazard statistic when given a new name", () => {
-        const originName = primaryStat.name;
-        const newName = "NEW_TEST";
+      describe("when changing to invalid value", () => {
+        test("should revert to prior valid dexterity score on participant", () => {
+          render(<TabbedDisplay />);
+          createAnExpandedParticipantRow();
 
-        render(<TabbedDisplay />);
-        createAnExpandedParticipantRow();
+          const dexterityEl = screen.getByRole("spinbutton", { name: /dex/i });
+          userEvent.clear(dexterityEl);
+          userEvent.type(dexterityEl, validScore.toString());
 
-        expect(screen.queryByText(newName)).not.toBeInTheDocument();
-        expect(screen.getByText(originName)).toBeInTheDocument();
+          userEvent.clear(dexterityEl);
+          userEvent.type(dexterityEl, invalidScore);
+          dexterityEl.blur();
 
-        userEvent.click(
-          screen.getByRole("button", {
-            name: new RegExp(`rename: ${originName}`, "i"),
-          })
-        );
-
-        const nameTextboxEl = screen.getByRole("textbox", {
-          name: /new name/i,
+          expect(dexterityEl).toHaveValue(validScore);
+          expect(dexterityEl).toHaveDisplayValue(validScore.toString());
         });
-        userEvent.clear(nameTextboxEl);
-        userEvent.type(nameTextboxEl, newName);
 
-        userEvent.click(screen.getByRole("button", { name: /^rename$/i }));
+        test("should revert to prior valid derived speed value on participant", () => {
+          render(<TabbedDisplay />);
+          createAnExpandedParticipantRow();
 
-        expect(screen.getByText(newName)).toBeInTheDocument();
-        expect(screen.queryByText(originName)).not.toBeInTheDocument();
+          const speedEl = screen.getByRole("spinbutton", { name: /speed/i });
+          userEvent.clear(speedEl);
+          userEvent.type(speedEl, validScore.toString());
+
+          userEvent.clear(speedEl);
+          userEvent.type(speedEl, invalidScore);
+          speedEl.blur();
+
+          expect(speedEl).toHaveValue(validScore);
+          expect(speedEl).toHaveDisplayValue(validScore.toString());
+        });
+
+        test("should revert to prior valid movement rate value on participant", () => {
+          render(<TabbedDisplay />);
+          createAnExpandedParticipantRow();
+
+          const movementEl = screen.getByRole("spinbutton", { name: /mov/i });
+          userEvent.clear(movementEl);
+          userEvent.type(movementEl, validScore.toString());
+
+          userEvent.clear(movementEl);
+          userEvent.type(movementEl, invalidScore);
+          movementEl.blur();
+
+          expect(movementEl).toHaveValue(validScore);
+          expect(movementEl).toHaveDisplayValue(validScore.toString());
+        });
       });
 
-      test("should change 'hazard statistic' to the last valid value when changed to an invalid value and focus lost", () => {
-        render(<TabbedDisplay />);
-        createAnExpandedParticipantRow();
+      describe("when leaving value blank", () => {
+        test("should revert to prior valid dexterity score on participant", () => {
+          render(<TabbedDisplay />);
+          createAnExpandedParticipantRow();
 
-        const statisticDisplayEl = screen.getByRole("spinbutton", {
-          name: primaryStat.name,
+          const dexterityEl = screen.getByRole("spinbutton", { name: /dex/i });
+          userEvent.clear(dexterityEl);
+          userEvent.type(dexterityEl, validScore.toString());
+
+          userEvent.clear(dexterityEl);
+          dexterityEl.blur();
+
+          expect(dexterityEl).toHaveValue(validScore);
+          expect(dexterityEl).toHaveDisplayValue(validScore.toString());
         });
-        userEvent.clear(statisticDisplayEl);
-        userEvent.type(statisticDisplayEl, validInput.toString());
-        userEvent.clear(statisticDisplayEl);
 
-        expect(statisticDisplayEl).toHaveDisplayValue("");
-        expect(statisticDisplayEl).toHaveValue(null);
+        test("should revert to prior valid derived speed value on participant", () => {
+          render(<TabbedDisplay />);
+          createAnExpandedParticipantRow();
 
-        statisticDisplayEl.blur();
+          const speedEl = screen.getByRole("spinbutton", { name: /speed/i });
+          userEvent.clear(speedEl);
+          userEvent.type(speedEl, validScore.toString());
 
-        expect(statisticDisplayEl).toHaveDisplayValue(validInput.toString());
-        expect(statisticDisplayEl).toHaveValue(validInput);
-      });
+          userEvent.clear(speedEl);
+          speedEl.blur();
 
-      test("should create a hazard stat with the appropriate name when creating a new hazard stat", () => {
-        render(<TabbedDisplay />);
-        createAnExpandedParticipantRow();
+          expect(speedEl).toHaveValue(validScore);
+          expect(speedEl).toHaveDisplayValue(validScore.toString());
+        });
 
-        userEvent.click(
-          screen.getByRole("button", {
-            name: new RegExp(`delete: ${primaryStat.name}`, "i"),
-          })
-        );
-        userEvent.click(
-          screen.getAllByRole("button", { name: /create statistic/i })[1]
-        );
+        test("should revert to prior valid movement rate value on participant", () => {
+          render(<TabbedDisplay />);
+          createAnExpandedParticipantRow();
 
-        expect(
-          screen.getByLabelText(`${ParticipantRow.DEFAULT_STAT_NAME} #1`)
-        ).toBeInTheDocument();
+          const movementEl = screen.getByRole("spinbutton", { name: /mov/i });
+          userEvent.clear(movementEl);
+          userEvent.type(movementEl, validScore.toString());
+
+          userEvent.clear(movementEl);
+          movementEl.blur();
+
+          expect(movementEl).toHaveValue(validScore);
+          expect(movementEl).toHaveDisplayValue(validScore.toString());
+        });
       });
     });
 
-    describe("Naming Speed Skill", () => {
+    describe("Peripheral Skills", () => {
       const [
-        primaryStat,
-        secondaryStat,
+        firstHazardStatistic,
+        secondHazardStatistic,
+      ] = ParticipantRow.DEFAULT_HAZARD_STATISTICS;
+      const [
+        firstSpeedStatistic,
+        secondSpeedStatistic,
       ] = ParticipantRow.DEFAULT_SPEED_STATISTICS;
 
-      test("should reset textbox to current name when another speed skill has been renamed", () => {
-        const firstNewName = "First Name";
+      const validName = "Valid Name";
+      const invalidName = "   ";
 
-        render(<TabbedDisplay />);
-        createAnExpandedParticipantRow();
+      describe("when changing to valid name", () => {
+        test("should update hazard skill on participant", () => {
+          render(<TabbedDisplay />);
+          createAnExpandedParticipantRow();
 
-        userEvent.click(
-          screen.getByRole("button", {
-            name: new RegExp(`rename: ${primaryStat.name}`),
-          })
-        );
+          userEvent.click(
+            screen.getByRole("button", {
+              name: new RegExp(`rename: ${firstHazardStatistic.name}`, "i"),
+            })
+          );
 
-        const renameInputEl = screen.getByRole("textbox", {
-          name: /new name/i,
+          const nameTextboxEl = screen.getByRole("textbox", {
+            name: /new name/i,
+          });
+          userEvent.clear(nameTextboxEl);
+          userEvent.type(nameTextboxEl, validName);
+          userEvent.click(screen.getByRole("button", { name: /^rename$/i }));
+
+          expect(screen.getByLabelText(validName)).toBeInTheDocument();
         });
-        userEvent.clear(renameInputEl);
-        userEvent.type(renameInputEl, firstNewName);
-        userEvent.click(screen.getByRole("button", { name: /^rename$/i }));
 
-        userEvent.click(
-          screen.getByRole("button", {
-            name: new RegExp(`rename: ${secondaryStat.name}`),
-          })
-        );
+        test("should update speed skill on participant", () => {
+          render(<TabbedDisplay />);
+          createAnExpandedParticipantRow();
 
-        expect(screen.getByRole("textbox", { name: /new name/i })).toHaveValue(
-          secondaryStat.name
-        );
+          userEvent.click(
+            screen.getByRole("button", {
+              name: new RegExp(`rename: ${firstSpeedStatistic.name}`, "i"),
+            })
+          );
+
+          const nameTextboxEl = screen.getByRole("textbox", {
+            name: /new name/i,
+          });
+          userEvent.clear(nameTextboxEl);
+          userEvent.type(nameTextboxEl, validName);
+          userEvent.click(screen.getByRole("button", { name: /^rename$/i }));
+
+          expect(screen.getByLabelText(validName)).toBeInTheDocument();
+        });
       });
 
-      test("should rename speed statistic when given a new name", () => {
-        const originName = primaryStat.name;
-        const newName = "NEW_TEST";
+      describe("when changing to invalid name", () => {
+        test("should revert to prior valid hazard skill on participant", () => {
+          render(<TabbedDisplay />);
+          createAnExpandedParticipantRow();
 
-        render(<TabbedDisplay />);
-        createAnExpandedParticipantRow();
+          userEvent.click(
+            screen.getByRole("button", {
+              name: new RegExp(`rename: ${firstHazardStatistic.name}`, "i"),
+            })
+          );
 
-        expect(screen.queryByText(newName)).not.toBeInTheDocument();
-        expect(screen.getByText(originName)).toBeInTheDocument();
+          const nameTextboxEl = screen.getByRole("textbox", {
+            name: /new name/i,
+          });
+          userEvent.clear(nameTextboxEl);
+          userEvent.type(nameTextboxEl, validName);
+          userEvent.clear(nameTextboxEl);
+          userEvent.type(nameTextboxEl, invalidName);
+          userEvent.click(screen.getByRole("button", { name: /^rename$/i }));
 
-        userEvent.click(
-          screen.getByRole("button", {
-            name: new RegExp(`rename: ${originName}`, "i"),
-          })
-        );
-
-        const nameTextboxEl = screen.getByRole("textbox", {
-          name: /new name/i,
+          expect(screen.getByLabelText(validName)).toBeInTheDocument();
         });
-        userEvent.clear(nameTextboxEl);
-        userEvent.type(nameTextboxEl, newName);
 
-        userEvent.click(screen.getByRole("button", { name: /^rename$/i }));
+        test("should revert to prior valid speed skill on participant", () => {
+          render(<TabbedDisplay />);
+          createAnExpandedParticipantRow();
 
-        expect(screen.getByText(newName)).toBeInTheDocument();
-        expect(screen.queryByText(originName)).not.toBeInTheDocument();
+          userEvent.click(
+            screen.getByRole("button", {
+              name: new RegExp(`rename: ${firstSpeedStatistic.name}`, "i"),
+            })
+          );
+
+          const nameTextboxEl = screen.getByRole("textbox", {
+            name: /new name/i,
+          });
+          userEvent.clear(nameTextboxEl);
+          userEvent.type(nameTextboxEl, validName);
+          userEvent.clear(nameTextboxEl);
+          userEvent.type(nameTextboxEl, invalidName);
+          userEvent.click(screen.getByRole("button", { name: /^rename$/i }));
+
+          expect(screen.getByLabelText(validName)).toBeInTheDocument();
+        });
       });
 
-      test("should change 'speed statistic' to the last valid value when changed to an invalid value and focus lost", () => {
-        render(<TabbedDisplay />);
-        createAnExpandedParticipantRow();
+      describe("when leaving name blank", () => {
+        test("should revert to prior valid hazard skill on participant", () => {
+          render(<TabbedDisplay />);
+          createAnExpandedParticipantRow();
 
-        const statisticDisplayEl = screen.getByRole("spinbutton", {
-          name: primaryStat.name,
+          userEvent.click(
+            screen.getByRole("button", {
+              name: new RegExp(`rename: ${firstHazardStatistic.name}`, "i"),
+            })
+          );
+
+          const nameTextboxEl = screen.getByRole("textbox", {
+            name: /new name/i,
+          });
+          userEvent.clear(nameTextboxEl);
+          userEvent.type(nameTextboxEl, validName);
+          userEvent.clear(nameTextboxEl);
+          userEvent.click(screen.getByRole("button", { name: /^rename$/i }));
+
+          expect(screen.getByLabelText(validName)).toBeInTheDocument();
         });
-        userEvent.clear(statisticDisplayEl);
-        userEvent.type(statisticDisplayEl, validInput.toString());
-        userEvent.clear(statisticDisplayEl);
 
-        expect(statisticDisplayEl).toHaveDisplayValue("");
-        expect(statisticDisplayEl).toHaveValue(null);
+        test("should revert to prior valid speed skill on participant", () => {
+          render(<TabbedDisplay />);
+          createAnExpandedParticipantRow();
 
-        statisticDisplayEl.blur();
+          userEvent.click(
+            screen.getByRole("button", {
+              name: new RegExp(`rename: ${firstSpeedStatistic.name}`, "i"),
+            })
+          );
 
-        expect(statisticDisplayEl).toHaveDisplayValue(validInput.toString());
-        expect(statisticDisplayEl).toHaveValue(validInput);
+          const nameTextboxEl = screen.getByRole("textbox", {
+            name: /new name/i,
+          });
+          userEvent.clear(nameTextboxEl);
+          userEvent.type(nameTextboxEl, validName);
+          userEvent.clear(nameTextboxEl);
+          userEvent.click(screen.getByRole("button", { name: /^rename$/i }));
+
+          expect(screen.getByLabelText(validName)).toBeInTheDocument();
+        });
       });
 
-      test("should create a speed stat with the appropriate name when creating a new speed stat", () => {
-        render(<TabbedDisplay />);
-        createAnExpandedParticipantRow();
+      describe("when renaming a second skill", () => {
+        test("should set renaming textbox to the associated hazard skills name", () => {
+          render(<TabbedDisplay />);
+          createAnExpandedParticipantRow();
 
-        userEvent.click(
-          screen.getByRole("button", {
-            name: new RegExp(`delete: ${primaryStat.name}`, "i"),
-          })
-        );
-        userEvent.click(
-          screen.getAllByRole("button", { name: /create statistic/i })[0]
-        );
+          userEvent.click(
+            screen.getByRole("button", {
+              name: new RegExp(`rename: ${firstHazardStatistic.name}`),
+            })
+          );
 
-        expect(
-          screen.getByLabelText(`${ParticipantRow.DEFAULT_STAT_NAME} #1`)
-        ).toBeInTheDocument();
+          const renameInputEl = screen.getByRole("textbox", {
+            name: /new name/i,
+          });
+          userEvent.clear(renameInputEl);
+          userEvent.type(renameInputEl, validName);
+          userEvent.click(screen.getByRole("button", { name: /^rename$/i }));
+
+          userEvent.click(
+            screen.getByRole("button", {
+              name: new RegExp(`rename: ${secondHazardStatistic.name}`),
+            })
+          );
+
+          expect(
+            screen.getByRole("textbox", { name: /new name/i })
+          ).toHaveValue(secondHazardStatistic.name);
+        });
+
+        test("should set renaming textbox to the associated speed skills name", () => {
+          render(<TabbedDisplay />);
+          createAnExpandedParticipantRow();
+
+          userEvent.click(
+            screen.getByRole("button", {
+              name: new RegExp(`rename: ${firstSpeedStatistic.name}`),
+            })
+          );
+
+          const renameInputEl = screen.getByRole("textbox", {
+            name: /new name/i,
+          });
+          userEvent.clear(renameInputEl);
+          userEvent.type(renameInputEl, validName);
+          userEvent.click(screen.getByRole("button", { name: /^rename$/i }));
+
+          userEvent.click(
+            screen.getByRole("button", {
+              name: new RegExp(`rename: ${secondSpeedStatistic.name}`),
+            })
+          );
+
+          expect(
+            screen.getByRole("textbox", { name: /new name/i })
+          ).toHaveValue(secondSpeedStatistic.name);
+        });
+      });
+
+      describe("when changing to valid score", () => {
+        test("should update hazard skill on participant", () => {
+          render(<TabbedDisplay />);
+          createAnExpandedParticipantRow();
+
+          const statisticDisplayEl = screen.getByRole("spinbutton", {
+            name: firstHazardStatistic.name,
+          });
+          userEvent.clear(statisticDisplayEl);
+          userEvent.type(statisticDisplayEl, validScore.toString());
+          statisticDisplayEl.blur();
+
+          expect(statisticDisplayEl).toHaveDisplayValue(validScore.toString());
+          expect(statisticDisplayEl).toHaveValue(validScore);
+        });
+
+        test("should update speed skill on participant", () => {
+          render(<TabbedDisplay />);
+          createAnExpandedParticipantRow();
+
+          const statisticDisplayEl = screen.getByRole("spinbutton", {
+            name: firstSpeedStatistic.name,
+          });
+          userEvent.clear(statisticDisplayEl);
+          userEvent.type(statisticDisplayEl, validScore.toString());
+          statisticDisplayEl.blur();
+
+          expect(statisticDisplayEl).toHaveDisplayValue(validScore.toString());
+          expect(statisticDisplayEl).toHaveValue(validScore);
+        });
+      });
+
+      describe("when changing to invalid score", () => {
+        test("should revert to prior valid hazard skill on participant", () => {
+          render(<TabbedDisplay />);
+          createAnExpandedParticipantRow();
+
+          const statisticDisplayEl = screen.getByRole("spinbutton", {
+            name: firstHazardStatistic.name,
+          });
+          userEvent.clear(statisticDisplayEl);
+          userEvent.type(statisticDisplayEl, validScore.toString());
+          userEvent.clear(statisticDisplayEl);
+          statisticDisplayEl.blur();
+
+          expect(statisticDisplayEl).toHaveDisplayValue(validScore.toString());
+          expect(statisticDisplayEl).toHaveValue(validScore);
+        });
+
+        test("should revert to prior valid speed skill on participant", () => {
+          render(<TabbedDisplay />);
+          createAnExpandedParticipantRow();
+
+          const statisticDisplayEl = screen.getByRole("spinbutton", {
+            name: firstSpeedStatistic.name,
+          });
+          userEvent.clear(statisticDisplayEl);
+          userEvent.type(statisticDisplayEl, validScore.toString());
+          userEvent.clear(statisticDisplayEl);
+          statisticDisplayEl.blur();
+
+          expect(statisticDisplayEl).toHaveDisplayValue(validScore.toString());
+          expect(statisticDisplayEl).toHaveValue(validScore);
+        });
+      });
+
+      describe("when leaving score blank", () => {
+        test("should revert to hazard statistic's prior valid score", () => {
+          render(<TabbedDisplay />);
+          createAnExpandedParticipantRow();
+
+          const statisticDisplayEl = screen.getByRole("spinbutton", {
+            name: firstHazardStatistic.name,
+          });
+          userEvent.clear(statisticDisplayEl);
+          userEvent.type(statisticDisplayEl, validScore.toString());
+          userEvent.clear(statisticDisplayEl);
+          statisticDisplayEl.blur();
+
+          expect(statisticDisplayEl).toHaveDisplayValue(validScore.toString());
+          expect(statisticDisplayEl).toHaveValue(validScore);
+        });
+
+        test("should revert to speed statistic's prior valid score", () => {
+          render(<TabbedDisplay />);
+          createAnExpandedParticipantRow();
+
+          const statisticDisplayEl = screen.getByRole("spinbutton", {
+            name: firstSpeedStatistic.name,
+          });
+          userEvent.clear(statisticDisplayEl);
+          userEvent.type(statisticDisplayEl, validScore.toString());
+          userEvent.clear(statisticDisplayEl);
+          statisticDisplayEl.blur();
+
+          expect(statisticDisplayEl).toHaveDisplayValue(validScore.toString());
+          expect(statisticDisplayEl).toHaveValue(validScore);
+        });
+      });
+
+      describe("when creating a new skill", () => {
+        test("should have hazard statistic with appropriate name", () => {
+          render(<TabbedDisplay />);
+          createAnExpandedParticipantRow();
+
+          userEvent.click(
+            screen.getByRole("button", {
+              name: new RegExp(`delete: ${firstHazardStatistic.name}`, "i"),
+            })
+          );
+          userEvent.click(
+            screen.getAllByRole("button", { name: /create statistic/i })[1]
+          );
+
+          expect(
+            screen.getByLabelText(`${ParticipantRow.DEFAULT_STAT_NAME} #1`)
+          ).toBeInTheDocument();
+        });
+
+        test("should have speed statistic with appropriate name", () => {
+          render(<TabbedDisplay />);
+          createAnExpandedParticipantRow();
+
+          userEvent.click(
+            screen.getByRole("button", {
+              name: new RegExp(`delete: ${firstSpeedStatistic.name}`, "i"),
+            })
+          );
+          userEvent.click(
+            screen.getAllByRole("button", { name: /create statistic/i })[0]
+          );
+
+          expect(
+            screen.getByLabelText(`${ParticipantRow.DEFAULT_STAT_NAME} #1`)
+          ).toBeInTheDocument();
+        });
       });
     });
 
@@ -363,48 +682,6 @@ describe("ParticipantTable Event Handlers", () => {
 
         expect(screen.queryByLabelText(name)).not.toBeInTheDocument();
       });
-    });
-
-    test("should have the appropriate default participant name when a participant has been removed", () => {
-      render(<TabbedDisplay />);
-      userEvent.click(screen.getByRole("tab", { name: /participants/i }));
-
-      const addButton = screen.getByRole("button", {
-        name: /add participant/i,
-      });
-      userEvent.click(addButton);
-      userEvent.click(addButton);
-      userEvent.click(addButton);
-      userEvent.click(addButton);
-      userEvent.click(
-        screen.getByRole("button", {
-          name: new RegExp(`remove: ${ParticipantTable.DEFAULT_NAME} #2`, "i"),
-        })
-      );
-      userEvent.click(screen.getByRole("button", { name: /delete/i }));
-      userEvent.click(
-        screen.getByRole("button", {
-          name: new RegExp(`remove: ${ParticipantTable.DEFAULT_NAME} #4`, "i"),
-        })
-      );
-      userEvent.click(screen.getByRole("button", { name: /delete/i }));
-      userEvent.click(addButton);
-
-      expect(
-        screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #1`)
-      ).toBeInTheDocument();
-      expect(
-        screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #2`)
-      ).toBeInTheDocument();
-      expect(
-        screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #3`)
-      ).toBeInTheDocument();
-      expect(
-        screen.queryByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #4`)
-      ).not.toBeInTheDocument();
-      expect(
-        screen.queryByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #5`)
-      ).not.toBeInTheDocument();
     });
   });
 

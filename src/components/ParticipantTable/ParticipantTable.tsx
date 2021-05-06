@@ -74,15 +74,15 @@ export default class ParticipantTable extends Component<Props, State> {
     this.closeModal();
   }
 
+  private closeModal() {
+    this.setState({ modalShown: false });
+  }
+
   private promptParticipantRemoval(participant: Participant) {
     this.setState({
       modalShown: true,
       selectedParticipant: participant,
     });
-  }
-
-  private closeModal() {
-    this.setState({ modalShown: false });
   }
 
   private renderFloatingActionButton() {

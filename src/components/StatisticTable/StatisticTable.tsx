@@ -39,6 +39,7 @@ export default class StatisticTable extends React.Component<Props, State> {
 
     this.handleCreateClick = this.handleCreateClick.bind(this);
     this.handleStatisticNameChange = this.handleStatisticNameChange.bind(this);
+    this.handleStatisticNameBlur = this.handleStatisticNameBlur.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
 
     this.state = {
@@ -96,8 +97,19 @@ export default class StatisticTable extends React.Component<Props, State> {
   private handleStatisticNameChange(evt: React.ChangeEvent<HTMLInputElement>) {
     const { value } = evt.target;
 
-    if (value) this.setState({ validNewName: value });
+    if (value.trim()) this.setState({ validNewName: value.trim() });
+
     this.setState({ currentNewName: value });
+  }
+
+  private handleStatisticNameBlur() {
+    this.setState((state) => {
+      const { currentNewName, validNewName } = state;
+
+      if (currentNewName.trim()) return { currentNewName };
+
+      return { currentNewName: validNewName };
+    });
   }
 
   private closeModal() {
@@ -170,6 +182,7 @@ export default class StatisticTable extends React.Component<Props, State> {
               type="text"
               value={currentNewName}
               onChange={this.handleStatisticNameChange}
+              onBlur={this.handleStatisticNameBlur}
               required
             />
           </label>

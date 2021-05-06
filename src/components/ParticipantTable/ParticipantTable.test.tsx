@@ -127,11 +127,10 @@ test("should trigger update when participant changes", () => {
   );
 
   const [rowEl] = screen.getAllByRole("row");
+  const nameTextboxEl = within(rowEl).getByRole("textbox", { name: /name/i });
 
-  userEvent.type(
-    within(rowEl).getByRole("textbox", { name: /name/i }),
-    newName
-  );
+  userEvent.type(nameTextboxEl, newName);
+  nameTextboxEl.blur();
 
   expect(onParticipantChange).toBeCalled();
 });

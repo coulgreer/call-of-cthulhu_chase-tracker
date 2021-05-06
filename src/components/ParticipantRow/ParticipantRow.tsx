@@ -200,12 +200,12 @@ export default class ParticipantRow extends React.Component<Props, State> {
     this.speedStatSequence = new UniqueSequenceGenerator(SEQUENCE_START);
     this.hazardStatSequence = new UniqueSequenceGenerator(SEQUENCE_START);
 
-    this.handleNameChange = this.handleNameChange.bind(this);
-    this.handleNameBlur = this.handleNameBlur.bind(this);
-
     this.toggleExpansion = this.toggleExpansion.bind(this);
     this.openModal = this.openModal.bind(this);
     this.closeModal = this.closeModal.bind(this);
+
+    this.handleNameChange = this.handleNameChange.bind(this);
+    this.handleNameBlur = this.handleNameBlur.bind(this);
 
     // Speed Statistic method binds
     this.createSpeedStatistic = this.createSpeedStatistic.bind(this);
@@ -245,13 +245,11 @@ export default class ParticipantRow extends React.Component<Props, State> {
   }
 
   private handleNameChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const { onParticipantChange } = this.props;
+    const { participant } = this.props;
     const { value } = event.currentTarget;
 
     if (value.trim()) {
-      const { participant } = this.props;
-      participant.name = value;
-      if (onParticipantChange) onParticipantChange(participant);
+      participant.name = value.trim();
       this.setState({ nameWarningShown: false });
     } else {
       this.setState({ nameWarningShown: true });
@@ -261,7 +259,8 @@ export default class ParticipantRow extends React.Component<Props, State> {
   }
 
   private handleNameBlur() {
-    const { participant } = this.props;
+    const { participant, onParticipantChange } = this.props;
+    if (onParticipantChange) onParticipantChange(participant);
 
     this.setState({ currentName: participant.name, nameWarningShown: false });
   }
@@ -390,27 +389,41 @@ export default class ParticipantRow extends React.Component<Props, State> {
   }
 
   private handleSpeedStatisticBlur(index: number) {
-    this.setState((state) => {
+    this.setState((state, props) => {
+      const { participant, onParticipantChange } = props;
       const { speedStatistics } = state;
       const wrappedStatistic = speedStatistics[index];
       const { score } = wrappedStatistic.statistic;
 
-      wrappedStatistic.currentValue = score.toString();
       speedStatistics[index] = wrappedStatistic;
+      participant.speedSkills = speedStatistics.map(
+        (statistic) => statistic.statistic
+      );
+      if (onParticipantChange) onParticipantChange(participant);
+
+      wrappedStatistic.currentValue = score.toString();
 
       return { speedStatistics };
     });
   }
 
   private handleHazardStatisticBlur(index: number) {
-    const { hazardStatistics } = this.state;
-    const wrappedStatistic = hazardStatistics[index];
-    const { score } = wrappedStatistic.statistic;
+    this.setState((state, props) => {
+      const { participant, onParticipantChange } = props;
+      const { hazardStatistics } = state;
+      const wrappedStatistic = hazardStatistics[index];
+      const { score } = wrappedStatistic.statistic;
 
-    wrappedStatistic.currentValue = score.toString();
-    hazardStatistics[index] = wrappedStatistic;
+      hazardStatistics[index] = wrappedStatistic;
+      participant.hazardSkills = hazardStatistics.map(
+        (statistic) => statistic.statistic
+      );
+      if (onParticipantChange) onParticipantChange(participant);
 
-    this.setState({ hazardStatistics });
+      wrappedStatistic.currentValue = score.toString();
+
+      return { hazardStatistics };
+    });
   }
 
   private handleSelectionChange(event: React.ChangeEvent<HTMLInputElement>) {

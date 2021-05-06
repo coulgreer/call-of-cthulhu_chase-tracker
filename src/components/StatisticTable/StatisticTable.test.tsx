@@ -13,7 +13,7 @@ const DEFAULT_PROPS = {
   ],
 };
 
-test("should render properly", () => {
+test("should render main display properly", () => {
   const [first, second] = DEFAULT_PROPS.data;
   render(
     <StatisticTable title={DEFAULT_PROPS.title} data={DEFAULT_PROPS.data} />
@@ -51,45 +51,12 @@ test("should render properly", () => {
   ).toBeInTheDocument();
 });
 
-test("should use provided callback", () => {
+test("should properly render renaming modal", () => {
   const [first] = DEFAULT_PROPS.data;
-  const handleCreateClick = jest.fn();
-  const handleDeleteClick = jest.fn();
-  const handleRenameClick = jest.fn();
-  render(
-    <StatisticTable
-      title={DEFAULT_PROPS.title}
-      data={DEFAULT_PROPS.data}
-      onCreateClick={handleCreateClick}
-      onDeleteClick={handleDeleteClick}
-      onRenameStatistic={handleRenameClick}
-    />
-  );
+  const {
+    statistic: { name },
+  } = first;
 
-  userEvent.click(screen.getByRole("button", { name: /create statistic/i }));
-
-  expect(handleCreateClick).toBeCalledTimes(1);
-
-  userEvent.click(
-    screen.getByRole("button", {
-      name: new RegExp(`delete: ${first.statistic.name}`),
-    })
-  );
-
-  expect(handleDeleteClick).toBeCalledTimes(1);
-
-  userEvent.click(
-    screen.getByRole("button", {
-      name: new RegExp(`rename: ${first.statistic.name}`),
-    })
-  );
-  userEvent.click(screen.getByRole("button", { name: /^rename$/i }));
-
-  expect(handleRenameClick).toBeCalledTimes(1);
-});
-
-test("should properly display modal", () => {
-  const [first] = DEFAULT_PROPS.data;
   render(
     <StatisticTable title={DEFAULT_PROPS.title} data={DEFAULT_PROPS.data} />
   );
@@ -98,11 +65,14 @@ test("should properly display modal", () => {
 
   userEvent.click(
     screen.getByRole("button", {
-      name: new RegExp(`rename: ${first.statistic.name}`),
+      name: new RegExp(`rename: ${name}`),
     })
   );
 
-  expect(screen.getByRole("dialog")).toBeInTheDocument();
+  expect(screen.getByRole("dialog")).toBeVisible();
+  expect(screen.getByRole("textbox", { name: /new name/i })).toBeVisible();
+  expect(screen.getByRole("button", { name: /cancel/i })).toBeVisible();
+  expect(screen.getByRole("button", { name: /^rename$/i })).toBeVisible();
 });
 
 test("should close modal when cancel button is pressed", () => {
@@ -135,4 +105,220 @@ test("should close modal when accept button is pressed", () => {
   userEvent.click(screen.getByRole("button", { name: /^rename$/i }));
 
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+});
+
+describe("Event Handlers", () => {
+  describe("Foriegn", () => {
+    test("should trigger statistic creation", () => {
+      const handleCreateClick = jest.fn();
+
+      render(
+        <StatisticTable
+          title={DEFAULT_PROPS.title}
+          data={DEFAULT_PROPS.data}
+          onCreateClick={handleCreateClick}
+        />
+      );
+
+      userEvent.click(
+        screen.getByRole("button", { name: /create statistic/i })
+      );
+
+      expect(handleCreateClick).toBeCalledTimes(1);
+    });
+
+    test("should trigger statistic deletion", () => {
+      const [first] = DEFAULT_PROPS.data;
+      const {
+        statistic: { name },
+      } = first;
+      const handleDeleteClick = jest.fn();
+
+      render(
+        <StatisticTable
+          title={DEFAULT_PROPS.title}
+          data={DEFAULT_PROPS.data}
+          onDeleteClick={handleDeleteClick}
+        />
+      );
+
+      userEvent.click(
+        screen.getByRole("button", {
+          name: new RegExp(`delete: ${name}`),
+        })
+      );
+
+      expect(handleDeleteClick).toBeCalledTimes(1);
+    });
+
+    test("should trigger statistic rename", () => {
+      const [first] = DEFAULT_PROPS.data;
+      const {
+        statistic: { name },
+      } = first;
+      const handleRenameClick = jest.fn();
+
+      render(
+        <StatisticTable
+          title={DEFAULT_PROPS.title}
+          data={DEFAULT_PROPS.data}
+          onRenameStatistic={handleRenameClick}
+        />
+      );
+
+      userEvent.click(
+        screen.getByRole("button", {
+          name: new RegExp(`rename: ${name}`),
+        })
+      );
+      userEvent.click(screen.getByRole("button", { name: /^rename$/i }));
+
+      expect(handleRenameClick).toBeCalledTimes(1);
+    });
+
+    test("should trigger statistic value change and blur", () => {
+      const [first] = DEFAULT_PROPS.data;
+      const {
+        statistic: { name },
+      } = first;
+      const onStatisticValueChange = jest.fn();
+      const onStatisticValueBlur = jest.fn();
+
+      render(
+        <StatisticTable
+          title={DEFAULT_PROPS.title}
+          data={DEFAULT_PROPS.data}
+          onStatisticValueChange={onStatisticValueChange}
+          onStatisticValueBlur={onStatisticValueBlur}
+        />
+      );
+
+      const valueTextboxEl = screen.getByRole("spinbutton", { name });
+      userEvent.clear(valueTextboxEl);
+      userEvent.type(valueTextboxEl, "20");
+      valueTextboxEl.blur();
+
+      expect(onStatisticValueChange).toBeCalled();
+      expect(onStatisticValueBlur).toBeCalledTimes(1);
+    });
+  });
+
+  describe("Domestic", () => {
+    const validName = "Valid Name";
+
+    test("should update statistic name when changing to valid name", () => {
+      const data = [...DEFAULT_PROPS.data];
+      const [first] = data;
+      const {
+        statistic: { name },
+      } = first;
+
+      render(<StatisticTable title={DEFAULT_PROPS.title} data={data} />);
+
+      userEvent.click(
+        screen.getByRole("button", {
+          name: new RegExp(`rename: ${name}`, "i"),
+        })
+      );
+
+      const nameTextboxEl = screen.getByRole("textbox", {
+        name: /new name/i,
+      });
+      userEvent.clear(nameTextboxEl);
+      userEvent.type(nameTextboxEl, validName);
+      nameTextboxEl.blur();
+
+      expect(nameTextboxEl).toHaveValue(validName);
+    });
+
+    test("should revert to prior valid statistic name when changing to invalid name", () => {
+      const data = [...DEFAULT_PROPS.data];
+      const [first] = data;
+      const {
+        statistic: { name },
+      } = first;
+      const invalidName = "   ";
+
+      render(<StatisticTable title={DEFAULT_PROPS.title} data={data} />);
+
+      userEvent.click(
+        screen.getByRole("button", {
+          name: new RegExp(`rename: ${name}`, "i"),
+        })
+      );
+
+      const nameTextboxEl = screen.getByRole("textbox", {
+        name: /new name/i,
+      });
+      userEvent.clear(nameTextboxEl);
+      userEvent.type(nameTextboxEl, validName);
+      userEvent.clear(nameTextboxEl);
+      userEvent.type(nameTextboxEl, invalidName);
+      nameTextboxEl.blur();
+
+      expect(nameTextboxEl).toHaveValue(validName);
+    });
+
+    test("should revert to prior valid statistic name when leaving name blank", () => {
+      const data = [...DEFAULT_PROPS.data];
+      const [first] = data;
+      const {
+        statistic: { name },
+      } = first;
+
+      render(<StatisticTable title={DEFAULT_PROPS.title} data={data} />);
+
+      userEvent.click(
+        screen.getByRole("button", {
+          name: new RegExp(`rename: ${name}`, "i"),
+        })
+      );
+
+      const nameTextboxEl = screen.getByRole("textbox", {
+        name: /new name/i,
+      });
+      userEvent.clear(nameTextboxEl);
+      userEvent.type(nameTextboxEl, validName);
+      userEvent.clear(nameTextboxEl);
+      nameTextboxEl.blur();
+
+      expect(nameTextboxEl).toHaveValue(validName);
+    });
+
+    test("should set renaming textbox to the associated statistic's name", () => {
+      const data = [...DEFAULT_PROPS.data];
+      const [first, second] = data;
+      const {
+        statistic: { name: firstsName },
+      } = first;
+      const {
+        statistic: { name: secondsName },
+      } = second;
+
+      render(<StatisticTable title={DEFAULT_PROPS.title} data={data} />);
+
+      userEvent.click(
+        screen.getByRole("button", {
+          name: new RegExp(`rename: ${firstsName}`),
+        })
+      );
+
+      const renameInputEl = screen.getByRole("textbox", {
+        name: /new name/i,
+      });
+      userEvent.clear(renameInputEl);
+      userEvent.type(renameInputEl, validName);
+      userEvent.click(screen.getByRole("button", { name: /^rename$/i }));
+
+      userEvent.click(
+        screen.getByRole("button", {
+          name: new RegExp(`rename: ${secondsName}`),
+        })
+      );
+
+      expect(screen.getByRole("textbox", { name: /new name/i })).toHaveValue(
+        secondsName
+      );
+    });
+  });
 });
