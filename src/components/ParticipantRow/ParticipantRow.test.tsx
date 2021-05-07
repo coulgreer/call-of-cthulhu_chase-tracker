@@ -16,8 +16,8 @@ const DEFAULT_PROPS: {
     dexterity: 15,
     movementRate: 2,
     derivedSpeed: 0,
-    speedSkills: ParticipantRow.DEFAULT_SPEED_STATISTICS,
-    hazardSkills: ParticipantRow.DEFAULT_HAZARD_STATISTICS,
+    speedStatistics: ParticipantRow.DEFAULT_SPEED_STATISTICS,
+    hazardStatistics: ParticipantRow.DEFAULT_HAZARD_STATISTICS,
   },
   onParticipantChange: jest.fn(),
 };
@@ -31,7 +31,7 @@ describe("Collapse/Expand detailed data", () => {
     ride,
     aircraft,
     boat,
-  ] = participant.speedSkills;
+  ] = participant.speedStatistics;
 
   const [
     strength,
@@ -41,7 +41,7 @@ describe("Collapse/Expand detailed data", () => {
     brawl,
     handgun,
     rifle,
-  ] = participant.hazardSkills;
+  ] = participant.hazardStatistics;
 
   test("should render participant information properly when collapsed", () => {
     render(<ParticipantRow participant={participant} />);
@@ -221,7 +221,7 @@ describe("Statistic Display event handlers", () => {
   const [firstSpeedStatistic] = ParticipantRow.DEFAULT_SPEED_STATISTICS;
 
   describe("when changing to valid score", () => {
-    test("should revert dexterity score to prior valid value", () => {
+    test("should revert dexterity score to prior valid score", () => {
       const participant = Object.assign(DEFAULT_PROPS.participant);
       const handleParticipantChange = jest.fn();
 
@@ -347,7 +347,7 @@ describe("Statistic Display event handlers", () => {
   describe("when changing to invalid score", () => {
     const invalidScore = "   ";
 
-    test("should revert dexterity score to prior valid value", () => {
+    test("should revert dexterity score to prior valid score", () => {
       const participant = Object.assign(DEFAULT_PROPS.participant);
       const handleParticipantChange = jest.fn();
 
@@ -476,7 +476,7 @@ describe("Statistic Display event handlers", () => {
   });
 
   describe("when leaving score blank", () => {
-    test("should revert dexterity score to prior valid value", () => {
+    test("should revert dexterity score to prior valid score", () => {
       const participant = Object.assign(DEFAULT_PROPS.participant);
       const handleParticipantChange = jest.fn();
 

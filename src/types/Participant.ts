@@ -9,6 +9,6 @@ export default interface Participant {
   dexterity: number;
   movementRate: number;
   derivedSpeed: number;
-  speedSkills: Statistic[];
-  hazardSkills: Statistic[];
+  speedStatistics: Statistic[];
+  hazardStatistics: Statistic[];
 }

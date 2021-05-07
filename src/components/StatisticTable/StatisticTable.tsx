@@ -94,8 +94,10 @@ export default class StatisticTable extends React.Component<Props, State> {
     if (onStatisticValueBlur) onStatisticValueBlur(index);
   }
 
-  private handleStatisticNameChange(evt: React.ChangeEvent<HTMLInputElement>) {
-    const { value } = evt.target;
+  private handleStatisticNameChange(
+    event: React.ChangeEvent<HTMLInputElement>
+  ) {
+    const { value } = event.currentTarget;
 
     if (value.trim()) this.setState({ validNewName: value.trim() });
 

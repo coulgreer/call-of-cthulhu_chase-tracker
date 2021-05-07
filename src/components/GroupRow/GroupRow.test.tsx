@@ -14,8 +14,8 @@ function createParticipant(id: string): Participant {
     dexterity: 15,
     movementRate: 3,
     derivedSpeed: 1,
-    speedSkills: [],
-    hazardSkills: [],
+    speedStatistics: [],
+    hazardStatistics: [],
   };
 }
 
@@ -74,8 +74,8 @@ const DEFAULT_PROPS: {
       dexterity: 15,
       movementRate: 3,
       derivedSpeed: 1,
-      speedSkills: [],
-      hazardSkills: [],
+      speedStatistics: [],
+      hazardStatistics: [],
     },
     {
       id: "p2",
@@ -83,8 +83,8 @@ const DEFAULT_PROPS: {
       dexterity: 50,
       movementRate: 6,
       derivedSpeed: 2,
-      speedSkills: [],
-      hazardSkills: [],
+      speedStatistics: [],
+      hazardStatistics: [],
     },
     {
       id: "p3",
@@ -92,8 +92,8 @@ const DEFAULT_PROPS: {
       dexterity: 75,
       movementRate: 8,
       derivedSpeed: 3,
-      speedSkills: [],
-      hazardSkills: [],
+      speedStatistics: [],
+      hazardStatistics: [],
     },
   ],
   handleDistancerBlur: jest.fn(),
@@ -302,8 +302,8 @@ describe("Member Display", () => {
           dexterity: 15,
           movementRate: 6,
           derivedSpeed: 1,
-          speedSkills: [],
-          hazardSkills: [],
+          speedStatistics: [],
+          hazardStatistics: [],
         },
       ];
 
@@ -355,8 +355,8 @@ describe("Member Display", () => {
           dexterity: 15,
           movementRate: lowestMOV,
           derivedSpeed: 1,
-          speedSkills: [],
-          hazardSkills: [],
+          speedStatistics: [],
+          hazardStatistics: [],
         },
         {
           id: "p2",
@@ -364,8 +364,8 @@ describe("Member Display", () => {
           dexterity: 50,
           movementRate: highestMOV,
           derivedSpeed: 2,
-          speedSkills: [],
-          hazardSkills: [],
+          speedStatistics: [],
+          hazardStatistics: [],
         },
       ];
 

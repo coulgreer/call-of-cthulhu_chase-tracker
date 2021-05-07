@@ -26,7 +26,7 @@ interface State {
   nameWarningShown: boolean;
   expansionShown: boolean;
   modalShown: boolean;
-  selectedStatValue: string;
+  selectedStatisticScore: string;
   currentName: string;
   dexterity: WrappedStatistic;
   movementRate: WrappedStatistic;
@@ -146,8 +146,8 @@ export default class ParticipantRow extends React.Component<Props, State> {
     };
   }
 
-  private static generateSpeedModifier(value: number) {
-    const degreeOfSuccess = roll(value);
+  private static generateSpeedModifier(score: number) {
+    const degreeOfSuccess = roll(score);
 
     switch (degreeOfSuccess) {
       case Result.CriticalSuccess:
@@ -166,28 +166,28 @@ export default class ParticipantRow extends React.Component<Props, State> {
     }
   }
 
-  private static parseValidValue(
+  private static parseValidScore(
     value: string,
-    { limiter, statistic: { score } }: WrappedStatistic
+    { limiter, statistic: { score: originalScore } }: WrappedStatistic
   ) {
     const upperLimit = limiter?.upperLimit || Number.MAX_SAFE_INTEGER;
     const lowerLimit = limiter?.lowerLimit || Number.MIN_SAFE_INTEGER;
 
     if (value !== "") {
-      const valueNum = Number.parseInt(value, 10);
+      const score = Number.parseInt(value, 10);
 
-      if (valueNum > upperLimit) {
+      if (score > upperLimit) {
         return upperLimit;
       }
 
-      if (valueNum < lowerLimit) {
+      if (score < lowerLimit) {
         return lowerLimit;
       }
 
-      return valueNum;
+      return score;
     }
 
-    return score;
+    return originalScore;
   }
 
   private speedStatSequence: UniqueSequenceGenerator;
@@ -234,7 +234,7 @@ export default class ParticipantRow extends React.Component<Props, State> {
       nameWarningShown: false,
       expansionShown: false,
       modalShown: false,
-      selectedStatValue: "",
+      selectedStatisticScore: "",
       currentName: participant.name,
       dexterity: ParticipantRow.initializeDexterity(participant),
       movementRate: ParticipantRow.initializeMovementRate(participant),
@@ -270,7 +270,7 @@ export default class ParticipantRow extends React.Component<Props, State> {
       const { dexterity } = state;
       const { statistic } = dexterity;
 
-      statistic.score = ParticipantRow.parseValidValue(value, dexterity);
+      statistic.score = ParticipantRow.parseValidScore(value, dexterity);
 
       dexterity.currentValue = value;
 
@@ -283,7 +283,7 @@ export default class ParticipantRow extends React.Component<Props, State> {
       const { derivedSpeed } = state;
       const { statistic } = derivedSpeed;
 
-      statistic.score = ParticipantRow.parseValidValue(value, derivedSpeed);
+      statistic.score = ParticipantRow.parseValidScore(value, derivedSpeed);
 
       derivedSpeed.currentValue = value;
 
@@ -296,7 +296,7 @@ export default class ParticipantRow extends React.Component<Props, State> {
       const { movementRate } = state;
       const { statistic } = movementRate;
 
-      statistic.score = ParticipantRow.parseValidValue(value, movementRate);
+      statistic.score = ParticipantRow.parseValidScore(value, movementRate);
 
       movementRate.currentValue = value;
 
@@ -310,7 +310,7 @@ export default class ParticipantRow extends React.Component<Props, State> {
       const wrappedStatistic = speedStatistics[index];
       const { statistic } = wrappedStatistic;
 
-      statistic.score = ParticipantRow.parseValidValue(value, wrappedStatistic);
+      statistic.score = ParticipantRow.parseValidScore(value, wrappedStatistic);
 
       wrappedStatistic.currentValue = value;
 
@@ -325,7 +325,7 @@ export default class ParticipantRow extends React.Component<Props, State> {
       const wrappedStatistic = hazardStatistics[index];
       const { statistic } = wrappedStatistic;
 
-      statistic.score = ParticipantRow.parseValidValue(value, wrappedStatistic);
+      statistic.score = ParticipantRow.parseValidScore(value, wrappedStatistic);
 
       wrappedStatistic.currentValue = value;
 
@@ -396,7 +396,7 @@ export default class ParticipantRow extends React.Component<Props, State> {
       const { score } = wrappedStatistic.statistic;
 
       speedStatistics[index] = wrappedStatistic;
-      participant.speedSkills = speedStatistics.map(
+      participant.speedStatistics = speedStatistics.map(
         (statistic) => statistic.statistic
       );
       if (onParticipantChange) onParticipantChange(participant);
@@ -415,7 +415,7 @@ export default class ParticipantRow extends React.Component<Props, State> {
       const { score } = wrappedStatistic.statistic;
 
       hazardStatistics[index] = wrappedStatistic;
-      participant.hazardSkills = hazardStatistics.map(
+      participant.hazardStatistics = hazardStatistics.map(
         (statistic) => statistic.statistic
       );
       if (onParticipantChange) onParticipantChange(participant);
@@ -427,36 +427,36 @@ export default class ParticipantRow extends React.Component<Props, State> {
   }
 
   private handleSelectionChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const { value } = event.target;
+    const { value } = event.currentTarget;
 
-    this.setState({ selectedStatValue: value });
+    this.setState({ selectedStatisticScore: value });
   }
 
   private initializeSpeedStatistics({
-    speedSkills,
+    speedStatistics,
   }: Participant): WrappedStatistic[] {
-    return speedSkills.map((skill) => ({
-      statistic: skill,
-      currentValue: skill.score.toString(),
+    return speedStatistics.map((statistic) => ({
+      statistic,
+      currentValue: statistic.score.toString(),
       key: this.speedStatSequence.nextNum(),
     }));
   }
 
   private initializeHazardStatistics({
-    hazardSkills,
+    hazardStatistics,
   }: Participant): WrappedStatistic[] {
-    return hazardSkills.map((skill) => ({
-      statistic: skill,
-      currentValue: skill.score.toString(),
+    return hazardStatistics.map((statistic) => ({
+      statistic,
+      currentValue: statistic.score.toString(),
       key: this.hazardStatSequence.nextNum(),
     }));
   }
 
   private calculateSpeedModifier() {
-    const { selectedStatValue } = this.state;
+    const { selectedStatisticScore } = this.state;
 
     const modifier = ParticipantRow.generateSpeedModifier(
-      Number.parseInt(selectedStatValue, 10)
+      Number.parseInt(selectedStatisticScore, 10)
     );
     this.updateSpeedModifier(modifier);
     this.closeModal();
@@ -584,7 +584,7 @@ export default class ParticipantRow extends React.Component<Props, State> {
         isOpen={modalShown}
         onRequestClose={this.closeModal}
       >
-        <p>Select a speed skill</p>
+        <p>Select a speed statistic</p>
         <form onSubmit={this.calculateSpeedModifier}>
           {speedStatistics.map((wrappedStatistic) => (
             <label

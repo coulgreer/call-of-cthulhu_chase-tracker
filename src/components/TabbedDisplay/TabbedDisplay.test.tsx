@@ -55,7 +55,7 @@ test("should switch displays when tab is clicked", () => {
 
 /*
  * TODO (Coul Greer): Ensure that any expected changes cause the new participant data to update the
- * associated particpant object. For example, name change, dexterity score change, hazard skill changes,
+ * associated particpant object. For example, name change, dexterity score change, hazard statistic changes,
  * etc.
  */
 
@@ -134,11 +134,11 @@ describe("ParticipantTable Event Handlers", () => {
     ).not.toBeInTheDocument();
   });
 
-  describe("Skills", () => {
+  describe("Statistics", () => {
     const validScore = 11;
     const invalidScore = "invalid";
 
-    describe("Core Skills", () => {
+    describe("Core Statistics", () => {
       describe("when changing to valid score", () => {
         test("should update dexterity score on participant", () => {
           render(<TabbedDisplay />);
@@ -153,7 +153,7 @@ describe("ParticipantTable Event Handlers", () => {
           expect(dexterityEl).toHaveDisplayValue(validScore.toString());
         });
 
-        test("should update derived speed value on participant", () => {
+        test("should update derived speed score on participant", () => {
           render(<TabbedDisplay />);
           createAnExpandedParticipantRow();
 
@@ -166,7 +166,7 @@ describe("ParticipantTable Event Handlers", () => {
           expect(speedEl).toHaveDisplayValue(validScore.toString());
         });
 
-        test("should update movement rate value on participant", () => {
+        test("should update movement rate score on participant", () => {
           render(<TabbedDisplay />);
           createAnExpandedParticipantRow();
 
@@ -180,7 +180,7 @@ describe("ParticipantTable Event Handlers", () => {
         });
       });
 
-      describe("when changing to invalid value", () => {
+      describe("when changing to invalid score", () => {
         test("should revert to prior valid dexterity score on participant", () => {
           render(<TabbedDisplay />);
           createAnExpandedParticipantRow();
@@ -197,7 +197,7 @@ describe("ParticipantTable Event Handlers", () => {
           expect(dexterityEl).toHaveDisplayValue(validScore.toString());
         });
 
-        test("should revert to prior valid derived speed value on participant", () => {
+        test("should revert to prior valid derived speed score on participant", () => {
           render(<TabbedDisplay />);
           createAnExpandedParticipantRow();
 
@@ -213,7 +213,7 @@ describe("ParticipantTable Event Handlers", () => {
           expect(speedEl).toHaveDisplayValue(validScore.toString());
         });
 
-        test("should revert to prior valid movement rate value on participant", () => {
+        test("should revert to prior valid movement rate score on participant", () => {
           render(<TabbedDisplay />);
           createAnExpandedParticipantRow();
 
@@ -230,7 +230,7 @@ describe("ParticipantTable Event Handlers", () => {
         });
       });
 
-      describe("when leaving value blank", () => {
+      describe("when leaving score blank", () => {
         test("should revert to prior valid dexterity score on participant", () => {
           render(<TabbedDisplay />);
           createAnExpandedParticipantRow();
@@ -246,7 +246,7 @@ describe("ParticipantTable Event Handlers", () => {
           expect(dexterityEl).toHaveDisplayValue(validScore.toString());
         });
 
-        test("should revert to prior valid derived speed value on participant", () => {
+        test("should revert to prior valid derived speed score on participant", () => {
           render(<TabbedDisplay />);
           createAnExpandedParticipantRow();
 
@@ -261,7 +261,7 @@ describe("ParticipantTable Event Handlers", () => {
           expect(speedEl).toHaveDisplayValue(validScore.toString());
         });
 
-        test("should revert to prior valid movement rate value on participant", () => {
+        test("should revert to prior valid movement rate score on participant", () => {
           render(<TabbedDisplay />);
           createAnExpandedParticipantRow();
 
@@ -278,7 +278,7 @@ describe("ParticipantTable Event Handlers", () => {
       });
     });
 
-    describe("Peripheral Skills", () => {
+    describe("Peripheral Statistics", () => {
       const [
         firstHazardStatistic,
         secondHazardStatistic,
@@ -292,7 +292,7 @@ describe("ParticipantTable Event Handlers", () => {
       const invalidName = "   ";
 
       describe("when changing to valid name", () => {
-        test("should update hazard skill on participant", () => {
+        test("should update hazard statistic on participant", () => {
           render(<TabbedDisplay />);
           createAnExpandedParticipantRow();
 
@@ -312,7 +312,7 @@ describe("ParticipantTable Event Handlers", () => {
           expect(screen.getByLabelText(validName)).toBeInTheDocument();
         });
 
-        test("should update speed skill on participant", () => {
+        test("should update speed statistic on participant", () => {
           render(<TabbedDisplay />);
           createAnExpandedParticipantRow();
 
@@ -334,7 +334,7 @@ describe("ParticipantTable Event Handlers", () => {
       });
 
       describe("when changing to invalid name", () => {
-        test("should revert to prior valid hazard skill on participant", () => {
+        test("should revert to prior valid hazard statistic on participant", () => {
           render(<TabbedDisplay />);
           createAnExpandedParticipantRow();
 
@@ -356,7 +356,7 @@ describe("ParticipantTable Event Handlers", () => {
           expect(screen.getByLabelText(validName)).toBeInTheDocument();
         });
 
-        test("should revert to prior valid speed skill on participant", () => {
+        test("should revert to prior valid speed statistic on participant", () => {
           render(<TabbedDisplay />);
           createAnExpandedParticipantRow();
 
@@ -380,7 +380,7 @@ describe("ParticipantTable Event Handlers", () => {
       });
 
       describe("when leaving name blank", () => {
-        test("should revert to prior valid hazard skill on participant", () => {
+        test("should revert to prior valid hazard statistic on participant", () => {
           render(<TabbedDisplay />);
           createAnExpandedParticipantRow();
 
@@ -401,7 +401,7 @@ describe("ParticipantTable Event Handlers", () => {
           expect(screen.getByLabelText(validName)).toBeInTheDocument();
         });
 
-        test("should revert to prior valid speed skill on participant", () => {
+        test("should revert to prior valid speed statistic on participant", () => {
           render(<TabbedDisplay />);
           createAnExpandedParticipantRow();
 
@@ -423,8 +423,8 @@ describe("ParticipantTable Event Handlers", () => {
         });
       });
 
-      describe("when renaming a second skill", () => {
-        test("should set renaming textbox to the associated hazard skills name", () => {
+      describe("when renaming a second statistic", () => {
+        test("should set renaming textbox to the associated hazard statistic's name", () => {
           render(<TabbedDisplay />);
           createAnExpandedParticipantRow();
 
@@ -452,7 +452,7 @@ describe("ParticipantTable Event Handlers", () => {
           ).toHaveValue(secondHazardStatistic.name);
         });
 
-        test("should set renaming textbox to the associated speed skills name", () => {
+        test("should set renaming textbox to the associated speed statistics name", () => {
           render(<TabbedDisplay />);
           createAnExpandedParticipantRow();
 
@@ -482,7 +482,7 @@ describe("ParticipantTable Event Handlers", () => {
       });
 
       describe("when changing to valid score", () => {
-        test("should update hazard skill on participant", () => {
+        test("should update hazard statistic on participant", () => {
           render(<TabbedDisplay />);
           createAnExpandedParticipantRow();
 
@@ -497,7 +497,7 @@ describe("ParticipantTable Event Handlers", () => {
           expect(statisticDisplayEl).toHaveValue(validScore);
         });
 
-        test("should update speed skill on participant", () => {
+        test("should update speed statistic on participant", () => {
           render(<TabbedDisplay />);
           createAnExpandedParticipantRow();
 
@@ -514,7 +514,7 @@ describe("ParticipantTable Event Handlers", () => {
       });
 
       describe("when changing to invalid score", () => {
-        test("should revert to prior valid hazard skill on participant", () => {
+        test("should revert to prior valid hazard statistic on participant", () => {
           render(<TabbedDisplay />);
           createAnExpandedParticipantRow();
 
@@ -530,7 +530,7 @@ describe("ParticipantTable Event Handlers", () => {
           expect(statisticDisplayEl).toHaveValue(validScore);
         });
 
-        test("should revert to prior valid speed skill on participant", () => {
+        test("should revert to prior valid speed statistic on participant", () => {
           render(<TabbedDisplay />);
           createAnExpandedParticipantRow();
 
@@ -581,7 +581,7 @@ describe("ParticipantTable Event Handlers", () => {
         });
       });
 
-      describe("when creating a new skill", () => {
+      describe("when creating a new statistic", () => {
         test("should have hazard statistic with appropriate name", () => {
           render(<TabbedDisplay />);
           createAnExpandedParticipantRow();
@@ -620,7 +620,7 @@ describe("ParticipantTable Event Handlers", () => {
       });
     });
 
-    describe("Skill Manipulation", () => {
+    describe("Statistic Manipulation", () => {
       test("should create hazard stat when 'create hazard statistic' clicked", () => {
         render(<TabbedDisplay />);
         createAnExpandedParticipantRow();

@@ -92,14 +92,17 @@ export default class StatisticDisplay extends React.Component<Props> {
     this.handleBlur = this.handleBlur.bind(this);
   }
 
-  private handleChange(evt: React.ChangeEvent<HTMLInputElement>) {
+  private handleChange(event: React.ChangeEvent<HTMLInputElement>) {
     const { onStatisticChange } = this.props;
-    if (onStatisticChange !== undefined) onStatisticChange(evt.target.value);
+    const { value } = event.currentTarget;
+
+    if (onStatisticChange) onStatisticChange(value);
   }
 
   private handleBlur() {
     const { onStatisticBlur } = this.props;
-    if (onStatisticBlur !== undefined) onStatisticBlur();
+
+    if (onStatisticBlur) onStatisticBlur();
   }
 
   private generateUpperBound(): Range {

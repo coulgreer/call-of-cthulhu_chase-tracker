@@ -105,9 +105,9 @@ export default class GroupRow extends React.Component<Props, State> {
     }));
   }
 
-  private handleDistancerBlur(evt: React.ChangeEvent<HTMLSelectElement>) {
+  private handleDistancerBlur(event: React.ChangeEvent<HTMLSelectElement>) {
     const { groups, ownedIndex, onDistancerBlur } = this.props;
-    const { value } = evt.currentTarget;
+    const { value } = event.currentTarget;
     const distancer = groups.find((group) => group.id === value);
 
     if (onDistancerBlur) onDistancerBlur(groups[ownedIndex], distancer);
@@ -137,8 +137,8 @@ export default class GroupRow extends React.Component<Props, State> {
     this.closeModal();
   }
 
-  private handleCheckboxChange(evt: React.FormEvent<HTMLInputElement>) {
-    const { value, checked } = evt.currentTarget;
+  private handleCheckboxChange(event: React.FormEvent<HTMLInputElement>) {
+    const { value, checked } = event.currentTarget;
 
     this.setState((state) => {
       const { selectedParticipantsIds } = state;

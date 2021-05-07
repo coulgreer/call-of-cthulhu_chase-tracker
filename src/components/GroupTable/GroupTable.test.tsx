@@ -15,8 +15,8 @@ function createParticipant(id: string): Participant {
     dexterity: 15,
     movementRate: 3,
     derivedSpeed: 1,
-    speedSkills: [],
-    hazardSkills: [],
+    speedStatistics: [],
+    hazardStatistics: [],
   };
 }
 
