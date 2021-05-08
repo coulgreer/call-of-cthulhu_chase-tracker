@@ -360,7 +360,7 @@ export default class GroupRow extends React.Component<Props, State> {
         {currentGroup.pursuersIds.length > 0 ? (
           <ul aria-labelledby={pursuerLabelId}>
             {currentGroup.pursuersIds.map((pursuerId) => (
-              <li>{pursuerId}</li>
+              <li key={pursuerId}>{pursuerId}</li>
             ))}
           </ul>
         ) : (
@@ -401,6 +401,7 @@ export default class GroupRow extends React.Component<Props, State> {
                 className={`${this.getBoundaryClassName(
                   participant
                 )} list__item`}
+                key={participant.id}
               >
                 {participant.name}
                 <span>{participant.movementRate}</span>
