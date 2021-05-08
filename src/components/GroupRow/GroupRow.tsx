@@ -9,6 +9,7 @@ import Button from "../Button";
 
 import ExpandLessIcon from "../../images/expand_less_black_24dp.svg";
 import ExpandMoreIcon from "../../images/expand_more_black_24dp.svg";
+import Checkmark from "../../images/check_black_24dp.svg";
 
 import "./GroupRow.css";
 
@@ -441,12 +442,18 @@ export default class GroupRow extends React.Component<Props, State> {
         <form onSubmit={this.handleSubmit}>
           {availableParticipants.length > 0 ? (
             availableParticipants.map((participant) => (
-              <label key={participant.id}>
-                <input
-                  type="checkbox"
-                  value={participant.id}
-                  onChange={this.handleCheckboxChange}
-                />
+              <label className="checkbox input__label" key={participant.id}>
+                <span>
+                  <input
+                    className="checkbox__input"
+                    type="checkbox"
+                    value={participant.id}
+                    onChange={this.handleCheckboxChange}
+                  />
+                  <span className="checkbox__checkmark">
+                    <img src={Checkmark} alt="checkmark" />
+                  </span>
+                </span>
                 {participant.name}
               </label>
             ))

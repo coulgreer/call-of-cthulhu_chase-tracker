@@ -235,12 +235,53 @@ input[type="number"] {
   line-height: 1;
 }
 
-/* Input: combobox */
+/* Input: checkbox */
+.checkbox {
+  display: grid;
+  grid-template-columns: min-content auto;
+  align-items: center;
+  grid-gap: 6px;
+}
+
+.checkbox__input {
+  position: absolute;
+  opacity: 0;
+}
+
+.checkbox__checkmark {
+  display: inline-grid;
+  width: 1em;
+  height: 1em;
+  border-radius: 25%;
+  border: 2px solid rgb(var(--buff));
+}
+
+.checkbox__input:focus + .checkbox__checkmark,
+.checkbox:hover .checkbox__checkmark {
+  border-radius: 25%;
+  box-shadow: 0 0 1px #fff, 0 0 6px rgb(var(--buff));
+}
+
+.checkbox__checkmark img {
+  transition: transform 0.1s ease-in 25ms;
+  transform: scale(0);
+  transform-origin: bottom left;
+}
+
+.checkbox__input:checked + .checkbox__checkmark {
+  background-color: rgb(var(--buff));
+}
+
+.checkbox__input:checked + .checkbox__checkmark img {
+  transform: scale(1);
+}
 
 /* 
  * TODO (Coul Greer): Create a style that has an on-brand color when hovering
  * an option.
  */
+
+/* Input: combobox */
 .input__combobox {
   appearance: none;
   outline: none;
