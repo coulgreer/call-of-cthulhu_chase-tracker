@@ -256,23 +256,25 @@ input[type="number"] {
   border: 2px solid rgb(var(--buff));
 }
 
+.checkbox__input:checked + .checkbox__checkmark {
+  background-color: rgb(var(--buff));
+}
+
 .checkbox__input:focus + .checkbox__checkmark,
 .checkbox:hover .checkbox__checkmark {
   border-radius: 25%;
   box-shadow: 0 0 1px #fff, 0 0 6px rgb(var(--buff));
 }
 
-.checkbox__checkmark img {
+.checkbox__checkmark .material-icons {
+  font-size: 1em;
+  color: rgb(var(--dark-jungle-green));
   transition: transform 0.1s ease-in 25ms;
   transform: scale(0);
   transform-origin: bottom left;
 }
 
-.checkbox__input:checked + .checkbox__checkmark {
-  background-color: rgb(var(--buff));
-}
-
-.checkbox__input:checked + .checkbox__checkmark img {
+.checkbox__input:checked + .checkbox__checkmark .material-icons {
   transform: scale(1);
 }
 

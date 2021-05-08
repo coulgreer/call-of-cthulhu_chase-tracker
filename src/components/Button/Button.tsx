@@ -14,6 +14,7 @@ function Button({
       className={className}
       disabled={props.disabled}
       role={props.role}
+      aria-label={props["aria-label"]}
       aria-expanded={props["aria-expanded"]}
       aria-controls={props["aria-controls"]}
     >

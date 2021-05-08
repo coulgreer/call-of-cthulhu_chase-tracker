@@ -60,7 +60,9 @@ describe("Collapse/Expand detailed data", () => {
       screen.getByRole("button", { name: /generate/i })
     ).toBeInTheDocument();
 
-    expect(screen.getByRole("button", { name: /expand/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /participant details/i })
+    ).toBeInTheDocument();
 
     expect(
       screen.queryByRole("heading", { name: /speed stats/i })
@@ -91,7 +93,9 @@ describe("Collapse/Expand detailed data", () => {
   test("should render participant information properly when expanded", () => {
     render(<ParticipantRow participant={participant} />);
 
-    userEvent.click(screen.getByRole("button", { name: /expand/i }));
+    userEvent.click(
+      screen.getByRole("button", { name: /participant details/i })
+    );
 
     expect(screen.getByRole("textbox", { name: /name/i })).toBeInTheDocument();
 
@@ -303,7 +307,9 @@ describe("Statistic Display event handlers", () => {
           onParticipantChange={handleParticipantChange}
         />
       );
-      userEvent.click(screen.getByRole("button", { name: /expand/i }));
+      userEvent.click(
+        screen.getByRole("button", { name: /participant details/i })
+      );
 
       const statisticDisplayEl = screen.getByRole("spinbutton", {
         name: firstHazardStatistic.name,
@@ -328,7 +334,9 @@ describe("Statistic Display event handlers", () => {
           onParticipantChange={handleParticipantChange}
         />
       );
-      userEvent.click(screen.getByRole("button", { name: /expand/i }));
+      userEvent.click(
+        screen.getByRole("button", { name: /participant details/i })
+      );
 
       const statisticDisplayEl = screen.getByRole("spinbutton", {
         name: firstSpeedStatistic.name,
@@ -432,7 +440,9 @@ describe("Statistic Display event handlers", () => {
           onParticipantChange={handleParticipantChange}
         />
       );
-      userEvent.click(screen.getByRole("button", { name: /expand/i }));
+      userEvent.click(
+        screen.getByRole("button", { name: /participant details/i })
+      );
 
       const statisticDisplayEl = screen.getByRole("spinbutton", {
         name: firstHazardStatistic.name,
@@ -458,7 +468,9 @@ describe("Statistic Display event handlers", () => {
           onParticipantChange={handleParticipantChange}
         />
       );
-      userEvent.click(screen.getByRole("button", { name: /expand/i }));
+      userEvent.click(
+        screen.getByRole("button", { name: /participant details/i })
+      );
 
       const statisticDisplayEl = screen.getByRole("spinbutton", {
         name: firstSpeedStatistic.name,
@@ -561,7 +573,9 @@ describe("Statistic Display event handlers", () => {
           onParticipantChange={handleParticipantChange}
         />
       );
-      userEvent.click(screen.getByRole("button", { name: /expand/i }));
+      userEvent.click(
+        screen.getByRole("button", { name: /participant details/i })
+      );
 
       const statisticDisplayEl = screen.getByRole("spinbutton", {
         name: firstHazardStatistic.name,
@@ -587,7 +601,9 @@ describe("Statistic Display event handlers", () => {
           onParticipantChange={handleParticipantChange}
         />
       );
-      userEvent.click(screen.getByRole("button", { name: /expand/i }));
+      userEvent.click(
+        screen.getByRole("button", { name: /participant details/i })
+      );
 
       const statisticDisplayEl = screen.getByRole("spinbutton", {
         name: firstSpeedStatistic.name,

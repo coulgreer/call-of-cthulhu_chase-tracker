@@ -30,6 +30,10 @@ const Seo = ({ title, description }: Props) => {
     <Helmet title={seo.title}>
       <html lang="en" />
       <meta name="description" content={seo.description} />
+      <link
+        href="https://fonts.googleapis.com/icon?family=Material+Icons|Material+Icons+Outlined"
+        rel="stylesheet"
+      />
     </Helmet>
   );
 };

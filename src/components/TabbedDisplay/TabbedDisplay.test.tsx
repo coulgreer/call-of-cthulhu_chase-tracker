@@ -20,7 +20,11 @@ function createAnExpandedGroupRow() {
 function createAnExpandedParticipantRow() {
   userEvent.click(screen.getByRole("tab", { name: /participants/i }));
   userEvent.click(screen.getByRole("button", { name: /add participant/i }));
-  userEvent.click(screen.getByRole("button", { name: /expand/i }));
+
+  const expandEls = screen.getAllByRole("button", {
+    name: /participant details/i,
+  });
+  userEvent.click(expandEls[expandEls.length - 1]);
 }
 
 test("should render properly", () => {
@@ -631,7 +635,7 @@ describe("ParticipantTable Event Handlers", () => {
           screen.getAllByRole("button", { name: /create statistic/i })[1]
         );
 
-        expect(screen.getByLabelText(/new stat #8/i)).toBeInTheDocument();
+        expect(screen.getByLabelText(/^new stat #8$/i)).toBeInTheDocument();
       });
 
       test("should delete given hazard stat when the 'delete hazard statistic' is clicked", () => {
@@ -662,7 +666,7 @@ describe("ParticipantTable Event Handlers", () => {
           screen.getAllByRole("button", { name: /create statistic/i })[0]
         );
 
-        expect(screen.getByLabelText(/new stat #6/i)).toBeInTheDocument();
+        expect(screen.getByLabelText(/^new stat #6$/i)).toBeInTheDocument();
       });
 
       test("should delete given speed stat when the 'delete speed stat' is clicked", () => {

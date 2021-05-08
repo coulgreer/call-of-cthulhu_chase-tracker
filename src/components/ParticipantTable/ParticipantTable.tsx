@@ -4,9 +4,6 @@ import Modal from "react-modal";
 import ParticipantRow from "../ParticipantRow";
 import Button from "../Button";
 
-import AddIcon from "../../images/add_black_24dp.svg";
-import RemoveIcon from "../../images/remove_circle_black_24dp.svg";
-
 import "./ParticipantTable.css";
 
 import { Participant } from "../../types";
@@ -87,8 +84,14 @@ export default class ParticipantTable extends Component<Props, State> {
 
   private renderFloatingActionButton() {
     return (
-      <Button className="button fab" onClick={this.createParticipant}>
-        <img src={AddIcon} alt="Add Participant" width="44" />
+      <Button
+        className="button fab"
+        aria-label="Add Participant"
+        onClick={this.createParticipant}
+      >
+        <span className="material-icons" aria-hidden>
+          add
+        </span>
       </Button>
     );
   }
@@ -144,9 +147,12 @@ export default class ParticipantTable extends Component<Props, State> {
         />
         <Button
           className="ParticipantTable__row-control button button--primary"
+          aria-label={`Remove: ${participant.id}`}
           onClick={() => this.promptParticipantRemoval(participant)}
         >
-          <img src={RemoveIcon} alt={`Remove: ${participant.id}`} />
+          <span className="material-icons" aria-hidden>
+            remove_circle
+          </span>
         </Button>
       </div>
     ));

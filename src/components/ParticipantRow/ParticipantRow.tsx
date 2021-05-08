@@ -1,14 +1,13 @@
 import React from "react";
+
 import { Transition, animated } from "react-spring/renderprops";
 import Modal from "react-modal";
+import { nanoid } from "nanoid";
 
 import Button from "../Button";
 import StatisticTable from "../StatisticTable";
 import { WrappedStatistic } from "../StatisticDisplay";
 import DisplayFactory from "../StatisticDisplay/DisplayFactory";
-
-import ExpandLessIcon from "../../images/expand_less_black_24dp.svg";
-import ExpandMoreIcon from "../../images/expand_more_black_24dp.svg";
 
 import "./ParticipantRow.css";
 
@@ -190,6 +189,12 @@ export default class ParticipantRow extends React.Component<Props, State> {
     return originalScore;
   }
 
+  static get EXPANSION_PREFIX() {
+    return "participant-row-expansion";
+  }
+
+  private id;
+
   private speedStatSequence: UniqueSequenceGenerator;
 
   private hazardStatSequence: UniqueSequenceGenerator;
@@ -197,6 +202,7 @@ export default class ParticipantRow extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
+    this.id = nanoid();
     this.speedStatSequence = new UniqueSequenceGenerator(SEQUENCE_START);
     this.hazardStatSequence = new UniqueSequenceGenerator(SEQUENCE_START);
 
@@ -680,12 +686,19 @@ export default class ParticipantRow extends React.Component<Props, State> {
           </div>
           <Button
             className="button button--primary button--small button--circular"
+            aria-label="Participant Details"
+            aria-expanded={expansionShown}
+            aria-controls={`${ParticipantRow.EXPANSION_PREFIX}-${this.id}`}
             onClick={this.toggleExpansion}
           >
             {expansionShown ? (
-              <img src={ExpandLessIcon} alt="Collapse" />
+              <span className="material-icons" aria-hidden>
+                expand_less
+              </span>
             ) : (
-              <img src={ExpandMoreIcon} alt="Expand" />
+              <span className="material-icons" aria-hidden>
+                expand_more
+              </span>
             )}
           </Button>
         </div>
@@ -707,6 +720,7 @@ export default class ParticipantRow extends React.Component<Props, State> {
           shown &&
           ((props) => (
             <animated.div
+              id={`${ParticipantRow.EXPANSION_PREFIX}-${this.id}`}
               className="ParticipantRow__extended-display"
               style={props}
             >

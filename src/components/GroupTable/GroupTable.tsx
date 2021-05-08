@@ -4,9 +4,6 @@ import Modal from "react-modal";
 import GroupRow from "../GroupRow";
 import Button from "../Button";
 
-import AddIcon from "../../images/add_black_24dp.svg";
-import RemoveIcon from "../../images/remove_circle_black_24dp.svg";
-
 import "./GroupTable.css";
 
 import { Group, Participant } from "../../types";
@@ -127,9 +124,12 @@ export default class GroupTable extends React.Component<Props, State> {
         <div role="gridcell">
           <Button
             className="GroupTable__row-control button button--primary"
+            aria-label={`Delete ${group.id}`}
             onClick={() => this.handlePromptDeleteClick(index)}
           >
-            <img src={RemoveIcon} alt={`Delete ${group.id}`} />
+            <span className="material-icons" aria-hidden>
+              remove_circle
+            </span>
           </Button>
         </div>
       </div>
@@ -138,8 +138,14 @@ export default class GroupTable extends React.Component<Props, State> {
 
   private renderFloatingActionButton() {
     return (
-      <Button className="button fab" onClick={this.handleCreateClick}>
-        <img src={AddIcon} alt="Create Group" width="44" />
+      <Button
+        className="button fab"
+        aria-label="Create Group"
+        onClick={this.handleCreateClick}
+      >
+        <span className="material-icons" aria-hidden>
+          add
+        </span>
       </Button>
     );
   }

@@ -7,10 +7,6 @@ import { nanoid } from "nanoid";
 
 import Button from "../Button";
 
-import ExpandLessIcon from "../../images/expand_less_black_24dp.svg";
-import ExpandMoreIcon from "../../images/expand_more_black_24dp.svg";
-import Checkmark from "../../images/check_black_24dp.svg";
-
 import "./GroupRow.css";
 
 import { Group, Participant } from "../../types";
@@ -29,7 +25,6 @@ interface State {
   modalShown: boolean;
 }
 
-// TODO (Coul Greer): Fix the styling of the 'add member' modal to be stacked.
 export default class GroupRow extends React.Component<Props, State> {
   static get INVALID_DISTANCER_ID() {
     return "N/A";
@@ -257,14 +252,19 @@ export default class GroupRow extends React.Component<Props, State> {
         </label>
         <Button
           className="button button--primary button--small button--circular"
+          aria-label="Group Details"
           aria-expanded={expansionShown}
           aria-controls={`${GroupRow.EXPANSION_PREFIX}-${this.id}`}
           onClick={this.handleExpandClick}
         >
           {expansionShown ? (
-            <img src={ExpandLessIcon} alt="Group Details" />
+            <span className="material-icons" aria-hidden>
+              expand_less
+            </span>
           ) : (
-            <img src={ExpandMoreIcon} alt="Group Details" />
+            <span className="material-icons" aria-hidden>
+              expand_more
+            </span>
           )}
         </Button>
       </div>
@@ -451,7 +451,9 @@ export default class GroupRow extends React.Component<Props, State> {
                     onChange={this.handleCheckboxChange}
                   />
                   <span className="checkbox__checkmark">
-                    <img src={Checkmark} alt="checkmark" />
+                    <span className="material-icons" aria-hidden>
+                      check
+                    </span>
                   </span>
                 </span>
                 {participant.name}

@@ -6,10 +6,6 @@ import Button from "../Button";
 import { WrappedStatistic } from "../StatisticDisplay";
 import DisplayFactory from "../StatisticDisplay/DisplayFactory";
 
-import AddIcon from "../../images/add_black_24dp.svg";
-import DeleteIcon from "../../images/delete_black_24dp.svg";
-import EditIcon from "../../images/edit_black_24dp.svg";
-
 import "./StatisticTable.css";
 
 interface Props {
@@ -134,15 +130,21 @@ export default class StatisticTable extends React.Component<Props, State> {
             >
               <Button
                 className="button button--small button--tertiary-on-light"
+                aria-label={`delete: ${statistic.name}`}
                 onClick={() => this.handleDeleteClick(index)}
               >
-                <img src={DeleteIcon} alt={`delete: ${statistic.name}`} />
+                <span className="material-icons" aria-hidden>
+                  delete_outline
+                </span>
               </Button>
               <Button
                 className="button button--small button--tertiary-on-light"
+                aria-label={`rename: ${statistic.name}`}
                 onClick={() => this.handlePromptRenameClick(index)}
               >
-                <img src={EditIcon} alt={`rename: ${statistic.name}`} />
+                <span className="material-icons-outlined" aria-hidden>
+                  edit
+                </span>
               </Button>
               {DisplayFactory.createStatisticDisplay(
                 "StatisticDisplay--horizontal",
@@ -156,9 +158,12 @@ export default class StatisticTable extends React.Component<Props, State> {
         })}
         <Button
           className="button button--small button--primary"
+          aria-label="create statistic"
           onClick={this.handleCreateClick}
         >
-          <img src={AddIcon} alt="create statistic" />
+          <span className="material-icons" aria-hidden>
+            add
+          </span>
         </Button>
       </>
     );

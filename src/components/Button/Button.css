@@ -16,12 +16,24 @@
   height: 72px;
 }
 
+.button--large .material-icons {
+  font-size: 48px;
+}
+
 .button--medium {
   height: 60px;
 }
 
+.button--medium .material-icons {
+  font-size: 36px;
+}
+
 .button--small {
   height: 48px;
+}
+
+.button--small .material-icons {
+  font-size: 24px;
 }
 
 .button--primary {
@@ -37,7 +49,14 @@
 .button--tertiary-on-dark,
 .button--tertiary-on-light {
   background: none;
+}
+
+.button--tertiary-on-dark {
   color: rgb(var(--buff));
+}
+
+.button--tertiary-on-light {
+  color: rgb(var(--dark-jungle-green));
 }
 
 .button__overlay {
@@ -91,6 +110,7 @@
 }
 
 .fab {
+  font-size: 44px;
   position: fixed;
   z-index: 1;
   bottom: 0;
@@ -101,6 +121,10 @@
   box-shadow: 4px 6px 6px #121212;
   background-color: rgb(var(--jonquil));
   border-radius: 50%;
+}
+
+.fab .material-icons {
+  font-size: 48px;
 }
 
 .fab:hover .button__overlay {
