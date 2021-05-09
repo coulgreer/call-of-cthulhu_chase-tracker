@@ -58,10 +58,10 @@ test("should switch displays when tab is clicked", () => {
 });
 
 /*
- * TODO (Coul Greer): Ensure that any expected changes cause the new participant data to update the
- * associated particpant object. For example, name change, dexterity score change, hazard statistic changes,
- * etc.
- */
+  TODO (Coul Greer): Ensure that any expected changes cause the new
+  participant data to update the associated particpant object. For example,
+  name change, dexterity score change, hazard statistic changes, etc.
+*/
 
 describe("ParticipantTable Event Handlers", () => {
   test("should render properly when a participant is created", () => {
@@ -868,10 +868,11 @@ describe("GroupTable Event Handlers", () => {
         .filter((listitem) => listitem.textContent === name3)
     ).toHaveLength(1);
 
-    /**
-     * TODO (Coul Greer): Think about if this last assert is necessary for the test. Meaning: does
-     * this improve confidence. If so, extract into another test for switching back and forth.
-     */
+    /*
+      TODO (Coul Greer): Think about if this last assert is necessary for the
+      test. Meaning: does this improve confidence. If so, extract into another
+      test for switching back and forth.
+    */
     userEvent.selectOptions(firstDistancerEl, name3);
     firstDistancerEl.blur();
 

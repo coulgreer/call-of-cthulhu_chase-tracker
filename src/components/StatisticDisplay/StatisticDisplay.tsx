@@ -30,7 +30,10 @@ interface Props {
   onStatisticBlur?: () => void;
 }
 
-// TODO (Coul Greer): Refector this class to better represent the new understanding of components.
+/* 
+  TODO (Coul Greer): Refector this class to better represent the new
+  understanding of components.
+*/
 export default class StatisticDisplay extends React.Component<Props> {
   static defaultProps = {
     className: "",

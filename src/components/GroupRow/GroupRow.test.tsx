@@ -270,7 +270,10 @@ describe("Prop Rendering", () => {
       expect(screen.getByRole("button", { name: /add/i })).toBeInTheDocument();
     });
 
-    // TODO (Coul Greer): Test if the 'add' button is disabled when no participants exist for selection
+    /* 
+      TODO (Coul Greer): Test if the 'add' button is disabled when no
+      participants exist for selection
+    */
   });
 });
 

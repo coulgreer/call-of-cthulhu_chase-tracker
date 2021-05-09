@@ -204,6 +204,7 @@ export default class TabbedDisplay extends React.Component<Props, State> {
       );
       groups[targetIndex].distancerId = distancerId;
 
+      // FIXME (Coul Greer): There is a bug when selecting "N/A".
       const distancerIndex = groups.findIndex((group) =>
         GroupTable.areGroupsEqual(group.id, distancerId)
       );

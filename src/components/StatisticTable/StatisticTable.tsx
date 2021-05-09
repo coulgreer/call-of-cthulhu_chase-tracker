@@ -119,7 +119,7 @@ export default class StatisticTable extends React.Component<Props, State> {
 
     return (
       <>
-        <h4>{title}</h4>
+        <h2>{title}</h2>
         {data.map((datum, index) => {
           const { statistic } = datum;
 
@@ -180,10 +180,11 @@ export default class StatisticTable extends React.Component<Props, State> {
         isOpen={modalShown}
         onRequestClose={this.closeModal}
       >
-        <p className="Modal__Content__text">Rename the Statistic</p>
+        <h2 className="Modal__Content__text">Rename the Statistic</h2>
+        <hr />
         <form onSubmit={this.handleSubmit}>
           <label>
-            <span className="input__label">New name</span>
+            <span className="input__label">New Name</span>
             <input
               className="textbox textbox--full-width"
               type="text"
@@ -193,6 +194,7 @@ export default class StatisticTable extends React.Component<Props, State> {
               required
             />
           </label>
+          <hr />
           <div className="Modal__Content__options">
             <Button
               className="button button--medium button--tertiary-on-dark"

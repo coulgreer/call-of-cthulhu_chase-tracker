@@ -161,9 +161,10 @@ export default class GroupTable extends React.Component<Props, State> {
         isOpen={modalShown}
         onRequestClose={this.closeModal}
       >
-        <p className="Modal__Content__text">
-          Would you like to delete this group?
-        </p>
+        <h2 className="Modal__Content__text">
+          Would You Like To Delete This Group?
+        </h2>
+        <hr />
         <div className="Modal__Content__options">
           <Button
             className="button button--tertiary-on-dark button--medium"

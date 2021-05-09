@@ -429,17 +429,22 @@ export default class GroupRow extends React.Component<Props, State> {
 
     const availableParticipants = participants?.filter(this.isAvailable) || [];
 
+    /* 
+      TODO (Coul Greer): Disable the "ADD" button when no participants exist for
+      selection.
+    */
     return (
       <Modal
         className="Modal__Content"
         overlayClassName="Modal__Overlay"
-        contentLabel="Confirm Removal"
+        contentLabel="Select Participant(s)"
         isOpen={modalShown}
         onRequestClose={this.closeModal}
       >
-        <p className="Modal__Content__text">
-          Who would you like to add to this group?
-        </p>
+        <h2 className="Modal__Content__text">
+          Select Participant(s) To Add To Group
+        </h2>
+        <hr />
         <form onSubmit={this.handleSubmit}>
           {availableParticipants.length > 0 ? (
             availableParticipants.map((participant) => (
@@ -463,15 +468,16 @@ export default class GroupRow extends React.Component<Props, State> {
           ) : (
             <p>{GroupRow.NO_AVAILABLE_PARTICIPANT_WARNING_MESSAGE}</p>
           )}
+          <hr />
           <div className="Modal__Content__options">
             <Button
-              className="button button--tertiary-on-dark button--medium"
+              className="button button--secondary button--medium"
               onClick={this.closeModal}
             >
               CANCEL
             </Button>
             <Button
-              className="button button--secondary button--medium"
+              className="button button--primary button--medium"
               type="submit"
               disabled={!(availableParticipants.length > 0)}
             >

@@ -14,7 +14,10 @@ const DEFAULT_PROPS = {
   onStatisticBlur: jest.fn(),
 };
 
-// TODO (Coul Greer): Refactor tests to test appropriate aspects of the associated component.
+/*
+  TODO (Coul Greer): Refactor tests to test appropriate aspects of the
+  associated component.
+*/
 test("should render properly", () => {
   render(
     <StatisticDisplay

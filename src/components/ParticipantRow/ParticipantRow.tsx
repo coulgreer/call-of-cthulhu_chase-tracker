@@ -574,14 +574,19 @@ export default class ParticipantRow extends React.Component<Props, State> {
   }
 
   /*
-   * FIXME (Coul Greer): There is a known bug in ReactModal involving radio
-   * buttons and pressing shift+tab. The focus escapes the modal when
-   * shift-tabbing through modal elements causing a break in the very point of
-   * using this package.
+     FIXME (Coul Greer): There is a known bug in ReactModal involving radio
+     buttons and pressing shift+tab. The focus escapes the modal when
+     shift-tabbing through modal elements causing a break in the very point of
+     using this package.
    */
   private renderSpeedStatisticModal() {
     const { modalShown, speedStatistics } = this.state;
 
+    /* 
+      TODO (Coul Greer): Disable the "CONFIRM" button when no option is
+      selected or when no speed statistics exist. Also, implement an error
+      message when no speed statistics exist.
+    */
     return (
       <Modal
         className="Modal__Content"
@@ -590,7 +595,8 @@ export default class ParticipantRow extends React.Component<Props, State> {
         isOpen={modalShown}
         onRequestClose={this.closeModal}
       >
-        <p>Select a speed statistic</p>
+        <h2>Select a Speed Statistic</h2>
+        <hr />
         <form onSubmit={this.calculateSpeedModifier}>
           {speedStatistics.map((wrappedStatistic) => (
             <label className="radio-button" key={wrappedStatistic.key}>
@@ -607,6 +613,7 @@ export default class ParticipantRow extends React.Component<Props, State> {
               </span>
             </label>
           ))}
+          <hr />
           <div className="Modal__Content__options">
             <Button
               className="button button--secondary button--small"
