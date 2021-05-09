@@ -14,44 +14,17 @@ const DEFAULT_PROPS = {
   onStatisticBlur: jest.fn(),
 };
 
-test("should render statistics properly", () => {
-  const className = "StatisticDisplay--vertical";
-
+// TODO (Coul Greer): Refactor tests to test appropriate aspects of the associated component.
+test("should render properly", () => {
   render(
     <StatisticDisplay
-      className={className}
-      title={DEFAULT_PROPS.title}
-      currentValue={DEFAULT_PROPS.currentValue}
-    />
-  );
-
-  expect(screen.getByText(DEFAULT_PROPS.title)).toHaveClass(className);
-
-  const inputEl = screen.getByLabelText(DEFAULT_PROPS.title, {
-    selector: "input",
-  });
-  expect(inputEl).toBeInTheDocument();
-  expect(inputEl).toHaveDisplayValue(DEFAULT_PROPS.currentValue);
-  expect(inputEl).toHaveClass(StatisticDisplay.DARK_MODE_CLASS);
-});
-
-test("should render statistics properly when textbox class is provided", () => {
-  const className = "StatisticDisplay--vertical";
-
-  render(
-    <StatisticDisplay
-      className={className}
       textboxClassName={StatisticDisplay.LIGHT_MODE_CLASS}
       title={DEFAULT_PROPS.title}
       currentValue={DEFAULT_PROPS.currentValue}
     />
   );
 
-  expect(screen.getByText(DEFAULT_PROPS.title)).toHaveClass(className);
-
-  const inputEl = screen.getByLabelText(DEFAULT_PROPS.title, {
-    selector: "input",
-  });
+  const inputEl = screen.getByLabelText(DEFAULT_PROPS.title);
   expect(inputEl).toBeInTheDocument();
   expect(inputEl).toHaveDisplayValue(DEFAULT_PROPS.currentValue);
   expect(inputEl).toHaveClass(StatisticDisplay.LIGHT_MODE_CLASS);

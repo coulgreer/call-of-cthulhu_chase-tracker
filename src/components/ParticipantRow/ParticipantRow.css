@@ -44,10 +44,10 @@
   text-align: right;
 }
 
-.ParticipantRow__extended-display .input__textbox:focus {
+.ParticipantRow__extended-display .textbox:focus {
   border-bottom: 2px solid rgb(var(--jonquil));
 }
 
-.StatisticDisplay .input__textbox {
+.StatisticDisplay .textbox {
   width: 7ch;
 }

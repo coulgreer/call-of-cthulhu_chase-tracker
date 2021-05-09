@@ -30,6 +30,7 @@ interface Props {
   onStatisticBlur?: () => void;
 }
 
+// TODO (Coul Greer): Refector this class to better represent the new understanding of components.
 export default class StatisticDisplay extends React.Component<Props> {
   static defaultProps = {
     className: "",
@@ -42,27 +43,27 @@ export default class StatisticDisplay extends React.Component<Props> {
   };
 
   static get DARK_MODE_CLASS() {
-    return "input__textbox--on-dark";
+    return "textbox--on-dark";
   }
 
   static get LIGHT_MODE_CLASS() {
-    return "input__textbox--on-light";
+    return "textbox--on-light";
   }
 
   static get UPPER_LIMIT_CLASS() {
-    return "input__textbox--upper-limit";
+    return "textbox--upper-limit";
   }
 
   static get UPPER_WARNING_CLASS() {
-    return "input__textbox--upper-warning";
+    return "textbox--upper-warning";
   }
 
   static get LOWER_WARNING_CLASS() {
-    return "input__textbox--lower-warning";
+    return "textbox--lower-warning";
   }
 
   static get LOWER_LIMIT_CLASS() {
-    return "input__textbox--lower-limit";
+    return "textbox--lower-limit";
   }
 
   constructor(props: Props) {
@@ -207,11 +208,11 @@ export default class StatisticDisplay extends React.Component<Props> {
     });
 
     return (
-      <label className={`StatisticDisplay input__label ${className}`}>
-        {title}
+      <label className={`StatisticDisplay ${className}`}>
+        <span className="input__label">{title}</span>
         <input
           type="number"
-          className={`input__textbox input__textbox--centered ${inputClassName} ${
+          className={`textbox textbox--centered ${inputClassName} ${
             textboxClassName || StatisticDisplay.DARK_MODE_CLASS
           }`}
           value={currentValue}

@@ -139,7 +139,7 @@ input[type="number"] {
 }
 
 /* Input: textbox */
-.input__textbox {
+.textbox {
   box-sizing: border-box;
   padding: 0 0.25ch;
   background-color: rgba(var(--cultured), var(--state--hovered));
@@ -153,38 +153,38 @@ input[type="number"] {
   line-height: 150%;
 }
 
-.input__textbox:focus {
+.textbox:focus {
   border-bottom: 2px solid rgb(var(--jonquil));
   outline: none;
 }
 
-.input__textbox--centered {
+.textbox--centered {
   text-align: center;
 }
 
-.input__textbox--full-width {
+.textbox--full-width {
   width: 100%;
 }
 
-.input__textbox--on-light {
+.textbox--on-light {
   background-color: rgb(var(--middle-blue-green));
   color: rgba(var(--cultured), var(--text-emphasis--high));
   border-bottom: 1px solid
     rgba(var(--rich-black-fogra-39), var(--state--focused));
 }
 
-.input__textbox--upper-limit,
-.input__textbox--upper-warning {
+.textbox--upper-limit,
+.textbox--upper-warning {
   color: rgb(var(--buff));
 }
 
-.input__textbox--lower-limit,
-.input__textbox--lower-warning {
+.textbox--lower-limit,
+.textbox--lower-warning {
   color: rgba(var(--deep-saffron), var(--text-emphasis--high));
 }
 
-/* Input: radio */
-.input__radio {
+/* Input: radio button */
+.radio-button {
   position: relative;
   display: flex;
   flex-direction: row;
@@ -192,12 +192,12 @@ input[type="number"] {
   cursor: pointer;
 }
 
-.input__radio__checkbox {
+.radio-button__input {
   position: absolute;
   opacity: 0;
 }
 
-.input__radio__checkmark {
+.radio-button__checkmark {
   position: relative;
   display: flex;
   width: 16px;
@@ -207,13 +207,13 @@ input[type="number"] {
   border: 2px solid rgb(var(--buff));
 }
 
-.input__radio__checkbox:focus + .input__radio__checkmark,
-.input__radio:hover .input__radio__checkmark {
+.radio-button__input:focus + .radio-button__checkmark,
+.radio-button:hover .radio-button__checkmark {
   border-radius: 100%;
   box-shadow: 0 0 2px #fff, 0 0 6px rgb(var(--buff));
 }
 
-.input__radio__checkmark::after {
+.radio-button__checkmark::after {
   content: "";
   position: absolute;
   display: block;
@@ -225,13 +225,13 @@ input[type="number"] {
   transform: scale(0);
 }
 
-.input__radio__checkbox:checked + .input__radio__checkmark::after {
+.radio-button__input:checked + .radio-button__checkmark::after {
   opacity: 1;
   transform: scale(0.6);
   transition: all 0.2s ease;
 }
 
-.input__radio.input__label {
+.radio.input__label {
   line-height: 1;
 }
 
@@ -284,7 +284,7 @@ input[type="number"] {
  */
 
 /* Input: combobox */
-.input__combobox {
+.combobox {
   appearance: none;
   outline: none;
   cursor: pointer;
@@ -302,7 +302,7 @@ input[type="number"] {
   line-height: 150%;
 }
 
-.input__combobox--full-width {
+.combobox--full-width {
   width: 100%;
 }
 

@@ -593,19 +593,18 @@ export default class ParticipantRow extends React.Component<Props, State> {
         <p>Select a speed statistic</p>
         <form onSubmit={this.calculateSpeedModifier}>
           {speedStatistics.map((wrappedStatistic) => (
-            <label
-              className="input__radio input__label"
-              key={wrappedStatistic.key}
-            >
+            <label className="radio-button" key={wrappedStatistic.key}>
               <input
-                className="input__radio__checkbox"
+                className="radio-button__input"
                 type="radio"
                 name="selectedStatistic"
                 value={wrappedStatistic.statistic.score}
                 onChange={this.handleSelectionChange}
               />
-              <span className="input__radio__checkmark" />
-              {wrappedStatistic.statistic.name}
+              <span className="radio-button__checkmark" />
+              <span className="input__label">
+                {wrappedStatistic.statistic.name}
+              </span>
             </label>
           ))}
           <div className="Modal__Content__options">
@@ -639,10 +638,10 @@ export default class ParticipantRow extends React.Component<Props, State> {
 
     return (
       <div className="ParticipantRow__main-display">
-        <label className="input input__label">
-          Name
+        <label>
+          <span className="input__label">Name</span>
           <input
-            className="input__textbox input__textbox--full-width"
+            className="textbox textbox--full-width"
             type="text"
             value={currentName}
             onChange={this.handleNameChange}

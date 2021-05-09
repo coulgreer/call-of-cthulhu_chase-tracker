@@ -151,7 +151,7 @@ export default class StatisticTable extends React.Component<Props, State> {
                 datum,
                 (value) => this.handleStatisticValueChange(index, value),
                 () => this.handleStatisticValueBlur(index),
-                "input__textbox--on-light"
+                "textbox--on-light"
               )}
             </div>
           );
@@ -182,10 +182,10 @@ export default class StatisticTable extends React.Component<Props, State> {
       >
         <p className="Modal__Content__text">Rename the Statistic</p>
         <form onSubmit={this.handleSubmit}>
-          <label className="input input__label">
-            New name
+          <label>
+            <span className="input__label">New name</span>
             <input
-              className="input__textbox input__textbox--full-width"
+              className="textbox textbox--full-width"
               type="text"
               value={currentNewName}
               onChange={this.handleStatisticNameChange}

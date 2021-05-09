@@ -243,10 +243,10 @@ export default class GroupRow extends React.Component<Props, State> {
             JOIN
           </Button>
         </div>
-        <label className="input input__label">
-          Name
+        <label>
+          <span className="input__label">Name</span>
           <input
-            className="input__textbox input__textbox--full-width"
+            className="textbox textbox--full-width"
             defaultValue={groups[ownedIndex].name}
           />
         </label>
@@ -318,10 +318,10 @@ export default class GroupRow extends React.Component<Props, State> {
 
     return (
       <div className="GroupRow__section-container">
-        <label className="input input__label">
-          Distancer
+        <label>
+          <span className="input__label">Distancer</span>
           <select
-            className="input input__combobox input__combobox--full-width"
+            className="combobox combobox--full-width"
             onBlur={this.handleDistancerBlur}
           >
             <option key="default" value={GroupRow.INVALID_DISTANCER_ID}>
@@ -443,7 +443,7 @@ export default class GroupRow extends React.Component<Props, State> {
         <form onSubmit={this.handleSubmit}>
           {availableParticipants.length > 0 ? (
             availableParticipants.map((participant) => (
-              <label className="checkbox input__label" key={participant.id}>
+              <label className="checkbox" key={participant.id}>
                 <span>
                   <input
                     className="checkbox__input"
@@ -457,7 +457,7 @@ export default class GroupRow extends React.Component<Props, State> {
                     </span>
                   </span>
                 </span>
-                {participant.name}
+                <span className="input__label">{participant.name}</span>
               </label>
             ))
           ) : (
