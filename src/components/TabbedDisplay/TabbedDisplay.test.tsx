@@ -19,7 +19,7 @@ function createAnExpandedGroupRow() {
 
 function createAnExpandedParticipantRow() {
   userEvent.click(screen.getByRole("tab", { name: /participants/i }));
-  userEvent.click(screen.getByRole("button", { name: /add participant/i }));
+  userEvent.click(screen.getByRole("button", { name: /create participant/i }));
 
   const expandEls = screen.getAllByRole("button", {
     name: /participant details/i,
@@ -68,7 +68,9 @@ describe("ParticipantTable Event Handlers", () => {
     render(<TabbedDisplay />);
 
     userEvent.click(screen.getByRole("tab", { name: /participants/i }));
-    userEvent.click(screen.getByRole("button", { name: /add participant/i }));
+    userEvent.click(
+      screen.getByRole("button", { name: /create participant/i })
+    );
 
     expect(
       screen.queryByText(ParticipantTable.DEFAULT_WARNING_MESSAGE)
@@ -100,13 +102,13 @@ describe("ParticipantTable Event Handlers", () => {
     render(<TabbedDisplay />);
     userEvent.click(screen.getByRole("tab", { name: /participants/i }));
 
-    const addButton = screen.getByRole("button", {
-      name: /add participant/i,
+    const createParticipantButton = screen.getByRole("button", {
+      name: /create participant/i,
     });
-    userEvent.click(addButton);
-    userEvent.click(addButton);
-    userEvent.click(addButton);
-    userEvent.click(addButton);
+    userEvent.click(createParticipantButton);
+    userEvent.click(createParticipantButton);
+    userEvent.click(createParticipantButton);
+    userEvent.click(createParticipantButton);
     userEvent.click(
       screen.getByRole("button", {
         name: new RegExp(`remove: ${ParticipantTable.DEFAULT_NAME} #2`, "i"),
@@ -119,7 +121,7 @@ describe("ParticipantTable Event Handlers", () => {
       })
     );
     userEvent.click(screen.getByRole("button", { name: /delete/i }));
-    userEvent.click(addButton);
+    userEvent.click(createParticipantButton);
 
     expect(
       screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #1`)
@@ -694,23 +696,23 @@ describe("ParticipantTable Event Handlers", () => {
       render(<TabbedDisplay />);
       userEvent.click(screen.getByRole("tab", { name: /participants/i }));
 
-      const addButton = screen.getByRole("button", {
-        name: /add participant/i,
+      const createParticipantButton = screen.getByRole("button", {
+        name: /create participant/i,
       });
 
       // Create 10+ participants.
-      userEvent.click(addButton);
-      userEvent.click(addButton);
-      userEvent.click(addButton);
-      userEvent.click(addButton);
-      userEvent.click(addButton);
-      userEvent.click(addButton);
-      userEvent.click(addButton);
-      userEvent.click(addButton);
-      userEvent.click(addButton);
-      userEvent.click(addButton);
+      userEvent.click(createParticipantButton);
+      userEvent.click(createParticipantButton);
+      userEvent.click(createParticipantButton);
+      userEvent.click(createParticipantButton);
+      userEvent.click(createParticipantButton);
+      userEvent.click(createParticipantButton);
+      userEvent.click(createParticipantButton);
+      userEvent.click(createParticipantButton);
+      userEvent.click(createParticipantButton);
+      userEvent.click(createParticipantButton);
 
-      // Remove a participant that's not at the end of the sequence.
+      // Delete a participant that's not at the end of the sequence.
       userEvent.click(
         screen.getByRole("button", {
           name: new RegExp(`remove: ${ParticipantTable.DEFAULT_NAME} #1$`, "i"),
@@ -718,7 +720,7 @@ describe("ParticipantTable Event Handlers", () => {
       );
       userEvent.click(screen.getByRole("button", { name: /delete/i }));
 
-      /* Then, remove another participant that starts with a differing digit
+      /* Then, delete another participant that starts with a differing digit
        *  from the first, but is not at the end of the sequence. */
       userEvent.click(
         screen.getByRole("button", {
@@ -727,9 +729,9 @@ describe("ParticipantTable Event Handlers", () => {
       );
       userEvent.click(screen.getByRole("button", { name: /delete/i }));
 
-      // Add the participants back.
-      userEvent.click(addButton);
-      userEvent.click(addButton);
+      // Replenish the participants.
+      userEvent.click(createParticipantButton);
+      userEvent.click(createParticipantButton);
 
       expect(
         screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #1`)
@@ -891,7 +893,9 @@ describe("GroupTable Event Handlers", () => {
 
       userEvent.click(screen.getByRole("tab", { name: /participant/i }));
 
-      userEvent.click(screen.getByRole("button", { name: /add participant/i }));
+      userEvent.click(
+        screen.getByRole("button", { name: /create participant/i })
+      );
 
       expect(screen.getByRole("grid")).toBeInTheDocument();
 

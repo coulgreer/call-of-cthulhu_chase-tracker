@@ -53,7 +53,7 @@ describe("Prop Rendering", () => {
       ).toBeInTheDocument();
       expect(screen.queryAllByRole("row")).toHaveLength(0);
       expect(
-        screen.getByRole("button", { name: /add participant/i })
+        screen.getByRole("button", { name: /create participant/i })
       ).toBeInTheDocument();
     });
 
@@ -78,7 +78,7 @@ describe("Prop Rendering", () => {
       expect(screen.getByText(warningMessage)).toBeInTheDocument();
       expect(screen.queryAllByRole("row")).toHaveLength(0);
       expect(
-        screen.getByRole("button", { name: /add participant/i })
+        screen.getByRole("button", { name: /create participant/i })
       ).toBeInTheDocument();
     });
   });
@@ -92,7 +92,7 @@ describe("Prop Rendering", () => {
       ).not.toBeInTheDocument();
       expect(screen.getAllByRole("row")).toHaveLength(participants.length);
       expect(
-        screen.getByRole("button", { name: /add participant/i })
+        screen.getByRole("button", { name: /create participant/i })
       ).toBeInTheDocument();
     });
   });
@@ -109,7 +109,7 @@ test("should trigger creation of a participant", () => {
     />
   );
 
-  userEvent.click(screen.getByRole("button", { name: /add participant/i }));
+  userEvent.click(screen.getByRole("button", { name: /create participant/i }));
 
   expect(onCreateParticipantClick).toBeCalled();
 });

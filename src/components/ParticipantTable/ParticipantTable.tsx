@@ -86,7 +86,7 @@ export default class ParticipantTable extends Component<Props, State> {
     return (
       <Button
         className="button fab"
-        aria-label="Add Participant"
+        aria-label="Create Participant"
         onClick={this.createParticipant}
       >
         <span className="material-icons" aria-hidden>
