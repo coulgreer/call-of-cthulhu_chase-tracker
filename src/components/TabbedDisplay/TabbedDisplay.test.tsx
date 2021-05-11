@@ -913,6 +913,20 @@ describe("GroupTable Event Handlers", () => {
         screen.getByText(GroupRow.NO_DISTANCER_WARNING_MESSAGE)
       ).toBeVisible();
     });
+
+    test("should not crash when changing distancer to 'none'", () => {
+      render(<TabbedDisplay />);
+      userEvent.click(screen.getByRole("tab", { name: /group/i }));
+      userEvent.click(screen.getByRole("button", { name: /create group/i }));
+      userEvent.click(screen.getByRole("button", { name: /group details/i }));
+
+      expect(() =>
+        userEvent.selectOptions(
+          screen.getByRole("combobox", { name: /distancer/i }),
+          GroupRow.INVALID_DISTANCER_ID
+        )
+      ).not.toThrowError();
+    });
   });
 });
 
