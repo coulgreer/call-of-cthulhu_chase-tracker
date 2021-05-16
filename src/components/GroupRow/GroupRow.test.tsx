@@ -614,6 +614,57 @@ describe("Member Display", () => {
       })
     ).not.toBeInTheDocument();
   });
+
+  test("should disable add button when all participants are owned", () => {
+    const domesticParticipant: Participant = {
+      id: "P-0",
+      name: "Domestic",
+      dexterity: 15,
+      movementRate: 3,
+      derivedSpeed: 1,
+      speedStatistics: [],
+      hazardStatistics: [],
+      isGrouped: true,
+    };
+
+    const groups = [
+      {
+        id: "g-1",
+        name: "Group 1",
+        distancerId: GroupRow.INVALID_DISTANCER_ID,
+        pursuersIds: [],
+        participants: [domesticParticipant],
+      },
+    ];
+
+    const foreignParticipant: Participant = {
+      id: "P-1",
+      name: "Foreign",
+      dexterity: 15,
+      movementRate: 3,
+      derivedSpeed: 1,
+      speedStatistics: [],
+      hazardStatistics: [],
+      isGrouped: true,
+    };
+
+    const participants: Participant[] = [
+      domesticParticipant,
+      foreignParticipant,
+    ];
+
+    render(
+      <GroupRow ownedIndex={0} groups={groups} participants={participants} />
+    );
+    userEvent.click(screen.getByRole("button", { name: /group details/i }));
+
+    userEvent.click(screen.getByRole("button", { name: /add/i }));
+
+    const modalEl = screen.getByRole("dialog");
+    expect(
+      within(modalEl).getByRole("button", { name: /add/i })
+    ).toBeDisabled();
+  });
 });
 
 describe("Warnings", () => {
