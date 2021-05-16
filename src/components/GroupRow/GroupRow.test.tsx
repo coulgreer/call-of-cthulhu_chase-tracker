@@ -482,6 +482,38 @@ describe("Member Display", () => {
     expect(handleSubmit).toBeCalled();
   });
 
+  test("should update participant's flag for representing group ownership", () => {
+    const { groups, handleSubmit } = DEFAULT_PROPS;
+
+    const participants: Participant[] = [
+      createParticipant("Part 1"),
+      createParticipant("Part 2"),
+    ];
+    const [first] = participants;
+
+    render(
+      <GroupRow
+        ownedIndex={isolatedGroupIndex}
+        groups={groups}
+        participants={participants}
+        onSubmit={handleSubmit}
+      />
+    );
+    userEvent.click(screen.getByRole("button", { name: /group details/i }));
+
+    expect(first.isGrouped).toBeFalsy();
+
+    userEvent.click(screen.getByRole("button", { name: /add/i }));
+    userEvent.click(
+      screen.getByRole("checkbox", { name: new RegExp(first.name) })
+    );
+    userEvent.click(
+      within(screen.getByRole("dialog")).getByRole("button", { name: /add/i })
+    );
+
+    expect(first.isGrouped).toBeTruthy();
+  });
+
   test("should render properly when all participants are already owned by a group", () => {
     const { groups } = DEFAULT_PROPS;
     const participant = createParticipant("Part");

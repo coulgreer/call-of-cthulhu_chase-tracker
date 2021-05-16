@@ -121,6 +121,10 @@ export default class GroupRow extends React.Component<Props, State> {
     const selectedParticipants = selectedParticipantsIds
       .map(this.findParticipantById)
       .filter((participant): participant is Participant => !!participant);
+    selectedParticipants.forEach((participant) => {
+      // eslint-disable-next-line no-param-reassign
+      participant.isGrouped = true;
+    });
 
     groups[ownedIndex].participants = selectedParticipants.concat(
       currentParticipants
