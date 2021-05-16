@@ -18,6 +18,7 @@ const DEFAULT_PROPS: {
     derivedSpeed: 0,
     speedStatistics: ParticipantRow.DEFAULT_SPEED_STATISTICS,
     hazardStatistics: ParticipantRow.DEFAULT_HAZARD_STATISTICS,
+    isGrouped: false,
   },
   onParticipantChange: jest.fn(),
 };

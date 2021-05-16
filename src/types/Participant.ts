@@ -11,4 +11,5 @@ export default interface Participant {
   derivedSpeed: number;
   speedStatistics: Statistic[];
   hazardStatistics: Statistic[];
+  isGrouped: boolean;
 }

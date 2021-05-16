@@ -83,6 +83,7 @@ export default class TabbedDisplay extends React.Component<Props, State> {
         derivedSpeed: 1,
         speedStatistics: ParticipantRow.DEFAULT_SPEED_STATISTICS,
         hazardStatistics: ParticipantRow.DEFAULT_HAZARD_STATISTICS,
+        isGrouped: false,
       });
 
       return { participants };

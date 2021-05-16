@@ -218,6 +218,8 @@ export default class GroupRow extends React.Component<Props, State> {
   }
 
   private isAvailable(participant: Participant) {
+    if (participant.isGrouped) return false;
+
     const { groups, ownedIndex } = this.props;
     const { participants: ownedParticipants } = groups[ownedIndex];
     let isAvailable = true;

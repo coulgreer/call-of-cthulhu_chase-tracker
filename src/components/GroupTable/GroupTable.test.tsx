@@ -17,6 +17,7 @@ function createParticipant(id: string): Participant {
     derivedSpeed: 1,
     speedStatistics: [],
     hazardStatistics: [],
+    isGrouped: false,
   };
 }
 

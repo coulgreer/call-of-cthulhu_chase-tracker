@@ -16,6 +16,7 @@ function createParticipant(id: string): Participant {
     derivedSpeed: 1,
     speedStatistics: [],
     hazardStatistics: [],
+    isGrouped: false,
   };
 }
 
@@ -76,6 +77,7 @@ const DEFAULT_PROPS: {
       derivedSpeed: 1,
       speedStatistics: [],
       hazardStatistics: [],
+      isGrouped: false,
     },
     {
       id: "p2",
@@ -85,6 +87,7 @@ const DEFAULT_PROPS: {
       derivedSpeed: 2,
       speedStatistics: [],
       hazardStatistics: [],
+      isGrouped: false,
     },
     {
       id: "p3",
@@ -94,6 +97,7 @@ const DEFAULT_PROPS: {
       derivedSpeed: 3,
       speedStatistics: [],
       hazardStatistics: [],
+      isGrouped: false,
     },
   ],
   handleDistancerBlur: jest.fn(),
@@ -336,6 +340,7 @@ describe("Member Display", () => {
           derivedSpeed: 1,
           speedStatistics: [],
           hazardStatistics: [],
+          isGrouped: false,
         },
       ];
 
@@ -389,6 +394,7 @@ describe("Member Display", () => {
           derivedSpeed: 1,
           speedStatistics: [],
           hazardStatistics: [],
+          isGrouped: false,
         },
         {
           id: "p2",
@@ -398,6 +404,7 @@ describe("Member Display", () => {
           derivedSpeed: 2,
           speedStatistics: [],
           hazardStatistics: [],
+          isGrouped: false,
         },
       ];
 
@@ -550,6 +557,62 @@ describe("Member Display", () => {
         name: new RegExp(participant3Name),
       })
     ).toBeInTheDocument();
+  });
+
+  test("should exclude participants already owned by any other group", () => {
+    const groups = [
+      {
+        id: "g-1",
+        name: "Group 1",
+        distancerId: GroupRow.INVALID_DISTANCER_ID,
+        pursuersIds: [],
+        participants: [],
+      },
+    ];
+
+    const orphanedParticipant = {
+      id: "P-0",
+      name: "Orphaned",
+      dexterity: 15,
+      movementRate: 3,
+      derivedSpeed: 1,
+      speedStatistics: [],
+      hazardStatistics: [],
+      isGrouped: false,
+    };
+    const fosteredParticipant = {
+      id: "P-1",
+      name: "Fostered",
+      dexterity: 15,
+      movementRate: 3,
+      derivedSpeed: 1,
+      speedStatistics: [],
+      hazardStatistics: [],
+      isGrouped: true,
+    };
+    const participants: Participant[] = [
+      orphanedParticipant,
+      fosteredParticipant,
+    ];
+
+    render(
+      <GroupRow ownedIndex={0} groups={groups} participants={participants} />
+    );
+    userEvent.click(screen.getByRole("button", { name: /group details/i }));
+
+    userEvent.click(screen.getByRole("button", { name: /add/i }));
+
+    const modalEl = screen.getByRole("dialog");
+    expect(
+      within(modalEl).getByRole("checkbox", {
+        name: new RegExp(orphanedParticipant.name),
+      })
+    ).toBeInTheDocument();
+    expect(
+      within(modalEl).queryByRole("checkbox", {
+        name: new RegExp(fosteredParticipant.name),
+      })
+    ).not.toBeInTheDocument();
   });
 });
 
