@@ -193,10 +193,10 @@ describe("Prop Rendering", () => {
       expect(
         screen.getByText(GroupRow.NO_MEMBER_WARNING_MESSAGE)
       ).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: /add/i })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /add/i })).toBeDisabled();
     });
 
-    test("should render properly when including all optional props", () => {
+    test("should render properly when including all optional props and at least one participant is given", () => {
       const {
         groups,
         participants,
@@ -270,10 +270,39 @@ describe("Prop Rendering", () => {
       expect(screen.getByRole("button", { name: /add/i })).toBeInTheDocument();
     });
 
-    /* 
-      TODO (Coul Greer): Test if the 'add' button is disabled when no
-      participants exist for selection
-    */
+    describe("Participants", () => {
+      test("should enable add button when 'participants' has at least one element", () => {
+        const { groups, participants } = DEFAULT_PROPS;
+
+        render(
+          <GroupRow
+            ownedIndex={isolatedGroupIndex}
+            groups={groups}
+            participants={participants}
+          />
+        );
+        userEvent.click(screen.getByRole("button", { name: /group details/i }));
+
+        expect(screen.getByRole("button", { name: /add/i })).not.toBeDisabled();
+      });
+
+      test("should disable add button when 'participants' is empty", () => {
+        const { groups } = DEFAULT_PROPS;
+
+        const empty: Participant[] = [];
+
+        render(
+          <GroupRow
+            ownedIndex={isolatedGroupIndex}
+            groups={groups}
+            participants={empty}
+          />
+        );
+        userEvent.click(screen.getByRole("button", { name: /group details/i }));
+
+        expect(screen.getByRole("button", { name: /add/i })).toBeDisabled();
+      });
+    });
   });
 });
 
@@ -446,12 +475,25 @@ describe("Member Display", () => {
     expect(handleSubmit).toBeCalled();
   });
 
-  test("should render properly when no participants are available", () => {
+  test("should render properly when all participants are already owned by a group", () => {
     const { groups } = DEFAULT_PROPS;
+    const participant = createParticipant("Part");
+    const participants = [participant];
 
-    render(<GroupRow ownedIndex={isolatedGroupIndex} groups={groups} />);
+    render(
+      <GroupRow
+        ownedIndex={isolatedGroupIndex}
+        groups={groups}
+        participants={participants}
+      />
+    );
 
     userEvent.click(screen.getByRole("button", { name: /group details/i }));
+    userEvent.click(screen.getByRole("button", { name: /add/i }));
+
+    const modalEl = screen.getByRole("dialog");
+    userEvent.click(within(modalEl).getByRole("checkbox"));
+    userEvent.click(within(modalEl).getByRole("button", { name: /add/i }));
 
     userEvent.click(screen.getByRole("button", { name: /add/i }));
 

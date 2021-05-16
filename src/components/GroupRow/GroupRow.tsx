@@ -373,7 +373,7 @@ export default class GroupRow extends React.Component<Props, State> {
   }
 
   private renderMembers() {
-    const { groups, ownedIndex } = this.props;
+    const { groups, ownedIndex, participants } = this.props;
     const currentGroup = groups[ownedIndex];
 
     this.lowestMovementRating = this.findLowestMovementRate();
@@ -416,6 +416,7 @@ export default class GroupRow extends React.Component<Props, State> {
         <Button
           className="button button--primary button--medium"
           onClick={this.handleAddClick}
+          disabled={!participants || participants.length < 1}
         >
           ADD
         </Button>
@@ -429,10 +430,6 @@ export default class GroupRow extends React.Component<Props, State> {
 
     const availableParticipants = participants?.filter(this.isAvailable) || [];
 
-    /* 
-      TODO (Coul Greer): Disable the "ADD" button when no participants exist for
-      selection.
-    */
     return (
       <Modal
         className="Modal__Content"
