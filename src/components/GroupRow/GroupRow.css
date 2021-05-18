@@ -32,12 +32,23 @@
   font-weight: 700;
 }
 
+.GroupRow__member-item {
+  display: flex;
+  justify-content: space-between;
+}
+
+.GroupRow__member-item .material-icons-outlined {
+  display: inline-flex;
+  vertical-align: middle;
+  font-size: 0.9em;
+}
+
 .GroupRow--highest {
-  color: rgba(var(--cultured), var(--text-emphasis--high));
-  background-color: rgba(var(--sweet-brown), var(--text-emphasis--high));
+  color: rgba(var(--rufous), var(--text-emphasis--high));
+  font-weight: 700;
 }
 
 .GroupRow--lowest {
-  color: #121212;
-  background-color: rgba(var(--little-boy-blue), var(--text-emphasis--high));
+  color: rgba(var(--usafa-blue), var(--text-emphasis--high));
+  font-weight: 700;
 }

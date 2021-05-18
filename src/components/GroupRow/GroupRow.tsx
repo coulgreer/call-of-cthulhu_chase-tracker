@@ -160,15 +160,24 @@ export default class GroupRow extends React.Component<Props, State> {
 
     if (this.areBoundariesEqual()) return "";
 
-    if (this.highestMovementRating === movementStr) {
+    if (this.isHighestBoundary(movementStr)) {
       return GroupRow.HIGHEST_MOVEMENT_CLASS_NAME;
     }
 
-    if (this.lowestMovementRating === movementStr) {
+    if (this.isLowestBoundary(movementStr)) {
       return GroupRow.LOWEST_MOVEMENT_CLASS_NAME;
     }
 
     return "";
+  }
+
+  private hasBoundaryMovementRate(participant: Participant) {
+    const { movementRate } = participant;
+    const movementStr = movementRate.toString();
+
+    return (
+      this.isHighestBoundary(movementStr) || this.isLowestBoundary(movementStr)
+    );
   }
 
   private closeModal() {
@@ -207,6 +216,14 @@ export default class GroupRow extends React.Component<Props, State> {
 
   private areBoundariesEqual() {
     return this.highestMovementRating === this.lowestMovementRating;
+  }
+
+  private isHighestBoundary(movementRate: string) {
+    return this.highestMovementRating === movementRate;
+  }
+
+  private isLowestBoundary(movementRate: string) {
+    return this.lowestMovementRating === movementRate;
   }
 
   private findParticipantById(id: string) {
@@ -406,11 +423,16 @@ export default class GroupRow extends React.Component<Props, State> {
               <li
                 className={`${this.getBoundaryClassName(
                   participant
-                )} list__item`}
+                )} list__item GroupRow__member-item`}
                 key={participant.id}
               >
                 {participant.name}
-                <span>{participant.movementRate}</span>
+                <span>
+                  {participant.movementRate}
+                  {this.hasBoundaryMovementRate(participant) && (
+                    <span className="material-icons-outlined">warning</span>
+                  )}
+                </span>
               </li>
             ))}
           </ul>

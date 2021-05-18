@@ -371,12 +371,14 @@ describe("Member Display", () => {
           new RegExp(`lowest mov : ${firstParticipant.movementRate}`, "i")
         )
       ).not.toHaveClass(GroupRow.LOWEST_MOVEMENT_CLASS_NAME);
+
       expect(within(listEl).getByText(firstParticipant.name)).not.toHaveClass(
         GroupRow.HIGHEST_MOVEMENT_CLASS_NAME
       );
       expect(within(listEl).getByText(firstParticipant.name)).not.toHaveClass(
         GroupRow.LOWEST_MOVEMENT_CLASS_NAME
       );
+      expect(within(listEl).getByText("warning")).toBeInTheDocument();
 
       expect(within(listEl).getAllByRole("listitem")).toHaveLength(1);
     });
@@ -438,6 +440,8 @@ describe("Member Display", () => {
       expect(
         screen.getByText(new RegExp(`lowest mov : ${lowestMOV}`, "i"))
       ).toHaveClass(GroupRow.LOWEST_MOVEMENT_CLASS_NAME);
+
+      expect(within(listEl).getAllByText("warning")).toHaveLength(2);
 
       expect(
         within(screen.getByRole("list", { name: /members/i })).getAllByRole(
