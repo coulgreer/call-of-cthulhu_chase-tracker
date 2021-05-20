@@ -113,6 +113,12 @@ describe("Prop Rendering", () => {
 
     render(<GroupRow ownedIndex={isolatedGroupIndex} groups={groups} />);
 
+    expect(
+      screen.getByRole("gridcell", {
+        name: new RegExp(`${groups[isolatedGroupIndex].name}`, "i"),
+      })
+    ).toBeInTheDocument();
+
     expect(screen.getByRole("button", { name: /split/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /join/i })).toBeInTheDocument();
     expect(screen.getByRole("textbox", { name: /name/i })).toBeInTheDocument();
@@ -150,6 +156,7 @@ describe("Prop Rendering", () => {
         screen.getByRole("button", { name: /split/i })
       ).toBeInTheDocument();
       expect(screen.getByRole("button", { name: /join/i })).toBeInTheDocument();
+
       expect(
         screen.getByRole("textbox", { name: /name/i })
       ).toBeInTheDocument();
@@ -229,6 +236,7 @@ describe("Prop Rendering", () => {
         screen.getByRole("button", { name: /split/i })
       ).toBeInTheDocument();
       expect(screen.getByRole("button", { name: /join/i })).toBeInTheDocument();
+
       expect(
         screen.getByRole("textbox", { name: /name/i })
       ).toBeInTheDocument();
@@ -271,6 +279,7 @@ describe("Prop Rendering", () => {
       expect(
         screen.getByText(GroupRow.NO_MEMBER_WARNING_MESSAGE)
       ).toBeInTheDocument();
+
       expect(screen.getByRole("button", { name: /add/i })).toBeInTheDocument();
     });
 
@@ -318,14 +327,32 @@ describe("Member Display", () => {
       render(<GroupRow ownedIndex={isolatedGroupIndex} groups={groups} />);
       userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
-      expect(screen.getByText(/highest mov : N\/A/i)).toBeInTheDocument();
-      expect(screen.getByText(/lowest mov : N\/A/i)).toBeInTheDocument();
+      const tableEl = screen.getByRole("table", { name: /members/i });
+      expect(tableEl).toHaveAttribute("aria-invalid", "true");
+      expect(tableEl).toHaveAttribute("aria-errormessage");
 
       expect(
-        screen.getByText(GroupRow.NO_MEMBER_WARNING_MESSAGE)
+        screen.getByRole("cell", { name: /arrow_upward/i })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("cell", { name: /arrow_downward/i })
+      ).toBeInTheDocument();
+      expect(screen.getAllByRole("cell", { name: /---/i })).toHaveLength(2);
+      expect(screen.getAllByRole("cell", { name: /N\/A/i })).toHaveLength(2);
+
+      expect(
+        screen.getByRole("columnheader", { name: /icon/i })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("columnheader", { name: /name/i })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("columnheader", { name: /mov/i })
       ).toBeInTheDocument();
 
-      expect(screen.queryByRole("list")).not.toBeInTheDocument();
+      expect(
+        screen.getByRole("cell", { name: GroupRow.NO_MEMBER_WARNING_MESSAGE })
+      ).toBeInTheDocument();
 
       expect(screen.getByRole("button", { name: /add/i })).toBeInTheDocument();
     });
@@ -359,33 +386,68 @@ describe("Member Display", () => {
       render(<GroupRow ownedIndex={0} groups={groups} />);
       userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
-      const listEl = screen.getByRole("list", { name: /members/i });
+      const tableEl = screen.getByRole("table", { name: /members/i });
 
       expect(
-        screen.getByText(
-          new RegExp(`highest mov : ${firstParticipant.movementRate}`, "i")
-        )
+        within(tableEl).getByRole("cell", { name: /warning/i })
+      ).toBeVisible();
+
+      expect(
+        within(tableEl).getByRole("cell", { name: /arrow_upward/i })
+      ).toBeInTheDocument();
+      expect(
+        within(tableEl).getByRole("cell", { name: /arrow_downward/i })
+      ).toBeInTheDocument();
+      expect(
+        within(tableEl).getAllByRole("cell", { name: firstParticipant.name })
+      ).toHaveLength(3);
+      expect(
+        within(tableEl).getAllByRole("cell", {
+          name: `${firstParticipant.movementRate}`,
+        })
+      ).toHaveLength(3);
+
+      expect(
+        within(tableEl).getByRole("row", {
+          name: /member with the highest mov/i,
+        })
       ).not.toHaveClass(GroupRow.HIGHEST_MOVEMENT_CLASS_NAME);
       expect(
-        screen.getByText(
-          new RegExp(`lowest mov : ${firstParticipant.movementRate}`, "i")
-        )
+        within(tableEl).getByRole("row", {
+          name: /member with the lowest mov/i,
+        })
       ).not.toHaveClass(GroupRow.LOWEST_MOVEMENT_CLASS_NAME);
 
-      expect(within(listEl).getByText(firstParticipant.name)).not.toHaveClass(
-        GroupRow.HIGHEST_MOVEMENT_CLASS_NAME
-      );
-      expect(within(listEl).getByText(firstParticipant.name)).not.toHaveClass(
-        GroupRow.LOWEST_MOVEMENT_CLASS_NAME
-      );
-      expect(within(listEl).getByText("warning")).toBeInTheDocument();
+      expect(
+        screen.getByRole("columnheader", { name: /icon/i })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("columnheader", { name: /name/i })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("columnheader", { name: /mov/i })
+      ).toBeInTheDocument();
 
-      expect(within(listEl).getAllByRole("listitem")).toHaveLength(1);
+      const tableBodyEl = within(tableEl).getByRole("rowgroup", {
+        name: /members/i,
+      });
+
+      expect(
+        within(tableBodyEl).getByRole("row", { name: firstParticipant.name })
+      ).not.toHaveClass(GroupRow.HIGHEST_MOVEMENT_CLASS_NAME);
+      expect(
+        within(tableBodyEl).getByRole("row", { name: firstParticipant.name })
+      ).not.toHaveClass(GroupRow.LOWEST_MOVEMENT_CLASS_NAME);
+      expect(
+        within(tableBodyEl).getByRole("cell", { name: /warning/i })
+      ).toBeInTheDocument();
+
+      expect(within(tableEl).getAllByRole("row")).toHaveLength(4);
     });
 
     test("should render properly when at least two participants exist with differing movement ratings", () => {
-      const lowestMOV = 6;
-      const highestMOV = 8;
+      const lowestMOV = 1;
+      const highestMOV = 11;
 
       const participants: Participant[] = [
         {
@@ -425,29 +487,78 @@ describe("Member Display", () => {
       render(<GroupRow ownedIndex={0} groups={groups} />);
       userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
-      const listEl = screen.getByRole("list", { name: /members/i });
+      const tableEl = screen.getByRole("table", { name: /members/i });
 
       expect(
-        screen.getByText(new RegExp(`highest mov : ${highestMOV}`, "i"))
+        within(tableEl).getByRole("cell", { name: /arrow_upward/i })
+      ).toBeInTheDocument();
+      expect(
+        within(tableEl).getByRole("cell", { name: /arrow_downward/i })
+      ).toBeInTheDocument();
+
+      expect(
+        within(tableEl).getAllByRole("cell", {
+          name: lowestMovParticipant.name,
+        })
+      ).toHaveLength(2);
+      expect(
+        within(tableEl).getAllByRole("cell", {
+          name: `${lowestMovParticipant.movementRate}`,
+        })
+      ).toHaveLength(2);
+
+      expect(
+        within(tableEl).getAllByRole("cell", {
+          name: highestMovParticipant.name,
+        })
+      ).toHaveLength(2);
+      expect(
+        within(tableEl).getAllByRole("cell", {
+          name: `${highestMovParticipant.movementRate}`,
+        })
+      ).toHaveLength(2);
+
+      expect(
+        within(tableEl).getByRole("row", {
+          name: /member with the highest mov/i,
+        })
       ).toHaveClass(GroupRow.HIGHEST_MOVEMENT_CLASS_NAME);
-      expect(within(listEl).getByText(highestMovParticipant.name)).toHaveClass(
-        GroupRow.HIGHEST_MOVEMENT_CLASS_NAME
-      );
-
-      expect(within(listEl).getByText(lowestMovParticipant.name)).toHaveClass(
-        GroupRow.LOWEST_MOVEMENT_CLASS_NAME
-      );
       expect(
-        screen.getByText(new RegExp(`lowest mov : ${lowestMOV}`, "i"))
+        within(tableEl).getByRole("row", {
+          name: /member with the lowest mov/i,
+        })
       ).toHaveClass(GroupRow.LOWEST_MOVEMENT_CLASS_NAME);
 
-      expect(within(listEl).getAllByText("warning")).toHaveLength(2);
+      expect(
+        screen.getByRole("columnheader", { name: /icon/i })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("columnheader", { name: /name/i })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("columnheader", { name: /mov/i })
+      ).toBeInTheDocument();
+
+      const tableBodyEl = within(tableEl).getByRole("rowgroup", {
+        name: /members/i,
+      });
 
       expect(
-        within(screen.getByRole("list", { name: /members/i })).getAllByRole(
-          "listitem"
-        )
-      ).toHaveLength(participants.length);
+        within(tableBodyEl).getByRole("row", {
+          name: highestMovParticipant.name,
+        })
+      ).toHaveClass(GroupRow.HIGHEST_MOVEMENT_CLASS_NAME);
+      expect(
+        within(tableBodyEl).getByRole("row", {
+          name: lowestMovParticipant.name,
+        })
+      ).toHaveClass(GroupRow.LOWEST_MOVEMENT_CLASS_NAME);
+
+      expect(
+        within(tableBodyEl).getAllByRole("cell", { name: /warning/i })
+      ).toHaveLength(2);
+
+      expect(within(tableEl).getAllByRole("row")).toHaveLength(5);
     });
   });
 
@@ -756,5 +867,69 @@ describe("Warnings", () => {
         ).getAllByRole("listitem")
       ).toHaveLength(1);
     });
+  });
+});
+
+describe("Confirmation Tests", () => {
+  test("should only show warning icon for members with boundary values", () => {
+    const lowestMOV = 1;
+    const highestMOV = 11;
+    const middlingMOV = highestMOV - lowestMOV;
+
+    const participants: Participant[] = [
+      {
+        id: "p1",
+        name: "Participant 1",
+        dexterity: 15,
+        movementRate: lowestMOV,
+        derivedSpeed: 1,
+        speedStatistics: [],
+        hazardStatistics: [],
+        isGrouped: true,
+      },
+      {
+        id: "p2",
+        name: "Participant 2",
+        dexterity: 15,
+        movementRate: middlingMOV,
+        derivedSpeed: 1,
+        speedStatistics: [],
+        hazardStatistics: [],
+        isGrouped: true,
+      },
+      {
+        id: "p3",
+        name: "Participant 3",
+        dexterity: 50,
+        movementRate: highestMOV,
+        derivedSpeed: 2,
+        speedStatistics: [],
+        hazardStatistics: [],
+        isGrouped: true,
+      },
+    ];
+
+    const [, middleParticipant] = participants;
+
+    const groups: Group[] = [
+      {
+        id: "0",
+        name: "Group 0",
+        distancerId: GroupRow.INVALID_DISTANCER_ID,
+        pursuersIds: [],
+        participants,
+      },
+    ];
+
+    render(<GroupRow ownedIndex={0} groups={groups} />);
+    userEvent.click(screen.getByRole("button", { name: /group details/i }));
+
+    const rowEl = screen.getByRole("row", {
+      name: middleParticipant.name,
+    });
+
+    expect(
+      within(rowEl).queryByRole("cell", { name: /warning/i })
+    ).not.toBeInTheDocument();
   });
 });

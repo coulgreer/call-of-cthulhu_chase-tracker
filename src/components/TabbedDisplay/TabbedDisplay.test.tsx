@@ -783,7 +783,7 @@ describe("GroupTable Event Handlers", () => {
     expect(screen.getByRole("grid", { name: /groups/i })).toBeInTheDocument();
   });
 
-  test("should update group when row adds at least one participant", () => {
+  test("should update group when row adds at least one member", () => {
     render(<TabbedDisplay />);
     createAnExpandedParticipantRow();
     createAnExpandedGroupRow();
@@ -796,7 +796,8 @@ describe("GroupTable Event Handlers", () => {
       within(screen.getByRole("dialog")).getByRole("button", { name: /add/i })
     );
 
-    expect(screen.getAllByRole("listitem")).toHaveLength(1);
+    const tableDataEl = screen.getByRole("rowgroup", { name: /members/i });
+    expect(within(tableDataEl).getAllByRole("row")).toHaveLength(1);
   });
 
   test("should delete pre-existing group when its associated delete button is pressed", () => {
@@ -813,14 +814,14 @@ describe("GroupTable Event Handlers", () => {
 
     userEvent.click(screen.getByRole("button", { name: /^delete$/i }));
 
-    expect(screen.getAllByRole("row")).toHaveLength(2);
+    expect(screen.getAllByRole("row", { name: /group/i })).toHaveLength(2);
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
   test("should update pursuers list when another group makes it its distancer", () => {
-    const name1 = "GROUP-1";
-    const name2 = "GROUP-2";
-    const name3 = "GROUP-3";
+    const id1 = "GROUP-1";
+    const id2 = "GROUP-2";
+    const id3 = "GROUP-3";
 
     render(<TabbedDisplay />);
     createAnExpandedGroupRow();
@@ -829,45 +830,49 @@ describe("GroupTable Event Handlers", () => {
 
     expect(screen.queryByRole("listitem")).not.toBeInTheDocument();
 
-    const [firstRow, secondRow, thirdRow] = screen.getAllByRole("row");
-    const firstDistancerEl = within(firstRow).getByRole("combobox", {
-      name: /distancer/i,
-    });
-    const secondDistancerEl = within(secondRow).getByRole("combobox", {
-      name: /distancer/i,
-    });
-    const thirdDistancerEl = within(thirdRow).getByRole("combobox", {
+    const firstGroupEl = screen.getByRole("row", { name: id1 });
+    const firstDistancerEl = within(firstGroupEl).getByRole("combobox", {
       name: /distancer/i,
     });
 
-    userEvent.selectOptions(firstDistancerEl, name2);
+    const secondGroupEl = screen.getByRole("row", { name: id2 });
+    const secondDistancerEl = within(secondGroupEl).getByRole("combobox", {
+      name: /distancer/i,
+    });
+
+    const thirdGroupEl = screen.getByRole("row", { name: id3 });
+    const thirdDistancerEl = within(thirdGroupEl).getByRole("combobox", {
+      name: /distancer/i,
+    });
+
+    userEvent.selectOptions(firstDistancerEl, id2);
     firstDistancerEl.blur();
 
-    expect(firstDistancerEl).toHaveValue(name2);
+    expect(firstDistancerEl).toHaveValue(id2);
     expect(
-      within(secondRow)
+      within(secondGroupEl)
         .getAllByRole("listitem")
-        .filter((listitem) => listitem.textContent === name1)
+        .filter((listitem) => listitem.textContent === id1)
     ).toHaveLength(1);
 
-    userEvent.selectOptions(secondDistancerEl, name3);
+    userEvent.selectOptions(secondDistancerEl, id3);
     secondDistancerEl.blur();
 
-    expect(secondDistancerEl).toHaveValue(name3);
+    expect(secondDistancerEl).toHaveValue(id3);
     expect(
-      within(thirdRow)
+      within(thirdGroupEl)
         .getAllByRole("listitem")
-        .filter((listitem) => listitem.textContent === name2)
+        .filter((listitem) => listitem.textContent === id2)
     ).toHaveLength(1);
 
-    userEvent.selectOptions(thirdDistancerEl, name1);
+    userEvent.selectOptions(thirdDistancerEl, id1);
     thirdDistancerEl.blur();
 
-    expect(thirdDistancerEl).toHaveValue(name1);
+    expect(thirdDistancerEl).toHaveValue(id1);
     expect(
-      within(firstRow)
+      within(firstGroupEl)
         .getAllByRole("listitem")
-        .filter((listitem) => listitem.textContent === name3)
+        .filter((listitem) => listitem.textContent === id3)
     ).toHaveLength(1);
 
     /*
@@ -875,16 +880,18 @@ describe("GroupTable Event Handlers", () => {
       test. Meaning: does this improve confidence. If so, extract into another
       test for switching back and forth.
     */
-    userEvent.selectOptions(firstDistancerEl, name3);
+    userEvent.selectOptions(firstDistancerEl, id3);
     firstDistancerEl.blur();
 
-    expect(firstDistancerEl).toHaveValue(name3);
+    expect(firstDistancerEl).toHaveValue(id3);
     expect(
-      within(thirdRow)
+      within(thirdGroupEl)
         .getAllByRole("listitem")
-        .filter((listitem) => listitem.textContent === name1)
+        .filter((listitem) => listitem.textContent === id1)
     ).toHaveLength(1);
-    expect(within(secondRow).queryByRole("listitem")).not.toBeInTheDocument();
+    expect(
+      within(secondGroupEl).queryByRole("listitem")
+    ).not.toBeInTheDocument();
   });
 
   describe("Confirmation tests", () => {
@@ -953,11 +960,18 @@ describe("Confirmation Tests", () => {
 
     userEvent.click(screen.getByRole("tab", { name: /groups/i }));
 
+    const lowestMovRow = screen.getByRole("row", {
+      name: /member with the lowest mov/i,
+    });
     expect(
-      screen.getByText(new RegExp(`lowest mov : ${newMov}`, "i"))
+      within(lowestMovRow).getByRole("cell", { name: `${newMov}` })
     ).toBeInTheDocument();
+
+    const highestMovRow = screen.getByRole("row", {
+      name: /member with the highest mov/i,
+    });
     expect(
-      screen.getByText(new RegExp(`highest mov : ${newMov}`, "i"))
+      within(highestMovRow).getByRole("cell", { name: `${newMov}` })
     ).toBeInTheDocument();
   });
 });

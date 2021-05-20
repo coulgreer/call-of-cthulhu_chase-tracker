@@ -62,11 +62,19 @@ export default class GroupRow extends React.Component<Props, State> {
     return "group-row-expansion";
   }
 
+  static get PLACEHOLDER_MEMBER_NAME() {
+    return "---";
+  }
+
+  static get PLACEHOLDER_MEMBER_MOVEMENT_RATE() {
+    return "N/A";
+  }
+
   private id;
 
-  private lowestMovementRating: string;
+  private lowestMovementRateMember: Participant | null;
 
-  private highestMovementRating: string;
+  private highestMovementRateMember: Participant | null;
 
   constructor(props: Props) {
     super(props);
@@ -79,8 +87,8 @@ export default class GroupRow extends React.Component<Props, State> {
 
     this.id = nanoid();
 
-    this.lowestMovementRating = "";
-    this.highestMovementRating = "";
+    this.lowestMovementRateMember = null;
+    this.highestMovementRateMember = null;
 
     // Event handlers
     this.handleExpandClick = this.handleExpandClick.bind(this);
@@ -156,15 +164,14 @@ export default class GroupRow extends React.Component<Props, State> {
 
   private getBoundaryClassName(participant: Participant) {
     const { movementRate } = participant;
-    const movementStr = movementRate.toString();
 
     if (this.areBoundariesEqual()) return "";
 
-    if (this.isHighestBoundary(movementStr)) {
+    if (this.isHighestBoundary(movementRate)) {
       return GroupRow.HIGHEST_MOVEMENT_CLASS_NAME;
     }
 
-    if (this.isLowestBoundary(movementStr)) {
+    if (this.isLowestBoundary(movementRate)) {
       return GroupRow.LOWEST_MOVEMENT_CLASS_NAME;
     }
 
@@ -173,10 +180,10 @@ export default class GroupRow extends React.Component<Props, State> {
 
   private hasBoundaryMovementRate(participant: Participant) {
     const { movementRate } = participant;
-    const movementStr = movementRate.toString();
 
     return (
-      this.isHighestBoundary(movementStr) || this.isLowestBoundary(movementStr)
+      this.isHighestBoundary(movementRate) ||
+      this.isLowestBoundary(movementRate)
     );
   }
 
@@ -184,46 +191,50 @@ export default class GroupRow extends React.Component<Props, State> {
     this.setState({ modalShown: false });
   }
 
-  private findHighestMovementRate() {
+  private findMemberWithHighestMovementRate() {
     const { groups, ownedIndex } = this.props;
     const { participants } = groups[ownedIndex];
 
-    if (participants.length <= 0) return "N/A";
+    if (participants.length <= 0) return null;
 
-    let result = participants[0].movementRate;
+    let result = participants[0];
 
     participants.forEach((participant) => {
-      if (participant.movementRate > result) result = participant.movementRate;
+      if (participant.movementRate > result.movementRate) result = participant;
     });
 
-    return result.toString();
+    return result;
   }
 
-  private findLowestMovementRate() {
+  private findMemberWithLowestMovementRate() {
     const { groups, ownedIndex } = this.props;
     const { participants } = groups[ownedIndex];
 
-    if (participants.length <= 0) return "N/A";
+    if (participants.length <= 0) return null;
 
-    let result = participants[0].movementRate;
+    let result = participants[0];
 
     participants.forEach((participant) => {
-      if (participant.movementRate < result) result = participant.movementRate;
+      if (participant.movementRate < result.movementRate) result = participant;
     });
 
-    return result.toString();
+    return result;
   }
 
   private areBoundariesEqual() {
-    return this.highestMovementRating === this.lowestMovementRating;
+    return this.highestMovementRateMember === this.lowestMovementRateMember;
   }
 
-  private isHighestBoundary(movementRate: string) {
-    return this.highestMovementRating === movementRate;
+  private isHighestBoundary(movementRate: number) {
+    if (!this.highestMovementRateMember) return false;
+
+    return this.highestMovementRateMember.movementRate === movementRate;
   }
 
-  private isLowestBoundary(movementRate: string) {
-    return this.lowestMovementRating === movementRate;
+  private isLowestBoundary(movementRate: number) {
+    if (!this.lowestMovementRateMember) return false;
+
+    return this.lowestMovementRateMember.movementRate === movementRate;
   }
 
   private findParticipantById(id: string) {
@@ -250,6 +261,13 @@ export default class GroupRow extends React.Component<Props, State> {
     });
 
     return isAvailable;
+  }
+
+  private hasMembers() {
+    const { groups, ownedIndex } = this.props;
+    const { participants } = groups[ownedIndex];
+
+    return participants.length > 0;
   }
 
   private renderMainContent() {
@@ -398,49 +416,101 @@ export default class GroupRow extends React.Component<Props, State> {
   private renderMembers() {
     const { groups, ownedIndex, participants } = this.props;
     const currentGroup = groups[ownedIndex];
+    const { participants: currentParticipants } = currentGroup;
 
-    this.lowestMovementRating = this.findLowestMovementRate();
-    this.highestMovementRating = this.findHighestMovementRate();
+    const errorId = `member-table-error-${this.id}`;
+
+    this.highestMovementRateMember = this.findMemberWithHighestMovementRate();
+    this.lowestMovementRateMember = this.findMemberWithLowestMovementRate();
 
     return (
       <div className="GroupRow__section-container">
-        <h2 className="GroupRow__title">Members</h2>
-        <div className="GroupRow__pursuer-movement">
-          <p
-            className={`text--small ${clsx(
-              !this.areBoundariesEqual() && GroupRow.HIGHEST_MOVEMENT_CLASS_NAME
-            )}`}
-          >{`Highest MOV : ${this.highestMovementRating}`}</p>
-          <p
-            className={`text--small ${clsx(
-              !this.areBoundariesEqual() && GroupRow.LOWEST_MOVEMENT_CLASS_NAME
-            )}`}
-          >{`Lowest MOV : ${this.lowestMovementRating}`}</p>
-        </div>
-        {currentGroup.participants.length > 0 ? (
-          <ul className="list" aria-label="Members">
-            {currentGroup.participants.map((participant) => (
-              <li
-                className={`${this.getBoundaryClassName(
-                  participant
-                )} list__item GroupRow__member-item`}
-                key={participant.id}
-              >
-                {participant.name}
-                <span>
-                  {participant.movementRate}
-                  {this.hasBoundaryMovementRate(participant) && (
-                    <span className="material-icons-outlined">warning</span>
-                  )}
-                </span>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="centered error text--small">
-            {GroupRow.NO_MEMBER_WARNING_MESSAGE}
-          </p>
-        )}
+        <table
+          className="GroupRow__table"
+          aria-errormessage={errorId}
+          aria-invalid={!this.hasMembers()}
+        >
+          <caption>
+            <h2 className="GroupRow__title">Members</h2>
+          </caption>
+          <thead>
+            <tr
+              className={clsx(
+                !this.areBoundariesEqual() &&
+                  GroupRow.HIGHEST_MOVEMENT_CLASS_NAME
+              )}
+              aria-label="Member with the highest MOV"
+            >
+              <td className="material-icons-outlined">arrow_upward</td>
+              <td>
+                {this.highestMovementRateMember?.name ||
+                  GroupRow.PLACEHOLDER_MEMBER_NAME}
+              </td>
+              <td>
+                {this.highestMovementRateMember?.movementRate ||
+                  GroupRow.PLACEHOLDER_MEMBER_MOVEMENT_RATE}
+              </td>
+            </tr>
+            <tr
+              className={clsx(
+                !this.areBoundariesEqual() &&
+                  GroupRow.LOWEST_MOVEMENT_CLASS_NAME
+              )}
+              aria-label="Member with the lowest MOV"
+            >
+              <td className="material-icons-outlined">arrow_downward</td>
+              <td className="GroupRow__cell--summarize">
+                {this.lowestMovementRateMember?.name ||
+                  GroupRow.PLACEHOLDER_MEMBER_NAME}
+              </td>
+              <td>
+                {this.lowestMovementRateMember?.movementRate ||
+                  GroupRow.PLACEHOLDER_MEMBER_MOVEMENT_RATE}
+              </td>
+            </tr>
+            <tr className="GroupRow__header">
+              <th aria-label="icon" />
+              <th>Name</th>
+              <th>MOV</th>
+            </tr>
+          </thead>
+          <tbody aria-label="Members">
+            {this.hasMembers() ? (
+              currentParticipants.map((participant) => (
+                <tr
+                  className={`${this.getBoundaryClassName(participant)}`}
+                  aria-label={participant.name}
+                  key={participant.id}
+                >
+                  <td
+                    className={`material-icons-outlined GroupRow__icon ${clsx({
+                      "GroupRow__icon--hidden": !this.hasBoundaryMovementRate(
+                        participant
+                      ),
+                    })}`}
+                    aria-hidden={!this.hasBoundaryMovementRate(participant)}
+                  >
+                    warning
+                  </td>
+                  <td className="GroupRow__cell--summarize GroupRow__cell--fill-horizontal">
+                    {participant.name}
+                  </td>
+                  <td>{participant.movementRate}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td
+                  id={errorId}
+                  className="centered error text--small"
+                  colSpan={3}
+                >
+                  {GroupRow.NO_MEMBER_WARNING_MESSAGE}
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
         <Button
           className="button button--primary button--medium"
           onClick={this.handleAddClick}
