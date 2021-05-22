@@ -104,6 +104,7 @@ export default class GroupRow extends React.Component<Props, State> {
     this.findParticipantById = this.findParticipantById.bind(this);
     this.isAvailable = this.isAvailable.bind(this);
     this.renderOption = this.renderOption.bind(this);
+    this.renderMember = this.renderMember.bind(this);
   }
 
   private handleExpandClick() {
@@ -274,6 +275,12 @@ export default class GroupRow extends React.Component<Props, State> {
     return distancerId !== GroupRow.INVALID_DISTANCER_ID;
   }
 
+  private hasValidParticipantCount() {
+    const { participants } = this.props;
+
+    return participants && participants.length > 0;
+  }
+
   private hasMembers() {
     const { groups, ownedIndex } = this.props;
     const { participants } = groups[ownedIndex];
@@ -367,7 +374,7 @@ export default class GroupRow extends React.Component<Props, State> {
     const { groups } = this.props;
     const { hasDistancer } = this.state;
 
-    const distancerWarningId = `distancer-combobox-${this.id}`;
+    const warningMessageId = `distancer-combobox-warning-${this.id}`;
 
     return (
       <div className="GroupRow__section-container">
@@ -376,7 +383,7 @@ export default class GroupRow extends React.Component<Props, State> {
           <select
             className="combobox combobox--full-width"
             onBlur={this.handleDistancerBlur}
-            aria-describedby={hasDistancer ? undefined : distancerWarningId}
+            aria-describedby={hasDistancer ? undefined : warningMessageId}
           >
             <option key="default" value={GroupRow.INVALID_DISTANCER_ID}>
               [N/A]
@@ -385,7 +392,7 @@ export default class GroupRow extends React.Component<Props, State> {
           </select>
         </label>
         <p
-          id={distancerWarningId}
+          id={warningMessageId}
           className="centered error text--small"
           hidden={hasDistancer}
         >
@@ -415,7 +422,7 @@ export default class GroupRow extends React.Component<Props, State> {
     return (
       <div className="GroupRow__section-container">
         <h2 id={pursuerLabelId} className="GroupRow__title">
-          Pursuer(s)
+          Pursuers
         </h2>
         {currentGroup.pursuersIds.length > 0 ? (
           <ul aria-labelledby={pursuerLabelId}>
@@ -433,11 +440,11 @@ export default class GroupRow extends React.Component<Props, State> {
   }
 
   private renderMembers() {
-    const { groups, ownedIndex, participants } = this.props;
+    const { groups, ownedIndex } = this.props;
     const currentGroup = groups[ownedIndex];
     const { participants: currentParticipants } = currentGroup;
 
-    const errorId = `member-table-error-${this.id}`;
+    const warningId = `member-table-warning-${this.id}`;
 
     this.highestMovementRateMember = this.findMemberWithHighestMovementRate();
     this.lowestMovementRateMember = this.findMemberWithLowestMovementRate();
@@ -446,8 +453,7 @@ export default class GroupRow extends React.Component<Props, State> {
       <div className="GroupRow__section-container">
         <table
           className="GroupRow__table"
-          aria-errormessage={errorId}
-          aria-invalid={!this.hasMembers()}
+          aria-describedby={this.hasMembers() ? undefined : warningId}
         >
           <caption>
             <h2 className="GroupRow__title">Members</h2>
@@ -493,51 +499,55 @@ export default class GroupRow extends React.Component<Props, State> {
               <th>MOV</th>
             </tr>
           </thead>
-          <tbody aria-label="Members">
-            {this.hasMembers() ? (
-              currentParticipants.map((participant) => (
-                <tr
-                  className={`${this.getBoundaryClassName(participant)}`}
-                  aria-label={participant.name}
-                  key={participant.id}
-                >
-                  <td
-                    className={`material-icons-outlined GroupRow__icon ${clsx({
-                      "GroupRow__icon--hidden": !this.hasBoundaryMovementRate(
-                        participant
-                      ),
-                    })}`}
-                    aria-hidden={!this.hasBoundaryMovementRate(participant)}
-                  >
-                    warning
-                  </td>
-                  <td className="GroupRow__cell--summarize GroupRow__cell--fill-horizontal">
-                    {participant.name}
-                  </td>
-                  <td>{participant.movementRate}</td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td
-                  id={errorId}
-                  className="centered error text--small"
-                  colSpan={3}
-                >
-                  {GroupRow.NO_MEMBER_WARNING_MESSAGE}
-                </td>
-              </tr>
-            )}
+          <tbody aria-label="All Members">
+            {this.hasMembers()
+              ? currentParticipants.map(this.renderMember)
+              : GroupRow.renderMemberWarning(warningId)}
           </tbody>
         </table>
         <Button
           className="button button--primary button--medium"
           onClick={this.handleAddClick}
-          disabled={!participants || participants.length < 1}
+          disabled={!this.hasValidParticipantCount()}
         >
           ADD
         </Button>
       </div>
+    );
+  }
+
+  private renderMember(participant: Participant) {
+    return (
+      <tr
+        className={`${this.getBoundaryClassName(participant)}`}
+        aria-label={participant.name}
+        key={participant.id}
+      >
+        <td
+          className={`material-icons-outlined GroupRow__icon ${clsx({
+            "GroupRow__icon--hidden": !this.hasBoundaryMovementRate(
+              participant
+            ),
+          })}`}
+          aria-hidden={!this.hasBoundaryMovementRate(participant)}
+        >
+          warning
+        </td>
+        <td className="GroupRow__cell--summarize GroupRow__cell--fill-horizontal">
+          {participant.name}
+        </td>
+        <td>{participant.movementRate}</td>
+      </tr>
+    );
+  }
+
+  private static renderMemberWarning(warningId: string) {
+    return (
+      <tr>
+        <td id={warningId} className="centered error text--small" colSpan={3}>
+          {GroupRow.NO_MEMBER_WARNING_MESSAGE}
+        </td>
+      </tr>
     );
   }
 
@@ -551,12 +561,12 @@ export default class GroupRow extends React.Component<Props, State> {
       <Modal
         className="Modal__Content"
         overlayClassName="Modal__Overlay"
-        contentLabel="Select Participant(s)"
+        contentLabel="Select Participant"
         isOpen={modalShown}
         onRequestClose={this.closeModal}
       >
         <h2 className="Modal__Content__text">
-          Select Participant(s) To Add To Group
+          Select Participant To Add To Group
         </h2>
         <hr />
         <form onSubmit={this.handleSubmit}>

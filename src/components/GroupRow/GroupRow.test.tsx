@@ -132,7 +132,7 @@ describe("Prop Rendering", () => {
       screen.queryByRole("combobox", { name: /distancer/i })
     ).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("heading", { name: /pursuer\(s\)/i })
+      screen.queryByRole("heading", { name: /pursuers/i })
     ).not.toBeInTheDocument();
     expect(
       screen.queryByRole("heading", { name: /members/i })
@@ -189,7 +189,7 @@ describe("Prop Rendering", () => {
       ).toBeInTheDocument();
 
       expect(
-        screen.getByRole("heading", { name: /pursuer\(s\)/i })
+        screen.getByRole("heading", { name: /pursuers/i })
       ).toBeInTheDocument();
       expect(
         screen.getByText(GroupRow.NO_PURSUER_WARNING_MESSAGE)
@@ -264,7 +264,7 @@ describe("Prop Rendering", () => {
       userEvent.click(screen.getByRole("combobox", { name: /distancer/i }));
 
       expect(
-        screen.getByRole("heading", { name: /pursuer\(s\)/i })
+        screen.getByRole("heading", { name: /pursuers/i })
       ).toBeInTheDocument();
       expect(
         screen.getByText(GroupRow.NO_PURSUER_WARNING_MESSAGE)
@@ -332,7 +332,7 @@ describe("Distancer Display", () => {
     expect(warningEl).toBeVisible();
     expect(distancerEl).toHaveAttribute(
       "aria-describedby",
-      expect.stringMatching(/distancer-combobox-.+/i)
+      expect.stringMatching(/distancer-combobox-warning-.+/i)
     );
   });
 
@@ -371,7 +371,7 @@ describe("Pursuer Display", () => {
     ).not.toBeInTheDocument();
 
     expect(
-      within(screen.getByRole("list", { name: /pursuer\(s\)/i })).getAllByRole(
+      within(screen.getByRole("list", { name: /pursuers/i })).getAllByRole(
         "listitem"
       )
     ).toHaveLength(1);
@@ -387,8 +387,10 @@ describe("Member Display", () => {
       userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
       const tableEl = screen.getByRole("table", { name: /members/i });
-      expect(tableEl).toHaveAttribute("aria-invalid", "true");
-      expect(tableEl).toHaveAttribute("aria-errormessage");
+      expect(tableEl).toHaveAttribute(
+        "aria-describedby",
+        expect.stringMatching(/member-table-warning-.+/i)
+      );
 
       expect(
         screen.getByRole("cell", { name: /arrow_upward/i })
@@ -409,6 +411,9 @@ describe("Member Display", () => {
         screen.getByRole("columnheader", { name: /mov/i })
       ).toBeInTheDocument();
 
+      expect(
+        screen.getByRole("rowgroup", { name: /all members/i })
+      ).toBeInTheDocument();
       expect(
         screen.getByRole("cell", { name: GroupRow.NO_MEMBER_WARNING_MESSAGE })
       ).toBeInTheDocument();
