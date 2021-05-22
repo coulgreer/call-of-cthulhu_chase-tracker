@@ -281,6 +281,13 @@ export default class GroupRow extends React.Component<Props, State> {
     return participants && participants.length > 0;
   }
 
+  private hasPursuers() {
+    const { ownedIndex, groups } = this.props;
+    const { pursuersIds } = groups[ownedIndex];
+
+    return pursuersIds.length > 0;
+  }
+
   private hasMembers() {
     const { groups, ownedIndex } = this.props;
     const { participants } = groups[ownedIndex];
@@ -360,7 +367,7 @@ export default class GroupRow extends React.Component<Props, State> {
     );
   }
 
-  static renderChaseName() {
+  private static renderChaseName() {
     return (
       <div className="GroupRow__section-container">
         <h2 className="GroupRow__title" aria-label="Chase name">
@@ -402,36 +409,28 @@ export default class GroupRow extends React.Component<Props, State> {
     );
   }
 
-  private renderOption(group: Group, index: number) {
-    const { ownedIndex } = this.props;
-
-    return (
-      ownedIndex !== index && (
-        <option key={group.id} value={group.id}>
-          {group.name}
-        </option>
-      )
-    );
-  }
-
   private renderPursuers() {
     const { ownedIndex, groups } = this.props;
-    const currentGroup = groups[ownedIndex];
-    const pursuerLabelId = `group-row-pursuer-heading-${this.id}`;
+    const { pursuersIds } = groups[ownedIndex];
+
+    const pursuerLabelId = `pursuers-heading-${this.id}`;
+    const warningMessageId = `pursuers-list-warning-${this.id}`;
 
     return (
       <div className="GroupRow__section-container">
-        <h2 id={pursuerLabelId} className="GroupRow__title">
+        <h2
+          id={pursuerLabelId}
+          className="GroupRow__title"
+          aria-describedby={this.hasPursuers() ? undefined : warningMessageId}
+        >
           Pursuers
         </h2>
-        {currentGroup.pursuersIds.length > 0 ? (
+        {this.hasPursuers() ? (
           <ul aria-labelledby={pursuerLabelId}>
-            {currentGroup.pursuersIds.map((pursuerId) => (
-              <li key={pursuerId}>{pursuerId}</li>
-            ))}
+            {pursuersIds.map(GroupRow.renderPursuer)}
           </ul>
         ) : (
-          <p className="centered error text--small">
+          <p id={warningMessageId} className="centered error text--small">
             {GroupRow.NO_PURSUER_WARNING_MESSAGE}
           </p>
         )}
@@ -516,41 +515,6 @@ export default class GroupRow extends React.Component<Props, State> {
     );
   }
 
-  private renderMember(participant: Participant) {
-    return (
-      <tr
-        className={`${this.getBoundaryClassName(participant)}`}
-        aria-label={participant.name}
-        key={participant.id}
-      >
-        <td
-          className={`material-icons-outlined GroupRow__icon ${clsx({
-            "GroupRow__icon--hidden": !this.hasBoundaryMovementRate(
-              participant
-            ),
-          })}`}
-          aria-hidden={!this.hasBoundaryMovementRate(participant)}
-        >
-          warning
-        </td>
-        <td className="GroupRow__cell--summarize GroupRow__cell--fill-horizontal">
-          {participant.name}
-        </td>
-        <td>{participant.movementRate}</td>
-      </tr>
-    );
-  }
-
-  private static renderMemberWarning(warningId: string) {
-    return (
-      <tr>
-        <td id={warningId} className="centered error text--small" colSpan={3}>
-          {GroupRow.NO_MEMBER_WARNING_MESSAGE}
-        </td>
-      </tr>
-    );
-  }
-
   private renderParticipantModal() {
     const { participants } = this.props;
     const { modalShown } = this.state;
@@ -610,6 +574,57 @@ export default class GroupRow extends React.Component<Props, State> {
           </div>
         </form>
       </Modal>
+    );
+  }
+
+  private renderOption(group: Group, index: number) {
+    const { ownedIndex } = this.props;
+
+    return (
+      ownedIndex !== index && (
+        <option key={group.id} value={group.id}>
+          {group.name}
+        </option>
+      )
+    );
+  }
+
+  private static renderPursuer(pursuerId: string) {
+    return <li key={pursuerId}>{pursuerId}</li>;
+  }
+
+  private renderMember(participant: Participant) {
+    return (
+      <tr
+        className={`${this.getBoundaryClassName(participant)}`}
+        aria-label={participant.name}
+        key={participant.id}
+      >
+        <td
+          className={`material-icons-outlined GroupRow__icon ${clsx({
+            "GroupRow__icon--hidden": !this.hasBoundaryMovementRate(
+              participant
+            ),
+          })}`}
+          aria-hidden={!this.hasBoundaryMovementRate(participant)}
+        >
+          warning
+        </td>
+        <td className="GroupRow__cell--summarize GroupRow__cell--fill-horizontal">
+          {participant.name}
+        </td>
+        <td>{participant.movementRate}</td>
+      </tr>
+    );
+  }
+
+  private static renderMemberWarning(warningId: string) {
+    return (
+      <tr>
+        <td id={warningId} className="centered error text--small" colSpan={3}>
+          {GroupRow.NO_MEMBER_WARNING_MESSAGE}
+        </td>
+      </tr>
     );
   }
 
