@@ -20,6 +20,7 @@ interface Props {
 }
 
 interface State {
+  hasDistancer: boolean;
   selectedParticipantsIds: string[];
   expansionShown: boolean;
   modalShown: boolean;
@@ -80,6 +81,7 @@ export default class GroupRow extends React.Component<Props, State> {
     super(props);
 
     this.state = {
+      hasDistancer: true,
       selectedParticipantsIds: [],
       expansionShown: false,
       modalShown: false,
@@ -101,6 +103,7 @@ export default class GroupRow extends React.Component<Props, State> {
     // Helpers
     this.findParticipantById = this.findParticipantById.bind(this);
     this.isAvailable = this.isAvailable.bind(this);
+    this.renderOption = this.renderOption.bind(this);
   }
 
   private handleExpandClick() {
@@ -115,6 +118,7 @@ export default class GroupRow extends React.Component<Props, State> {
     const distancer = groups.find((group) => group.id === value);
 
     if (onDistancerBlur) onDistancerBlur(groups[ownedIndex], distancer);
+    this.setState({ hasDistancer: this.hasDistancer() });
   }
 
   private handleAddClick() {
@@ -263,6 +267,13 @@ export default class GroupRow extends React.Component<Props, State> {
     return isAvailable;
   }
 
+  private hasDistancer() {
+    const { ownedIndex, groups } = this.props;
+    const { distancerId } = groups[ownedIndex];
+
+    return distancerId !== GroupRow.INVALID_DISTANCER_ID;
+  }
+
   private hasMembers() {
     const { groups, ownedIndex } = this.props;
     const { participants } = groups[ownedIndex];
@@ -353,9 +364,10 @@ export default class GroupRow extends React.Component<Props, State> {
   }
 
   private renderDistancer() {
-    const { ownedIndex, groups } = this.props;
+    const { groups } = this.props;
+    const { hasDistancer } = this.state;
 
-    const currentGroup = groups[ownedIndex];
+    const distancerWarningId = `distancer-combobox-${this.id}`;
 
     return (
       <div className="GroupRow__section-container">
@@ -364,27 +376,34 @@ export default class GroupRow extends React.Component<Props, State> {
           <select
             className="combobox combobox--full-width"
             onBlur={this.handleDistancerBlur}
+            aria-describedby={hasDistancer ? undefined : distancerWarningId}
           >
             <option key="default" value={GroupRow.INVALID_DISTANCER_ID}>
               [N/A]
             </option>
-            {groups.map(
-              (group, index) =>
-                ownedIndex !== index && (
-                  <option key={group.id} value={group.id}>
-                    {group.name}
-                  </option>
-                )
-            )}
+            {groups.map(this.renderOption)}
           </select>
         </label>
         <p
+          id={distancerWarningId}
           className="centered error text--small"
-          hidden={currentGroup.distancerId !== GroupRow.INVALID_DISTANCER_ID}
+          hidden={hasDistancer}
         >
           {GroupRow.NO_DISTANCER_WARNING_MESSAGE}
         </p>
       </div>
+    );
+  }
+
+  private renderOption(group: Group, index: number) {
+    const { ownedIndex } = this.props;
+
+    return (
+      ownedIndex !== index && (
+        <option key={group.id} value={group.id}>
+          {group.name}
+        </option>
+      )
     );
   }
 

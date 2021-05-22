@@ -187,9 +187,6 @@ describe("Prop Rendering", () => {
       expect(
         screen.getByRole("combobox", { name: /distancer/i })
       ).toBeInTheDocument();
-      expect(
-        screen.getByText(GroupRow.NO_DISTANCER_WARNING_MESSAGE)
-      ).toBeInTheDocument();
 
       expect(
         screen.getByRole("heading", { name: /pursuer\(s\)/i })
@@ -316,6 +313,68 @@ describe("Prop Rendering", () => {
         expect(screen.getByRole("button", { name: /add/i })).toBeDisabled();
       });
     });
+  });
+});
+
+describe("Distancer Display", () => {
+  test("should show warning message when a group does not have a distancer", () => {
+    const { groups } = DEFAULT_PROPS;
+
+    render(<GroupRow ownedIndex={1} groups={groups} />);
+    userEvent.click(screen.getByRole("button", { name: /group details/i }));
+
+    const distancerEl = screen.getByRole("combobox", { name: /distancer/i });
+    const warningEl = screen.getByText(GroupRow.NO_DISTANCER_WARNING_MESSAGE);
+
+    distancerEl.focus();
+    distancerEl.blur();
+
+    expect(warningEl).toBeVisible();
+    expect(distancerEl).toHaveAttribute(
+      "aria-describedby",
+      expect.stringMatching(/distancer-combobox-.+/i)
+    );
+  });
+
+  test("should hide warning and display current distancer when a group has a distancer", () => {
+    const { groups } = DEFAULT_PROPS;
+
+    render(<GroupRow ownedIndex={centralGroupIndex} groups={groups} />);
+    userEvent.click(screen.getByRole("button", { name: /group details/i }));
+
+    expect(
+      screen.getByText(GroupRow.NO_DISTANCER_WARNING_MESSAGE)
+    ).not.toBeVisible();
+  });
+});
+
+describe("Pursuer Display", () => {
+  test("should show warning message when a group does not have at least one pursuer", () => {
+    const { groups } = DEFAULT_PROPS;
+
+    render(<GroupRow ownedIndex={3} groups={groups} />);
+    userEvent.click(screen.getByRole("button", { name: /group details/i }));
+
+    expect(
+      screen.getByText(GroupRow.NO_PURSUER_WARNING_MESSAGE)
+    ).toBeInTheDocument();
+  });
+
+  test("should hide warning and display current pursuer(s) when a group has any pursuers", () => {
+    const { groups } = DEFAULT_PROPS;
+
+    render(<GroupRow ownedIndex={centralGroupIndex} groups={groups} />);
+    userEvent.click(screen.getByRole("button", { name: /group details/i }));
+
+    expect(
+      screen.queryByText(GroupRow.NO_PURSUER_WARNING_MESSAGE)
+    ).not.toBeInTheDocument();
+
+    expect(
+      within(screen.getByRole("list", { name: /pursuer\(s\)/i })).getAllByRole(
+        "listitem"
+      )
+    ).toHaveLength(1);
   });
 });
 
@@ -811,62 +870,6 @@ describe("Member Display", () => {
     expect(
       within(modalEl).getByRole("button", { name: /add/i })
     ).toBeDisabled();
-  });
-});
-
-describe("Warnings", () => {
-  describe("Distancer", () => {
-    test("should show warning message when a group does not have a distancer", () => {
-      const { groups } = DEFAULT_PROPS;
-
-      render(<GroupRow ownedIndex={1} groups={groups} />);
-      userEvent.click(screen.getByRole("button", { name: /group details/i }));
-
-      expect(
-        screen.getByText(GroupRow.NO_DISTANCER_WARNING_MESSAGE)
-      ).toBeVisible();
-    });
-
-    test("should hide warning and display current distancer when a group has a distancer", () => {
-      const { groups } = DEFAULT_PROPS;
-
-      render(<GroupRow ownedIndex={centralGroupIndex} groups={groups} />);
-      userEvent.click(screen.getByRole("button", { name: /group details/i }));
-
-      expect(
-        screen.getByText(GroupRow.NO_DISTANCER_WARNING_MESSAGE)
-      ).not.toBeVisible();
-    });
-  });
-
-  describe("Pursuer", () => {
-    test("should show warning message when a group does not have at least one pursuer", () => {
-      const { groups } = DEFAULT_PROPS;
-
-      render(<GroupRow ownedIndex={3} groups={groups} />);
-      userEvent.click(screen.getByRole("button", { name: /group details/i }));
-
-      expect(
-        screen.getByText(GroupRow.NO_PURSUER_WARNING_MESSAGE)
-      ).toBeInTheDocument();
-    });
-
-    test("should hide warning and display current pursuer(s) when a group has any pursuers", () => {
-      const { groups } = DEFAULT_PROPS;
-
-      render(<GroupRow ownedIndex={centralGroupIndex} groups={groups} />);
-      userEvent.click(screen.getByRole("button", { name: /group details/i }));
-
-      expect(
-        screen.queryByText(GroupRow.NO_PURSUER_WARNING_MESSAGE)
-      ).not.toBeInTheDocument();
-
-      expect(
-        within(
-          screen.getByRole("list", { name: /pursuer\(s\)/i })
-        ).getAllByRole("listitem")
-      ).toHaveLength(1);
-    });
   });
 });
 

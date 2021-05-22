@@ -912,15 +912,6 @@ describe("GroupTable Event Handlers", () => {
       expect(screen.getByRole("grid")).toBeInTheDocument();
     });
 
-    test("should render 'no distancer' warning when row is initially added", () => {
-      render(<TabbedDisplay />);
-      createAnExpandedGroupRow();
-
-      expect(
-        screen.getByText(GroupRow.NO_DISTANCER_WARNING_MESSAGE)
-      ).toBeVisible();
-    });
-
     test("should not crash when changing distancer to 'none'", () => {
       render(<TabbedDisplay />);
       userEvent.click(screen.getByRole("tab", { name: /group/i }));

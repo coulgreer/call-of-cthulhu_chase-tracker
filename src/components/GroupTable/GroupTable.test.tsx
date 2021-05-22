@@ -317,20 +317,3 @@ test("should trigger distancer change", () => {
 
   expect(onDistancerBlur).toBeCalledTimes(3);
 });
-
-describe("Confirmation Tests", () => {
-  test("should render 'no distancer' warning when row is initially added", () => {
-    const { groups, warningMessage } = DEFAULT_PROPS;
-    render(<GroupTable groups={groups} warningMessage={warningMessage} />);
-
-    const [first] = groups;
-    const firstRow = screen.getByRole("row", { name: first.id });
-    userEvent.click(
-      within(firstRow).getByRole("button", { name: /group details/i })
-    );
-
-    expect(
-      within(firstRow).getByText(GroupRow.NO_DISTANCER_WARNING_MESSAGE)
-    ).toBeVisible();
-  });
-});
