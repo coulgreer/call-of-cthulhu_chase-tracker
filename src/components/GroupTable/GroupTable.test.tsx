@@ -47,14 +47,14 @@ const DEFAULT_PROPS: {
     {
       id: "0",
       name: isolatedGroupName,
-      distancerId: GroupRow.INVALID_DISTANCER_ID,
+      distancerId: GroupRow.getInvalidDistancerId(),
       pursuersIds: [],
       participants: [],
     },
     {
       id: "1",
       name: distancingGroupName,
-      distancerId: GroupRow.INVALID_DISTANCER_ID,
+      distancerId: GroupRow.getInvalidDistancerId(),
       pursuersIds: [distancingAndPursuingGroupName],
       participants: [participant1],
     },
@@ -97,7 +97,7 @@ describe("Prop Rendering", () => {
       render(<GroupTable groups={empty} />);
 
       expect(
-        screen.getByText(GroupTable.DEFAULT_WARNING_MESSAGE)
+        screen.getByText(GroupTable.getDefaultWarningMessage())
       ).toBeInTheDocument();
       expect(screen.queryAllByRole("row")).toHaveLength(0);
       expect(
@@ -142,7 +142,7 @@ describe("Prop Rendering", () => {
       render(<GroupTable groups={groups} />);
 
       expect(
-        screen.queryByText(GroupTable.DEFAULT_WARNING_MESSAGE)
+        screen.queryByText(GroupTable.getDefaultWarningMessage())
       ).not.toBeInTheDocument();
       expect(screen.getAllByRole("row")).toHaveLength(groups.length);
       expect(

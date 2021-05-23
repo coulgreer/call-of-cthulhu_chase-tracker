@@ -104,7 +104,7 @@ export default class TabbedDisplay extends React.Component<Props, State> {
       groups.push({
         id: `GROUP-${idNum}`,
         name: `Group ${idNum}`,
-        distancerId: GroupRow.INVALID_DISTANCER_ID,
+        distancerId: GroupRow.getInvalidDistancerId(),
         pursuersIds: [],
         participants: [],
       });
@@ -143,7 +143,7 @@ export default class TabbedDisplay extends React.Component<Props, State> {
   }
 
   private handleDistancerBlur(target: Group, distancer: Group | undefined) {
-    if (target.distancerId !== GroupRow.INVALID_DISTANCER_ID) {
+    if (target.distancerId !== GroupRow.getInvalidDistancerId()) {
       this.removeDistancerFrom(target);
     }
 
@@ -195,7 +195,7 @@ export default class TabbedDisplay extends React.Component<Props, State> {
   }
 
   private addDistancer({ id: targetId }: Group, distancer: Group | undefined) {
-    const distancerId = distancer?.id || GroupRow.INVALID_DISTANCER_ID;
+    const distancerId = distancer?.id || GroupRow.getInvalidDistancerId();
 
     this.setState((state) => {
       const { groups } = state;

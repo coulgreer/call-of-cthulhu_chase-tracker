@@ -24,7 +24,7 @@ interface State {
 }
 
 export default class GroupTable extends React.Component<Props, State> {
-  static get DEFAULT_WARNING_MESSAGE() {
+  static getDefaultWarningMessage() {
     return "No groups exist in this table";
   }
 
@@ -41,6 +41,8 @@ export default class GroupTable extends React.Component<Props, State> {
     this.handleDeleteClick = this.handleDeleteClick.bind(this);
     this.handleGroupUpdate = this.handleGroupUpdate.bind(this);
     this.closeModal = this.closeModal.bind(this);
+
+    this.renderContainer = this.renderContainer.bind(this);
   }
 
   private handleCreateClick() {
@@ -77,7 +79,14 @@ export default class GroupTable extends React.Component<Props, State> {
     if (onGroupUpdate) onGroupUpdate(newGroup);
   }
 
-  // TODO (Coul Greer): Check for order of class members to eliminate this issue or learn more about its working
+  private closeModal() {
+    this.setState({ modalShown: false });
+  }
+
+  /*
+  TODO (Coul Greer): Check for order of class members to eliminate this issue
+  or learn more about its working
+  */
   static areGroupsEqual(group1: Group, group2: Group): boolean;
   static areGroupsEqual(groupId1: string, groupId2: string): boolean;
   // eslint-disable-next-line react/sort-comp
@@ -93,20 +102,28 @@ export default class GroupTable extends React.Component<Props, State> {
     return (object as Group).id !== undefined;
   }
 
-  private closeModal() {
-    this.setState({ modalShown: false });
-  }
-
   private renderWarning() {
-    const { warningMessage = GroupTable.DEFAULT_WARNING_MESSAGE } = this.props;
+    const {
+      warningMessage = GroupTable.getDefaultWarningMessage(),
+    } = this.props;
 
     return <p className="centered">{warningMessage}</p>;
   }
 
   private renderRows() {
+    const { groups } = this.props;
+
+    return (
+      <div className="GroupTable__container" role="grid" aria-label="Groups">
+        {groups.map(this.renderContainer)}
+      </div>
+    );
+  }
+
+  private renderContainer(group: Group, index: number) {
     const { groups, participants } = this.props;
 
-    return groups.map((group, index) => (
+    return (
       <div
         className="GroupTable__row-container"
         tabIndex={0}
@@ -133,7 +150,7 @@ export default class GroupTable extends React.Component<Props, State> {
           </Button>
         </div>
       </div>
-    ));
+    );
   }
 
   private renderFloatingActionButton() {
@@ -188,17 +205,7 @@ export default class GroupTable extends React.Component<Props, State> {
 
     return (
       <section className="GroupTable">
-        {groups.length > 0 ? (
-          <div
-            className="GroupTable__container"
-            role="grid"
-            aria-label="Groups"
-          >
-            {this.renderRows()}
-          </div>
-        ) : (
-          this.renderWarning()
-        )}
+        {groups.length > 0 ? this.renderRows() : this.renderWarning()}
         {this.renderFloatingActionButton()}
         {this.renderDeletionModal()}
       </section>

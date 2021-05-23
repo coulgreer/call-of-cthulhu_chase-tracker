@@ -27,27 +27,27 @@ interface State {
 }
 
 export default class GroupRow extends React.Component<Props, State> {
-  static get INVALID_DISTANCER_ID() {
+  static getInvalidDistancerId() {
     return "N/A";
   }
 
-  static get DEFAULT_CHASE_NAME() {
+  static getDefaultChaseName() {
     return "DEFAULT Chase";
   }
 
-  static get NO_DISTANCER_WARNING_MESSAGE() {
+  static getNoDistancerWarningMessage() {
     return "No appetite for the hunt? In due time it will come. It always does...";
   }
 
-  static get NO_PURSUER_WARNING_MESSAGE() {
+  static getNoPursuerWarningMessage() {
     return "These little birds fly free. They haven't noticed, yet.";
   }
 
-  static get NO_MEMBER_WARNING_MESSAGE() {
+  static getNoMemberWarningMessage() {
     return "An emptiness, yet to be filled. This *thing* lacks purpose.";
   }
 
-  static get NO_AVAILABLE_PARTICIPANT_WARNING_MESSAGE() {
+  static getNoAvailableParticipantWarningMessage() {
     return "A place void of life... past or present. All claimed. None free.";
   }
 
@@ -103,6 +103,7 @@ export default class GroupRow extends React.Component<Props, State> {
     // Helpers
     this.findParticipantById = this.findParticipantById.bind(this);
     this.isAvailable = this.isAvailable.bind(this);
+    this.renderParticipantCheckbox = this.renderParticipantCheckbox.bind(this);
     this.renderOption = this.renderOption.bind(this);
     this.renderMember = this.renderMember.bind(this);
   }
@@ -183,15 +184,6 @@ export default class GroupRow extends React.Component<Props, State> {
     return "";
   }
 
-  private hasBoundaryMovementRate(participant: Participant) {
-    const { movementRate } = participant;
-
-    return (
-      this.isHighestBoundary(movementRate) ||
-      this.isLowestBoundary(movementRate)
-    );
-  }
-
   private closeModal() {
     this.setState({ modalShown: false });
   }
@@ -226,6 +218,27 @@ export default class GroupRow extends React.Component<Props, State> {
     return result;
   }
 
+  private findParticipantById(id: string) {
+    const { participants } = this.props;
+
+    if (!participants) return undefined;
+
+    const index = participants.findIndex(
+      (participant) => id === participant.id
+    );
+
+    return participants[index];
+  }
+
+  private hasBoundaryMovementRate(participant: Participant) {
+    const { movementRate } = participant;
+
+    return (
+      this.isHighestBoundary(movementRate) ||
+      this.isLowestBoundary(movementRate)
+    );
+  }
+
   private areBoundariesEqual() {
     return this.highestMovementRateMember === this.lowestMovementRateMember;
   }
@@ -240,18 +253,6 @@ export default class GroupRow extends React.Component<Props, State> {
     if (!this.lowestMovementRateMember) return false;
 
     return this.lowestMovementRateMember.movementRate === movementRate;
-  }
-
-  private findParticipantById(id: string) {
-    const { participants } = this.props;
-
-    if (!participants) return undefined;
-
-    const index = participants.findIndex(
-      (participant) => id === participant.id
-    );
-
-    return participants[index];
   }
 
   private isAvailable(participant: Participant) {
@@ -272,7 +273,7 @@ export default class GroupRow extends React.Component<Props, State> {
     const { ownedIndex, groups } = this.props;
     const { distancerId } = groups[ownedIndex];
 
-    return distancerId !== GroupRow.INVALID_DISTANCER_ID;
+    return distancerId !== GroupRow.getInvalidDistancerId();
   }
 
   private hasValidParticipantCount() {
@@ -367,11 +368,56 @@ export default class GroupRow extends React.Component<Props, State> {
     );
   }
 
+  private renderParticipantModal() {
+    const { participants } = this.props;
+    const { modalShown } = this.state;
+
+    const availableParticipants = participants?.filter(this.isAvailable) || [];
+
+    return (
+      <Modal
+        className="Modal__Content"
+        overlayClassName="Modal__Overlay"
+        contentLabel="Select Participant"
+        isOpen={modalShown}
+        onRequestClose={this.closeModal}
+      >
+        <h2 className="Modal__Content__text">
+          Select Participant To Add To Group
+        </h2>
+        <hr />
+        <form onSubmit={this.handleSubmit}>
+          {availableParticipants.length > 0 ? (
+            availableParticipants.map(this.renderParticipantCheckbox)
+          ) : (
+            <p>{GroupRow.getNoAvailableParticipantWarningMessage()}</p>
+          )}
+          <hr />
+          <div className="Modal__Content__options">
+            <Button
+              className="button button--secondary button--medium"
+              onClick={this.closeModal}
+            >
+              CANCEL
+            </Button>
+            <Button
+              className="button button--primary button--medium"
+              type="submit"
+              disabled={!(availableParticipants.length > 0)}
+            >
+              ADD
+            </Button>
+          </div>
+        </form>
+      </Modal>
+    );
+  }
+
   private static renderChaseName() {
     return (
       <div className="GroupRow__section-container">
         <h2 className="GroupRow__title" aria-label="Chase name">
-          Chase Name: <em>{GroupRow.DEFAULT_CHASE_NAME}</em>
+          Chase Name: <em>{GroupRow.getDefaultChaseName()}</em>
         </h2>
       </div>
     );
@@ -392,7 +438,7 @@ export default class GroupRow extends React.Component<Props, State> {
             onBlur={this.handleDistancerBlur}
             aria-describedby={hasDistancer ? undefined : warningMessageId}
           >
-            <option key="default" value={GroupRow.INVALID_DISTANCER_ID}>
+            <option key="default" value={GroupRow.getInvalidDistancerId()}>
               [N/A]
             </option>
             {groups.map(this.renderOption)}
@@ -403,7 +449,7 @@ export default class GroupRow extends React.Component<Props, State> {
           className="centered error text--small"
           hidden={hasDistancer}
         >
-          {GroupRow.NO_DISTANCER_WARNING_MESSAGE}
+          {GroupRow.getNoDistancerWarningMessage()}
         </p>
       </div>
     );
@@ -431,7 +477,7 @@ export default class GroupRow extends React.Component<Props, State> {
           </ul>
         ) : (
           <p id={warningMessageId} className="centered error text--small">
-            {GroupRow.NO_PURSUER_WARNING_MESSAGE}
+            {GroupRow.getNoPursuerWarningMessage()}
           </p>
         )}
       </div>
@@ -515,68 +561,6 @@ export default class GroupRow extends React.Component<Props, State> {
     );
   }
 
-  private renderParticipantModal() {
-    const { participants } = this.props;
-    const { modalShown } = this.state;
-
-    const availableParticipants = participants?.filter(this.isAvailable) || [];
-
-    return (
-      <Modal
-        className="Modal__Content"
-        overlayClassName="Modal__Overlay"
-        contentLabel="Select Participant"
-        isOpen={modalShown}
-        onRequestClose={this.closeModal}
-      >
-        <h2 className="Modal__Content__text">
-          Select Participant To Add To Group
-        </h2>
-        <hr />
-        <form onSubmit={this.handleSubmit}>
-          {availableParticipants.length > 0 ? (
-            availableParticipants.map((participant) => (
-              <label className="checkbox" key={participant.id}>
-                <span>
-                  <input
-                    className="checkbox__input"
-                    type="checkbox"
-                    value={participant.id}
-                    onChange={this.handleCheckboxChange}
-                  />
-                  <span className="checkbox__checkmark">
-                    <span className="material-icons" aria-hidden>
-                      check
-                    </span>
-                  </span>
-                </span>
-                <span className="input__label">{participant.name}</span>
-              </label>
-            ))
-          ) : (
-            <p>{GroupRow.NO_AVAILABLE_PARTICIPANT_WARNING_MESSAGE}</p>
-          )}
-          <hr />
-          <div className="Modal__Content__options">
-            <Button
-              className="button button--secondary button--medium"
-              onClick={this.closeModal}
-            >
-              CANCEL
-            </Button>
-            <Button
-              className="button button--primary button--medium"
-              type="submit"
-              disabled={!(availableParticipants.length > 0)}
-            >
-              ADD
-            </Button>
-          </div>
-        </form>
-      </Modal>
-    );
-  }
-
   private renderOption(group: Group, index: number) {
     const { ownedIndex } = this.props;
 
@@ -622,9 +606,30 @@ export default class GroupRow extends React.Component<Props, State> {
     return (
       <tr>
         <td id={warningId} className="centered error text--small" colSpan={3}>
-          {GroupRow.NO_MEMBER_WARNING_MESSAGE}
+          {GroupRow.getNoMemberWarningMessage()}
         </td>
       </tr>
+    );
+  }
+
+  private renderParticipantCheckbox({ id, name }: Participant) {
+    return (
+      <label className="checkbox" key={id}>
+        <span>
+          <input
+            className="checkbox__input"
+            type="checkbox"
+            value={id}
+            onChange={this.handleCheckboxChange}
+          />
+          <span className="checkbox__checkmark">
+            <span className="material-icons" aria-hidden>
+              check
+            </span>
+          </span>
+        </span>
+        <span className="input__label">{name}</span>
+      </label>
     );
   }
 

@@ -778,7 +778,7 @@ describe("GroupTable Event Handlers", () => {
     userEvent.click(screen.getByRole("button", { name: /create group/i }));
 
     expect(
-      screen.queryByText(GroupTable.DEFAULT_WARNING_MESSAGE)
+      screen.queryByText(GroupTable.getDefaultWarningMessage())
     ).not.toBeInTheDocument();
     expect(screen.getByRole("grid", { name: /groups/i })).toBeInTheDocument();
   });
@@ -921,7 +921,7 @@ describe("GroupTable Event Handlers", () => {
       expect(() =>
         userEvent.selectOptions(
           screen.getByRole("combobox", { name: /distancer/i }),
-          GroupRow.INVALID_DISTANCER_ID
+          GroupRow.getInvalidDistancerId()
         )
       ).not.toThrowError();
     });

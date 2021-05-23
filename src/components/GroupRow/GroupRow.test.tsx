@@ -35,14 +35,14 @@ const DEFAULT_PROPS: {
     {
       id: "0",
       name: isolatedGroupName,
-      distancerId: GroupRow.INVALID_DISTANCER_ID,
+      distancerId: GroupRow.getInvalidDistancerId(),
       pursuersIds: [],
       participants: [],
     },
     {
       id: "1",
       name: distancingGroupName,
-      distancerId: GroupRow.INVALID_DISTANCER_ID,
+      distancerId: GroupRow.getInvalidDistancerId(),
       pursuersIds: [distancingAndPursuingGroupName],
       participants: [createParticipant("Participant 00")],
     },
@@ -169,7 +169,7 @@ describe("Prop Rendering", () => {
             if (node.textContent === null) return false;
 
             const regex = new RegExp(
-              `chase name: ${GroupRow.DEFAULT_CHASE_NAME}`,
+              `chase name: ${GroupRow.getDefaultChaseName()}`,
               "i"
             );
 
@@ -192,14 +192,14 @@ describe("Prop Rendering", () => {
         screen.getByRole("heading", { name: /pursuers/i })
       ).toBeInTheDocument();
       expect(
-        screen.getByText(GroupRow.NO_PURSUER_WARNING_MESSAGE)
+        screen.getByText(GroupRow.getNoPursuerWarningMessage())
       ).toBeInTheDocument();
 
       expect(
         screen.getByRole("heading", { name: /members/i })
       ).toBeInTheDocument();
       expect(
-        screen.getByText(GroupRow.NO_MEMBER_WARNING_MESSAGE)
+        screen.getByText(GroupRow.getNoMemberWarningMessage())
       ).toBeInTheDocument();
       expect(screen.getByRole("button", { name: /add/i })).toBeDisabled();
     });
@@ -246,7 +246,7 @@ describe("Prop Rendering", () => {
             if (node.textContent === null) return false;
 
             const regex = new RegExp(
-              `chase name: ${GroupRow.DEFAULT_CHASE_NAME}`,
+              `chase name: ${GroupRow.getDefaultChaseName()}`,
               "i"
             );
 
@@ -267,14 +267,14 @@ describe("Prop Rendering", () => {
         screen.getByRole("heading", { name: /pursuers/i })
       ).toBeInTheDocument();
       expect(
-        screen.getByText(GroupRow.NO_PURSUER_WARNING_MESSAGE)
+        screen.getByText(GroupRow.getNoPursuerWarningMessage())
       ).toBeInTheDocument();
 
       expect(
         screen.getByRole("heading", { name: /members/i })
       ).toBeInTheDocument();
       expect(
-        screen.getByText(GroupRow.NO_MEMBER_WARNING_MESSAGE)
+        screen.getByText(GroupRow.getNoMemberWarningMessage())
       ).toBeInTheDocument();
 
       expect(screen.getByRole("button", { name: /add/i })).toBeInTheDocument();
@@ -324,7 +324,7 @@ describe("Distancer Display", () => {
     userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
     const distancerEl = screen.getByRole("combobox", { name: /distancer/i });
-    const warningEl = screen.getByText(GroupRow.NO_DISTANCER_WARNING_MESSAGE);
+    const warningEl = screen.getByText(GroupRow.getNoDistancerWarningMessage());
 
     distancerEl.focus();
     distancerEl.blur();
@@ -343,7 +343,7 @@ describe("Distancer Display", () => {
     userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
     expect(
-      screen.getByText(GroupRow.NO_DISTANCER_WARNING_MESSAGE)
+      screen.getByText(GroupRow.getNoDistancerWarningMessage())
     ).not.toBeVisible();
   });
 });
@@ -356,7 +356,7 @@ describe("Pursuer Display", () => {
     userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
     expect(
-      screen.getByText(GroupRow.NO_PURSUER_WARNING_MESSAGE)
+      screen.getByText(GroupRow.getNoPursuerWarningMessage())
     ).toBeInTheDocument();
   });
 
@@ -367,7 +367,7 @@ describe("Pursuer Display", () => {
     userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
     expect(
-      screen.queryByText(GroupRow.NO_PURSUER_WARNING_MESSAGE)
+      screen.queryByText(GroupRow.getNoPursuerWarningMessage())
     ).not.toBeInTheDocument();
 
     expect(
@@ -415,7 +415,7 @@ describe("Member Display", () => {
         screen.getByRole("rowgroup", { name: /all members/i })
       ).toBeInTheDocument();
       expect(
-        screen.getByRole("cell", { name: GroupRow.NO_MEMBER_WARNING_MESSAGE })
+        screen.getByRole("cell", { name: GroupRow.getNoMemberWarningMessage() })
       ).toBeInTheDocument();
 
       expect(screen.getByRole("button", { name: /add/i })).toBeInTheDocument();
@@ -439,7 +439,7 @@ describe("Member Display", () => {
         {
           id: "0",
           name: "Group 0",
-          distancerId: GroupRow.INVALID_DISTANCER_ID,
+          distancerId: GroupRow.getInvalidDistancerId(),
           pursuersIds: [],
           participants,
         },
@@ -542,7 +542,7 @@ describe("Member Display", () => {
         {
           id: "0",
           name: "Group 0",
-          distancerId: GroupRow.INVALID_DISTANCER_ID,
+          distancerId: GroupRow.getInvalidDistancerId(),
           pursuersIds: [],
           participants,
         },
@@ -717,7 +717,7 @@ describe("Member Display", () => {
 
     expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
     expect(
-      screen.getByText(GroupRow.NO_AVAILABLE_PARTICIPANT_WARNING_MESSAGE)
+      screen.getByText(GroupRow.getNoAvailableParticipantWarningMessage())
     ).toBeInTheDocument();
     expect(
       within(screen.getByRole("dialog")).getByRole("button", { name: /add/i })
@@ -738,7 +738,7 @@ describe("Member Display", () => {
       {
         id: "g-1",
         name: "Group 1",
-        distancerId: GroupRow.INVALID_DISTANCER_ID,
+        distancerId: GroupRow.getInvalidDistancerId(),
         pursuersIds: [],
         participants: [participant2],
       },
@@ -775,7 +775,7 @@ describe("Member Display", () => {
       {
         id: "g-1",
         name: "Group 1",
-        distancerId: GroupRow.INVALID_DISTANCER_ID,
+        distancerId: GroupRow.getInvalidDistancerId(),
         pursuersIds: [],
         participants: [],
       },
@@ -842,7 +842,7 @@ describe("Member Display", () => {
       {
         id: "g-1",
         name: "Group 1",
-        distancerId: GroupRow.INVALID_DISTANCER_ID,
+        distancerId: GroupRow.getInvalidDistancerId(),
         pursuersIds: [],
         participants: [domesticParticipant],
       },
@@ -923,7 +923,7 @@ describe("Confirmation Tests", () => {
       {
         id: "0",
         name: "Group 0",
-        distancerId: GroupRow.INVALID_DISTANCER_ID,
+        distancerId: GroupRow.getInvalidDistancerId(),
         pursuersIds: [],
         participants,
       },
