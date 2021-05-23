@@ -2,9 +2,9 @@ import React from "react";
 
 import Button from "../Button";
 import GroupTable from "../GroupTable";
-import GroupRow from "../GroupRow";
+import GroupContainer from "../GroupContainer";
 import ParticipantTable from "../ParticipantTable";
-import ParticipantRow from "../ParticipantRow";
+import ParticipantContainer from "../ParticipantContainer";
 
 import { Group, Participant } from "../../types";
 
@@ -81,8 +81,8 @@ export default class TabbedDisplay extends React.Component<Props, State> {
         dexterity: 15,
         movementRate: 2,
         derivedSpeed: 1,
-        speedStatistics: ParticipantRow.DEFAULT_SPEED_STATISTICS,
-        hazardStatistics: ParticipantRow.DEFAULT_HAZARD_STATISTICS,
+        speedStatistics: ParticipantContainer.DEFAULT_SPEED_STATISTICS,
+        hazardStatistics: ParticipantContainer.DEFAULT_HAZARD_STATISTICS,
         isGrouped: false,
       });
 
@@ -104,7 +104,7 @@ export default class TabbedDisplay extends React.Component<Props, State> {
       groups.push({
         id: `GROUP-${idNum}`,
         name: `Group ${idNum}`,
-        distancerId: GroupRow.getInvalidDistancerId(),
+        distancerId: GroupContainer.getInvalidDistancerId(),
         pursuersIds: [],
         participants: [],
       });
@@ -143,7 +143,7 @@ export default class TabbedDisplay extends React.Component<Props, State> {
   }
 
   private handleDistancerBlur(target: Group, distancer: Group | undefined) {
-    if (target.distancerId !== GroupRow.getInvalidDistancerId()) {
+    if (target.distancerId !== GroupContainer.getInvalidDistancerId()) {
       this.removeDistancerFrom(target);
     }
 
@@ -195,7 +195,7 @@ export default class TabbedDisplay extends React.Component<Props, State> {
   }
 
   private addDistancer({ id: targetId }: Group, distancer: Group | undefined) {
-    const distancerId = distancer?.id || GroupRow.getInvalidDistancerId();
+    const distancerId = distancer?.id || GroupContainer.getInvalidDistancerId();
 
     this.setState((state) => {
       const { groups } = state;

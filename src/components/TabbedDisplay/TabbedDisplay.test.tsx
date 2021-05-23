@@ -5,11 +5,11 @@ import userEvent from "@testing-library/user-event";
 
 import TabbedDisplay from ".";
 import GroupTable from "../GroupTable";
-import GroupRow from "../GroupRow";
+import GroupContainer from "../GroupContainer";
 import ParticipantTable from "../ParticipantTable";
-import ParticipantRow from "../ParticipantRow";
+import ParticipantContainer from "../ParticipantContainer";
 
-function createAnExpandedGroupRow() {
+function createAnExpandedGroupContainer() {
   userEvent.click(screen.getByRole("tab", { name: /groups/i }));
   userEvent.click(screen.getByRole("button", { name: /create group/i }));
 
@@ -17,7 +17,7 @@ function createAnExpandedGroupRow() {
   userEvent.click(expandEls[expandEls.length - 1]);
 }
 
-function createAnExpandedParticipantRow() {
+function createAnExpandedParticipantContainer() {
   userEvent.click(screen.getByRole("tab", { name: /participants/i }));
   userEvent.click(screen.getByRole("button", { name: /create participant/i }));
 
@@ -83,9 +83,9 @@ describe("ParticipantTable Event Handlers", () => {
   test("should delete pre-existing participant when its associated delete button is pressed", () => {
     render(<TabbedDisplay />);
 
-    createAnExpandedParticipantRow();
-    createAnExpandedParticipantRow();
-    createAnExpandedParticipantRow();
+    createAnExpandedParticipantContainer();
+    createAnExpandedParticipantContainer();
+    createAnExpandedParticipantContainer();
 
     userEvent.click(
       screen.getByRole("button", {
@@ -148,7 +148,7 @@ describe("ParticipantTable Event Handlers", () => {
       describe("when changing to valid score", () => {
         test("should update dexterity score on participant", () => {
           render(<TabbedDisplay />);
-          createAnExpandedParticipantRow();
+          createAnExpandedParticipantContainer();
 
           const dexterityEl = screen.getByRole("spinbutton", { name: /dex/i });
           userEvent.clear(dexterityEl);
@@ -161,7 +161,7 @@ describe("ParticipantTable Event Handlers", () => {
 
         test("should update derived speed score on participant", () => {
           render(<TabbedDisplay />);
-          createAnExpandedParticipantRow();
+          createAnExpandedParticipantContainer();
 
           const speedEl = screen.getByRole("spinbutton", { name: /speed/i });
           userEvent.clear(speedEl);
@@ -174,7 +174,7 @@ describe("ParticipantTable Event Handlers", () => {
 
         test("should update movement rate score on participant", () => {
           render(<TabbedDisplay />);
-          createAnExpandedParticipantRow();
+          createAnExpandedParticipantContainer();
 
           const movementEl = screen.getByRole("spinbutton", { name: /mov/i });
           userEvent.clear(movementEl);
@@ -189,7 +189,7 @@ describe("ParticipantTable Event Handlers", () => {
       describe("when changing to invalid score", () => {
         test("should revert to prior valid dexterity score on participant", () => {
           render(<TabbedDisplay />);
-          createAnExpandedParticipantRow();
+          createAnExpandedParticipantContainer();
 
           const dexterityEl = screen.getByRole("spinbutton", { name: /dex/i });
           userEvent.clear(dexterityEl);
@@ -205,7 +205,7 @@ describe("ParticipantTable Event Handlers", () => {
 
         test("should revert to prior valid derived speed score on participant", () => {
           render(<TabbedDisplay />);
-          createAnExpandedParticipantRow();
+          createAnExpandedParticipantContainer();
 
           const speedEl = screen.getByRole("spinbutton", { name: /speed/i });
           userEvent.clear(speedEl);
@@ -221,7 +221,7 @@ describe("ParticipantTable Event Handlers", () => {
 
         test("should revert to prior valid movement rate score on participant", () => {
           render(<TabbedDisplay />);
-          createAnExpandedParticipantRow();
+          createAnExpandedParticipantContainer();
 
           const movementEl = screen.getByRole("spinbutton", { name: /mov/i });
           userEvent.clear(movementEl);
@@ -239,7 +239,7 @@ describe("ParticipantTable Event Handlers", () => {
       describe("when leaving score blank", () => {
         test("should revert to prior valid dexterity score on participant", () => {
           render(<TabbedDisplay />);
-          createAnExpandedParticipantRow();
+          createAnExpandedParticipantContainer();
 
           const dexterityEl = screen.getByRole("spinbutton", { name: /dex/i });
           userEvent.clear(dexterityEl);
@@ -254,7 +254,7 @@ describe("ParticipantTable Event Handlers", () => {
 
         test("should revert to prior valid derived speed score on participant", () => {
           render(<TabbedDisplay />);
-          createAnExpandedParticipantRow();
+          createAnExpandedParticipantContainer();
 
           const speedEl = screen.getByRole("spinbutton", { name: /speed/i });
           userEvent.clear(speedEl);
@@ -269,7 +269,7 @@ describe("ParticipantTable Event Handlers", () => {
 
         test("should revert to prior valid movement rate score on participant", () => {
           render(<TabbedDisplay />);
-          createAnExpandedParticipantRow();
+          createAnExpandedParticipantContainer();
 
           const movementEl = screen.getByRole("spinbutton", { name: /mov/i });
           userEvent.clear(movementEl);
@@ -288,11 +288,11 @@ describe("ParticipantTable Event Handlers", () => {
       const [
         firstHazardStatistic,
         secondHazardStatistic,
-      ] = ParticipantRow.DEFAULT_HAZARD_STATISTICS;
+      ] = ParticipantContainer.DEFAULT_HAZARD_STATISTICS;
       const [
         firstSpeedStatistic,
         secondSpeedStatistic,
-      ] = ParticipantRow.DEFAULT_SPEED_STATISTICS;
+      ] = ParticipantContainer.DEFAULT_SPEED_STATISTICS;
 
       const validName = "Valid Name";
       const invalidName = "   ";
@@ -300,7 +300,7 @@ describe("ParticipantTable Event Handlers", () => {
       describe("when changing to valid name", () => {
         test("should update hazard statistic on participant", () => {
           render(<TabbedDisplay />);
-          createAnExpandedParticipantRow();
+          createAnExpandedParticipantContainer();
 
           userEvent.click(
             screen.getByRole("button", {
@@ -320,7 +320,7 @@ describe("ParticipantTable Event Handlers", () => {
 
         test("should update speed statistic on participant", () => {
           render(<TabbedDisplay />);
-          createAnExpandedParticipantRow();
+          createAnExpandedParticipantContainer();
 
           userEvent.click(
             screen.getByRole("button", {
@@ -342,7 +342,7 @@ describe("ParticipantTable Event Handlers", () => {
       describe("when changing to invalid name", () => {
         test("should revert to prior valid hazard statistic on participant", () => {
           render(<TabbedDisplay />);
-          createAnExpandedParticipantRow();
+          createAnExpandedParticipantContainer();
 
           userEvent.click(
             screen.getByRole("button", {
@@ -364,7 +364,7 @@ describe("ParticipantTable Event Handlers", () => {
 
         test("should revert to prior valid speed statistic on participant", () => {
           render(<TabbedDisplay />);
-          createAnExpandedParticipantRow();
+          createAnExpandedParticipantContainer();
 
           userEvent.click(
             screen.getByRole("button", {
@@ -388,7 +388,7 @@ describe("ParticipantTable Event Handlers", () => {
       describe("when leaving name blank", () => {
         test("should revert to prior valid hazard statistic on participant", () => {
           render(<TabbedDisplay />);
-          createAnExpandedParticipantRow();
+          createAnExpandedParticipantContainer();
 
           userEvent.click(
             screen.getByRole("button", {
@@ -409,7 +409,7 @@ describe("ParticipantTable Event Handlers", () => {
 
         test("should revert to prior valid speed statistic on participant", () => {
           render(<TabbedDisplay />);
-          createAnExpandedParticipantRow();
+          createAnExpandedParticipantContainer();
 
           userEvent.click(
             screen.getByRole("button", {
@@ -432,7 +432,7 @@ describe("ParticipantTable Event Handlers", () => {
       describe("when renaming a second statistic", () => {
         test("should set renaming textbox to the associated hazard statistic's name", () => {
           render(<TabbedDisplay />);
-          createAnExpandedParticipantRow();
+          createAnExpandedParticipantContainer();
 
           userEvent.click(
             screen.getByRole("button", {
@@ -460,7 +460,7 @@ describe("ParticipantTable Event Handlers", () => {
 
         test("should set renaming textbox to the associated speed statistics name", () => {
           render(<TabbedDisplay />);
-          createAnExpandedParticipantRow();
+          createAnExpandedParticipantContainer();
 
           userEvent.click(
             screen.getByRole("button", {
@@ -490,7 +490,7 @@ describe("ParticipantTable Event Handlers", () => {
       describe("when changing to valid score", () => {
         test("should update hazard statistic on participant", () => {
           render(<TabbedDisplay />);
-          createAnExpandedParticipantRow();
+          createAnExpandedParticipantContainer();
 
           const statisticDisplayEl = screen.getByRole("spinbutton", {
             name: firstHazardStatistic.name,
@@ -505,7 +505,7 @@ describe("ParticipantTable Event Handlers", () => {
 
         test("should update speed statistic on participant", () => {
           render(<TabbedDisplay />);
-          createAnExpandedParticipantRow();
+          createAnExpandedParticipantContainer();
 
           const statisticDisplayEl = screen.getByRole("spinbutton", {
             name: firstSpeedStatistic.name,
@@ -522,7 +522,7 @@ describe("ParticipantTable Event Handlers", () => {
       describe("when changing to invalid score", () => {
         test("should revert to prior valid hazard statistic on participant", () => {
           render(<TabbedDisplay />);
-          createAnExpandedParticipantRow();
+          createAnExpandedParticipantContainer();
 
           const statisticDisplayEl = screen.getByRole("spinbutton", {
             name: firstHazardStatistic.name,
@@ -538,7 +538,7 @@ describe("ParticipantTable Event Handlers", () => {
 
         test("should revert to prior valid speed statistic on participant", () => {
           render(<TabbedDisplay />);
-          createAnExpandedParticipantRow();
+          createAnExpandedParticipantContainer();
 
           const statisticDisplayEl = screen.getByRole("spinbutton", {
             name: firstSpeedStatistic.name,
@@ -556,7 +556,7 @@ describe("ParticipantTable Event Handlers", () => {
       describe("when leaving score blank", () => {
         test("should revert to hazard statistic's prior valid score", () => {
           render(<TabbedDisplay />);
-          createAnExpandedParticipantRow();
+          createAnExpandedParticipantContainer();
 
           const statisticDisplayEl = screen.getByRole("spinbutton", {
             name: firstHazardStatistic.name,
@@ -572,7 +572,7 @@ describe("ParticipantTable Event Handlers", () => {
 
         test("should revert to speed statistic's prior valid score", () => {
           render(<TabbedDisplay />);
-          createAnExpandedParticipantRow();
+          createAnExpandedParticipantContainer();
 
           const statisticDisplayEl = screen.getByRole("spinbutton", {
             name: firstSpeedStatistic.name,
@@ -590,7 +590,7 @@ describe("ParticipantTable Event Handlers", () => {
       describe("when creating a new statistic", () => {
         test("should have hazard statistic with appropriate name", () => {
           render(<TabbedDisplay />);
-          createAnExpandedParticipantRow();
+          createAnExpandedParticipantContainer();
 
           userEvent.click(
             screen.getByRole("button", {
@@ -602,13 +602,15 @@ describe("ParticipantTable Event Handlers", () => {
           );
 
           expect(
-            screen.getByLabelText(`${ParticipantRow.DEFAULT_STAT_NAME} #1`)
+            screen.getByLabelText(
+              `${ParticipantContainer.DEFAULT_STAT_NAME} #1`
+            )
           ).toBeInTheDocument();
         });
 
         test("should have speed statistic with appropriate name", () => {
           render(<TabbedDisplay />);
-          createAnExpandedParticipantRow();
+          createAnExpandedParticipantContainer();
 
           userEvent.click(
             screen.getByRole("button", {
@@ -620,7 +622,9 @@ describe("ParticipantTable Event Handlers", () => {
           );
 
           expect(
-            screen.getByLabelText(`${ParticipantRow.DEFAULT_STAT_NAME} #1`)
+            screen.getByLabelText(
+              `${ParticipantContainer.DEFAULT_STAT_NAME} #1`
+            )
           ).toBeInTheDocument();
         });
       });
@@ -629,7 +633,7 @@ describe("ParticipantTable Event Handlers", () => {
     describe("Statistic Manipulation", () => {
       test("should create hazard stat when 'create hazard statistic' clicked", () => {
         render(<TabbedDisplay />);
-        createAnExpandedParticipantRow();
+        createAnExpandedParticipantContainer();
 
         expect(screen.queryByLabelText(/new stat #8/i)).not.toBeInTheDocument();
 
@@ -642,9 +646,9 @@ describe("ParticipantTable Event Handlers", () => {
 
       test("should delete given hazard stat when the 'delete hazard statistic' is clicked", () => {
         render(<TabbedDisplay />);
-        createAnExpandedParticipantRow();
+        createAnExpandedParticipantContainer();
 
-        const [hazardStat] = ParticipantRow.DEFAULT_HAZARD_STATISTICS;
+        const [hazardStat] = ParticipantContainer.DEFAULT_HAZARD_STATISTICS;
         const { name } = hazardStat;
 
         expect(screen.getByLabelText(name)).toBeInTheDocument();
@@ -660,7 +664,7 @@ describe("ParticipantTable Event Handlers", () => {
 
       test("should create speed statistic when appropriate 'create statistic' button clicked", () => {
         render(<TabbedDisplay />);
-        createAnExpandedParticipantRow();
+        createAnExpandedParticipantContainer();
 
         expect(screen.queryByLabelText(/new stat #6/i)).not.toBeInTheDocument();
 
@@ -673,9 +677,9 @@ describe("ParticipantTable Event Handlers", () => {
 
       test("should delete given speed stat when the 'delete speed stat' is clicked", () => {
         render(<TabbedDisplay />);
-        createAnExpandedParticipantRow();
+        createAnExpandedParticipantContainer();
 
-        const [speedStat] = ParticipantRow.DEFAULT_SPEED_STATISTICS;
+        const [speedStat] = ParticipantContainer.DEFAULT_SPEED_STATISTICS;
         const { name } = speedStat;
 
         expect(screen.getByLabelText(name)).toBeInTheDocument();
@@ -785,8 +789,8 @@ describe("GroupTable Event Handlers", () => {
 
   test("should update group when row adds at least one member", () => {
     render(<TabbedDisplay />);
-    createAnExpandedParticipantRow();
-    createAnExpandedGroupRow();
+    createAnExpandedParticipantContainer();
+    createAnExpandedGroupContainer();
 
     userEvent.click(screen.getByRole("tab", { name: /groups/i }));
     userEvent.click(screen.getByRole("button", { name: /add/i }));
@@ -802,9 +806,9 @@ describe("GroupTable Event Handlers", () => {
 
   test("should delete pre-existing group when its associated delete button is pressed", () => {
     render(<TabbedDisplay />);
-    createAnExpandedGroupRow();
-    createAnExpandedGroupRow();
-    createAnExpandedGroupRow();
+    createAnExpandedGroupContainer();
+    createAnExpandedGroupContainer();
+    createAnExpandedGroupContainer();
 
     userEvent.click(
       screen.getByRole("button", {
@@ -824,9 +828,9 @@ describe("GroupTable Event Handlers", () => {
     const id3 = "GROUP-3";
 
     render(<TabbedDisplay />);
-    createAnExpandedGroupRow();
-    createAnExpandedGroupRow();
-    createAnExpandedGroupRow();
+    createAnExpandedGroupContainer();
+    createAnExpandedGroupContainer();
+    createAnExpandedGroupContainer();
 
     expect(screen.queryByRole("listitem")).not.toBeInTheDocument();
 
@@ -921,7 +925,7 @@ describe("GroupTable Event Handlers", () => {
       expect(() =>
         userEvent.selectOptions(
           screen.getByRole("combobox", { name: /distancer/i }),
-          GroupRow.getInvalidDistancerId()
+          GroupContainer.getInvalidDistancerId()
         )
       ).not.toThrowError();
     });
@@ -933,8 +937,8 @@ describe("Confirmation Tests", () => {
     const newMov = 20;
 
     render(<TabbedDisplay />);
-    createAnExpandedParticipantRow();
-    createAnExpandedGroupRow();
+    createAnExpandedParticipantContainer();
+    createAnExpandedGroupContainer();
 
     userEvent.click(screen.getByRole("tab", { name: /groups/i }));
     userEvent.click(screen.getByRole("button", { name: /add/i }));

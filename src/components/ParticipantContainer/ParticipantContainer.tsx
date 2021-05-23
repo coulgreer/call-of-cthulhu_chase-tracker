@@ -9,7 +9,7 @@ import StatisticTable from "../StatisticTable";
 import { WrappedStatistic } from "../StatisticDisplay";
 import DisplayFactory from "../StatisticDisplay/DisplayFactory";
 
-import "./ParticipantRow.css";
+import "./ParticipantContainer.css";
 
 import UniqueSequenceGenerator from "../../utils/unique-sequence-generator";
 import { roll, Result } from "../../utils/roller";
@@ -36,7 +36,10 @@ interface State {
 
 const SEQUENCE_START = 0;
 
-export default class ParticipantRow extends React.Component<Props, State> {
+export default class ParticipantContainer extends React.Component<
+  Props,
+  State
+> {
   static get WARNING_MESSAGE() {
     return "Even Elder Ones have a title. You ought follow suit.";
   }
@@ -190,7 +193,7 @@ export default class ParticipantRow extends React.Component<Props, State> {
   }
 
   static get EXPANSION_PREFIX() {
-    return "participant-row-expansion";
+    return "participant-container-expansion";
   }
 
   private id;
@@ -242,9 +245,9 @@ export default class ParticipantRow extends React.Component<Props, State> {
       modalShown: false,
       selectedStatisticScore: "",
       currentName: participant.name,
-      dexterity: ParticipantRow.initializeDexterity(participant),
-      movementRate: ParticipantRow.initializeMovementRate(participant),
-      derivedSpeed: ParticipantRow.initializeDerivedSpeed(participant),
+      dexterity: ParticipantContainer.initializeDexterity(participant),
+      movementRate: ParticipantContainer.initializeMovementRate(participant),
+      derivedSpeed: ParticipantContainer.initializeDerivedSpeed(participant),
       speedStatistics: this.initializeSpeedStatistics(participant),
       hazardStatistics: this.initializeHazardStatistics(participant),
     };
@@ -276,7 +279,7 @@ export default class ParticipantRow extends React.Component<Props, State> {
       const { dexterity } = state;
       const { statistic } = dexterity;
 
-      statistic.score = ParticipantRow.parseValidScore(value, dexterity);
+      statistic.score = ParticipantContainer.parseValidScore(value, dexterity);
 
       dexterity.currentValue = value;
 
@@ -289,7 +292,10 @@ export default class ParticipantRow extends React.Component<Props, State> {
       const { derivedSpeed } = state;
       const { statistic } = derivedSpeed;
 
-      statistic.score = ParticipantRow.parseValidScore(value, derivedSpeed);
+      statistic.score = ParticipantContainer.parseValidScore(
+        value,
+        derivedSpeed
+      );
 
       derivedSpeed.currentValue = value;
 
@@ -302,7 +308,10 @@ export default class ParticipantRow extends React.Component<Props, State> {
       const { movementRate } = state;
       const { statistic } = movementRate;
 
-      statistic.score = ParticipantRow.parseValidScore(value, movementRate);
+      statistic.score = ParticipantContainer.parseValidScore(
+        value,
+        movementRate
+      );
 
       movementRate.currentValue = value;
 
@@ -316,7 +325,10 @@ export default class ParticipantRow extends React.Component<Props, State> {
       const wrappedStatistic = speedStatistics[index];
       const { statistic } = wrappedStatistic;
 
-      statistic.score = ParticipantRow.parseValidScore(value, wrappedStatistic);
+      statistic.score = ParticipantContainer.parseValidScore(
+        value,
+        wrappedStatistic
+      );
 
       wrappedStatistic.currentValue = value;
 
@@ -331,7 +343,10 @@ export default class ParticipantRow extends React.Component<Props, State> {
       const wrappedStatistic = hazardStatistics[index];
       const { statistic } = wrappedStatistic;
 
-      statistic.score = ParticipantRow.parseValidScore(value, wrappedStatistic);
+      statistic.score = ParticipantContainer.parseValidScore(
+        value,
+        wrappedStatistic
+      );
 
       wrappedStatistic.currentValue = value;
 
@@ -461,7 +476,7 @@ export default class ParticipantRow extends React.Component<Props, State> {
   private calculateSpeedModifier() {
     const { selectedStatisticScore } = this.state;
 
-    const modifier = ParticipantRow.generateSpeedModifier(
+    const modifier = ParticipantContainer.generateSpeedModifier(
       Number.parseInt(selectedStatisticScore, 10)
     );
     this.updateSpeedModifier(modifier);
@@ -479,7 +494,7 @@ export default class ParticipantRow extends React.Component<Props, State> {
     const startingScore = 15;
     const newData: WrappedStatistic = {
       statistic: {
-        name: `${ParticipantRow.DEFAULT_STAT_NAME} #${key}`,
+        name: `${ParticipantContainer.DEFAULT_STAT_NAME} #${key}`,
         score: startingScore,
       },
       currentValue: startingScore.toString(),
@@ -519,7 +534,7 @@ export default class ParticipantRow extends React.Component<Props, State> {
     const startingScore = 15;
     const newData = {
       statistic: {
-        name: `${ParticipantRow.DEFAULT_STAT_NAME} #${key}`,
+        name: `${ParticipantContainer.DEFAULT_STAT_NAME} #${key}`,
         score: startingScore,
       },
       currentValue: startingScore.toString(),
@@ -644,7 +659,7 @@ export default class ParticipantRow extends React.Component<Props, State> {
     } = this.state;
 
     return (
-      <div className="ParticipantRow__main-display">
+      <div className="ParticipantContainer__main-display">
         <label>
           <span className="input__label">Name</span>
           <input
@@ -661,10 +676,10 @@ export default class ParticipantRow extends React.Component<Props, State> {
             visibility: nameWarningShown ? "visible" : "hidden",
           }}
         >
-          {ParticipantRow.WARNING_MESSAGE}
+          {ParticipantContainer.WARNING_MESSAGE}
         </p>
-        <div className="ParticipantRow__footer">
-          <div className="ParticipantRow__main-characteristics">
+        <div className="ParticipantContainer__footer">
+          <div className="ParticipantContainer__main-characteristics">
             {DisplayFactory.createStatisticDisplay(
               "StatisticDisplay--vertical",
               dexterity,
@@ -694,7 +709,7 @@ export default class ParticipantRow extends React.Component<Props, State> {
             className="button button--primary button--small button--circular"
             aria-label="Participant Details"
             aria-expanded={expansionShown}
-            aria-controls={`${ParticipantRow.EXPANSION_PREFIX}-${this.id}`}
+            aria-controls={`${ParticipantContainer.EXPANSION_PREFIX}-${this.id}`}
             onClick={this.toggleExpansion}
           >
             {expansionShown ? (
@@ -726,8 +741,8 @@ export default class ParticipantRow extends React.Component<Props, State> {
           shown &&
           ((props) => (
             <animated.div
-              id={`${ParticipantRow.EXPANSION_PREFIX}-${this.id}`}
-              className="ParticipantRow__extended-display"
+              id={`${ParticipantContainer.EXPANSION_PREFIX}-${this.id}`}
+              className="ParticipantContainer__extended-display"
               style={props}
             >
               {this.renderSpeedStatistics()}
@@ -775,7 +790,7 @@ export default class ParticipantRow extends React.Component<Props, State> {
 
   render() {
     return (
-      <div className="ParticipantRow">
+      <div className="ParticipantContainer">
         {this.renderMainDisplay()}
         {this.renderExpansiveDisplay()}
         {this.renderSpeedStatisticModal()}

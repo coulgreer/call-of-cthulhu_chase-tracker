@@ -1,20 +1,20 @@
-.ParticipantRow__main-display {
+.ParticipantContainer__main-display {
   padding: 4px;
 }
 
-.ParticipantRow__main-display::after {
+.ParticipantContainer__main-display::after {
   content: "";
   display: block;
   clear: both;
 }
 
-.ParticipantRow__footer {
+.ParticipantContainer__footer {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
 }
 
-.ParticipantRow__main-characteristics {
+.ParticipantContainer__main-characteristics {
   display: grid;
   grid-template-columns: auto auto auto;
   grid-template-rows: auto auto;
@@ -22,11 +22,11 @@
   margin-right: 8px;
 }
 
-.ParticipantRow__main-characteristics .button {
+.ParticipantContainer__main-characteristics .button {
   grid-column-end: span 3;
 }
 
-.ParticipantRow__extended-display {
+.ParticipantContainer__extended-display {
   background-color: rgba(var(--cultured), var(--text-emphasis--high));
   color: rgba(var(--rich-black-fogra-39), var(--text-emphasis--high));
   padding: 6px;
@@ -34,17 +34,17 @@
   box-shadow: inset 0 0 12px #121212;
 }
 
-.ParticipantRow__extended-display .StatisticDisplay--horizontal {
+.ParticipantContainer__extended-display .StatisticDisplay--horizontal {
   display: grid;
   grid-template-columns: auto 8ch;
   column-gap: 12px;
 }
 
-.ParticipantRow__extended-display .StatisticDisplay.input__label {
+.ParticipantContainer__extended-display .StatisticDisplay.input__label {
   text-align: right;
 }
 
-.ParticipantRow__extended-display .textbox:focus {
+.ParticipantContainer__extended-display .textbox:focus {
   border-bottom: 2px solid rgb(var(--jonquil));
 }
 

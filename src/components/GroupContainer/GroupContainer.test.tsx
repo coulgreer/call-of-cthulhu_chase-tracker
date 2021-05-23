@@ -3,7 +3,7 @@ import React from "react";
 import { screen, render, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import GroupRow from ".";
+import GroupContainer from ".";
 
 import { Group, Participant } from "../../types";
 
@@ -35,14 +35,14 @@ const DEFAULT_PROPS: {
     {
       id: "0",
       name: isolatedGroupName,
-      distancerId: GroupRow.getInvalidDistancerId(),
+      distancerId: GroupContainer.getInvalidDistancerId(),
       pursuersIds: [],
       participants: [],
     },
     {
       id: "1",
       name: distancingGroupName,
-      distancerId: GroupRow.getInvalidDistancerId(),
+      distancerId: GroupContainer.getInvalidDistancerId(),
       pursuersIds: [distancingAndPursuingGroupName],
       participants: [createParticipant("Participant 00")],
     },
@@ -111,7 +111,7 @@ describe("Prop Rendering", () => {
   test("should render properly when collapsed", () => {
     const { groups } = DEFAULT_PROPS;
 
-    render(<GroupRow ownedIndex={isolatedGroupIndex} groups={groups} />);
+    render(<GroupContainer ownedIndex={isolatedGroupIndex} groups={groups} />);
 
     expect(
       screen.getByRole("gridcell", {
@@ -143,7 +143,9 @@ describe("Prop Rendering", () => {
     test("should render properly when ommitting all optional props", () => {
       const { groups } = DEFAULT_PROPS;
 
-      render(<GroupRow ownedIndex={isolatedGroupIndex} groups={groups} />);
+      render(
+        <GroupContainer ownedIndex={isolatedGroupIndex} groups={groups} />
+      );
       userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
       expect(
@@ -169,7 +171,7 @@ describe("Prop Rendering", () => {
             if (node.textContent === null) return false;
 
             const regex = new RegExp(
-              `chase name: ${GroupRow.getDefaultChaseName()}`,
+              `chase name: ${GroupContainer.getDefaultChaseName()}`,
               "i"
             );
 
@@ -192,14 +194,14 @@ describe("Prop Rendering", () => {
         screen.getByRole("heading", { name: /pursuers/i })
       ).toBeInTheDocument();
       expect(
-        screen.getByText(GroupRow.getNoPursuerWarningMessage())
+        screen.getByText(GroupContainer.getNoPursuerWarningMessage())
       ).toBeInTheDocument();
 
       expect(
         screen.getByRole("heading", { name: /members/i })
       ).toBeInTheDocument();
       expect(
-        screen.getByText(GroupRow.getNoMemberWarningMessage())
+        screen.getByText(GroupContainer.getNoMemberWarningMessage())
       ).toBeInTheDocument();
       expect(screen.getByRole("button", { name: /add/i })).toBeDisabled();
     });
@@ -213,7 +215,7 @@ describe("Prop Rendering", () => {
       } = DEFAULT_PROPS;
 
       render(
-        <GroupRow
+        <GroupContainer
           ownedIndex={isolatedGroupIndex}
           groups={groups}
           participants={participants}
@@ -246,7 +248,7 @@ describe("Prop Rendering", () => {
             if (node.textContent === null) return false;
 
             const regex = new RegExp(
-              `chase name: ${GroupRow.getDefaultChaseName()}`,
+              `chase name: ${GroupContainer.getDefaultChaseName()}`,
               "i"
             );
 
@@ -267,14 +269,14 @@ describe("Prop Rendering", () => {
         screen.getByRole("heading", { name: /pursuers/i })
       ).toBeInTheDocument();
       expect(
-        screen.getByText(GroupRow.getNoPursuerWarningMessage())
+        screen.getByText(GroupContainer.getNoPursuerWarningMessage())
       ).toBeInTheDocument();
 
       expect(
         screen.getByRole("heading", { name: /members/i })
       ).toBeInTheDocument();
       expect(
-        screen.getByText(GroupRow.getNoMemberWarningMessage())
+        screen.getByText(GroupContainer.getNoMemberWarningMessage())
       ).toBeInTheDocument();
 
       expect(screen.getByRole("button", { name: /add/i })).toBeInTheDocument();
@@ -285,7 +287,7 @@ describe("Prop Rendering", () => {
         const { groups, participants } = DEFAULT_PROPS;
 
         render(
-          <GroupRow
+          <GroupContainer
             ownedIndex={isolatedGroupIndex}
             groups={groups}
             participants={participants}
@@ -302,7 +304,7 @@ describe("Prop Rendering", () => {
         const empty: Participant[] = [];
 
         render(
-          <GroupRow
+          <GroupContainer
             ownedIndex={isolatedGroupIndex}
             groups={groups}
             participants={empty}
@@ -320,11 +322,13 @@ describe("Distancer Display", () => {
   test("should show warning message when a group does not have a distancer", () => {
     const { groups } = DEFAULT_PROPS;
 
-    render(<GroupRow ownedIndex={1} groups={groups} />);
+    render(<GroupContainer ownedIndex={1} groups={groups} />);
     userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
     const distancerEl = screen.getByRole("combobox", { name: /distancer/i });
-    const warningEl = screen.getByText(GroupRow.getNoDistancerWarningMessage());
+    const warningEl = screen.getByText(
+      GroupContainer.getNoDistancerWarningMessage()
+    );
 
     distancerEl.focus();
     distancerEl.blur();
@@ -339,11 +343,11 @@ describe("Distancer Display", () => {
   test("should hide warning and display current distancer when a group has a distancer", () => {
     const { groups } = DEFAULT_PROPS;
 
-    render(<GroupRow ownedIndex={centralGroupIndex} groups={groups} />);
+    render(<GroupContainer ownedIndex={centralGroupIndex} groups={groups} />);
     userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
     expect(
-      screen.getByText(GroupRow.getNoDistancerWarningMessage())
+      screen.getByText(GroupContainer.getNoDistancerWarningMessage())
     ).not.toBeVisible();
   });
 });
@@ -352,22 +356,22 @@ describe("Pursuer Display", () => {
   test("should show warning message when a group does not have at least one pursuer", () => {
     const { groups } = DEFAULT_PROPS;
 
-    render(<GroupRow ownedIndex={3} groups={groups} />);
+    render(<GroupContainer ownedIndex={3} groups={groups} />);
     userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
     expect(
-      screen.getByText(GroupRow.getNoPursuerWarningMessage())
+      screen.getByText(GroupContainer.getNoPursuerWarningMessage())
     ).toBeInTheDocument();
   });
 
   test("should hide warning and display current pursuer(s) when a group has any pursuers", () => {
     const { groups } = DEFAULT_PROPS;
 
-    render(<GroupRow ownedIndex={centralGroupIndex} groups={groups} />);
+    render(<GroupContainer ownedIndex={centralGroupIndex} groups={groups} />);
     userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
     expect(
-      screen.queryByText(GroupRow.getNoPursuerWarningMessage())
+      screen.queryByText(GroupContainer.getNoPursuerWarningMessage())
     ).not.toBeInTheDocument();
 
     expect(
@@ -383,7 +387,9 @@ describe("Member Display", () => {
     test("should render members properly when none exist on the group", () => {
       const { groups } = DEFAULT_PROPS;
 
-      render(<GroupRow ownedIndex={isolatedGroupIndex} groups={groups} />);
+      render(
+        <GroupContainer ownedIndex={isolatedGroupIndex} groups={groups} />
+      );
       userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
       const tableEl = screen.getByRole("table", { name: /members/i });
@@ -415,7 +421,9 @@ describe("Member Display", () => {
         screen.getByRole("rowgroup", { name: /all members/i })
       ).toBeInTheDocument();
       expect(
-        screen.getByRole("cell", { name: GroupRow.getNoMemberWarningMessage() })
+        screen.getByRole("cell", {
+          name: GroupContainer.getNoMemberWarningMessage(),
+        })
       ).toBeInTheDocument();
 
       expect(screen.getByRole("button", { name: /add/i })).toBeInTheDocument();
@@ -439,7 +447,7 @@ describe("Member Display", () => {
         {
           id: "0",
           name: "Group 0",
-          distancerId: GroupRow.getInvalidDistancerId(),
+          distancerId: GroupContainer.getInvalidDistancerId(),
           pursuersIds: [],
           participants,
         },
@@ -447,7 +455,7 @@ describe("Member Display", () => {
 
       const [firstParticipant] = participants;
 
-      render(<GroupRow ownedIndex={0} groups={groups} />);
+      render(<GroupContainer ownedIndex={0} groups={groups} />);
       userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
       const tableEl = screen.getByRole("table", { name: /members/i });
@@ -475,12 +483,12 @@ describe("Member Display", () => {
         within(tableEl).getByRole("row", {
           name: /member with the highest mov/i,
         })
-      ).not.toHaveClass(GroupRow.HIGHEST_MOVEMENT_CLASS_NAME);
+      ).not.toHaveClass(GroupContainer.HIGHEST_MOVEMENT_CLASS_NAME);
       expect(
         within(tableEl).getByRole("row", {
           name: /member with the lowest mov/i,
         })
-      ).not.toHaveClass(GroupRow.LOWEST_MOVEMENT_CLASS_NAME);
+      ).not.toHaveClass(GroupContainer.LOWEST_MOVEMENT_CLASS_NAME);
 
       expect(
         screen.getByRole("columnheader", { name: /icon/i })
@@ -498,10 +506,10 @@ describe("Member Display", () => {
 
       expect(
         within(tableBodyEl).getByRole("row", { name: firstParticipant.name })
-      ).not.toHaveClass(GroupRow.HIGHEST_MOVEMENT_CLASS_NAME);
+      ).not.toHaveClass(GroupContainer.HIGHEST_MOVEMENT_CLASS_NAME);
       expect(
         within(tableBodyEl).getByRole("row", { name: firstParticipant.name })
-      ).not.toHaveClass(GroupRow.LOWEST_MOVEMENT_CLASS_NAME);
+      ).not.toHaveClass(GroupContainer.LOWEST_MOVEMENT_CLASS_NAME);
       expect(
         within(tableBodyEl).getByRole("cell", { name: /warning/i })
       ).toBeInTheDocument();
@@ -542,13 +550,13 @@ describe("Member Display", () => {
         {
           id: "0",
           name: "Group 0",
-          distancerId: GroupRow.getInvalidDistancerId(),
+          distancerId: GroupContainer.getInvalidDistancerId(),
           pursuersIds: [],
           participants,
         },
       ];
 
-      render(<GroupRow ownedIndex={0} groups={groups} />);
+      render(<GroupContainer ownedIndex={0} groups={groups} />);
       userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
       const tableEl = screen.getByRole("table", { name: /members/i });
@@ -586,12 +594,12 @@ describe("Member Display", () => {
         within(tableEl).getByRole("row", {
           name: /member with the highest mov/i,
         })
-      ).toHaveClass(GroupRow.HIGHEST_MOVEMENT_CLASS_NAME);
+      ).toHaveClass(GroupContainer.HIGHEST_MOVEMENT_CLASS_NAME);
       expect(
         within(tableEl).getByRole("row", {
           name: /member with the lowest mov/i,
         })
-      ).toHaveClass(GroupRow.LOWEST_MOVEMENT_CLASS_NAME);
+      ).toHaveClass(GroupContainer.LOWEST_MOVEMENT_CLASS_NAME);
 
       expect(
         screen.getByRole("columnheader", { name: /icon/i })
@@ -611,12 +619,12 @@ describe("Member Display", () => {
         within(tableBodyEl).getByRole("row", {
           name: highestMovParticipant.name,
         })
-      ).toHaveClass(GroupRow.HIGHEST_MOVEMENT_CLASS_NAME);
+      ).toHaveClass(GroupContainer.HIGHEST_MOVEMENT_CLASS_NAME);
       expect(
         within(tableBodyEl).getByRole("row", {
           name: lowestMovParticipant.name,
         })
-      ).toHaveClass(GroupRow.LOWEST_MOVEMENT_CLASS_NAME);
+      ).toHaveClass(GroupContainer.LOWEST_MOVEMENT_CLASS_NAME);
 
       expect(
         within(tableBodyEl).getAllByRole("cell", { name: /warning/i })
@@ -632,7 +640,7 @@ describe("Member Display", () => {
     const [first, second, third] = participants;
 
     render(
-      <GroupRow
+      <GroupContainer
         ownedIndex={isolatedGroupIndex}
         groups={groups}
         participants={participants}
@@ -671,7 +679,7 @@ describe("Member Display", () => {
     const [first] = participants;
 
     render(
-      <GroupRow
+      <GroupContainer
         ownedIndex={isolatedGroupIndex}
         groups={groups}
         participants={participants}
@@ -699,7 +707,7 @@ describe("Member Display", () => {
     const participants = [participant];
 
     render(
-      <GroupRow
+      <GroupContainer
         ownedIndex={isolatedGroupIndex}
         groups={groups}
         participants={participants}
@@ -717,7 +725,7 @@ describe("Member Display", () => {
 
     expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
     expect(
-      screen.getByText(GroupRow.getNoAvailableParticipantWarningMessage())
+      screen.getByText(GroupContainer.getNoAvailableParticipantWarningMessage())
     ).toBeInTheDocument();
     expect(
       within(screen.getByRole("dialog")).getByRole("button", { name: /add/i })
@@ -738,7 +746,7 @@ describe("Member Display", () => {
       {
         id: "g-1",
         name: "Group 1",
-        distancerId: GroupRow.getInvalidDistancerId(),
+        distancerId: GroupContainer.getInvalidDistancerId(),
         pursuersIds: [],
         participants: [participant2],
       },
@@ -746,7 +754,11 @@ describe("Member Display", () => {
     const participants = [participant1, participant2, participant3];
 
     render(
-      <GroupRow ownedIndex={0} groups={groups} participants={participants} />
+      <GroupContainer
+        ownedIndex={0}
+        groups={groups}
+        participants={participants}
+      />
     );
     userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
@@ -775,7 +787,7 @@ describe("Member Display", () => {
       {
         id: "g-1",
         name: "Group 1",
-        distancerId: GroupRow.getInvalidDistancerId(),
+        distancerId: GroupContainer.getInvalidDistancerId(),
         pursuersIds: [],
         participants: [],
       },
@@ -807,7 +819,11 @@ describe("Member Display", () => {
     ];
 
     render(
-      <GroupRow ownedIndex={0} groups={groups} participants={participants} />
+      <GroupContainer
+        ownedIndex={0}
+        groups={groups}
+        participants={participants}
+      />
     );
     userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
@@ -842,7 +858,7 @@ describe("Member Display", () => {
       {
         id: "g-1",
         name: "Group 1",
-        distancerId: GroupRow.getInvalidDistancerId(),
+        distancerId: GroupContainer.getInvalidDistancerId(),
         pursuersIds: [],
         participants: [domesticParticipant],
       },
@@ -865,7 +881,11 @@ describe("Member Display", () => {
     ];
 
     render(
-      <GroupRow ownedIndex={0} groups={groups} participants={participants} />
+      <GroupContainer
+        ownedIndex={0}
+        groups={groups}
+        participants={participants}
+      />
     );
     userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
@@ -923,13 +943,13 @@ describe("Confirmation Tests", () => {
       {
         id: "0",
         name: "Group 0",
-        distancerId: GroupRow.getInvalidDistancerId(),
+        distancerId: GroupContainer.getInvalidDistancerId(),
         pursuersIds: [],
         participants,
       },
     ];
 
-    render(<GroupRow ownedIndex={0} groups={groups} />);
+    render(<GroupContainer ownedIndex={0} groups={groups} />);
     userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
     const rowEl = screen.getByRole("row", {

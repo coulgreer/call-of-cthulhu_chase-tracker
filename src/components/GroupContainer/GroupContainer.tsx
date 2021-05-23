@@ -7,7 +7,7 @@ import { nanoid } from "nanoid";
 
 import Button from "../Button";
 
-import "./GroupRow.css";
+import "./GroupContainer.css";
 
 import { Group, Participant } from "../../types";
 
@@ -26,7 +26,7 @@ interface State {
   modalShown: boolean;
 }
 
-export default class GroupRow extends React.Component<Props, State> {
+export default class GroupContainer extends React.Component<Props, State> {
   static getInvalidDistancerId() {
     return "N/A";
   }
@@ -52,15 +52,15 @@ export default class GroupRow extends React.Component<Props, State> {
   }
 
   static get HIGHEST_MOVEMENT_CLASS_NAME() {
-    return "GroupRow--highest";
+    return "GroupContainer--highest";
   }
 
   static get LOWEST_MOVEMENT_CLASS_NAME() {
-    return "GroupRow--lowest";
+    return "GroupContainer--lowest";
   }
 
   static get EXPANSION_PREFIX() {
-    return "group-row-expansion";
+    return "group-container-expansion";
   }
 
   static get PLACEHOLDER_MEMBER_NAME() {
@@ -174,11 +174,11 @@ export default class GroupRow extends React.Component<Props, State> {
     if (this.areBoundariesEqual()) return "";
 
     if (this.isHighestBoundary(movementRate)) {
-      return GroupRow.HIGHEST_MOVEMENT_CLASS_NAME;
+      return GroupContainer.HIGHEST_MOVEMENT_CLASS_NAME;
     }
 
     if (this.isLowestBoundary(movementRate)) {
-      return GroupRow.LOWEST_MOVEMENT_CLASS_NAME;
+      return GroupContainer.LOWEST_MOVEMENT_CLASS_NAME;
     }
 
     return "";
@@ -273,7 +273,7 @@ export default class GroupRow extends React.Component<Props, State> {
     const { ownedIndex, groups } = this.props;
     const { distancerId } = groups[ownedIndex];
 
-    return distancerId !== GroupRow.getInvalidDistancerId();
+    return distancerId !== GroupContainer.getInvalidDistancerId();
   }
 
   private hasValidParticipantCount() {
@@ -301,8 +301,8 @@ export default class GroupRow extends React.Component<Props, State> {
     const { expansionShown } = this.state;
 
     return (
-      <div className="GroupRow__main-container">
-        <div className="GroupRow__merge-control-container">
+      <div className="GroupContainer__main-container">
+        <div className="GroupContainer__merge-control-container">
           <Button className="button button--small button--secondary">
             SPLIT
           </Button>
@@ -321,7 +321,7 @@ export default class GroupRow extends React.Component<Props, State> {
           className="button button--primary button--small button--circular"
           aria-label="Group Details"
           aria-expanded={expansionShown}
-          aria-controls={`${GroupRow.EXPANSION_PREFIX}-${this.id}`}
+          aria-controls={`${GroupContainer.EXPANSION_PREFIX}-${this.id}`}
           onClick={this.handleExpandClick}
         >
           {expansionShown ? (
@@ -353,11 +353,11 @@ export default class GroupRow extends React.Component<Props, State> {
           shown &&
           ((props) => (
             <animated.div
-              id={`${GroupRow.EXPANSION_PREFIX}-${this.id}`}
+              id={`${GroupContainer.EXPANSION_PREFIX}-${this.id}`}
               style={props}
-              className="GroupRow__extended-container"
+              className="GroupContainer__extended-container"
             >
-              {GroupRow.renderChaseName()}
+              {GroupContainer.renderChaseName()}
               {this.renderDistancer()}
               {this.renderPursuers()}
               {this.renderMembers()}
@@ -390,7 +390,7 @@ export default class GroupRow extends React.Component<Props, State> {
           {availableParticipants.length > 0 ? (
             availableParticipants.map(this.renderParticipantCheckbox)
           ) : (
-            <p>{GroupRow.getNoAvailableParticipantWarningMessage()}</p>
+            <p>{GroupContainer.getNoAvailableParticipantWarningMessage()}</p>
           )}
           <hr />
           <div className="Modal__Content__options">
@@ -415,9 +415,9 @@ export default class GroupRow extends React.Component<Props, State> {
 
   private static renderChaseName() {
     return (
-      <div className="GroupRow__section-container">
-        <h2 className="GroupRow__title" aria-label="Chase name">
-          Chase Name: <em>{GroupRow.getDefaultChaseName()}</em>
+      <div className="GroupContainer__section-container">
+        <h2 className="GroupContainer__title" aria-label="Chase name">
+          Chase Name: <em>{GroupContainer.getDefaultChaseName()}</em>
         </h2>
       </div>
     );
@@ -430,7 +430,7 @@ export default class GroupRow extends React.Component<Props, State> {
     const warningMessageId = `distancer-combobox-warning-${this.id}`;
 
     return (
-      <div className="GroupRow__section-container">
+      <div className="GroupContainer__section-container">
         <label>
           <span className="input__label">Distancer</span>
           <select
@@ -438,7 +438,10 @@ export default class GroupRow extends React.Component<Props, State> {
             onBlur={this.handleDistancerBlur}
             aria-describedby={hasDistancer ? undefined : warningMessageId}
           >
-            <option key="default" value={GroupRow.getInvalidDistancerId()}>
+            <option
+              key="default"
+              value={GroupContainer.getInvalidDistancerId()}
+            >
               [N/A]
             </option>
             {groups.map(this.renderOption)}
@@ -449,7 +452,7 @@ export default class GroupRow extends React.Component<Props, State> {
           className="centered error text--small"
           hidden={hasDistancer}
         >
-          {GroupRow.getNoDistancerWarningMessage()}
+          {GroupContainer.getNoDistancerWarningMessage()}
         </p>
       </div>
     );
@@ -463,21 +466,21 @@ export default class GroupRow extends React.Component<Props, State> {
     const warningMessageId = `pursuers-list-warning-${this.id}`;
 
     return (
-      <div className="GroupRow__section-container">
+      <div className="GroupContainer__section-container">
         <h2
           id={pursuerLabelId}
-          className="GroupRow__title"
+          className="GroupContainer__title"
           aria-describedby={this.hasPursuers() ? undefined : warningMessageId}
         >
           Pursuers
         </h2>
         {this.hasPursuers() ? (
           <ul aria-labelledby={pursuerLabelId}>
-            {pursuersIds.map(GroupRow.renderPursuer)}
+            {pursuersIds.map(GroupContainer.renderPursuer)}
           </ul>
         ) : (
           <p id={warningMessageId} className="centered error text--small">
-            {GroupRow.getNoPursuerWarningMessage()}
+            {GroupContainer.getNoPursuerWarningMessage()}
           </p>
         )}
       </div>
@@ -495,50 +498,50 @@ export default class GroupRow extends React.Component<Props, State> {
     this.lowestMovementRateMember = this.findMemberWithLowestMovementRate();
 
     return (
-      <div className="GroupRow__section-container">
+      <div className="GroupContainer__section-container">
         <table
-          className="GroupRow__table"
+          className="GroupContainer__table"
           aria-describedby={this.hasMembers() ? undefined : warningId}
         >
           <caption>
-            <h2 className="GroupRow__title">Members</h2>
+            <h2 className="GroupContainer__title">Members</h2>
           </caption>
           <thead>
             <tr
               className={clsx(
                 !this.areBoundariesEqual() &&
-                  GroupRow.HIGHEST_MOVEMENT_CLASS_NAME
+                  GroupContainer.HIGHEST_MOVEMENT_CLASS_NAME
               )}
               aria-label="Member with the highest MOV"
             >
               <td className="material-icons-outlined">arrow_upward</td>
               <td>
                 {this.highestMovementRateMember?.name ||
-                  GroupRow.PLACEHOLDER_MEMBER_NAME}
+                  GroupContainer.PLACEHOLDER_MEMBER_NAME}
               </td>
               <td>
                 {this.highestMovementRateMember?.movementRate ||
-                  GroupRow.PLACEHOLDER_MEMBER_MOVEMENT_RATE}
+                  GroupContainer.PLACEHOLDER_MEMBER_MOVEMENT_RATE}
               </td>
             </tr>
             <tr
               className={clsx(
                 !this.areBoundariesEqual() &&
-                  GroupRow.LOWEST_MOVEMENT_CLASS_NAME
+                  GroupContainer.LOWEST_MOVEMENT_CLASS_NAME
               )}
               aria-label="Member with the lowest MOV"
             >
               <td className="material-icons-outlined">arrow_downward</td>
-              <td className="GroupRow__cell--summarize">
+              <td className="GroupContainer__cell--summarize">
                 {this.lowestMovementRateMember?.name ||
-                  GroupRow.PLACEHOLDER_MEMBER_NAME}
+                  GroupContainer.PLACEHOLDER_MEMBER_NAME}
               </td>
               <td>
                 {this.lowestMovementRateMember?.movementRate ||
-                  GroupRow.PLACEHOLDER_MEMBER_MOVEMENT_RATE}
+                  GroupContainer.PLACEHOLDER_MEMBER_MOVEMENT_RATE}
               </td>
             </tr>
-            <tr className="GroupRow__header">
+            <tr className="GroupContainer__header">
               <th aria-label="icon" />
               <th>Name</th>
               <th>MOV</th>
@@ -547,7 +550,7 @@ export default class GroupRow extends React.Component<Props, State> {
           <tbody aria-label="All Members">
             {this.hasMembers()
               ? currentParticipants.map(this.renderMember)
-              : GroupRow.renderMemberWarning(warningId)}
+              : GroupContainer.renderMemberWarning(warningId)}
           </tbody>
         </table>
         <Button
@@ -585,8 +588,8 @@ export default class GroupRow extends React.Component<Props, State> {
         key={participant.id}
       >
         <td
-          className={`material-icons-outlined GroupRow__icon ${clsx({
-            "GroupRow__icon--hidden": !this.hasBoundaryMovementRate(
+          className={`material-icons-outlined GroupContainer__icon ${clsx({
+            "GroupContainer__icon--hidden": !this.hasBoundaryMovementRate(
               participant
             ),
           })}`}
@@ -594,7 +597,7 @@ export default class GroupRow extends React.Component<Props, State> {
         >
           warning
         </td>
-        <td className="GroupRow__cell--summarize GroupRow__cell--fill-horizontal">
+        <td className="GroupContainer__cell--summarize GroupContainer__cell--fill-horizontal">
           {participant.name}
         </td>
         <td>{participant.movementRate}</td>
@@ -606,7 +609,7 @@ export default class GroupRow extends React.Component<Props, State> {
     return (
       <tr>
         <td id={warningId} className="centered error text--small" colSpan={3}>
-          {GroupRow.getNoMemberWarningMessage()}
+          {GroupContainer.getNoMemberWarningMessage()}
         </td>
       </tr>
     );
@@ -638,7 +641,7 @@ export default class GroupRow extends React.Component<Props, State> {
 
     return (
       <div
-        className="GroupRow"
+        className="GroupContainer"
         tabIndex={0}
         role="gridcell"
         aria-label={`${groups[ownedIndex].name} Editor`}

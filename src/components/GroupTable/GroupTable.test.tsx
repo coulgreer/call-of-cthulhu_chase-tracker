@@ -4,7 +4,7 @@ import { screen, render, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import GroupTable from ".";
-import GroupRow from "../GroupRow";
+import GroupContainer from "../GroupContainer";
 
 import { Group, Participant } from "../../types";
 
@@ -47,14 +47,14 @@ const DEFAULT_PROPS: {
     {
       id: "0",
       name: isolatedGroupName,
-      distancerId: GroupRow.getInvalidDistancerId(),
+      distancerId: GroupContainer.getInvalidDistancerId(),
       pursuersIds: [],
       participants: [],
     },
     {
       id: "1",
       name: distancingGroupName,
-      distancerId: GroupRow.getInvalidDistancerId(),
+      distancerId: GroupContainer.getInvalidDistancerId(),
       pursuersIds: [distancingAndPursuingGroupName],
       participants: [participant1],
     },

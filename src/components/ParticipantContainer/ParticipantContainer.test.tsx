@@ -2,7 +2,7 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import ParticipantRow from ".";
+import ParticipantContainer from ".";
 
 import { Participant } from "../../types";
 
@@ -16,8 +16,8 @@ const DEFAULT_PROPS: {
     dexterity: 15,
     movementRate: 2,
     derivedSpeed: 0,
-    speedStatistics: ParticipantRow.DEFAULT_SPEED_STATISTICS,
-    hazardStatistics: ParticipantRow.DEFAULT_HAZARD_STATISTICS,
+    speedStatistics: ParticipantContainer.DEFAULT_SPEED_STATISTICS,
+    hazardStatistics: ParticipantContainer.DEFAULT_HAZARD_STATISTICS,
     isGrouped: false,
   },
   onParticipantChange: jest.fn(),
@@ -45,12 +45,12 @@ describe("Collapse/Expand detailed data", () => {
   ] = participant.hazardStatistics;
 
   test("should render participant information properly when collapsed", () => {
-    render(<ParticipantRow participant={participant} />);
+    render(<ParticipantContainer participant={participant} />);
 
     expect(screen.getByRole("textbox", { name: /name/i })).toBeInTheDocument();
 
     expect(
-      screen.queryByText(ParticipantRow.WARNING_MESSAGE)
+      screen.queryByText(ParticipantContainer.WARNING_MESSAGE)
     ).not.toBeVisible();
 
     expect(screen.getByLabelText(/dex/i)).toBeInTheDocument();
@@ -92,7 +92,7 @@ describe("Collapse/Expand detailed data", () => {
   });
 
   test("should render participant information properly when expanded", () => {
-    render(<ParticipantRow participant={participant} />);
+    render(<ParticipantContainer participant={participant} />);
 
     userEvent.click(
       screen.getByRole("button", { name: /participant details/i })
@@ -101,7 +101,7 @@ describe("Collapse/Expand detailed data", () => {
     expect(screen.getByRole("textbox", { name: /name/i })).toBeInTheDocument();
 
     expect(
-      screen.queryByText(ParticipantRow.WARNING_MESSAGE)
+      screen.queryByText(ParticipantContainer.WARNING_MESSAGE)
     ).not.toBeVisible();
 
     expect(screen.getByLabelText(/dex/i)).toBeInTheDocument();
@@ -143,7 +143,7 @@ describe("Collapse/Expand detailed data", () => {
 describe("Participant name rendering", () => {
   test("should render given name when changed from default name", () => {
     const newName = "Test Name";
-    render(<ParticipantRow participant={DEFAULT_PROPS.participant} />);
+    render(<ParticipantContainer participant={DEFAULT_PROPS.participant} />);
 
     const inputEl = screen.getByRole("textbox", { name: /name/i });
     userEvent.clear(inputEl);
@@ -155,7 +155,7 @@ describe("Participant name rendering", () => {
   test("should render the last valid name when name changed to empty string", () => {
     const validName = "Valid";
     const invalidName = "";
-    render(<ParticipantRow participant={DEFAULT_PROPS.participant} />);
+    render(<ParticipantContainer participant={DEFAULT_PROPS.participant} />);
 
     const inputEl = screen.getByRole("textbox", { name: /name/i });
     userEvent.clear(inputEl);
@@ -173,7 +173,7 @@ describe("Participant name rendering", () => {
     const handleParticipantChange = jest.fn();
 
     render(
-      <ParticipantRow
+      <ParticipantContainer
         participant={DEFAULT_PROPS.participant}
         onParticipantChange={handleParticipantChange}
       />
@@ -185,14 +185,14 @@ describe("Participant name rendering", () => {
     userEvent.clear(inputEl);
 
     expect(
-      screen.getByText(ParticipantRow.WARNING_MESSAGE)
+      screen.getByText(ParticipantContainer.WARNING_MESSAGE)
     ).toBeInTheDocument();
 
     userEvent.type(inputEl, invalidName);
     inputEl.blur();
 
     expect(
-      screen.queryByText(ParticipantRow.WARNING_MESSAGE)
+      screen.queryByText(ParticipantContainer.WARNING_MESSAGE)
     ).not.toBeVisible();
     expect(inputEl).toHaveDisplayValue(validName);
 
@@ -201,20 +201,20 @@ describe("Participant name rendering", () => {
 
   test("should render with a warning message when an invalid name is displayed then hide the message upon receiving a valid character", () => {
     const validName = "valid";
-    render(<ParticipantRow participant={DEFAULT_PROPS.participant} />);
+    render(<ParticipantContainer participant={DEFAULT_PROPS.participant} />);
 
     const inputEl = screen.getByRole("textbox", { name: /name/i });
     userEvent.clear(inputEl);
 
     expect(
-      screen.getByText(ParticipantRow.WARNING_MESSAGE)
+      screen.getByText(ParticipantContainer.WARNING_MESSAGE)
     ).toBeInTheDocument();
     expect(inputEl).toHaveDisplayValue("");
 
     userEvent.type(inputEl, validName);
 
     expect(
-      screen.queryByText(ParticipantRow.WARNING_MESSAGE)
+      screen.queryByText(ParticipantContainer.WARNING_MESSAGE)
     ).not.toBeVisible();
     expect(inputEl).toHaveDisplayValue(validName);
   });
@@ -222,8 +222,8 @@ describe("Participant name rendering", () => {
 
 describe("Statistic Display event handlers", () => {
   const validScore = 11;
-  const [firstHazardStatistic] = ParticipantRow.DEFAULT_HAZARD_STATISTICS;
-  const [firstSpeedStatistic] = ParticipantRow.DEFAULT_SPEED_STATISTICS;
+  const [firstHazardStatistic] = ParticipantContainer.DEFAULT_HAZARD_STATISTICS;
+  const [firstSpeedStatistic] = ParticipantContainer.DEFAULT_SPEED_STATISTICS;
 
   describe("when changing to valid score", () => {
     test("should revert dexterity score to prior valid score", () => {
@@ -231,7 +231,7 @@ describe("Statistic Display event handlers", () => {
       const handleParticipantChange = jest.fn();
 
       render(
-        <ParticipantRow
+        <ParticipantContainer
           participant={participant}
           onParticipantChange={handleParticipantChange}
         />
@@ -255,7 +255,7 @@ describe("Statistic Display event handlers", () => {
       const handleParticipantChange = jest.fn();
 
       render(
-        <ParticipantRow
+        <ParticipantContainer
           participant={participant}
           onParticipantChange={handleParticipantChange}
         />
@@ -279,7 +279,7 @@ describe("Statistic Display event handlers", () => {
       const handleParticipantChange = jest.fn();
 
       render(
-        <ParticipantRow
+        <ParticipantContainer
           participant={participant}
           onParticipantChange={handleParticipantChange}
         />
@@ -303,7 +303,7 @@ describe("Statistic Display event handlers", () => {
       const handleParticipantChange = jest.fn();
 
       render(
-        <ParticipantRow
+        <ParticipantContainer
           participant={participant}
           onParticipantChange={handleParticipantChange}
         />
@@ -330,7 +330,7 @@ describe("Statistic Display event handlers", () => {
       const handleParticipantChange = jest.fn();
 
       render(
-        <ParticipantRow
+        <ParticipantContainer
           participant={participant}
           onParticipantChange={handleParticipantChange}
         />
@@ -361,7 +361,7 @@ describe("Statistic Display event handlers", () => {
       const handleParticipantChange = jest.fn();
 
       render(
-        <ParticipantRow
+        <ParticipantContainer
           participant={participant}
           onParticipantChange={handleParticipantChange}
         />
@@ -386,7 +386,7 @@ describe("Statistic Display event handlers", () => {
       const handleParticipantChange = jest.fn();
 
       render(
-        <ParticipantRow
+        <ParticipantContainer
           participant={participant}
           onParticipantChange={handleParticipantChange}
         />
@@ -411,7 +411,7 @@ describe("Statistic Display event handlers", () => {
       const handleParticipantChange = jest.fn();
 
       render(
-        <ParticipantRow
+        <ParticipantContainer
           participant={participant}
           onParticipantChange={handleParticipantChange}
         />
@@ -436,7 +436,7 @@ describe("Statistic Display event handlers", () => {
       const handleParticipantChange = jest.fn();
 
       render(
-        <ParticipantRow
+        <ParticipantContainer
           participant={participant}
           onParticipantChange={handleParticipantChange}
         />
@@ -464,7 +464,7 @@ describe("Statistic Display event handlers", () => {
       const handleParticipantChange = jest.fn();
 
       render(
-        <ParticipantRow
+        <ParticipantContainer
           participant={participant}
           onParticipantChange={handleParticipantChange}
         />
@@ -494,7 +494,7 @@ describe("Statistic Display event handlers", () => {
       const handleParticipantChange = jest.fn();
 
       render(
-        <ParticipantRow
+        <ParticipantContainer
           participant={participant}
           onParticipantChange={handleParticipantChange}
         />
@@ -519,7 +519,7 @@ describe("Statistic Display event handlers", () => {
       const handleParticipantChange = jest.fn();
 
       render(
-        <ParticipantRow
+        <ParticipantContainer
           participant={participant}
           onParticipantChange={handleParticipantChange}
         />
@@ -544,7 +544,7 @@ describe("Statistic Display event handlers", () => {
       const handleParticipantChange = jest.fn();
 
       render(
-        <ParticipantRow
+        <ParticipantContainer
           participant={participant}
           onParticipantChange={handleParticipantChange}
         />
@@ -569,7 +569,7 @@ describe("Statistic Display event handlers", () => {
       const handleParticipantChange = jest.fn();
 
       render(
-        <ParticipantRow
+        <ParticipantContainer
           participant={participant}
           onParticipantChange={handleParticipantChange}
         />
@@ -597,7 +597,7 @@ describe("Statistic Display event handlers", () => {
       const handleParticipantChange = jest.fn();
 
       render(
-        <ParticipantRow
+        <ParticipantContainer
           participant={participant}
           onParticipantChange={handleParticipantChange}
         />
@@ -624,7 +624,7 @@ describe("Statistic Display event handlers", () => {
 
 describe("Modal", () => {
   test("should reveal modal when 'generate speed modifier' button is pressed", () => {
-    render(<ParticipantRow participant={DEFAULT_PROPS.participant} />);
+    render(<ParticipantContainer participant={DEFAULT_PROPS.participant} />);
 
     userEvent.click(screen.getByRole("button", { name: /generate/i }));
 
@@ -632,7 +632,7 @@ describe("Modal", () => {
   });
 
   test("should close modal when any button is pressed", () => {
-    render(<ParticipantRow participant={DEFAULT_PROPS.participant} />);
+    render(<ParticipantContainer participant={DEFAULT_PROPS.participant} />);
     userEvent.click(screen.getByRole("button", { name: /generate/i }));
 
     expect(screen.getByRole("dialog")).toBeInTheDocument();

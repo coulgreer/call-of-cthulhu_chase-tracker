@@ -1,7 +1,7 @@
 import React from "react";
 import Modal from "react-modal";
 
-import GroupRow from "../GroupRow";
+import GroupContainer from "../GroupContainer";
 import Button from "../Button";
 
 import "./GroupTable.css";
@@ -42,7 +42,7 @@ export default class GroupTable extends React.Component<Props, State> {
     this.handleGroupUpdate = this.handleGroupUpdate.bind(this);
     this.closeModal = this.closeModal.bind(this);
 
-    this.renderContainer = this.renderContainer.bind(this);
+    this.renderRow = this.renderRow.bind(this);
   }
 
   private handleCreateClick() {
@@ -115,12 +115,12 @@ export default class GroupTable extends React.Component<Props, State> {
 
     return (
       <div className="GroupTable__container" role="grid" aria-label="Groups">
-        {groups.map(this.renderContainer)}
+        {groups.map(this.renderRow)}
       </div>
     );
   }
 
-  private renderContainer(group: Group, index: number) {
+  private renderRow(group: Group, index: number) {
     const { groups, participants } = this.props;
 
     return (
@@ -131,7 +131,7 @@ export default class GroupTable extends React.Component<Props, State> {
         aria-label={group.id}
         key={group.id}
       >
-        <GroupRow
+        <GroupContainer
           onDistancerBlur={this.handleDistancerBlur}
           onSubmit={this.handleGroupUpdate}
           ownedIndex={index}

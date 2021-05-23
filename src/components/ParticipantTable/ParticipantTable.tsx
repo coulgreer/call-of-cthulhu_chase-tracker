@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import Modal from "react-modal";
 
-import ParticipantRow from "../ParticipantRow";
+import ParticipantContainer from "../ParticipantContainer";
 import Button from "../Button";
 
 import "./ParticipantTable.css";
@@ -142,7 +142,7 @@ export default class ParticipantTable extends Component<Props, State> {
 
     return participants.map((participant) => (
       <div className="ParticipantTable__row" role="row" key={participant.id}>
-        <ParticipantRow
+        <ParticipantContainer
           participant={participant}
           onParticipantChange={() => this.handleParticipantChange(participant)}
         />
