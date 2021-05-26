@@ -23,7 +23,8 @@ interface State {
   hasDistancer: boolean;
   selectedParticipantsIds: string[];
   expansionShown: boolean;
-  modalShown: boolean;
+  newMemberModalShown: boolean;
+  mergeGroupModalShown: boolean;
 }
 
 export default class GroupContainer extends React.Component<Props, State> {
@@ -84,7 +85,8 @@ export default class GroupContainer extends React.Component<Props, State> {
       hasDistancer: true,
       selectedParticipantsIds: [],
       expansionShown: false,
-      modalShown: false,
+      newMemberModalShown: false,
+      mergeGroupModalShown: false,
     };
 
     this.id = nanoid();
@@ -95,10 +97,16 @@ export default class GroupContainer extends React.Component<Props, State> {
     // Event handlers
     this.handleExpandClick = this.handleExpandClick.bind(this);
     this.handleDistancerBlur = this.handleDistancerBlur.bind(this);
-    this.handleAddClick = this.handleAddClick.bind(this);
+    this.handleOpenAddMemberModalClick = this.handleOpenAddMemberModalClick.bind(
+      this
+    );
+    this.handleOpenMergeGroupModalClick = this.handleOpenMergeGroupModalClick.bind(
+      this
+    );
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleCheckboxChange = this.handleCheckboxChange.bind(this);
-    this.closeModal = this.closeModal.bind(this);
+    this.closeNewMemberModal = this.closeNewMemberModal.bind(this);
+    this.closeMergeGroupModal = this.closeMergeGroupModal.bind(this);
 
     // Helpers
     this.findParticipantById = this.findParticipantById.bind(this);
@@ -123,8 +131,12 @@ export default class GroupContainer extends React.Component<Props, State> {
     this.setState({ hasDistancer: this.hasDistancer() });
   }
 
-  private handleAddClick() {
-    this.setState({ modalShown: true });
+  private handleOpenAddMemberModalClick() {
+    this.setState({ newMemberModalShown: true });
+  }
+
+  private handleOpenMergeGroupModalClick() {
+    this.setState({ mergeGroupModalShown: true });
   }
 
   private handleSubmit() {
@@ -148,7 +160,7 @@ export default class GroupContainer extends React.Component<Props, State> {
 
     this.setState({ selectedParticipantsIds: [] });
 
-    this.closeModal();
+    this.closeNewMemberModal();
   }
 
   private handleCheckboxChange(event: React.FormEvent<HTMLInputElement>) {
@@ -184,8 +196,12 @@ export default class GroupContainer extends React.Component<Props, State> {
     return "";
   }
 
-  private closeModal() {
-    this.setState({ modalShown: false });
+  private closeNewMemberModal() {
+    this.setState({ newMemberModalShown: false });
+  }
+
+  private closeMergeGroupModal() {
+    this.setState({ mergeGroupModalShown: false });
   }
 
   private findMemberWithHighestMovementRate() {
@@ -306,7 +322,10 @@ export default class GroupContainer extends React.Component<Props, State> {
           <Button className="button button--small button--secondary">
             SPLIT
           </Button>
-          <Button className="button button--small button--secondary">
+          <Button
+            className="button button--small button--secondary"
+            onClick={this.handleOpenMergeGroupModalClick}
+          >
             JOIN
           </Button>
         </div>
@@ -370,7 +389,7 @@ export default class GroupContainer extends React.Component<Props, State> {
 
   private renderParticipantModal() {
     const { participants } = this.props;
-    const { modalShown } = this.state;
+    const { newMemberModalShown } = this.state;
 
     const availableParticipants = participants?.filter(this.isAvailable) || [];
 
@@ -379,8 +398,8 @@ export default class GroupContainer extends React.Component<Props, State> {
         className="Modal__Content"
         overlayClassName="Modal__Overlay"
         contentLabel="Select Participant"
-        isOpen={modalShown}
-        onRequestClose={this.closeModal}
+        isOpen={newMemberModalShown}
+        onRequestClose={this.closeNewMemberModal}
       >
         <h2 className="Modal__Content__text">
           Select Participant To Add To Group
@@ -396,7 +415,7 @@ export default class GroupContainer extends React.Component<Props, State> {
           <div className="Modal__Content__options">
             <Button
               className="button button--secondary button--medium"
-              onClick={this.closeModal}
+              onClick={this.closeNewMemberModal}
             >
               CANCEL
             </Button>
@@ -410,6 +429,20 @@ export default class GroupContainer extends React.Component<Props, State> {
           </div>
         </form>
       </Modal>
+    );
+  }
+
+  private renderMergeModal() {
+    const { mergeGroupModalShown } = this.state;
+
+    return (
+      <Modal
+        className="Modal__Content"
+        overlayClassName="Modal__Overlay"
+        contentLabel="Select Participant"
+        isOpen={mergeGroupModalShown}
+        onRequestClose={this.closeMergeGroupModal}
+      />
     );
   }
 
@@ -555,7 +588,7 @@ export default class GroupContainer extends React.Component<Props, State> {
         </table>
         <Button
           className="button button--primary button--medium"
-          onClick={this.handleAddClick}
+          onClick={this.handleOpenAddMemberModalClick}
           disabled={!this.hasValidParticipantCount()}
         >
           ADD
@@ -649,6 +682,7 @@ export default class GroupContainer extends React.Component<Props, State> {
         {this.renderMainContent()}
         {this.renderExpandedContent()}
         {this.renderParticipantModal()}
+        {this.renderMergeModal()}
       </div>
     );
   }

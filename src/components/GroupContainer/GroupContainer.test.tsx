@@ -318,6 +318,29 @@ describe("Prop Rendering", () => {
   });
 });
 
+describe("Merging", () => {
+  test("should open modal", () => {
+    const { groups } = DEFAULT_PROPS;
+
+    render(<GroupContainer ownedIndex={isolatedGroupIndex} groups={groups} />);
+
+    userEvent.click(screen.getByRole("button", { name: /join/i }));
+
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+  });
+
+  test("should close modal when 'esc' is pressed", () => {
+    const { groups } = DEFAULT_PROPS;
+
+    render(<GroupContainer ownedIndex={isolatedGroupIndex} groups={groups} />);
+    userEvent.click(screen.getByRole("button", { name: /join/i }));
+
+    userEvent.keyboard("{esc}");
+
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+});
+
 describe("Distancer Display", () => {
   test("should show warning message when a group does not have a distancer", () => {
     const { groups } = DEFAULT_PROPS;
