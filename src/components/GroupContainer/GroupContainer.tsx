@@ -74,12 +74,16 @@ export default class GroupContainer extends React.Component<Props, State> {
 
   private id;
 
+  private currentGroup;
+
   private lowestMovementRateMember: Participant | null;
 
   private highestMovementRateMember: Participant | null;
 
   constructor(props: Props) {
     super(props);
+
+    const { groups, ownedIndex } = this.props;
 
     this.state = {
       hasDistancer: true,
@@ -90,6 +94,7 @@ export default class GroupContainer extends React.Component<Props, State> {
     };
 
     this.id = nanoid();
+    this.currentGroup = groups[ownedIndex];
 
     this.lowestMovementRateMember = null;
     this.highestMovementRateMember = null;
@@ -97,12 +102,10 @@ export default class GroupContainer extends React.Component<Props, State> {
     // Event handlers
     this.handleExpandClick = this.handleExpandClick.bind(this);
     this.handleDistancerBlur = this.handleDistancerBlur.bind(this);
-    this.handleOpenAddMemberModalClick = this.handleOpenAddMemberModalClick.bind(
-      this
-    );
-    this.handleOpenMergeGroupModalClick = this.handleOpenMergeGroupModalClick.bind(
-      this
-    );
+    this.handleOpenAddMemberModalClick =
+      this.handleOpenAddMemberModalClick.bind(this);
+    this.handleOpenMergeGroupModalClick =
+      this.handleOpenMergeGroupModalClick.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleCheckboxChange = this.handleCheckboxChange.bind(this);
     this.closeNewMemberModal = this.closeNewMemberModal.bind(this);
@@ -123,11 +126,11 @@ export default class GroupContainer extends React.Component<Props, State> {
   }
 
   private handleDistancerBlur(event: React.ChangeEvent<HTMLSelectElement>) {
-    const { groups, ownedIndex, onDistancerBlur } = this.props;
+    const { groups, onDistancerBlur } = this.props;
     const { value } = event.currentTarget;
     const distancer = groups.find((group) => group.id === value);
 
-    if (onDistancerBlur) onDistancerBlur(groups[ownedIndex], distancer);
+    if (onDistancerBlur) onDistancerBlur(this.currentGroup, distancer);
     this.setState({ hasDistancer: this.hasDistancer() });
   }
 
@@ -140,9 +143,9 @@ export default class GroupContainer extends React.Component<Props, State> {
   }
 
   private handleSubmit() {
-    const { groups, ownedIndex, onSubmit } = this.props;
+    const { onSubmit } = this.props;
     const { selectedParticipantsIds } = this.state;
-    const { participants: currentParticipants } = groups[ownedIndex];
+    const { participants: currentParticipants } = this.currentGroup;
 
     const selectedParticipants = selectedParticipantsIds
       .map(this.findParticipantById)
@@ -152,11 +155,10 @@ export default class GroupContainer extends React.Component<Props, State> {
       participant.isGrouped = true;
     });
 
-    groups[ownedIndex].participants = selectedParticipants.concat(
-      currentParticipants
-    );
+    this.currentGroup.participants =
+      selectedParticipants.concat(currentParticipants);
 
-    if (onSubmit) onSubmit(groups[ownedIndex]);
+    if (onSubmit) onSubmit(this.currentGroup);
 
     this.setState({ selectedParticipantsIds: [] });
 
@@ -205,8 +207,7 @@ export default class GroupContainer extends React.Component<Props, State> {
   }
 
   private findMemberWithHighestMovementRate() {
-    const { groups, ownedIndex } = this.props;
-    const { participants } = groups[ownedIndex];
+    const { participants } = this.currentGroup;
 
     if (participants.length <= 0) return null;
 
@@ -220,8 +221,7 @@ export default class GroupContainer extends React.Component<Props, State> {
   }
 
   private findMemberWithLowestMovementRate() {
-    const { groups, ownedIndex } = this.props;
-    const { participants } = groups[ownedIndex];
+    const { participants } = this.currentGroup;
 
     if (participants.length <= 0) return null;
 
@@ -274,8 +274,7 @@ export default class GroupContainer extends React.Component<Props, State> {
   private isAvailable(participant: Participant) {
     if (participant.isGrouped) return false;
 
-    const { groups, ownedIndex } = this.props;
-    const { participants: ownedParticipants } = groups[ownedIndex];
+    const { participants: ownedParticipants } = this.currentGroup;
     let isAvailable = true;
 
     ownedParticipants.forEach((ownedParticipant) => {
@@ -286,8 +285,7 @@ export default class GroupContainer extends React.Component<Props, State> {
   }
 
   private hasDistancer() {
-    const { ownedIndex, groups } = this.props;
-    const { distancerId } = groups[ownedIndex];
+    const { distancerId } = this.currentGroup;
 
     return distancerId !== GroupContainer.getInvalidDistancerId();
   }
@@ -299,21 +297,19 @@ export default class GroupContainer extends React.Component<Props, State> {
   }
 
   private hasPursuers() {
-    const { ownedIndex, groups } = this.props;
-    const { pursuersIds } = groups[ownedIndex];
+    const { pursuersIds } = this.currentGroup;
 
     return pursuersIds.length > 0;
   }
 
   private hasMembers() {
-    const { groups, ownedIndex } = this.props;
-    const { participants } = groups[ownedIndex];
+    const { participants } = this.currentGroup;
 
     return participants.length > 0;
   }
 
   private renderMainContent() {
-    const { groups, ownedIndex } = this.props;
+    const { name } = this.currentGroup;
     const { expansionShown } = this.state;
 
     return (
@@ -331,10 +327,7 @@ export default class GroupContainer extends React.Component<Props, State> {
         </div>
         <label>
           <span className="input__label">Name</span>
-          <input
-            className="textbox textbox--full-width"
-            defaultValue={groups[ownedIndex].name}
-          />
+          <input className="textbox textbox--full-width" defaultValue={name} />
         </label>
         <Button
           className="button button--primary button--small button--circular"
@@ -433,16 +426,30 @@ export default class GroupContainer extends React.Component<Props, State> {
   }
 
   private renderMergeModal() {
+    const { groups } = this.props;
     const { mergeGroupModalShown } = this.state;
+    const { id: currentId } = this.currentGroup;
+    const headerId = `merge-modal-header-${this.id}`;
 
     return (
       <Modal
         className="Modal__Content"
         overlayClassName="Modal__Overlay"
-        contentLabel="Select Participant"
         isOpen={mergeGroupModalShown}
         onRequestClose={this.closeMergeGroupModal}
-      />
+        aria={{ labelledby: headerId }}
+      >
+        <h2 id={headerId}>Select Merging Group</h2>
+        <div>
+          {groups
+            .filter((group) => currentId !== group.id)
+            .map(GroupContainer.renderMergeableGroupCheckbox)}
+        </div>
+        <div>
+          <Button>CANCEL</Button>
+          <Button>JOIN</Button>
+        </div>
+      </Modal>
     );
   }
 
@@ -492,8 +499,7 @@ export default class GroupContainer extends React.Component<Props, State> {
   }
 
   private renderPursuers() {
-    const { ownedIndex, groups } = this.props;
-    const { pursuersIds } = groups[ownedIndex];
+    const { pursuersIds } = this.currentGroup;
 
     const pursuerLabelId = `pursuers-heading-${this.id}`;
     const warningMessageId = `pursuers-list-warning-${this.id}`;
@@ -521,9 +527,7 @@ export default class GroupContainer extends React.Component<Props, State> {
   }
 
   private renderMembers() {
-    const { groups, ownedIndex } = this.props;
-    const currentGroup = groups[ownedIndex];
-    const { participants: currentParticipants } = currentGroup;
+    const { participants: currentParticipants } = this.currentGroup;
 
     const warningId = `member-table-warning-${this.id}`;
 
@@ -622,9 +626,8 @@ export default class GroupContainer extends React.Component<Props, State> {
       >
         <td
           className={`material-icons-outlined GroupContainer__icon ${clsx({
-            "GroupContainer__icon--hidden": !this.hasBoundaryMovementRate(
-              participant
-            ),
+            "GroupContainer__icon--hidden":
+              !this.hasBoundaryMovementRate(participant),
           })}`}
           aria-hidden={!this.hasBoundaryMovementRate(participant)}
         >
@@ -669,15 +672,24 @@ export default class GroupContainer extends React.Component<Props, State> {
     );
   }
 
+  private static renderMergeableGroupCheckbox({ name }: Group) {
+    return (
+      <label>
+        <input type="radio" />
+        {name}
+      </label>
+    );
+  }
+
   render() {
-    const { ownedIndex, groups } = this.props;
+    const { name } = this.currentGroup;
 
     return (
       <div
         className="GroupContainer"
         tabIndex={0}
         role="gridcell"
-        aria-label={`${groups[ownedIndex].name} Editor`}
+        aria-label={`${name} Editor`}
       >
         {this.renderMainContent()}
         {this.renderExpandedContent()}

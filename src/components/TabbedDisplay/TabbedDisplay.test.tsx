@@ -285,14 +285,10 @@ describe("ParticipantTable Event Handlers", () => {
     });
 
     describe("Peripheral Statistics", () => {
-      const [
-        firstHazardStatistic,
-        secondHazardStatistic,
-      ] = ParticipantContainer.DEFAULT_HAZARD_STATISTICS;
-      const [
-        firstSpeedStatistic,
-        secondSpeedStatistic,
-      ] = ParticipantContainer.DEFAULT_SPEED_STATISTICS;
+      const [firstHazardStatistic, secondHazardStatistic] =
+        ParticipantContainer.DEFAULT_HAZARD_STATISTICS;
+      const [firstSpeedStatistic, secondSpeedStatistic] =
+        ParticipantContainer.DEFAULT_SPEED_STATISTICS;
 
       const validName = "Valid Name";
       const invalidName = "   ";

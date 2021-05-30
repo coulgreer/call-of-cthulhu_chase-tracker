@@ -207,12 +207,8 @@ describe("Prop Rendering", () => {
     });
 
     test("should render properly when including all optional props and at least one participant is given", () => {
-      const {
-        groups,
-        participants,
-        handleDistancerBlur,
-        handleSubmit,
-      } = DEFAULT_PROPS;
+      const { groups, participants, handleDistancerBlur, handleSubmit } =
+        DEFAULT_PROPS;
 
       render(
         <GroupContainer
@@ -338,6 +334,28 @@ describe("Merging", () => {
     userEvent.keyboard("{esc}");
 
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  test("should render modal properly", () => {
+    const { groups } = DEFAULT_PROPS;
+    const label = /Select Merging Group/i;
+
+    render(<GroupContainer ownedIndex={isolatedGroupIndex} groups={groups} />);
+    userEvent.click(screen.getByRole("button", { name: /join/i }));
+
+    const modalEl = screen.getByRole("dialog", { name: label });
+    expect(
+      within(modalEl).getByRole("heading", { name: label })
+    ).toBeInTheDocument();
+    expect(within(modalEl).getAllByRole("radio")).toHaveLength(
+      groups.length - 1
+    );
+    expect(
+      within(modalEl).getByRole("button", { name: /cancel/i })
+    ).toBeInTheDocument();
+    expect(
+      within(modalEl).getByRole("button", { name: /join/i })
+    ).toBeInTheDocument();
   });
 });
 

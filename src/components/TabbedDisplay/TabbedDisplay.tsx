@@ -36,12 +36,10 @@ export default class TabbedDisplay extends React.Component<Props, State> {
     this.groupSequenceGenerator = new UniqueSequenceGen(SEQUENCE_START);
 
     // Participant Table Event Handlers
-    this.handleCreateParticipantClick = this.handleCreateParticipantClick.bind(
-      this
-    );
-    this.handleDeleteParticipantClick = this.handleDeleteParticipantClick.bind(
-      this
-    );
+    this.handleCreateParticipantClick =
+      this.handleCreateParticipantClick.bind(this);
+    this.handleDeleteParticipantClick =
+      this.handleDeleteParticipantClick.bind(this);
     this.handleParticipantChange = this.handleParticipantChange.bind(this);
 
     // Group Table Event Handlers

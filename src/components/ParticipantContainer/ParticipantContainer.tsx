@@ -220,18 +220,16 @@ export default class ParticipantContainer extends React.Component<
     this.createSpeedStatistic = this.createSpeedStatistic.bind(this);
     this.deleteSpeedStatistic = this.deleteSpeedStatistic.bind(this);
     this.renameSpeedStatistic = this.renameSpeedStatistic.bind(this);
-    this.handleSpeedStatisticChange = this.handleSpeedStatisticChange.bind(
-      this
-    );
+    this.handleSpeedStatisticChange =
+      this.handleSpeedStatisticChange.bind(this);
     this.handleSpeedStatisticBlur = this.handleSpeedStatisticBlur.bind(this);
 
     // Hazard Statistic method binds
     this.createHazardStatistic = this.createHazardStatistic.bind(this);
     this.deleteHazardStatistic = this.deleteHazardStatistic.bind(this);
     this.renameHazardStatistic = this.renameHazardStatistic.bind(this);
-    this.handleHazardStatisticChange = this.handleHazardStatisticChange.bind(
-      this
-    );
+    this.handleHazardStatisticChange =
+      this.handleHazardStatisticChange.bind(this);
     this.handleHazardStatisticBlur = this.handleHazardStatisticBlur.bind(this);
 
     this.calculateSpeedModifier = this.calculateSpeedModifier.bind(this);

@@ -130,9 +130,8 @@ export default class ParticipantTable extends Component<Props, State> {
   }
 
   private renderWarningMessage() {
-    const {
-      warningMessage = ParticipantTable.DEFAULT_WARNING_MESSAGE,
-    } = this.props;
+    const { warningMessage = ParticipantTable.DEFAULT_WARNING_MESSAGE } =
+      this.props;
 
     return <p className="centered">{warningMessage}</p>;
   }

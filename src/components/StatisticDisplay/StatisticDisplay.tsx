@@ -196,18 +196,14 @@ export default class StatisticDisplay extends React.Component<Props> {
     const currentValueNum = Number.parseInt(currentValue, 10);
 
     const inputClassName = clsx({
-      [StatisticDisplay.UPPER_LIMIT_CLASS]: this.isValueAtUpperLimit(
-        currentValueNum
-      ),
-      [StatisticDisplay.UPPER_WARNING_CLASS]: this.isValueWithinUpperWarning(
-        currentValueNum
-      ),
-      [StatisticDisplay.LOWER_WARNING_CLASS]: this.isValueWithinLowerWarning(
-        currentValueNum
-      ),
-      [StatisticDisplay.LOWER_LIMIT_CLASS]: this.isValueAtLowerLimit(
-        currentValueNum
-      ),
+      [StatisticDisplay.UPPER_LIMIT_CLASS]:
+        this.isValueAtUpperLimit(currentValueNum),
+      [StatisticDisplay.UPPER_WARNING_CLASS]:
+        this.isValueWithinUpperWarning(currentValueNum),
+      [StatisticDisplay.LOWER_WARNING_CLASS]:
+        this.isValueWithinLowerWarning(currentValueNum),
+      [StatisticDisplay.LOWER_LIMIT_CLASS]:
+        this.isValueAtLowerLimit(currentValueNum),
     });
 
     return (

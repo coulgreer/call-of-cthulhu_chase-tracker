@@ -22,16 +22,6 @@
   },
   "plugins": ["react", "@typescript-eslint"],
   "rules": {
-    "import/no-extraneous-dependencies": [
-      "error",
-      {
-        "devDependencies": [
-          "**/*.test.[jt]s?(x)",
-          "**/*.spec.[jt]s?(x)",
-          "**/setup-test-env.ts"
-        ]
-      }
-    ],
     "import/no-unresolved": "error",
     "jsx-a11y/label-has-associated-control": ["error", { "assert": "either" }],
     "react/static-property-placement": ["error", "static public field"]

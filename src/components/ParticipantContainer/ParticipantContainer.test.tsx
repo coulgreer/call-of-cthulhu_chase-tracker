@@ -26,23 +26,11 @@ const DEFAULT_PROPS: {
 describe("Collapse/Expand detailed data", () => {
   const { participant } = DEFAULT_PROPS;
 
-  const [
-    constitution,
-    driveAuto,
-    ride,
-    aircraft,
-    boat,
-  ] = participant.speedStatistics;
+  const [constitution, driveAuto, ride, aircraft, boat] =
+    participant.speedStatistics;
 
-  const [
-    strength,
-    climb,
-    swim,
-    dodge,
-    brawl,
-    handgun,
-    rifle,
-  ] = participant.hazardStatistics;
+  const [strength, climb, swim, dodge, brawl, handgun, rifle] =
+    participant.hazardStatistics;
 
   test("should render participant information properly when collapsed", () => {
     render(<ParticipantContainer participant={participant} />);

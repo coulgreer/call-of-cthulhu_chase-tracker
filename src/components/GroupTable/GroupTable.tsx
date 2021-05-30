@@ -103,9 +103,8 @@ export default class GroupTable extends React.Component<Props, State> {
   }
 
   private renderWarning() {
-    const {
-      warningMessage = GroupTable.getDefaultWarningMessage(),
-    } = this.props;
+    const { warningMessage = GroupTable.getDefaultWarningMessage() } =
+      this.props;
 
     return <p className="centered">{warningMessage}</p>;
   }
