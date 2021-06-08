@@ -894,6 +894,33 @@ describe("GroupTable Event Handlers", () => {
     ).not.toBeInTheDocument();
   });
 
+  test("should combine groups", () => {
+    render(<TabbedDisplay />);
+    createAnExpandedGroupContainer();
+    createAnExpandedGroupContainer();
+    createAnExpandedGroupContainer();
+
+    const gridEl = screen.getByRole("grid");
+    const editorEl = screen.getByRole("gridcell", {
+      name: /group 1 editor/i,
+    });
+    userEvent.click(within(editorEl).getByRole("button", { name: /combine/i }));
+
+    const modalEl = screen.getByRole("dialog");
+    userEvent.click(within(modalEl).getByRole("radio", { name: /group 3/i }));
+    userEvent.click(within(modalEl).getByRole("button", { name: /combine/i }));
+
+    expect(
+      within(gridEl).getByRole("row", { name: /group-1/i })
+    ).toBeInTheDocument();
+    expect(
+      within(gridEl).getByRole("row", { name: /group-2/i })
+    ).toBeInTheDocument();
+    expect(
+      within(gridEl).queryByRole("row", { name: /group-3/i })
+    ).not.toBeInTheDocument();
+  });
+
   describe("Confirmation tests", () => {
     test("should maintain state when tabbed display are switched", () => {
       render(<TabbedDisplay />);
@@ -921,7 +948,7 @@ describe("GroupTable Event Handlers", () => {
       expect(() =>
         userEvent.selectOptions(
           screen.getByRole("combobox", { name: /distancer/i }),
-          GroupContainer.getInvalidDistancerId()
+          GroupContainer.getInvalidGroupId()
         )
       ).not.toThrowError();
     });

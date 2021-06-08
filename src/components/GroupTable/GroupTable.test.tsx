@@ -5,8 +5,10 @@ import userEvent from "@testing-library/user-event";
 
 import GroupTable from ".";
 import GroupContainer from "../GroupContainer";
+import { createDummyGroupWithParticipants } from "../../utils/group-factory";
 
 import { Group, Participant } from "../../types";
+import { createDummyParticipant } from "../../utils/participant-factory";
 
 function createParticipant(id: string): Participant {
   return {
@@ -38,23 +40,20 @@ const DEFAULT_PROPS: {
   groups: Group[];
   participants: Participant[];
   warningMessage: string;
-  handleCreateGroupClick: () => void;
-  handleDeleteGroupClick: (i: number) => void;
-  handleGroupUpdate: (g: Group) => void;
-  handleDistancerBlur: (t: Group, d: Group | undefined) => void;
+  handleGroupsChange: (g: Group[]) => void;
 } = {
   groups: [
     {
       id: "0",
       name: isolatedGroupName,
-      distancerId: GroupContainer.getInvalidDistancerId(),
+      distancerId: GroupContainer.getInvalidGroupId(),
       pursuersIds: [],
       participants: [],
     },
     {
       id: "1",
       name: distancingGroupName,
-      distancerId: GroupContainer.getInvalidDistancerId(),
+      distancerId: GroupContainer.getInvalidGroupId(),
       pursuersIds: [distancingAndPursuingGroupName],
       participants: [participant1],
     },
@@ -83,10 +82,7 @@ const DEFAULT_PROPS: {
     participant7,
   ],
   warningMessage: "Warning There's an Error",
-  handleCreateGroupClick: jest.fn(),
-  handleDeleteGroupClick: jest.fn(),
-  handleGroupUpdate: jest.fn(),
-  handleDistancerBlur: jest.fn(),
+  handleGroupsChange: jest.fn(),
 };
 
 describe("Prop Rendering", () => {
@@ -106,24 +102,15 @@ describe("Prop Rendering", () => {
     });
 
     test("should render properly when including all optional props", () => {
-      const {
-        warningMessage,
-        participants,
-        handleCreateGroupClick,
-        handleDeleteGroupClick,
-        handleGroupUpdate,
-        handleDistancerBlur,
-      } = DEFAULT_PROPS;
+      const { warningMessage, participants, handleGroupsChange } =
+        DEFAULT_PROPS;
 
       render(
         <GroupTable
           warningMessage={warningMessage}
           groups={empty}
           participants={participants}
-          onCreateGroupClick={handleCreateGroupClick}
-          onDeleteGroupClick={handleDeleteGroupClick}
-          onGroupUpdate={handleGroupUpdate}
-          onDistancerBlur={handleDistancerBlur}
+          onGroupsChange={handleGroupsChange}
         />
       );
 
@@ -138,13 +125,21 @@ describe("Prop Rendering", () => {
   describe("when at least one group exists", () => {
     test("should render properly when ommitting all optional props", () => {
       const { groups } = DEFAULT_PROPS;
+      const cellCount = groups.length * 2;
 
       render(<GroupTable groups={groups} />);
 
+      expect(screen.getAllByRole("gridcell")).toHaveLength(cellCount);
       expect(
         screen.queryByText(GroupTable.getDefaultWarningMessage())
       ).not.toBeInTheDocument();
       expect(screen.getAllByRole("row")).toHaveLength(groups.length);
+      expect(screen.getAllByRole("button", { name: /split/i })).toHaveLength(
+        groups.length
+      );
+      expect(screen.getAllByRole("button", { name: /combine/i })).toHaveLength(
+        groups.length
+      );
       expect(
         screen.getByRole("button", { name: /create group/i })
       ).toBeInTheDocument();
@@ -154,27 +149,25 @@ describe("Prop Rendering", () => {
 
 test("should trigger creation of a group", () => {
   const { groups } = DEFAULT_PROPS;
-  const onCreateGroupClick = jest.fn();
+  const handleGroupsChange = jest.fn();
 
-  render(
-    <GroupTable groups={groups} onCreateGroupClick={onCreateGroupClick} />
-  );
+  render(<GroupTable groups={groups} onGroupsChange={handleGroupsChange} />);
 
   userEvent.click(screen.getByRole("button", { name: /create group/i }));
 
-  expect(onCreateGroupClick).toBeCalled();
+  expect(handleGroupsChange).toBeCalled();
 });
 
 test("should trigger update on group change", () => {
   const { groups, participants } = DEFAULT_PROPS;
   const [first, , third] = participants;
-  const onGroupUpdate = jest.fn();
+  const handleGroupsChange = jest.fn();
 
   render(
     <GroupTable
       groups={groups}
       participants={participants}
-      onGroupUpdate={onGroupUpdate}
+      onGroupsChange={handleGroupsChange}
     />
   );
 
@@ -194,18 +187,16 @@ test("should trigger update on group change", () => {
     within(screen.getByRole("dialog")).getByRole("button", { name: /add/i })
   );
 
-  expect(onGroupUpdate).toBeCalled();
+  expect(handleGroupsChange).toBeCalled();
 });
 
 describe("Delete Group", () => {
   test("should trigger deletion of given group", () => {
     const { groups } = DEFAULT_PROPS;
     const [group] = groups;
-    const onDeleteGroupClick = jest.fn();
+    const handleGroupsChange = jest.fn();
 
-    render(
-      <GroupTable groups={groups} onDeleteGroupClick={onDeleteGroupClick} />
-    );
+    render(<GroupTable groups={groups} onGroupsChange={handleGroupsChange} />);
 
     userEvent.click(
       screen.getByRole("button", {
@@ -217,7 +208,7 @@ describe("Delete Group", () => {
 
     userEvent.click(screen.getByRole("button", { name: /^delete$/i }));
 
-    expect(onDeleteGroupClick).toBeCalled();
+    expect(handleGroupsChange).toBeCalled();
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
@@ -225,10 +216,10 @@ describe("Delete Group", () => {
     test("should abort deletion when 'esc' is pressed", () => {
       const { groups } = DEFAULT_PROPS;
       const [group] = groups;
-      const onDeleteGroupClick = jest.fn();
+      const handleGroupsChange = jest.fn();
 
       render(
-        <GroupTable groups={groups} onDeleteGroupClick={onDeleteGroupClick} />
+        <GroupTable groups={groups} onGroupsChange={handleGroupsChange} />
       );
 
       userEvent.click(
@@ -241,17 +232,17 @@ describe("Delete Group", () => {
 
       userEvent.keyboard("{esc}");
 
-      expect(onDeleteGroupClick).not.toBeCalled();
+      expect(handleGroupsChange).not.toBeCalled();
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     });
 
     test("should abort deletion when 'cancel' button is clicked", () => {
       const { groups } = DEFAULT_PROPS;
       const [group] = groups;
-      const onDeleteGroupClick = jest.fn();
+      const handleGroupsChange = jest.fn();
 
       render(
-        <GroupTable groups={groups} onDeleteGroupClick={onDeleteGroupClick} />
+        <GroupTable groups={groups} onGroupsChange={handleGroupsChange} />
       );
 
       userEvent.click(
@@ -264,18 +255,120 @@ describe("Delete Group", () => {
 
       userEvent.click(screen.getByRole("button", { name: /cancel/i }));
 
-      expect(onDeleteGroupClick).not.toBeCalled();
+      expect(handleGroupsChange).not.toBeCalled();
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     });
   });
 });
 
-test("should trigger distancer change", () => {
+describe("Merging", () => {
+  test("should open modal", () => {
+    const { groups } = DEFAULT_PROPS;
+
+    render(<GroupTable groups={groups} />);
+
+    const [first] = screen.getAllByRole("row");
+    userEvent.click(within(first).getByRole("button", { name: /combine/i }));
+
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+  });
+
+  test("should close modal when 'esc' is pressed", () => {
+    const { groups } = DEFAULT_PROPS;
+
+    render(<GroupTable groups={groups} />);
+
+    const [first] = screen.getAllByRole("row");
+    userEvent.click(within(first).getByRole("button", { name: /combine/i }));
+
+    userEvent.keyboard("{esc}");
+
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  test("should close modal when process canceled", () => {
+    const { groups } = DEFAULT_PROPS;
+
+    render(<GroupTable groups={groups} />);
+
+    const [first] = screen.getAllByRole("row");
+    userEvent.click(within(first).getByRole("button", { name: /combine/i }));
+
+    userEvent.click(screen.getByRole("button", { name: /cancel/i }));
+
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  test("should render modal properly", () => {
+    const { groups } = DEFAULT_PROPS;
+    const label = /Select Merging Group/i;
+
+    render(<GroupTable groups={groups} />);
+
+    const [first] = screen.getAllByRole("row");
+    userEvent.click(within(first).getByRole("button", { name: /combine/i }));
+
+    const modalEl = screen.getByRole("dialog", { name: label });
+    expect(
+      within(modalEl).getByRole("heading", { name: label })
+    ).toBeInTheDocument();
+    expect(within(modalEl).getAllByRole("radio")).toHaveLength(
+      groups.length - 1
+    );
+    expect(
+      within(modalEl).getByRole("button", { name: /cancel/i })
+    ).toBeInTheDocument();
+    expect(
+      within(modalEl).getByRole("button", { name: /combine/i })
+    ).toBeInTheDocument();
+  });
+
+  test("should trigger 'onGroupsChange' groups and transfer members", () => {
+    const handleGroupsChange = jest.fn();
+    const groups = [
+      createDummyGroupWithParticipants([]),
+      createDummyGroupWithParticipants([
+        createDummyParticipant(),
+        createDummyParticipant(),
+      ]),
+    ];
+
+    const [dominantGroup, subservientGroup] = groups;
+    const { participants } = dominantGroup;
+
+    render(<GroupTable groups={groups} onGroupsChange={handleGroupsChange} />);
+
+    const editorEl = screen.getByRole("gridcell", {
+      name: new RegExp(`${dominantGroup.name} editor`, "i"),
+    });
+    userEvent.click(within(editorEl).getByRole("button", { name: /combine/i }));
+
+    const modalEl = screen.getByRole("dialog");
+    userEvent.click(
+      within(modalEl).getByRole("radio", { name: subservientGroup.name })
+    );
+    userEvent.click(within(modalEl).getByRole("button", { name: /combine/i }));
+    userEvent.click(
+      within(editorEl).getByRole("button", { name: /group details/i })
+    );
+
+    expect(handleGroupsChange).toBeCalledTimes(1);
+    expect(modalEl).not.toBeInTheDocument();
+
+    expect(
+      within(
+        within(editorEl).getByRole("rowgroup", { name: /all members/i })
+      ).getAllByRole("row")
+    ).toHaveLength(participants.length);
+  });
+});
+
+test("should trigger 'distancerChange'", () => {
   const { groups } = DEFAULT_PROPS;
   const [group1, group2, group3] = groups;
-  const onDistancerBlur = jest.fn();
+  const handleGroupsChange = jest.fn();
 
-  render(<GroupTable groups={groups} onDistancerBlur={onDistancerBlur} />);
+  render(<GroupTable groups={groups} onGroupsChange={handleGroupsChange} />);
 
   expect(screen.queryByRole("listitem")).not.toBeInTheDocument();
 
@@ -315,5 +408,5 @@ test("should trigger distancer change", () => {
 
   expect(thirdDistancerEl).toHaveValue(group1.id);
 
-  expect(onDistancerBlur).toBeCalledTimes(3);
+  expect(handleGroupsChange).toBeCalledTimes(6);
 });

@@ -2,7 +2,6 @@ import React from "react";
 
 import Button from "../Button";
 import GroupTable from "../GroupTable";
-import GroupContainer from "../GroupContainer";
 import ParticipantTable from "../ParticipantTable";
 import ParticipantContainer from "../ParticipantContainer";
 
@@ -22,10 +21,12 @@ interface State {
 
 const SEQUENCE_START = 0;
 
+/* 
+TODO (Coul Greer): Think about adding Redux to the project due to Participants
+and Groups being needed in multiple components.
+*/
 export default class TabbedDisplay extends React.Component<Props, State> {
   private participantSequenceGenerator;
-
-  private groupSequenceGenerator;
 
   constructor(props: Props) {
     super(props);
@@ -33,7 +34,6 @@ export default class TabbedDisplay extends React.Component<Props, State> {
     this.state = { displayedIndex: 0, groups: [], participants: [] };
 
     this.participantSequenceGenerator = new UniqueSequenceGen(SEQUENCE_START);
-    this.groupSequenceGenerator = new UniqueSequenceGen(SEQUENCE_START);
 
     // Participant Table Event Handlers
     this.handleCreateParticipantClick =
@@ -43,10 +43,7 @@ export default class TabbedDisplay extends React.Component<Props, State> {
     this.handleParticipantChange = this.handleParticipantChange.bind(this);
 
     // Group Table Event Handlers
-    this.handleCreateGroupClick = this.handleCreateGroupClick.bind(this);
-    this.handleDistancerBlur = this.handleDistancerBlur.bind(this);
-    this.handleDeleteGroupClick = this.handleDeleteGroupClick.bind(this);
-    this.handleGroupUpdate = this.handleGroupUpdate.bind(this);
+    this.handleGroupsChange = this.handleGroupsChange.bind(this);
   }
 
   private handleClick(index: number) {
@@ -93,59 +90,8 @@ export default class TabbedDisplay extends React.Component<Props, State> {
     this.removeParticipantFromTable(participant);
   }
 
-  private handleCreateGroupClick() {
-    const idNum = this.groupSequenceGenerator.nextNum();
-
-    this.setState((state) => {
-      const { groups } = state;
-
-      groups.push({
-        id: `GROUP-${idNum}`,
-        name: `Group ${idNum}`,
-        distancerId: GroupContainer.getInvalidDistancerId(),
-        pursuersIds: [],
-        participants: [],
-      });
-
-      return { groups };
-    });
-  }
-
-  private handleDeleteGroupClick(index: number) {
-    this.setState((state) => {
-      const { groups } = state;
-
-      const groupId = groups[index].id;
-      const results = groupId.match(new RegExp(/\d+$/)) || [];
-      const result = results[0];
-
-      this.groupSequenceGenerator.remove(Number.parseInt(result, 10));
-      groups.splice(index, 1);
-
-      return { groups };
-    });
-  }
-
-  private handleGroupUpdate(newGroup: Group) {
-    this.setState((state) => {
-      const { groups } = state;
-
-      const index = groups.findIndex((group) =>
-        GroupTable.areGroupsEqual(group, newGroup)
-      );
-
-      groups.splice(index, 1, newGroup);
-
-      return { groups };
-    });
-  }
-
-  private handleDistancerBlur(target: Group, distancer: Group | undefined) {
-    if (target.distancerId !== GroupContainer.getInvalidDistancerId()) {
-      this.removeDistancerFrom(target);
-    }
-
-    this.addDistancer(target, distancer);
+  private handleGroupsChange(newGroups: Group[]) {
+    this.setState({ groups: newGroups });
   }
 
   private removeParticipantFromSequence(participant: Participant) {
@@ -172,47 +118,6 @@ export default class TabbedDisplay extends React.Component<Props, State> {
     });
   }
 
-  private removeDistancerFrom({ id: targetId, distancerId }: Group) {
-    this.setState((state) => {
-      const { groups } = state;
-
-      const distancerIndex = groups.findIndex((group) =>
-        GroupTable.areGroupsEqual(group.id, distancerId)
-      );
-      const distancer = groups[distancerIndex];
-
-      const { pursuersIds } = distancer;
-      const currentIndex = pursuersIds.findIndex((pursuerId) =>
-        GroupTable.areGroupsEqual(pursuerId, targetId)
-      );
-
-      distancer.pursuersIds.splice(currentIndex, 1);
-
-      return { groups };
-    });
-  }
-
-  private addDistancer({ id: targetId }: Group, distancer: Group | undefined) {
-    const distancerId = distancer?.id || GroupContainer.getInvalidDistancerId();
-
-    this.setState((state) => {
-      const { groups } = state;
-
-      const targetIndex = groups.findIndex((group) =>
-        GroupTable.areGroupsEqual(group.id, targetId)
-      );
-      groups[targetIndex].distancerId = distancerId;
-
-      const distancerIndex = groups.findIndex((group) =>
-        GroupTable.areGroupsEqual(group.id, distancerId)
-      );
-      if (distancerIndex < 0) return { groups };
-      groups[distancerIndex].pursuersIds.push(targetId);
-
-      return { groups };
-    });
-  }
-
   private isActive(index: number) {
     const { displayedIndex } = this.state;
 
@@ -227,10 +132,7 @@ export default class TabbedDisplay extends React.Component<Props, State> {
         warningMessage="No allegiances. No protection. Tsk, tsk..."
         groups={groups}
         participants={participants}
-        onCreateGroupClick={this.handleCreateGroupClick}
-        onDeleteGroupClick={this.handleDeleteGroupClick}
-        onDistancerBlur={this.handleDistancerBlur}
-        onGroupUpdate={this.handleGroupUpdate}
+        onGroupsChange={this.handleGroupsChange}
       />
     );
   }

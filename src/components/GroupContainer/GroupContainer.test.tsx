@@ -4,21 +4,17 @@ import { screen, render, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import GroupContainer from ".";
+import {
+  createDummyParticipant,
+  createParticipant,
+} from "../../utils/participant-factory";
+import {
+  createGroup,
+  createDummyGroupWithParticipants,
+  createDummyGroup,
+} from "../../utils/group-factory";
 
 import { Group, Participant } from "../../types";
-
-function createParticipant(id: string): Participant {
-  return {
-    id,
-    name: id,
-    dexterity: 15,
-    movementRate: 3,
-    derivedSpeed: 1,
-    speedStatistics: [],
-    hazardStatistics: [],
-    isGrouped: false,
-  };
-}
 
 const isolatedGroupName = "Group 0";
 const distancingGroupName = "Group 1";
@@ -28,80 +24,48 @@ const pursuingGroupName = "Group 3";
 const DEFAULT_PROPS: {
   groups: Group[];
   participants: Participant[];
-  handleDistancerBlur: () => void;
-  handleSubmit: (g: Group) => void;
+  handleGroupChange: (g: Group) => void;
 } = {
   groups: [
-    {
-      id: "0",
-      name: isolatedGroupName,
-      distancerId: GroupContainer.getInvalidDistancerId(),
-      pursuersIds: [],
-      participants: [],
-    },
-    {
-      id: "1",
-      name: distancingGroupName,
-      distancerId: GroupContainer.getInvalidDistancerId(),
-      pursuersIds: [distancingAndPursuingGroupName],
-      participants: [createParticipant("Participant 00")],
-    },
-    {
-      id: "2",
-      name: distancingAndPursuingGroupName,
-      distancerId: distancingGroupName,
-      pursuersIds: [pursuingGroupName],
-      participants: [
-        createParticipant("Participant 01"),
-        createParticipant("Participant 02"),
-      ],
-    },
-    {
-      id: "3",
-      name: pursuingGroupName,
-      distancerId: distancingAndPursuingGroupName,
-      pursuersIds: [],
-      participants: [
-        createParticipant("Participant 03"),
-        createParticipant("Participant 04"),
-        createParticipant("Participant 05"),
-      ],
-    },
+    createGroup(
+      "0",
+      isolatedGroupName,
+      GroupContainer.getInvalidGroupId(),
+      [],
+      []
+    ),
+    createGroup(
+      "1",
+      distancingGroupName,
+      GroupContainer.getInvalidGroupId(),
+      [distancingAndPursuingGroupName],
+      [createDummyParticipant(true)]
+    ),
+    createGroup(
+      "2",
+      distancingAndPursuingGroupName,
+      distancingGroupName,
+      [pursuingGroupName],
+      [createDummyParticipant(true), createDummyParticipant(true)]
+    ),
+    createGroup(
+      "3",
+      pursuingGroupName,
+      distancingAndPursuingGroupName,
+      [],
+      [
+        createDummyParticipant(true),
+        createDummyParticipant(true),
+        createDummyParticipant(true),
+      ]
+    ),
   ],
   participants: [
-    {
-      id: "p1",
-      name: "Participant 1",
-      dexterity: 15,
-      movementRate: 3,
-      derivedSpeed: 1,
-      speedStatistics: [],
-      hazardStatistics: [],
-      isGrouped: false,
-    },
-    {
-      id: "p2",
-      name: "Participant 2",
-      dexterity: 50,
-      movementRate: 6,
-      derivedSpeed: 2,
-      speedStatistics: [],
-      hazardStatistics: [],
-      isGrouped: false,
-    },
-    {
-      id: "p3",
-      name: "Participant 3",
-      dexterity: 75,
-      movementRate: 8,
-      derivedSpeed: 3,
-      speedStatistics: [],
-      hazardStatistics: [],
-      isGrouped: false,
-    },
+    createDummyParticipant(),
+    createDummyParticipant(),
+    createDummyParticipant(),
   ],
-  handleDistancerBlur: jest.fn(),
-  handleSubmit: jest.fn(),
+  handleGroupChange: jest.fn(),
 };
 
 const isolatedGroupIndex = 0;
@@ -113,16 +77,7 @@ describe("Prop Rendering", () => {
 
     render(<GroupContainer ownedIndex={isolatedGroupIndex} groups={groups} />);
 
-    expect(
-      screen.getByRole("gridcell", {
-        name: new RegExp(`${groups[isolatedGroupIndex].name}`, "i"),
-      })
-    ).toBeInTheDocument();
-
-    expect(screen.getByRole("button", { name: /split/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /join/i })).toBeInTheDocument();
     expect(screen.getByRole("textbox", { name: /name/i })).toBeInTheDocument();
-
     expect(
       screen.getByRole("button", { name: /group details/i })
     ).toBeInTheDocument();
@@ -147,17 +102,6 @@ describe("Prop Rendering", () => {
         <GroupContainer ownedIndex={isolatedGroupIndex} groups={groups} />
       );
       userEvent.click(screen.getByRole("button", { name: /group details/i }));
-
-      expect(
-        screen.getByRole("gridcell", {
-          name: new RegExp(`${groups[isolatedGroupIndex].name}`, "i"),
-        })
-      ).toBeInTheDocument();
-
-      expect(
-        screen.getByRole("button", { name: /split/i })
-      ).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: /join/i })).toBeInTheDocument();
 
       expect(
         screen.getByRole("textbox", { name: /name/i })
@@ -207,30 +151,17 @@ describe("Prop Rendering", () => {
     });
 
     test("should render properly when including all optional props and at least one participant is given", () => {
-      const { groups, participants, handleDistancerBlur, handleSubmit } =
-        DEFAULT_PROPS;
+      const { groups, participants, handleGroupChange } = DEFAULT_PROPS;
 
       render(
         <GroupContainer
           ownedIndex={isolatedGroupIndex}
           groups={groups}
           participants={participants}
-          onDistancerBlur={handleDistancerBlur}
-          onSubmit={handleSubmit}
+          onGroupChange={handleGroupChange}
         />
       );
       userEvent.click(screen.getByRole("button", { name: /group details/i }));
-
-      expect(
-        screen.getByRole("gridcell", {
-          name: new RegExp(`${groups[isolatedGroupIndex].name}`, "i"),
-        })
-      ).toBeInTheDocument();
-
-      expect(
-        screen.getByRole("button", { name: /split/i })
-      ).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: /join/i })).toBeInTheDocument();
 
       expect(
         screen.getByRole("textbox", { name: /name/i })
@@ -311,51 +242,6 @@ describe("Prop Rendering", () => {
         expect(screen.getByRole("button", { name: /add/i })).toBeDisabled();
       });
     });
-  });
-});
-
-describe("Merging", () => {
-  test("should open modal", () => {
-    const { groups } = DEFAULT_PROPS;
-
-    render(<GroupContainer ownedIndex={isolatedGroupIndex} groups={groups} />);
-
-    userEvent.click(screen.getByRole("button", { name: /join/i }));
-
-    expect(screen.getByRole("dialog")).toBeInTheDocument();
-  });
-
-  test("should close modal when 'esc' is pressed", () => {
-    const { groups } = DEFAULT_PROPS;
-
-    render(<GroupContainer ownedIndex={isolatedGroupIndex} groups={groups} />);
-    userEvent.click(screen.getByRole("button", { name: /join/i }));
-
-    userEvent.keyboard("{esc}");
-
-    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-  });
-
-  test("should render modal properly", () => {
-    const { groups } = DEFAULT_PROPS;
-    const label = /Select Merging Group/i;
-
-    render(<GroupContainer ownedIndex={isolatedGroupIndex} groups={groups} />);
-    userEvent.click(screen.getByRole("button", { name: /join/i }));
-
-    const modalEl = screen.getByRole("dialog", { name: label });
-    expect(
-      within(modalEl).getByRole("heading", { name: label })
-    ).toBeInTheDocument();
-    expect(within(modalEl).getAllByRole("radio")).toHaveLength(
-      groups.length - 1
-    );
-    expect(
-      within(modalEl).getByRole("button", { name: /cancel/i })
-    ).toBeInTheDocument();
-    expect(
-      within(modalEl).getByRole("button", { name: /join/i })
-    ).toBeInTheDocument();
   });
 });
 
@@ -471,28 +357,8 @@ describe("Member Display", () => {
     });
 
     test("should render properly when one participant exists in the group", () => {
-      const participants: Participant[] = [
-        {
-          id: "p1",
-          name: "Participant 1",
-          dexterity: 15,
-          movementRate: 6,
-          derivedSpeed: 1,
-          speedStatistics: [],
-          hazardStatistics: [],
-          isGrouped: false,
-        },
-      ];
-
-      const groups: Group[] = [
-        {
-          id: "0",
-          name: "Group 0",
-          distancerId: GroupContainer.getInvalidDistancerId(),
-          pursuersIds: [],
-          participants,
-        },
-      ];
+      const participants = [createDummyParticipant()];
+      const groups = [createDummyGroupWithParticipants(participants)];
 
       const [firstParticipant] = participants;
 
@@ -562,40 +428,32 @@ describe("Member Display", () => {
       const lowestMOV = 1;
       const highestMOV = 11;
 
-      const participants: Participant[] = [
-        {
-          id: "p1",
-          name: "Participant 1",
-          dexterity: 15,
-          movementRate: lowestMOV,
-          derivedSpeed: 1,
-          speedStatistics: [],
-          hazardStatistics: [],
-          isGrouped: false,
-        },
-        {
-          id: "p2",
-          name: "Participant 2",
-          dexterity: 50,
-          movementRate: highestMOV,
-          derivedSpeed: 2,
-          speedStatistics: [],
-          hazardStatistics: [],
-          isGrouped: false,
-        },
+      const participants = [
+        createParticipant(
+          "p1",
+          "Participant 1",
+          15,
+          lowestMOV,
+          1,
+          [],
+          [],
+          true
+        ),
+        createParticipant(
+          "p2",
+          "Participant 2",
+          50,
+          highestMOV,
+          2,
+          [],
+          [],
+          true
+        ),
       ];
 
       const [lowestMovParticipant, highestMovParticipant] = participants;
 
-      const groups: Group[] = [
-        {
-          id: "0",
-          name: "Group 0",
-          distancerId: GroupContainer.getInvalidDistancerId(),
-          pursuersIds: [],
-          participants,
-        },
-      ];
+      const groups = [createDummyGroupWithParticipants(participants)];
 
       render(<GroupContainer ownedIndex={0} groups={groups} />);
       userEvent.click(screen.getByRole("button", { name: /group details/i }));
@@ -675,8 +533,9 @@ describe("Member Display", () => {
     });
   });
 
-  test("should trigger 'handleSubmit' and close modal", () => {
-    const { groups, participants, handleSubmit } = DEFAULT_PROPS;
+  test("should trigger 'handleGroupChange' and close modal", () => {
+    const { groups, participants } = DEFAULT_PROPS;
+    const handleGroupChange = jest.fn();
 
     const [first, second, third] = participants;
 
@@ -685,7 +544,7 @@ describe("Member Display", () => {
         ownedIndex={isolatedGroupIndex}
         groups={groups}
         participants={participants}
-        onSubmit={handleSubmit}
+        onGroupChange={handleGroupChange}
       />
     );
     userEvent.click(screen.getByRole("button", { name: /group details/i }));
@@ -707,16 +566,14 @@ describe("Member Display", () => {
     );
 
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-    expect(handleSubmit).toBeCalled();
+    expect(handleGroupChange).toBeCalled();
   });
 
+  // TODO (Coul Greer): Add a test for ungrouping a participant
   test("should update participant's flag for representing group ownership", () => {
-    const { groups, handleSubmit } = DEFAULT_PROPS;
+    const { groups, handleGroupChange } = DEFAULT_PROPS;
 
-    const participants: Participant[] = [
-      createParticipant("Part 1"),
-      createParticipant("Part 2"),
-    ];
+    const participants = [createDummyParticipant(), createDummyParticipant()];
     const [first] = participants;
 
     render(
@@ -724,7 +581,7 @@ describe("Member Display", () => {
         ownedIndex={isolatedGroupIndex}
         groups={groups}
         participants={participants}
-        onSubmit={handleSubmit}
+        onGroupChange={handleGroupChange}
       />
     );
     userEvent.click(screen.getByRole("button", { name: /group details/i }));
@@ -744,8 +601,7 @@ describe("Member Display", () => {
 
   test("should render properly when all participants are already owned by a group", () => {
     const { groups } = DEFAULT_PROPS;
-    const participant = createParticipant("Part");
-    const participants = [participant];
+    const participants = [createDummyParticipant()];
 
     render(
       <GroupContainer
@@ -774,25 +630,19 @@ describe("Member Display", () => {
   });
 
   test("should exclude participants already owned by the given group", () => {
-    const participant1Name = "Part 1";
-    const participant1 = createParticipant(participant1Name);
-
-    const participant2Name = "Part 2";
-    const participant2 = createParticipant(participant2Name);
-
-    const participant3Name = "Part 3";
-    const participant3 = createParticipant(participant3Name);
-
-    const groups = [
-      {
-        id: "g-1",
-        name: "Group 1",
-        distancerId: GroupContainer.getInvalidDistancerId(),
-        pursuersIds: [],
-        participants: [participant2],
-      },
+    const participants = [
+      createDummyParticipant(),
+      createDummyParticipant(true),
+      createDummyParticipant(),
     ];
-    const participants = [participant1, participant2, participant3];
+
+    const [
+      { name: firstDummyName },
+      groupedParticipant,
+      { name: secondDummyName },
+    ] = participants;
+
+    const groups = [createDummyGroupWithParticipants([groupedParticipant])];
 
     render(
       <GroupContainer
@@ -808,56 +658,27 @@ describe("Member Display", () => {
     const modalEl = screen.getByRole("dialog");
     expect(
       within(modalEl).getByRole("checkbox", {
-        name: new RegExp(participant1Name),
+        name: firstDummyName,
       })
     ).toBeInTheDocument();
     expect(
       within(modalEl).queryByRole("checkbox", {
-        name: new RegExp(participant2Name),
+        name: groupedParticipant.name,
       })
     ).not.toBeInTheDocument();
     expect(
       within(modalEl).getByRole("checkbox", {
-        name: new RegExp(participant3Name),
+        name: secondDummyName,
       })
     ).toBeInTheDocument();
   });
 
   test("should exclude participants already owned by any other group", () => {
-    const groups = [
-      {
-        id: "g-1",
-        name: "Group 1",
-        distancerId: GroupContainer.getInvalidDistancerId(),
-        pursuersIds: [],
-        participants: [],
-      },
-    ];
+    const groups = [createDummyGroup()];
 
-    const orphanedParticipant = {
-      id: "P-0",
-      name: "Orphaned",
-      dexterity: 15,
-      movementRate: 3,
-      derivedSpeed: 1,
-      speedStatistics: [],
-      hazardStatistics: [],
-      isGrouped: false,
-    };
-    const fosteredParticipant = {
-      id: "P-1",
-      name: "Fostered",
-      dexterity: 15,
-      movementRate: 3,
-      derivedSpeed: 1,
-      speedStatistics: [],
-      hazardStatistics: [],
-      isGrouped: true,
-    };
-    const participants: Participant[] = [
-      orphanedParticipant,
-      fosteredParticipant,
-    ];
+    const orphanedParticipant = createDummyParticipant(false);
+    const fosteredParticipant = createDummyParticipant(true);
+    const participants = [orphanedParticipant, fosteredParticipant];
 
     render(
       <GroupContainer
@@ -884,42 +705,11 @@ describe("Member Display", () => {
   });
 
   test("should disable add button when all participants are owned", () => {
-    const domesticParticipant: Participant = {
-      id: "P-0",
-      name: "Domestic",
-      dexterity: 15,
-      movementRate: 3,
-      derivedSpeed: 1,
-      speedStatistics: [],
-      hazardStatistics: [],
-      isGrouped: true,
-    };
+    const domesticParticipant = createDummyParticipant(true);
+    const foreignParticipant = createDummyParticipant(true);
+    const participants = [domesticParticipant, foreignParticipant];
 
-    const groups = [
-      {
-        id: "g-1",
-        name: "Group 1",
-        distancerId: GroupContainer.getInvalidDistancerId(),
-        pursuersIds: [],
-        participants: [domesticParticipant],
-      },
-    ];
-
-    const foreignParticipant: Participant = {
-      id: "P-1",
-      name: "Foreign",
-      dexterity: 15,
-      movementRate: 3,
-      derivedSpeed: 1,
-      speedStatistics: [],
-      hazardStatistics: [],
-      isGrouped: true,
-    };
-
-    const participants: Participant[] = [
-      domesticParticipant,
-      foreignParticipant,
-    ];
+    const groups = [createDummyGroupWithParticipants([domesticParticipant])];
 
     render(
       <GroupContainer
@@ -945,57 +735,29 @@ describe("Confirmation Tests", () => {
     const highestMOV = 11;
     const middlingMOV = highestMOV - lowestMOV;
 
-    const participants: Participant[] = [
-      {
-        id: "p1",
-        name: "Participant 1",
-        dexterity: 15,
-        movementRate: lowestMOV,
-        derivedSpeed: 1,
-        speedStatistics: [],
-        hazardStatistics: [],
-        isGrouped: true,
-      },
-      {
-        id: "p2",
-        name: "Participant 2",
-        dexterity: 15,
-        movementRate: middlingMOV,
-        derivedSpeed: 1,
-        speedStatistics: [],
-        hazardStatistics: [],
-        isGrouped: true,
-      },
-      {
-        id: "p3",
-        name: "Participant 3",
-        dexterity: 50,
-        movementRate: highestMOV,
-        derivedSpeed: 2,
-        speedStatistics: [],
-        hazardStatistics: [],
-        isGrouped: true,
-      },
+    const participants = [
+      createParticipant("p1", "Participant 1", 15, lowestMOV, 1, [], [], true),
+      createParticipant(
+        "p2",
+        "Participant 2",
+        15,
+        middlingMOV,
+        1,
+        [],
+        [],
+        true
+      ),
+      createParticipant("p3", "Participant 3", 50, highestMOV, 2, [], [], true),
     ];
 
-    const [, middleParticipant] = participants;
+    const [, { name: middlingName }] = participants;
 
-    const groups: Group[] = [
-      {
-        id: "0",
-        name: "Group 0",
-        distancerId: GroupContainer.getInvalidDistancerId(),
-        pursuersIds: [],
-        participants,
-      },
-    ];
+    const groups = [createDummyGroupWithParticipants(participants)];
 
     render(<GroupContainer ownedIndex={0} groups={groups} />);
     userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
-    const rowEl = screen.getByRole("row", {
-      name: middleParticipant.name,
-    });
+    const rowEl = screen.getByRole("row", { name: middlingName });
 
     expect(
       within(rowEl).queryByRole("cell", { name: /warning/i })

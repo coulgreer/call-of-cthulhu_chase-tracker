@@ -15,8 +15,7 @@ interface Props {
   ownedIndex: number;
   groups: Group[];
   participants?: Participant[];
-  onDistancerBlur?: (target: Group, distancer: Group | undefined) => void;
-  onSubmit?: (group: Group) => void;
+  onGroupChange?: (g: Group) => void;
 }
 
 interface State {
@@ -24,11 +23,10 @@ interface State {
   selectedParticipantsIds: string[];
   expansionShown: boolean;
   newMemberModalShown: boolean;
-  mergeGroupModalShown: boolean;
 }
 
 export default class GroupContainer extends React.Component<Props, State> {
-  static getInvalidDistancerId() {
+  static getInvalidGroupId() {
     return "N/A";
   }
 
@@ -90,7 +88,6 @@ export default class GroupContainer extends React.Component<Props, State> {
       selectedParticipantsIds: [],
       expansionShown: false,
       newMemberModalShown: false,
-      mergeGroupModalShown: false,
     };
 
     this.id = nanoid();
@@ -100,16 +97,15 @@ export default class GroupContainer extends React.Component<Props, State> {
     this.highestMovementRateMember = null;
 
     // Event handlers
-    this.handleExpandClick = this.handleExpandClick.bind(this);
+    this.handleToggleClick = this.handleToggleClick.bind(this);
     this.handleDistancerBlur = this.handleDistancerBlur.bind(this);
-    this.handleOpenAddMemberModalClick =
-      this.handleOpenAddMemberModalClick.bind(this);
-    this.handleOpenMergeGroupModalClick =
-      this.handleOpenMergeGroupModalClick.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
     this.handleCheckboxChange = this.handleCheckboxChange.bind(this);
-    this.closeNewMemberModal = this.closeNewMemberModal.bind(this);
-    this.closeMergeGroupModal = this.closeMergeGroupModal.bind(this);
+    this.handleInitiateMemberAdditionClick =
+      this.handleInitiateMemberAdditionClick.bind(this);
+    this.handleMemberAdditionSubmit =
+      this.handleMemberAdditionSubmit.bind(this);
+    this.handleCancelMemberAdditionClick =
+      this.handleCancelMemberAdditionClick.bind(this);
 
     // Helpers
     this.findParticipantById = this.findParticipantById.bind(this);
@@ -119,31 +115,42 @@ export default class GroupContainer extends React.Component<Props, State> {
     this.renderMember = this.renderMember.bind(this);
   }
 
-  private handleExpandClick() {
+  private handleToggleClick() {
     this.setState((state) => ({
       expansionShown: !state.expansionShown,
     }));
   }
 
   private handleDistancerBlur(event: React.ChangeEvent<HTMLSelectElement>) {
-    const { groups, onDistancerBlur } = this.props;
+    const { groups, onGroupChange } = this.props;
     const { value } = event.currentTarget;
-    const distancer = groups.find((group) => group.id === value);
+    const { distancerId: oldDistancerId } = this.currentGroup;
+    const newDistancer = groups.find((group) => group.id === value);
+    const oldDistancer = groups.find((group) => group.id === oldDistancerId);
 
-    if (onDistancerBlur) onDistancerBlur(this.currentGroup, distancer);
+    this.removeDistancer();
+
+    if (newDistancer) this.addDistancer(newDistancer);
+
     this.setState({ hasDistancer: this.hasDistancer() });
+
+    if (onGroupChange) {
+      onGroupChange(this.currentGroup);
+      if (newDistancer) onGroupChange(newDistancer);
+      if (oldDistancer) onGroupChange(oldDistancer);
+    }
   }
 
-  private handleOpenAddMemberModalClick() {
+  private handleInitiateMemberAdditionClick() {
     this.setState({ newMemberModalShown: true });
   }
 
-  private handleOpenMergeGroupModalClick() {
-    this.setState({ mergeGroupModalShown: true });
+  private handleCancelMemberAdditionClick() {
+    this.setState({ newMemberModalShown: false });
   }
 
-  private handleSubmit() {
-    const { onSubmit } = this.props;
+  private handleMemberAdditionSubmit() {
+    const { onGroupChange } = this.props;
     const { selectedParticipantsIds } = this.state;
     const { participants: currentParticipants } = this.currentGroup;
 
@@ -157,12 +164,11 @@ export default class GroupContainer extends React.Component<Props, State> {
 
     this.currentGroup.participants =
       selectedParticipants.concat(currentParticipants);
-
-    if (onSubmit) onSubmit(this.currentGroup);
+    if (onGroupChange) onGroupChange(this.currentGroup);
 
     this.setState({ selectedParticipantsIds: [] });
 
-    this.closeNewMemberModal();
+    this.handleCancelMemberAdditionClick();
   }
 
   private handleCheckboxChange(event: React.FormEvent<HTMLInputElement>) {
@@ -196,14 +202,6 @@ export default class GroupContainer extends React.Component<Props, State> {
     }
 
     return "";
-  }
-
-  private closeNewMemberModal() {
-    this.setState({ newMemberModalShown: false });
-  }
-
-  private closeMergeGroupModal() {
-    this.setState({ mergeGroupModalShown: false });
   }
 
   private findMemberWithHighestMovementRate() {
@@ -287,7 +285,7 @@ export default class GroupContainer extends React.Component<Props, State> {
   private hasDistancer() {
     const { distancerId } = this.currentGroup;
 
-    return distancerId !== GroupContainer.getInvalidDistancerId();
+    return distancerId !== GroupContainer.getInvalidGroupId();
   }
 
   private hasValidParticipantCount() {
@@ -308,23 +306,37 @@ export default class GroupContainer extends React.Component<Props, State> {
     return participants.length > 0;
   }
 
+  private removeDistancer() {
+    const { groups } = this.props;
+    const { id: currentGroupId, distancerId: oldDistancerId } =
+      this.currentGroup;
+
+    const oldDistancer = groups.find((group) => oldDistancerId === group.id);
+
+    if (oldDistancer) {
+      const { pursuersIds } = oldDistancer;
+      const pursuerIndex = pursuersIds.findIndex(
+        (pursuerId) => pursuerId === currentGroupId
+      );
+
+      pursuersIds.splice(pursuerIndex, 1);
+    }
+
+    this.currentGroup.distancerId = GroupContainer.getInvalidGroupId();
+  }
+
+  private addDistancer({ id, pursuersIds }: Group) {
+    this.currentGroup.distancerId = id;
+
+    pursuersIds.push(this.currentGroup.id);
+  }
+
   private renderMainContent() {
     const { name } = this.currentGroup;
     const { expansionShown } = this.state;
 
     return (
       <div className="GroupContainer__main-container">
-        <div className="GroupContainer__merge-control-container">
-          <Button className="button button--small button--secondary">
-            SPLIT
-          </Button>
-          <Button
-            className="button button--small button--secondary"
-            onClick={this.handleOpenMergeGroupModalClick}
-          >
-            JOIN
-          </Button>
-        </div>
         <label>
           <span className="input__label">Name</span>
           <input className="textbox textbox--full-width" defaultValue={name} />
@@ -334,7 +346,7 @@ export default class GroupContainer extends React.Component<Props, State> {
           aria-label="Group Details"
           aria-expanded={expansionShown}
           aria-controls={`${GroupContainer.EXPANSION_PREFIX}-${this.id}`}
-          onClick={this.handleExpandClick}
+          onClick={this.handleToggleClick}
         >
           {expansionShown ? (
             <span className="material-icons" aria-hidden>
@@ -384,7 +396,7 @@ export default class GroupContainer extends React.Component<Props, State> {
     const { participants } = this.props;
     const { newMemberModalShown } = this.state;
 
-    const availableParticipants = participants?.filter(this.isAvailable) || [];
+    const availableParticipants = participants?.filter(this.isAvailable) ?? [];
 
     return (
       <Modal
@@ -392,13 +404,13 @@ export default class GroupContainer extends React.Component<Props, State> {
         overlayClassName="Modal__Overlay"
         contentLabel="Select Participant"
         isOpen={newMemberModalShown}
-        onRequestClose={this.closeNewMemberModal}
+        onRequestClose={this.handleCancelMemberAdditionClick}
       >
         <h2 className="Modal__Content__text">
           Select Participant To Add To Group
         </h2>
         <hr />
-        <form onSubmit={this.handleSubmit}>
+        <form onSubmit={this.handleMemberAdditionSubmit}>
           {availableParticipants.length > 0 ? (
             availableParticipants.map(this.renderParticipantCheckbox)
           ) : (
@@ -408,7 +420,7 @@ export default class GroupContainer extends React.Component<Props, State> {
           <div className="Modal__Content__options">
             <Button
               className="button button--secondary button--medium"
-              onClick={this.closeNewMemberModal}
+              onClick={this.handleCancelMemberAdditionClick}
             >
               CANCEL
             </Button>
@@ -421,34 +433,6 @@ export default class GroupContainer extends React.Component<Props, State> {
             </Button>
           </div>
         </form>
-      </Modal>
-    );
-  }
-
-  private renderMergeModal() {
-    const { groups } = this.props;
-    const { mergeGroupModalShown } = this.state;
-    const { id: currentId } = this.currentGroup;
-    const headerId = `merge-modal-header-${this.id}`;
-
-    return (
-      <Modal
-        className="Modal__Content"
-        overlayClassName="Modal__Overlay"
-        isOpen={mergeGroupModalShown}
-        onRequestClose={this.closeMergeGroupModal}
-        aria={{ labelledby: headerId }}
-      >
-        <h2 id={headerId}>Select Merging Group</h2>
-        <div>
-          {groups
-            .filter((group) => currentId !== group.id)
-            .map(GroupContainer.renderMergeableGroupCheckbox)}
-        </div>
-        <div>
-          <Button>CANCEL</Button>
-          <Button>JOIN</Button>
-        </div>
       </Modal>
     );
   }
@@ -478,10 +462,7 @@ export default class GroupContainer extends React.Component<Props, State> {
             onBlur={this.handleDistancerBlur}
             aria-describedby={hasDistancer ? undefined : warningMessageId}
           >
-            <option
-              key="default"
-              value={GroupContainer.getInvalidDistancerId()}
-            >
+            <option key="default" value={GroupContainer.getInvalidGroupId()}>
               [N/A]
             </option>
             {groups.map(this.renderOption)}
@@ -592,7 +573,7 @@ export default class GroupContainer extends React.Component<Props, State> {
         </table>
         <Button
           className="button button--primary button--medium"
-          onClick={this.handleOpenAddMemberModalClick}
+          onClick={this.handleInitiateMemberAdditionClick}
           disabled={!this.hasValidParticipantCount()}
         >
           ADD
@@ -672,29 +653,14 @@ export default class GroupContainer extends React.Component<Props, State> {
     );
   }
 
-  private static renderMergeableGroupCheckbox({ name }: Group) {
-    return (
-      <label>
-        <input type="radio" />
-        {name}
-      </label>
-    );
-  }
-
   render() {
     const { name } = this.currentGroup;
 
     return (
-      <div
-        className="GroupContainer"
-        tabIndex={0}
-        role="gridcell"
-        aria-label={`${name} Editor`}
-      >
+      <div className="GroupContainer" aria-label={`${name} Editor`}>
         {this.renderMainContent()}
         {this.renderExpandedContent()}
         {this.renderParticipantModal()}
-        {this.renderMergeModal()}
       </div>
     );
   }
