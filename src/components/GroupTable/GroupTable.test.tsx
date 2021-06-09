@@ -5,7 +5,10 @@ import userEvent from "@testing-library/user-event";
 
 import GroupTable from ".";
 import GroupContainer from "../GroupContainer";
-import { createDummyGroupWithParticipants } from "../../utils/group-factory";
+import {
+  createDummyGroup,
+  createDummyGroupWithParticipants,
+} from "../../utils/group-factory";
 
 import { Group, Participant } from "../../types";
 import { createDummyParticipant } from "../../utils/participant-factory";
@@ -262,6 +265,25 @@ describe("Delete Group", () => {
 });
 
 describe("Merging", () => {
+  test("should disable button", () => {
+    const groups = [createDummyGroup()];
+
+    render(<GroupTable groups={groups} />);
+
+    expect(screen.getByRole("button", { name: /combine/i })).toBeDisabled();
+  });
+
+  test("should enable button", () => {
+    const groups = [createDummyGroup(), createDummyGroup()];
+
+    render(<GroupTable groups={groups} />);
+
+    const [anyJoinButtonEl] = screen.getAllByRole("button", {
+      name: /combine/i,
+    });
+    expect(anyJoinButtonEl).not.toBeDisabled();
+  });
+
   test("should open modal", () => {
     const { groups } = DEFAULT_PROPS;
 

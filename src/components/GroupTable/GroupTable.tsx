@@ -235,6 +235,7 @@ export default class GroupTable extends React.Component<Props, State> {
             </Button>
             <Button
               className="button button--small button--secondary"
+              disabled={groups.length < 2}
               onClick={() => this.handleInitiateCombiningClick(index)}
             >
               COMBINE
