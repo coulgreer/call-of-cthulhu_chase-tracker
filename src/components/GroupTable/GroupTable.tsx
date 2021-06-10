@@ -221,7 +221,7 @@ export default class GroupTable extends React.Component<Props, State> {
     );
   }
 
-  private renderRow(group: Group, index: number) {
+  private renderRow({ id }: Group, index: number) {
     const { groups, participants } = this.props;
 
     return (
@@ -229,8 +229,8 @@ export default class GroupTable extends React.Component<Props, State> {
         className="GroupTable__row-container"
         tabIndex={0}
         role="row"
-        aria-label={group.id}
-        key={group.id}
+        aria-label={id}
+        key={id}
       >
         <div role="gridcell">
           <div className="GroupContainer__merge-control-container">
@@ -255,7 +255,7 @@ export default class GroupTable extends React.Component<Props, State> {
         <div role="gridcell">
           <Button
             className="GroupTable__row-control button button--primary"
-            aria-label={`Delete ${group.id}`}
+            aria-label={`Delete ${id}`}
             onClick={() => this.handleInitiateDeletingClick(index)}
           >
             <span className="material-icons" aria-hidden>
@@ -283,6 +283,7 @@ export default class GroupTable extends React.Component<Props, State> {
 
   private renderDeletionModal() {
     const { deletingModalShown } = this.state;
+    const headerId = `delete-modal-header-${this.id}`;
 
     return (
       <Modal
@@ -291,20 +292,21 @@ export default class GroupTable extends React.Component<Props, State> {
         contentLabel="Confirm Removal"
         isOpen={deletingModalShown}
         onRequestClose={this.handleCancelDeletingClick}
+        aria={{ labelledby: headerId }}
       >
-        <h2 className="Modal__Content__text">
-          Would You Like To Delete This Group?
+        <h2 id={headerId} className="Modal__Content__text">
+          Would you like to delete the selected group?
         </h2>
         <hr />
         <div className="Modal__Content__options">
           <Button
-            className="button button--tertiary-on-dark button--medium"
+            className="button button--secondary button--medium"
             onClick={this.handleCancelDeletingClick}
           >
             CANCEL
           </Button>
           <Button
-            className="button button--secondary button--medium"
+            className="button button--tertiary-on-dark button--medium"
             onClick={this.handleDeletingClick}
           >
             DELETE
@@ -329,17 +331,29 @@ export default class GroupTable extends React.Component<Props, State> {
         onRequestClose={this.handleCancelCombiningClick}
         aria={{ labelledby: headerId }}
       >
-        <h2 id={headerId}>Select Merging Group</h2>
+        <h2 id={headerId}>Would you like to merge the selected groups?</h2>
         <form onSubmit={this.handleCombiningSubmit}>
           <div>
             {groups
               .filter((group) => currentId !== group.id)
               .map(this.renderCombinableGroupRadioButton)}
           </div>
-          <p>{GroupTable.getCombiningWarningMessage()}</p>
-          <div>
-            <Button onClick={this.handleCancelCombiningClick}>CANCEL</Button>
-            <Button type="submit">COMBINE</Button>
+          <p className="text--small">
+            {GroupTable.getCombiningWarningMessage()}
+          </p>
+          <div className="Modal__Content__options">
+            <Button
+              className="button button--secondary button--medium"
+              onClick={this.handleCancelCombiningClick}
+            >
+              CANCEL
+            </Button>
+            <Button
+              className="button button--tertiary-on-dark button--medium"
+              type="submit"
+            >
+              COMBINE
+            </Button>
           </div>
         </form>
       </Modal>
@@ -348,9 +362,15 @@ export default class GroupTable extends React.Component<Props, State> {
 
   private renderCombinableGroupRadioButton({ id, name }: Group) {
     return (
-      <label>
-        <input type="radio" value={id} onChange={this.handleCombiningChange} />
-        {name}
+      <label className="radio-button" key={id}>
+        <input
+          className="radio-button__input"
+          type="radio"
+          value={id}
+          onChange={this.handleCombiningChange}
+        />
+        <span className="radio-button__checkmark" />
+        <span className="input__label">{name}</span>
       </label>
     );
   }

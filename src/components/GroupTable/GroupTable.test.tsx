@@ -194,6 +194,27 @@ test("should trigger update on group change", () => {
 });
 
 describe("Delete Group", () => {
+  test("should render modal properly", () => {
+    const { groups } = DEFAULT_PROPS;
+    const label = /Would you like to delete the selected group\?/i;
+
+    render(<GroupTable groups={groups} />);
+
+    const [first] = screen.getAllByRole("row");
+    userEvent.click(within(first).getByRole("button", { name: /delete/i }));
+
+    const modalEl = screen.getByRole("dialog", { name: label });
+    expect(
+      within(modalEl).getByRole("heading", { name: label })
+    ).toBeInTheDocument();
+    expect(
+      within(modalEl).getByRole("button", { name: /cancel/i })
+    ).toBeInTheDocument();
+    expect(
+      within(modalEl).getByRole("button", { name: /delete/i })
+    ).toBeInTheDocument();
+  });
+
   test("should trigger deletion of given group", () => {
     const { groups } = DEFAULT_PROPS;
     const [group] = groups;
@@ -323,7 +344,7 @@ describe("Merging", () => {
 
   test("should render modal properly", () => {
     const { groups } = DEFAULT_PROPS;
-    const label = /Select Merging Group/i;
+    const label = /Would you like to merge the selected groups\?/i;
 
     render(<GroupTable groups={groups} />);
 
