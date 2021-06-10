@@ -33,6 +33,10 @@ export default class GroupTable extends React.Component<Props, State> {
     return "No groups exist in this table";
   }
 
+  static getCombiningWarningMessage() {
+    return "This process will remove the selected group and move its members into the initiating group.";
+  }
+
   private id;
 
   private sequenceGenerator;
@@ -332,6 +336,7 @@ export default class GroupTable extends React.Component<Props, State> {
               .filter((group) => currentId !== group.id)
               .map(this.renderCombinableGroupRadioButton)}
           </div>
+          <p>{GroupTable.getCombiningWarningMessage()}</p>
           <div>
             <Button onClick={this.handleCancelCombiningClick}>CANCEL</Button>
             <Button type="submit">COMBINE</Button>

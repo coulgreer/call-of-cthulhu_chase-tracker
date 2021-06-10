@@ -308,7 +308,7 @@ describe("Merging", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
-  test("should close modal when process canceled", () => {
+  test("should close modal when cancellation button is clicked", () => {
     const { groups } = DEFAULT_PROPS;
 
     render(<GroupTable groups={groups} />);
@@ -337,6 +337,9 @@ describe("Merging", () => {
     expect(within(modalEl).getAllByRole("radio")).toHaveLength(
       groups.length - 1
     );
+    expect(
+      within(modalEl).getByText(GroupTable.getCombiningWarningMessage())
+    ).toBeInTheDocument();
     expect(
       within(modalEl).getByRole("button", { name: /cancel/i })
     ).toBeInTheDocument();
