@@ -349,11 +349,16 @@ describe("Merging", () => {
     render(<GroupTable groups={groups} />);
 
     const [first] = screen.getAllByRole("row");
+
     userEvent.click(within(first).getByRole("button", { name: /combine/i }));
 
     const modalEl = screen.getByRole("dialog", { name: label });
+
     expect(
       within(modalEl).getByRole("heading", { name: label })
+    ).toBeInTheDocument();
+    expect(
+      within(modalEl).getByRole("textbox", { name: /new name/i })
     ).toBeInTheDocument();
     expect(within(modalEl).getAllByRole("radio")).toHaveLength(
       groups.length - 1

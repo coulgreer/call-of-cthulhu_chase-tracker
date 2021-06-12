@@ -82,7 +82,7 @@ export default class GroupContainer extends React.Component<Props, State> {
     super(props);
 
     const { groups, ownedIndex } = this.props;
-
+    this.currentGroup = groups[ownedIndex];
     this.state = {
       hasDistancer: true,
       selectedParticipantsIds: [],
@@ -91,7 +91,6 @@ export default class GroupContainer extends React.Component<Props, State> {
     };
 
     this.id = nanoid();
-    this.currentGroup = groups[ownedIndex];
 
     this.lowestMovementRateMember = null;
     this.highestMovementRateMember = null;
@@ -106,6 +105,7 @@ export default class GroupContainer extends React.Component<Props, State> {
       this.handleMemberAdditionSubmit.bind(this);
     this.handleCancelMemberAdditionClick =
       this.handleCancelMemberAdditionClick.bind(this);
+    this.handleNameChange = this.handleNameChange.bind(this);
 
     // Helpers
     this.findParticipantById = this.findParticipantById.bind(this);
@@ -139,6 +139,14 @@ export default class GroupContainer extends React.Component<Props, State> {
       if (newDistancer) onGroupChange(newDistancer);
       if (oldDistancer) onGroupChange(oldDistancer);
     }
+  }
+
+  private handleNameChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const { onGroupChange } = this.props;
+    const { value } = event.currentTarget;
+
+    this.currentGroup.name = value;
+    if (onGroupChange) onGroupChange(this.currentGroup);
   }
 
   private handleInitiateMemberAdditionClick() {
@@ -332,14 +340,17 @@ export default class GroupContainer extends React.Component<Props, State> {
   }
 
   private renderMainContent() {
-    const { name } = this.currentGroup;
     const { expansionShown } = this.state;
 
     return (
       <div className="GroupContainer__main-container">
         <label>
           <span className="input__label">Name</span>
-          <input className="textbox textbox--full-width" defaultValue={name} />
+          <input
+            className="textbox textbox--full-width"
+            value={this.currentGroup.name}
+            onChange={this.handleNameChange}
+          />
         </label>
         <Button
           className="button button--primary button--small button--circular"

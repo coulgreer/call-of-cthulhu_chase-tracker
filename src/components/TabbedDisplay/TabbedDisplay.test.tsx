@@ -921,6 +921,86 @@ describe("GroupTable Event Handlers", () => {
     ).not.toBeInTheDocument();
   });
 
+  test("should rename group", () => {
+    const newGroupName = "Newly Merged Group";
+
+    render(<TabbedDisplay />);
+    createAnExpandedGroupContainer();
+    createAnExpandedGroupContainer();
+
+    const editorEl = screen.getByRole("gridcell", {
+      name: /group 1 editor/i,
+    });
+
+    userEvent.click(within(editorEl).getByRole("button", { name: /combine/i }));
+
+    const modalEl = screen.getByRole("dialog");
+    const newNameEl = within(modalEl).getByRole("textbox", { name: /name/i });
+
+    userEvent.click(within(modalEl).getByRole("radio", { name: /group 2/i }));
+    userEvent.clear(newNameEl);
+    userEvent.type(newNameEl, newGroupName);
+    userEvent.click(within(modalEl).getByRole("button", { name: /combine/i }));
+
+    expect(
+      within(editorEl).getByRole("textbox", { name: /name/i })
+    ).toHaveDisplayValue(newGroupName);
+  });
+
+  test("should revert empty new name", () => {
+    const validName = "Valid";
+
+    render(<TabbedDisplay />);
+    createAnExpandedGroupContainer();
+    createAnExpandedGroupContainer();
+
+    const editorEl = screen.getByRole("gridcell", {
+      name: /group 1 editor/i,
+    });
+
+    userEvent.click(within(editorEl).getByRole("button", { name: /combine/i }));
+
+    const modalEl = screen.getByRole("dialog");
+    const newNameEl = within(modalEl).getByRole("textbox", { name: /name/i });
+
+    userEvent.click(within(modalEl).getByRole("radio", { name: /group 2/i }));
+    userEvent.clear(newNameEl);
+    userEvent.type(newNameEl, validName);
+    userEvent.clear(newNameEl);
+    userEvent.click(within(modalEl).getByRole("button", { name: /combine/i }));
+
+    expect(
+      within(editorEl).getByRole("textbox", { name: /name/i })
+    ).toHaveDisplayValue(validName);
+  });
+
+  test("should trim new name", () => {
+    const paddedName = "   Valid   ";
+    const refinedName = paddedName.trim();
+
+    render(<TabbedDisplay />);
+    createAnExpandedGroupContainer();
+    createAnExpandedGroupContainer();
+
+    const editorEl = screen.getByRole("gridcell", {
+      name: /group 1 editor/i,
+    });
+
+    userEvent.click(within(editorEl).getByRole("button", { name: /combine/i }));
+
+    const modalEl = screen.getByRole("dialog");
+    const newNameEl = within(modalEl).getByRole("textbox", { name: /name/i });
+
+    userEvent.click(within(modalEl).getByRole("radio", { name: /group 2/i }));
+    userEvent.clear(newNameEl);
+    userEvent.type(newNameEl, paddedName);
+    userEvent.click(within(modalEl).getByRole("button", { name: /combine/i }));
+
+    expect(
+      within(editorEl).getByRole("textbox", { name: /name/i })
+    ).toHaveDisplayValue(refinedName);
+  });
+
   describe("Confirmation tests", () => {
     test("should maintain state when tabbed display are switched", () => {
       render(<TabbedDisplay />);

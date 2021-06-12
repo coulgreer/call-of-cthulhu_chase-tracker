@@ -24,6 +24,8 @@ interface State {
   deletingModalShown: boolean;
   combiningModalShown: boolean;
   selectedCombining: Group | undefined;
+  rawCombiningName: string | undefined;
+  validCombiningName: string | undefined;
 }
 
 const SEQUENCE_START = 0;
@@ -49,6 +51,8 @@ export default class GroupTable extends React.Component<Props, State> {
       deletingModalShown: false,
       combiningModalShown: false,
       selectedCombining: undefined,
+      rawCombiningName: undefined,
+      validCombiningName: undefined,
     };
 
     this.id = nanoid();
@@ -61,6 +65,8 @@ export default class GroupTable extends React.Component<Props, State> {
     this.handleCancelDeletingClick = this.handleCancelDeletingClick.bind(this);
     this.handleCombiningSubmit = this.handleCombiningSubmit.bind(this);
     this.handleCombiningChange = this.handleCombiningChange.bind(this);
+    this.handleCombiningNameChange = this.handleCombiningNameChange.bind(this);
+    this.handleCombiningNameBlur = this.handleCombiningNameBlur.bind(this);
     this.handleCancelCombiningClick =
       this.handleCancelCombiningClick.bind(this);
 
@@ -118,7 +124,7 @@ export default class GroupTable extends React.Component<Props, State> {
 
   private handleCombiningSubmit() {
     const { groups, onGroupsChange } = this.props;
-    const { selectedIndex, selectedCombining } = this.state;
+    const { selectedIndex, selectedCombining, validCombiningName } = this.state;
 
     if (selectedCombining) {
       const dominantGroup = groups[selectedIndex];
@@ -128,6 +134,10 @@ export default class GroupTable extends React.Component<Props, State> {
       );
 
       GroupTable.transferParticipants(dominantGroup, subservientGroup);
+      if (validCombiningName) {
+        dominantGroup.name = validCombiningName;
+        this.setState({ validCombiningName: undefined });
+      }
       const newGroups = this.deleteGroup(mergingGroupIndex);
 
       if (onGroupsChange) onGroupsChange(newGroups);
@@ -141,7 +151,15 @@ export default class GroupTable extends React.Component<Props, State> {
   }
 
   private handleInitiateCombiningClick(index: number) {
-    this.setState({ combiningModalShown: true, selectedIndex: index });
+    const { groups } = this.props;
+    const currentGroup = groups[index];
+    const currentGroupName = currentGroup?.name ?? "";
+
+    this.setState({
+      combiningModalShown: true,
+      selectedIndex: index,
+      rawCombiningName: currentGroupName,
+    });
   }
 
   private handleCombiningChange(event: React.FormEvent<HTMLInputElement>) {
@@ -151,6 +169,19 @@ export default class GroupTable extends React.Component<Props, State> {
     const mergingGroup = groups.find((group) => mergingGroupId === group.id);
 
     this.setState({ selectedCombining: mergingGroup });
+  }
+
+  private handleCombiningNameChange(event: React.FormEvent<HTMLInputElement>) {
+    const { value } = event.currentTarget;
+    const trimmedValue = value.trim();
+
+    if (trimmedValue) this.setState({ validCombiningName: trimmedValue });
+
+    this.setState({ rawCombiningName: value });
+  }
+
+  private handleCombiningNameBlur() {
+    this.setState((state) => ({ rawCombiningName: state.validCombiningName }));
   }
 
   /*
@@ -318,9 +349,14 @@ export default class GroupTable extends React.Component<Props, State> {
 
   private renderCombiningModal() {
     const { groups } = this.props;
-    const { selectedIndex, combiningModalShown } = this.state;
-    const currentId =
-      groups[selectedIndex]?.id || GroupContainer.getInvalidGroupId();
+    const {
+      selectedIndex,
+      combiningModalShown,
+      rawCombiningName: combiningName = "Default",
+    } = this.state;
+    const currentGroup = groups[selectedIndex];
+    const currentGroupId =
+      currentGroup?.id ?? GroupContainer.getInvalidGroupId();
     const headerId = `combine-modal-header-${this.id}`;
 
     return (
@@ -333,9 +369,19 @@ export default class GroupTable extends React.Component<Props, State> {
       >
         <h2 id={headerId}>Would you like to merge the selected groups?</h2>
         <form onSubmit={this.handleCombiningSubmit}>
+          <label>
+            <span className="input__label">New Name</span>
+            <input
+              className="textbox textbox--full-width"
+              type="text"
+              value={combiningName}
+              onChange={this.handleCombiningNameChange}
+              onBlur={this.handleCombiningNameBlur}
+            />
+          </label>
           <div>
             {groups
-              .filter((group) => currentId !== group.id)
+              .filter((group) => currentGroupId !== group.id)
               .map(this.renderCombinableGroupRadioButton)}
           </div>
           <p className="text--small">
