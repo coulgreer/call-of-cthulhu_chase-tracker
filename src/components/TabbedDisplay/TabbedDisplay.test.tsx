@@ -899,26 +899,37 @@ describe("GroupTable Event Handlers", () => {
     createAnExpandedGroupContainer();
     createAnExpandedGroupContainer();
     createAnExpandedGroupContainer();
+    createAnExpandedGroupContainer();
 
     const gridEl = screen.getByRole("grid");
     const editorEl = screen.getByRole("gridcell", {
       name: /group 1 editor/i,
     });
+
     userEvent.click(within(editorEl).getByRole("button", { name: /combine/i }));
 
     const modalEl = screen.getByRole("dialog");
-    userEvent.click(within(modalEl).getByRole("radio", { name: /group 3/i }));
+
+    userEvent.click(
+      within(modalEl).getByRole("checkbox", { name: /group 2/i })
+    );
+    userEvent.click(
+      within(modalEl).getByRole("checkbox", { name: /group 3/i })
+    );
     userEvent.click(within(modalEl).getByRole("button", { name: /combine/i }));
 
     expect(
       within(gridEl).getByRole("row", { name: /group-1/i })
     ).toBeInTheDocument();
     expect(
-      within(gridEl).getByRole("row", { name: /group-2/i })
-    ).toBeInTheDocument();
+      within(gridEl).queryByRole("row", { name: /group-2/i })
+    ).not.toBeInTheDocument();
     expect(
       within(gridEl).queryByRole("row", { name: /group-3/i })
     ).not.toBeInTheDocument();
+    expect(
+      within(gridEl).getByRole("row", { name: /group-4/i })
+    ).toBeInTheDocument();
   });
 
   test("should rename group", () => {
@@ -937,7 +948,9 @@ describe("GroupTable Event Handlers", () => {
     const modalEl = screen.getByRole("dialog");
     const newNameEl = within(modalEl).getByRole("textbox", { name: /name/i });
 
-    userEvent.click(within(modalEl).getByRole("radio", { name: /group 2/i }));
+    userEvent.click(
+      within(modalEl).getByRole("checkbox", { name: /group 2/i })
+    );
     userEvent.clear(newNameEl);
     userEvent.type(newNameEl, newGroupName);
     userEvent.click(within(modalEl).getByRole("button", { name: /combine/i }));
@@ -963,7 +976,9 @@ describe("GroupTable Event Handlers", () => {
     const modalEl = screen.getByRole("dialog");
     const newNameEl = within(modalEl).getByRole("textbox", { name: /name/i });
 
-    userEvent.click(within(modalEl).getByRole("radio", { name: /group 2/i }));
+    userEvent.click(
+      within(modalEl).getByRole("checkbox", { name: /group 2/i })
+    );
     userEvent.clear(newNameEl);
     userEvent.type(newNameEl, validName);
     userEvent.clear(newNameEl);
@@ -991,7 +1006,9 @@ describe("GroupTable Event Handlers", () => {
     const modalEl = screen.getByRole("dialog");
     const newNameEl = within(modalEl).getByRole("textbox", { name: /name/i });
 
-    userEvent.click(within(modalEl).getByRole("radio", { name: /group 2/i }));
+    userEvent.click(
+      within(modalEl).getByRole("checkbox", { name: /group 2/i })
+    );
     userEvent.clear(newNameEl);
     userEvent.type(newNameEl, paddedName);
     userEvent.click(within(modalEl).getByRole("button", { name: /combine/i }));

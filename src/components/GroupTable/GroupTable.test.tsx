@@ -360,7 +360,7 @@ describe("Merging", () => {
     expect(
       within(modalEl).getByRole("textbox", { name: /new name/i })
     ).toBeInTheDocument();
-    expect(within(modalEl).getAllByRole("radio")).toHaveLength(
+    expect(within(modalEl).getAllByRole("checkbox")).toHaveLength(
       groups.length - 1
     );
     expect(
@@ -396,7 +396,7 @@ describe("Merging", () => {
 
     const modalEl = screen.getByRole("dialog");
     userEvent.click(
-      within(modalEl).getByRole("radio", { name: subservientGroup.name })
+      within(modalEl).getByRole("checkbox", { name: subservientGroup.name })
     );
     userEvent.click(within(modalEl).getByRole("button", { name: /combine/i }));
     userEvent.click(
