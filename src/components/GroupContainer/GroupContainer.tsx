@@ -353,7 +353,7 @@ export default class GroupContainer extends React.Component<Props, State> {
           />
         </label>
         <Button
-          className="button button--primary button--small button--circular"
+          className="button button--contained button--on-dark button--small button--circular"
           aria-label="Group Details"
           aria-expanded={expansionShown}
           aria-controls={`${GroupContainer.EXPANSION_PREFIX}-${this.id}`}
@@ -430,13 +430,13 @@ export default class GroupContainer extends React.Component<Props, State> {
           <hr />
           <div className="Modal__Content__options">
             <Button
-              className="button button--secondary button--medium"
+              className="button button--outlined button--on-dark button--medium"
               onClick={this.handleCancelMemberAdditionClick}
             >
               CANCEL
             </Button>
             <Button
-              className="button button--primary button--medium"
+              className="button button--text button--on-dark button--medium"
               type="submit"
               disabled={!(availableParticipants.length > 0)}
             >
@@ -583,7 +583,7 @@ export default class GroupContainer extends React.Component<Props, State> {
           </tbody>
         </table>
         <Button
-          className="button button--primary button--medium"
+          className="button button--outlined button--on-light button--medium"
           onClick={this.handleInitiateMemberAdditionClick}
           disabled={!this.hasValidParticipantCount()}
         >

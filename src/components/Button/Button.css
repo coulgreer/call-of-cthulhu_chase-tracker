@@ -36,27 +36,40 @@
   font-size: 24px;
 }
 
-.button--primary {
+.button--contained:disabled,
+.button--outlined:disabled,
+.button--text:disabled {
+  opacity: var(--text-emphasis--disable);
+}
+
+.button--text {
+  background: none;
+}
+
+.button--outlined {
+  background: none;
+  border-width: 2px;
+  border-style: solid;
+}
+
+.button--contained.button--on-dark {
+  color: rgba(var(--rich-black-fogra-39), var(--text-emphasis--high));
   background-color: rgb(var(--buff));
 }
 
-.button--secondary {
-  background: none;
+.button--contained.button--on-light {
+  color: rgba(var(--cultured), var(--text-emphasis--high));
+  background-color: rgb(var(--dark-jungle-green));
+}
+
+.button--on-dark {
   color: rgb(var(--buff));
-  border: 1px solid rgb(var(--buff));
+  border-color: rgb(var(--buff));
 }
 
-.button--tertiary-on-dark,
-.button--tertiary-on-light {
-  background: none;
-}
-
-.button--tertiary-on-dark {
-  color: rgb(var(--buff));
-}
-
-.button--tertiary-on-light {
+.button--on-light {
   color: rgb(var(--dark-jungle-green));
+  border-color: rgb(var(--dark-jungle-green));
 }
 
 .button__overlay {
@@ -68,40 +81,31 @@
   overflow: hidden;
 }
 
-.button--primary:hover .button__overlay {
+.button--contained.button--on-dark:hover .button__overlay,
+.button--contained.button--on-light:hover .button__overlay {
   background-color: rgba(var(--cultured), var(--state--hovered));
 }
 
-.button--primary:focus .button__overlay {
+.button--contained.button--on-dark:focus .button__overlay,
+.button--contained.button--on-light:focus .button__overlay {
   background-color: rgba(var(--cultured), var(--state--focused));
   border: 1px solid rgba(var(--cultured), var(--text-emphasis--high));
 }
 
-.button--secondary:hover .button__overlay {
+.button--on-dark:hover .button__overlay {
   background-color: rgba(var(--buff), var(--state--hovered));
 }
 
-.button--secondary:focus .button__overlay {
+.button--on-dark:focus .button__overlay {
   background-color: rgba(var(--buff), var(--state--focused));
-  border-radius: 4px;
 }
 
-.button--tertiary-on-dark:hover .button__overlay {
-  background-color: rgba(var(--buff), var(--state--hovered));
-}
-
-.button--tertiary-on-dark:focus .button__overlay {
-  background-color: rgba(var(--buff), var(--state--focused));
-  border-radius: 4px;
-}
-
-.button--tertiary-on-light:hover .button__overlay {
+.button--on-light:hover .button__overlay {
   background-color: rgba(var(--rich-black-fogra-39), var(--state--hovered));
 }
 
-.button--tertiary-on-light:focus .button__overlay {
+.button--on-light:focus .button__overlay {
   background-color: rgba(var(--rich-black-fogra-39), var(--state--focused));
-  border-radius: 4px;
 }
 
 .button--circular,

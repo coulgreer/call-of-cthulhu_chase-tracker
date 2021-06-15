@@ -129,7 +129,7 @@ export default class StatisticTable extends React.Component<Props, State> {
               key={datum.key}
             >
               <Button
-                className="button button--small button--tertiary-on-light"
+                className="button button--small button--text button--on-light"
                 aria-label={`delete: ${statistic.name}`}
                 onClick={() => this.handleDeleteClick(index)}
               >
@@ -138,7 +138,7 @@ export default class StatisticTable extends React.Component<Props, State> {
                 </span>
               </Button>
               <Button
-                className="button button--small button--tertiary-on-light"
+                className="button button--small button--text button--on-light"
                 aria-label={`rename: ${statistic.name}`}
                 onClick={() => this.handlePromptRenameClick(index)}
               >
@@ -157,7 +157,7 @@ export default class StatisticTable extends React.Component<Props, State> {
           );
         })}
         <Button
-          className="button button--small button--primary"
+          className="button button--small button--contained button--on-dark"
           aria-label="create statistic"
           onClick={this.handleCreateClick}
         >
@@ -197,13 +197,13 @@ export default class StatisticTable extends React.Component<Props, State> {
           <hr />
           <div className="Modal__Content__options">
             <Button
-              className="button button--medium button--tertiary-on-dark"
+              className="button button--medium button--outlined button--on-dark"
               onClick={this.closeModal}
             >
               CANCEL
             </Button>
             <Button
-              className="button button--medium button--secondary"
+              className="button button--medium button--text button--on-dark"
               type="submit"
             >
               RENAME

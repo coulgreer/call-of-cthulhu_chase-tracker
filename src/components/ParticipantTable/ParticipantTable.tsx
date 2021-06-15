@@ -113,13 +113,13 @@ export default class ParticipantTable extends Component<Props, State> {
         <hr />
         <div className="Modal__Content__options">
           <Button
-            className="button button--tertiary-on-dark button--medium"
+            className="button button--contained button--on-dark button--medium"
             onClick={this.closeModal}
           >
             CANCEL
           </Button>
           <Button
-            className="button button--secondary button--medium"
+            className="button button--outlined button--on-dark button--medium"
             onClick={this.deleteSelectedParticipant}
           >
             DELETE
@@ -146,7 +146,7 @@ export default class ParticipantTable extends Component<Props, State> {
           onParticipantChange={() => this.handleParticipantChange(participant)}
         />
         <Button
-          className="ParticipantTable__row-control button button--primary"
+          className="ParticipantTable__row-control button button--contained button--on-dark"
           aria-label={`Remove: ${participant.id}`}
           onClick={() => this.promptParticipantRemoval(participant)}
         >

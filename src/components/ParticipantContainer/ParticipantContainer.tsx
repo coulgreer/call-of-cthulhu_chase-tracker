@@ -629,13 +629,13 @@ export default class ParticipantContainer extends React.Component<
           <hr />
           <div className="Modal__Content__options">
             <Button
-              className="button button--secondary button--small"
+              className="button button--outlined button--on-dark button--small"
               onClick={this.closeModal}
             >
               CANCEL
             </Button>
             <Button
-              className="button button--primary button--small"
+              className="button button--text button--on-dark button--small"
               type="submit"
             >
               CONFIRM
@@ -697,14 +697,14 @@ export default class ParticipantContainer extends React.Component<
               () => this.handleMovementRateBlur()
             )}
             <Button
-              className="button button--secondary button--small"
+              className="button button--outlined button--on-dark button--small"
               onClick={this.openModal}
             >
               GENERATE
             </Button>
           </div>
           <Button
-            className="button button--primary button--small button--circular"
+            className="button button--contained button--on-dark button--small button--circular"
             aria-label="Participant Details"
             aria-expanded={expansionShown}
             aria-controls={`${ParticipantContainer.EXPANSION_PREFIX}-${this.id}`}

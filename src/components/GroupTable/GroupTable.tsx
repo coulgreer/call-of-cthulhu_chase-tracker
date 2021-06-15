@@ -301,11 +301,11 @@ export default class GroupTable extends React.Component<Props, State> {
       >
         <div role="gridcell">
           <div className="GroupContainer__merge-control-container">
-            <Button className="button button--small button--secondary">
+            <Button className="button button--small button--outlined button--on-dark">
               SPLIT
             </Button>
             <Button
-              className="button button--small button--secondary"
+              className="button button--small button--outlined button--on-dark"
               disabled={groups.length < 2}
               onClick={() => this.handleInitiateCombiningClick(index)}
             >
@@ -321,7 +321,7 @@ export default class GroupTable extends React.Component<Props, State> {
         </div>
         <div role="gridcell">
           <Button
-            className="GroupTable__row-control button button--primary"
+            className="GroupTable__row-control button button--contained button--on-dark"
             aria-label={`Delete ${id}`}
             onClick={() => this.handleInitiateDeletingClick(index)}
           >
@@ -367,13 +367,13 @@ export default class GroupTable extends React.Component<Props, State> {
         <hr />
         <div className="Modal__Content__options">
           <Button
-            className="button button--secondary button--medium"
+            className="button button--contained button--on-dark button--medium"
             onClick={this.handleCancelDeletingClick}
           >
             CANCEL
           </Button>
           <Button
-            className="button button--tertiary-on-dark button--medium"
+            className="button button--outlined button--on-dark button--medium"
             onClick={this.handleDeletingClick}
           >
             DELETE
@@ -425,13 +425,13 @@ export default class GroupTable extends React.Component<Props, State> {
           </p>
           <div className="Modal__Content__options">
             <Button
-              className="button button--secondary button--medium"
+              className="button button--outlined button--on-dark button--medium"
               onClick={this.handleCancelCombiningClick}
             >
               CANCEL
             </Button>
             <Button
-              className="button button--tertiary-on-dark button--medium"
+              className="button button--text button--on-dark button--medium"
               type="submit"
             >
               COMBINE
