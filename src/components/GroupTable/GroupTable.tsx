@@ -22,6 +22,7 @@ interface Props {
 interface State {
   selectedIndex: number;
   deletingModalShown: boolean;
+  splittingModalShown: boolean;
   combiningModalShown: boolean;
   selectedCombining: Group[];
   rawCombiningName: string | undefined;
@@ -49,6 +50,7 @@ export default class GroupTable extends React.Component<Props, State> {
     this.state = {
       selectedIndex: -1,
       deletingModalShown: false,
+      splittingModalShown: false,
       combiningModalShown: false,
       selectedCombining: [],
       rawCombiningName: undefined,
@@ -70,6 +72,8 @@ export default class GroupTable extends React.Component<Props, State> {
     this.handleCombiningNameBlur = this.handleCombiningNameBlur.bind(this);
     this.handleCancelCombiningClick =
       this.handleCancelCombiningClick.bind(this);
+    this.handleCancelSplittingClick =
+      this.handleCancelSplittingClick.bind(this);
 
     this.renderRow = this.renderRow.bind(this);
     this.renderCombinableGroupCheckbox =
@@ -119,6 +123,17 @@ export default class GroupTable extends React.Component<Props, State> {
   private handleInitiateDeletingClick(index: number) {
     this.setState({
       deletingModalShown: true,
+      selectedIndex: index,
+    });
+  }
+
+  private handleCancelSplittingClick() {
+    this.setState({ splittingModalShown: false, selectedIndex: -1 });
+  }
+
+  private handleInitiateSplittingClick(index: number) {
+    this.setState({
+      splittingModalShown: true,
       selectedIndex: index,
     });
   }
@@ -243,6 +258,10 @@ export default class GroupTable extends React.Component<Props, State> {
     this.setState((state) => ({ ...state, deletingModalShown: false }));
   }
 
+  private closeSplittingModal() {
+    this.setState({ splittingModalShown: false });
+  }
+
   private closeCombiningModal() {
     this.setState((state) => ({ ...state, combiningModalShown: false }));
   }
@@ -301,7 +320,10 @@ export default class GroupTable extends React.Component<Props, State> {
       >
         <div role="gridcell">
           <div className="GroupContainer__merge-control-container">
-            <Button className="button button--small button--outlined button--on-dark">
+            <Button
+              className="button button--small button--outlined button--on-dark"
+              onClick={() => this.handleInitiateSplittingClick(index)}
+            >
               SPLIT
             </Button>
             <Button
@@ -383,6 +405,61 @@ export default class GroupTable extends React.Component<Props, State> {
     );
   }
 
+  private renderSplittingModal() {
+    const { groups } = this.props;
+    const { selectedIndex, splittingModalShown } = this.state;
+    const currentGroup = groups[selectedIndex];
+    const headerId = `split-modal-header-${this.id}`;
+    const newNameInputId = `new-name-input-${this.id}`;
+
+    return (
+      currentGroup && (
+        <Modal
+          isOpen={splittingModalShown}
+          onRequestClose={this.handleCancelSplittingClick}
+          aria={{ labelledby: headerId }}
+        >
+          <h2 id={headerId}>Transfer members</h2>
+          <div>
+            <table>
+              <caption>{currentGroup.name}</caption>
+              <thead>
+                <tr>
+                  <th>Member</th>
+                  <th>Transfer</th>
+                </tr>
+              </thead>
+              <tbody>
+                {currentGroup.participants.map(GroupTable.renderOriginalMember)}
+              </tbody>
+            </table>
+            <br />
+            <div>
+              <label id={newNameInputId}>
+                New group
+                <input />
+              </label>
+              <div role="grid" aria-labelledby={newNameInputId}>
+                <div role="row">
+                  <span role="columnheader">Member</span>
+                  <span role="columnheader">Transfer</span>
+                </div>
+                <div role="row" aria-label="placeholder">
+                  <span> </span>
+                  <span> </span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <Button onClick={this.handleCancelSplittingClick}>CANCEL</Button>
+            <Button>SPLIT</Button>
+          </div>
+        </Modal>
+      )
+    );
+  }
+
   private renderCombiningModal() {
     const { groups } = this.props;
     const {
@@ -391,54 +468,54 @@ export default class GroupTable extends React.Component<Props, State> {
       rawCombiningName = "Default",
     } = this.state;
     const currentGroup = groups[selectedIndex];
-    const currentGroupId =
-      currentGroup?.id ?? GroupContainer.getInvalidGroupId();
     const headerId = `combine-modal-header-${this.id}`;
 
     return (
-      <Modal
-        className="Modal__Content"
-        overlayClassName="Modal__Overlay"
-        isOpen={combiningModalShown}
-        onRequestClose={this.handleCancelCombiningClick}
-        aria={{ labelledby: headerId }}
-      >
-        <h2 id={headerId}>Would you like to merge the selected groups?</h2>
-        <form onSubmit={this.handleCombiningSubmit}>
-          <label>
-            <span className="input__label">New Name</span>
-            <input
-              className="textbox textbox--full-width"
-              type="text"
-              value={rawCombiningName}
-              onChange={this.handleCombiningNameChange}
-              onBlur={this.handleCombiningNameBlur}
-            />
-          </label>
-          <div>
-            {groups
-              .filter((group) => currentGroupId !== group.id)
-              .map(this.renderCombinableGroupCheckbox)}
-          </div>
-          <p className="text--small">
-            {GroupTable.getCombiningWarningMessage()}
-          </p>
-          <div className="Modal__Content__options">
-            <Button
-              className="button button--outlined button--on-dark button--medium"
-              onClick={this.handleCancelCombiningClick}
-            >
-              CANCEL
-            </Button>
-            <Button
-              className="button button--text button--on-dark button--medium"
-              type="submit"
-            >
-              COMBINE
-            </Button>
-          </div>
-        </form>
-      </Modal>
+      currentGroup && (
+        <Modal
+          className="Modal__Content"
+          overlayClassName="Modal__Overlay"
+          isOpen={combiningModalShown}
+          onRequestClose={this.handleCancelCombiningClick}
+          aria={{ labelledby: headerId }}
+        >
+          <h2 id={headerId}>Would you like to merge the selected groups?</h2>
+          <form onSubmit={this.handleCombiningSubmit}>
+            <label>
+              <span className="input__label">New Name</span>
+              <input
+                className="textbox textbox--full-width"
+                type="text"
+                value={rawCombiningName}
+                onChange={this.handleCombiningNameChange}
+                onBlur={this.handleCombiningNameBlur}
+              />
+            </label>
+            <div>
+              {groups
+                .filter((group) => currentGroup.id !== group.id)
+                .map(this.renderCombinableGroupCheckbox)}
+            </div>
+            <p className="text--small">
+              {GroupTable.getCombiningWarningMessage()}
+            </p>
+            <div className="Modal__Content__options">
+              <Button
+                className="button button--outlined button--on-dark button--medium"
+                onClick={this.handleCancelCombiningClick}
+              >
+                CANCEL
+              </Button>
+              <Button
+                className="button button--text button--on-dark button--medium"
+                type="submit"
+              >
+                COMBINE
+              </Button>
+            </div>
+          </form>
+        </Modal>
+      )
     );
   }
 
@@ -461,6 +538,19 @@ export default class GroupTable extends React.Component<Props, State> {
     );
   }
 
+  private static renderOriginalMember({ name }: Participant) {
+    return (
+      <tr aria-label={name}>
+        <td>{name}</td>
+        <td>
+          <Button>
+            <span>arrow_downward</span>
+          </Button>
+        </td>
+      </tr>
+    );
+  }
+
   render() {
     const { groups } = this.props;
 
@@ -469,6 +559,7 @@ export default class GroupTable extends React.Component<Props, State> {
         {groups.length > 0 ? this.renderRows() : this.renderWarning()}
         {this.renderFloatingActionButton()}
         {this.renderDeletionModal()}
+        {this.renderSplittingModal()}
         {this.renderCombiningModal()}
       </section>
     );

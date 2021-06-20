@@ -285,7 +285,9 @@ describe("Delete Group", () => {
   });
 });
 
-describe("Merging", () => {
+describe("Combining", () => {
+  const headerText = "Would you like to merge the selected groups?";
+
   test("should disable button", () => {
     const groups = [createDummyGroup()];
 
@@ -313,7 +315,9 @@ describe("Merging", () => {
     const [first] = screen.getAllByRole("row");
     userEvent.click(within(first).getByRole("button", { name: /combine/i }));
 
-    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(
+      screen.getByRole("dialog", { name: headerText })
+    ).toBeInTheDocument();
   });
 
   test("should close modal when 'esc' is pressed", () => {
@@ -326,7 +330,9 @@ describe("Merging", () => {
 
     userEvent.keyboard("{esc}");
 
-    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("dialog", { name: headerText })
+    ).not.toBeInTheDocument();
   });
 
   test("should close modal when cancellation button is clicked", () => {
@@ -339,12 +345,13 @@ describe("Merging", () => {
 
     userEvent.click(screen.getByRole("button", { name: /cancel/i }));
 
-    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("dialog", { name: headerText })
+    ).not.toBeInTheDocument();
   });
 
   test("should render modal properly", () => {
     const { groups } = DEFAULT_PROPS;
-    const label = /Would you like to merge the selected groups\?/i;
 
     render(<GroupTable groups={groups} />);
 
@@ -352,10 +359,10 @@ describe("Merging", () => {
 
     userEvent.click(within(first).getByRole("button", { name: /combine/i }));
 
-    const modalEl = screen.getByRole("dialog", { name: label });
+    const modalEl = screen.getByRole("dialog", { name: headerText });
 
     expect(
-      within(modalEl).getByRole("heading", { name: label })
+      within(modalEl).getByRole("heading", { name: headerText })
     ).toBeInTheDocument();
     expect(
       within(modalEl).getByRole("textbox", { name: /new name/i })
@@ -411,6 +418,131 @@ describe("Merging", () => {
         within(editorEl).getByRole("rowgroup", { name: /all members/i })
       ).getAllByRole("row")
     ).toHaveLength(participants.length);
+  });
+});
+
+describe("Splitting", () => {
+  const headerText = "Transfer members";
+
+  test("should open modal", () => {
+    const { groups } = DEFAULT_PROPS;
+
+    render(<GroupTable groups={groups} />);
+
+    const [first] = screen.getAllByRole("row");
+    userEvent.click(within(first).getByRole("button", { name: /split/i }));
+
+    expect(
+      screen.getByRole("dialog", { name: headerText })
+    ).toBeInTheDocument();
+  });
+
+  test("should close modal when 'esc' is pressed", () => {
+    const { groups } = DEFAULT_PROPS;
+
+    render(<GroupTable groups={groups} />);
+
+    const [first] = screen.getAllByRole("row");
+    userEvent.click(within(first).getByRole("button", { name: /split/i }));
+    userEvent.keyboard("{esc}");
+
+    expect(
+      screen.queryByRole("dialog", { name: headerText })
+    ).not.toBeInTheDocument();
+  });
+
+  test("should close modal when 'cancel' is clicked", () => {
+    const { groups } = DEFAULT_PROPS;
+
+    render(<GroupTable groups={groups} />);
+
+    const [first] = screen.getAllByRole("row");
+    userEvent.click(within(first).getByRole("button", { name: /split/i }));
+
+    const modalEl = screen.getByRole("dialog", { name: headerText });
+    userEvent.click(within(modalEl).getByRole("button", { name: /cancel/i }));
+
+    expect(
+      screen.queryByRole("dialog", { name: headerText })
+    ).not.toBeInTheDocument();
+  });
+
+  test("should render modal properly", () => {
+    const participants = [
+      createDummyParticipant(),
+      createDummyParticipant(),
+      createDummyParticipant(),
+    ];
+    const groups = [createDummyGroupWithParticipants(participants)];
+    const [
+      { name: firstMember },
+      { name: secondMember },
+      { name: thirdMember },
+    ] = participants;
+    const [originalGroup] = groups;
+
+    render(<GroupTable groups={groups} />);
+
+    userEvent.click(screen.getByRole("button", { name: /split/i }));
+
+    const modalEl = screen.getByRole("dialog", { name: headerText });
+    const originalMembersEl = within(modalEl).getByRole("table", {
+      name: originalGroup.name,
+    });
+    const newMembersEl = within(modalEl).getByRole("grid", {
+      name: /new group/i,
+    });
+
+    expect(
+      within(modalEl).getByRole("heading", { name: headerText })
+    ).toBeInTheDocument();
+    expect(
+      within(originalMembersEl).getByRole("columnheader", { name: /member/i })
+    ).toBeInTheDocument();
+    expect(
+      within(originalMembersEl).getByRole("columnheader", { name: /transfer/i })
+    ).toBeInTheDocument();
+    expect(
+      within(originalMembersEl).getByRole("row", { name: firstMember })
+    ).toBeInTheDocument();
+    expect(
+      within(originalMembersEl).getByRole("cell", { name: firstMember })
+    ).toBeInTheDocument();
+    expect(
+      within(originalMembersEl).getByRole("row", { name: secondMember })
+    ).toBeInTheDocument();
+    expect(
+      within(originalMembersEl).getByRole("cell", { name: secondMember })
+    ).toBeInTheDocument();
+    expect(
+      within(originalMembersEl).getByRole("row", { name: thirdMember })
+    ).toBeInTheDocument();
+    expect(
+      within(originalMembersEl).getByRole("cell", { name: thirdMember })
+    ).toBeInTheDocument();
+    expect(
+      within(originalMembersEl).getAllByRole("cell", {
+        name: /arrow_downward/i,
+      })
+    ).toHaveLength(participants.length);
+    expect(
+      within(modalEl).getByRole("textbox", { name: /new group/i })
+    ).toBeInTheDocument();
+    expect(
+      within(newMembersEl).getByRole("columnheader", { name: /member/i })
+    ).toBeInTheDocument();
+    expect(
+      within(newMembersEl).getByRole("columnheader", { name: /transfer/i })
+    ).toBeInTheDocument();
+    expect(
+      within(newMembersEl).getByRole("row", { name: /placeholder/i })
+    ).toBeInTheDocument();
+    expect(
+      within(modalEl).getByRole("button", { name: /cancel/i })
+    ).toBeInTheDocument();
+    expect(
+      within(modalEl).getByRole("button", { name: /split/i })
+    ).toBeInTheDocument();
   });
 });
 
