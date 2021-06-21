@@ -27,11 +27,15 @@ interface State {
   selectedCombining: Group[];
   rawCombiningName: string | undefined;
   validCombiningName: string | undefined;
+  originalMembers: Participant[];
+  splinteredMembers: Participant[];
 }
 
 const SEQUENCE_START = 0;
 
 export default class GroupTable extends React.Component<Props, State> {
+  static DEFAULT_SPLINTERED_NAME = "New Group";
+
   static getDefaultWarningMessage() {
     return "No groups exist in this table";
   }
@@ -55,11 +59,13 @@ export default class GroupTable extends React.Component<Props, State> {
       selectedCombining: [],
       rawCombiningName: undefined,
       validCombiningName: undefined,
+      originalMembers: [],
+      splinteredMembers: [],
     };
 
-    this.id = nanoid();
-
     this.sequenceGenerator = new UniqueSequenceGen(SEQUENCE_START);
+
+    this.id = nanoid();
 
     this.handleGroupChange = this.handleGroupChange.bind(this);
     this.handleCreationClick = this.handleCreationClick.bind(this);
@@ -78,6 +84,8 @@ export default class GroupTable extends React.Component<Props, State> {
     this.renderRow = this.renderRow.bind(this);
     this.renderCombinableGroupCheckbox =
       this.renderCombinableGroupCheckbox.bind(this);
+    this.renderOriginalMemberRow = this.renderOriginalMemberRow.bind(this);
+    this.renderNewMemberRow = this.renderNewMemberRow.bind(this);
   }
 
   private handleGroupChange(newGroup: Group) {
@@ -128,13 +136,23 @@ export default class GroupTable extends React.Component<Props, State> {
   }
 
   private handleCancelSplittingClick() {
-    this.setState({ splittingModalShown: false, selectedIndex: -1 });
+    this.setState({
+      splittingModalShown: false,
+      selectedIndex: -1,
+      originalMembers: [],
+      splinteredMembers: [],
+    });
   }
 
   private handleInitiateSplittingClick(index: number) {
+    const { groups } = this.props;
+    const selectedGroup = groups[index];
+
     this.setState({
       splittingModalShown: true,
       selectedIndex: index,
+      originalMembers: selectedGroup.participants,
+      splinteredMembers: [],
     });
   }
 
@@ -215,6 +233,34 @@ export default class GroupTable extends React.Component<Props, State> {
 
   private handleCombiningNameBlur() {
     this.setState((state) => ({ rawCombiningName: state.validCombiningName }));
+  }
+
+  private handleOriginalMemberClick(transferedMember: Participant) {
+    this.setState((state) => {
+      const { originalMembers, splinteredMembers } = state;
+      const index = originalMembers.findIndex(
+        (member) => transferedMember.id === member.id
+      );
+
+      originalMembers.splice(index, 1);
+      splinteredMembers.push(transferedMember);
+
+      return { originalMembers, splinteredMembers };
+    });
+  }
+
+  private handleNewMemberClick(transferedMember: Participant) {
+    this.setState((state) => {
+      const { originalMembers, splinteredMembers } = state;
+      const index = splinteredMembers.findIndex(
+        (member) => transferedMember.id === member.id
+      );
+
+      splinteredMembers.splice(index, 1);
+      originalMembers.push(transferedMember);
+
+      return { originalMembers, splinteredMembers };
+    });
   }
 
   /*
@@ -407,13 +453,18 @@ export default class GroupTable extends React.Component<Props, State> {
 
   private renderSplittingModal() {
     const { groups } = this.props;
-    const { selectedIndex, splittingModalShown } = this.state;
-    const currentGroup = groups[selectedIndex];
+    const {
+      splittingModalShown,
+      selectedIndex,
+      originalMembers,
+      splinteredMembers,
+    } = this.state;
+    const selectedGroup = groups[selectedIndex];
     const headerId = `split-modal-header-${this.id}`;
     const newNameInputId = `new-name-input-${this.id}`;
 
     return (
-      currentGroup && (
+      selectedGroup && (
         <Modal
           isOpen={splittingModalShown}
           onRequestClose={this.handleCancelSplittingClick}
@@ -422,21 +473,19 @@ export default class GroupTable extends React.Component<Props, State> {
           <h2 id={headerId}>Transfer members</h2>
           <div>
             <table>
-              <caption>{currentGroup.name}</caption>
+              <caption>{selectedGroup.name}</caption>
               <thead>
                 <tr>
                   <th>Member</th>
                   <th>Transfer</th>
                 </tr>
               </thead>
-              <tbody>
-                {currentGroup.participants.map(GroupTable.renderOriginalMember)}
-              </tbody>
+              <tbody>{originalMembers.map(this.renderOriginalMemberRow)}</tbody>
             </table>
             <br />
             <div>
               <label id={newNameInputId}>
-                New group
+                New group name
                 <input />
               </label>
               <div role="grid" aria-labelledby={newNameInputId}>
@@ -444,10 +493,9 @@ export default class GroupTable extends React.Component<Props, State> {
                   <span role="columnheader">Member</span>
                   <span role="columnheader">Transfer</span>
                 </div>
-                <div role="row" aria-label="placeholder">
-                  <span> </span>
-                  <span> </span>
-                </div>
+                {splinteredMembers.length > 0
+                  ? splinteredMembers.map(this.renderNewMemberRow)
+                  : GroupTable.renderMemberPlaceholder()}
               </div>
             </div>
           </div>
@@ -538,16 +586,38 @@ export default class GroupTable extends React.Component<Props, State> {
     );
   }
 
-  private static renderOriginalMember({ name }: Participant) {
+  private static renderMemberPlaceholder() {
     return (
-      <tr aria-label={name}>
-        <td>{name}</td>
+      <div role="row" aria-label="placeholder">
+        <span role="cell"> </span>
+        <span role="cell"> </span>
+      </div>
+    );
+  }
+
+  private renderOriginalMemberRow(member: Participant) {
+    return (
+      <tr key={member.id} aria-label={member.name}>
+        <td>{member.name}</td>
         <td>
-          <Button>
+          <Button onClick={() => this.handleOriginalMemberClick(member)}>
             <span>arrow_downward</span>
           </Button>
         </td>
       </tr>
+    );
+  }
+
+  private renderNewMemberRow(member: Participant) {
+    return (
+      <div key={member.id} role="row" aria-label={member.name}>
+        <div role="gridcell">{member.name}</div>
+        <div role="gridcell">
+          <Button onClick={() => this.handleNewMemberClick(member)}>
+            <span>arrow_upward</span>
+          </Button>
+        </div>
+      </div>
     );
   }
 

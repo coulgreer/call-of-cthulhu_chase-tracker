@@ -526,7 +526,7 @@ describe("Splitting", () => {
       })
     ).toHaveLength(participants.length);
     expect(
-      within(modalEl).getByRole("textbox", { name: /new group/i })
+      within(modalEl).getByRole("textbox", { name: /new group name/i })
     ).toBeInTheDocument();
     expect(
       within(newMembersEl).getByRole("columnheader", { name: /member/i })
@@ -542,6 +542,53 @@ describe("Splitting", () => {
     ).toBeInTheDocument();
     expect(
       within(modalEl).getByRole("button", { name: /split/i })
+    ).toBeInTheDocument();
+  });
+
+  test("should switch members between groups", () => {
+    const participants = [
+      createDummyParticipant(),
+      createDummyParticipant(),
+      createDummyParticipant(),
+    ];
+    const groups = [createDummyGroupWithParticipants(participants)];
+    const [
+      { name: firstMember },
+      { name: secondMember },
+      { name: thirdMember },
+    ] = participants;
+    const [originalGroup] = groups;
+
+    render(<GroupTable groups={groups} />);
+
+    userEvent.click(screen.getByRole("button", { name: /split/i }));
+
+    const modalEl = screen.getByRole("dialog", { name: headerText });
+    const originalMembersEl = within(modalEl).getByRole("table", {
+      name: originalGroup.name,
+    });
+    const newMembersEl = within(modalEl).getByRole("grid", {
+      name: /new group/i,
+    });
+
+    const firstMemberRow = screen.getByRole("row", { name: firstMember });
+    let secondMemberRow = screen.getByRole("row", { name: secondMember });
+    userEvent.click(within(firstMemberRow).getByRole("button"));
+    userEvent.click(within(secondMemberRow).getByRole("button"));
+
+    secondMemberRow = within(
+      screen.getByRole("row", { name: secondMember })
+    ).getByRole("button");
+    userEvent.click(secondMemberRow);
+
+    expect(
+      within(originalMembersEl).getByRole("row", { name: secondMember })
+    ).toBeInTheDocument();
+    expect(
+      within(originalMembersEl).getByRole("row", { name: thirdMember })
+    ).toBeInTheDocument();
+    expect(
+      within(newMembersEl).getByRole("row", { name: firstMember })
     ).toBeInTheDocument();
   });
 });
