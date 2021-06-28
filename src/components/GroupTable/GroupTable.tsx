@@ -373,7 +373,7 @@ export default class GroupTable extends React.Component<Props, State> {
     );
   }
 
-  private renderRow({ id }: Group, index: number) {
+  private renderRow({ id, participants: members }: Group, index: number) {
     const { groups, participants } = this.props;
 
     return (
@@ -388,6 +388,7 @@ export default class GroupTable extends React.Component<Props, State> {
           <div className="GroupContainer__merge-control-container">
             <Button
               className="button button--small button--outlined button--on-dark"
+              disabled={members.length <= 1}
               onClick={() => this.handleInitiateSplittingClick(index)}
             >
               SPLIT

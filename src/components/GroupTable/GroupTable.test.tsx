@@ -614,6 +614,15 @@ describe("Splitting", () => {
 
     expect(nameTextbox).toHaveValue(newName);
   });
+
+  test("should disable split button", () => {
+    const participants = [createDummyParticipant()];
+    const groups = [createDummyGroupWithParticipants(participants)];
+
+    render(<GroupTable groups={groups} />);
+
+    expect(screen.getByRole("button", { name: /split/i })).toBeDisabled();
+  });
 });
 
 test("should trigger 'distancerChange'", () => {
