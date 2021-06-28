@@ -591,6 +591,29 @@ describe("Splitting", () => {
       within(newMembersEl).getByRole("row", { name: firstMember })
     ).toBeInTheDocument();
   });
+
+  test("should update new group name", () => {
+    const newName = "A Cool Group";
+    const participants = [
+      createDummyParticipant(),
+      createDummyParticipant(),
+      createDummyParticipant(),
+    ];
+    const groups = [createDummyGroupWithParticipants(participants)];
+
+    render(<GroupTable groups={groups} />);
+
+    userEvent.click(screen.getByRole("button", { name: /split/i }));
+
+    const nameTextbox = within(
+      screen.getByRole("dialog", { name: headerText })
+    ).getByRole("textbox", { name: /new group name/i });
+
+    userEvent.clear(nameTextbox);
+    userEvent.type(nameTextbox, newName);
+
+    expect(nameTextbox).toHaveValue(newName);
+  });
 });
 
 test("should trigger 'distancerChange'", () => {

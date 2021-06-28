@@ -819,60 +819,52 @@ describe("GroupTable Event Handlers", () => {
   });
 
   test("should update pursuers list when another group makes it its distancer", () => {
-    const id1 = "GROUP-1";
-    const id2 = "GROUP-2";
-    const id3 = "GROUP-3";
+    const [firstGroupId, secondGroupId, thirdGroupId] = [
+      "GROUP-1",
+      "GROUP-2",
+      "GROUP-3",
+    ];
 
     render(<TabbedDisplay />);
     createAnExpandedGroupContainer();
     createAnExpandedGroupContainer();
     createAnExpandedGroupContainer();
 
-    expect(screen.queryByRole("listitem")).not.toBeInTheDocument();
-
-    const firstGroupEl = screen.getByRole("row", { name: id1 });
-    const firstDistancerEl = within(firstGroupEl).getByRole("combobox", {
+    const firstGroupEditor = screen.getByRole("row", { name: firstGroupId });
+    const firstDistancerEl = within(firstGroupEditor).getByRole("combobox", {
+      name: /distancer/i,
+    });
+    const secondGroupEditor = screen.getByRole("row", { name: secondGroupId });
+    const secondDistancerEl = within(secondGroupEditor).getByRole("combobox", {
+      name: /distancer/i,
+    });
+    const thirdGroupEditor = screen.getByRole("row", { name: thirdGroupId });
+    const thirdDistancerEl = within(thirdGroupEditor).getByRole("combobox", {
       name: /distancer/i,
     });
 
-    const secondGroupEl = screen.getByRole("row", { name: id2 });
-    const secondDistancerEl = within(secondGroupEl).getByRole("combobox", {
-      name: /distancer/i,
-    });
-
-    const thirdGroupEl = screen.getByRole("row", { name: id3 });
-    const thirdDistancerEl = within(thirdGroupEl).getByRole("combobox", {
-      name: /distancer/i,
-    });
-
-    userEvent.selectOptions(firstDistancerEl, id2);
-    firstDistancerEl.blur();
-
-    expect(firstDistancerEl).toHaveValue(id2);
-    expect(
-      within(secondGroupEl)
-        .getAllByRole("listitem")
-        .filter((listitem) => listitem.textContent === id1)
-    ).toHaveLength(1);
-
-    userEvent.selectOptions(secondDistancerEl, id3);
-    secondDistancerEl.blur();
-
-    expect(secondDistancerEl).toHaveValue(id3);
-    expect(
-      within(thirdGroupEl)
-        .getAllByRole("listitem")
-        .filter((listitem) => listitem.textContent === id2)
-    ).toHaveLength(1);
-
-    userEvent.selectOptions(thirdDistancerEl, id1);
+    userEvent.selectOptions(firstDistancerEl, secondGroupId);
+    userEvent.selectOptions(secondDistancerEl, thirdGroupId);
+    userEvent.selectOptions(thirdDistancerEl, firstGroupId);
     thirdDistancerEl.blur();
 
-    expect(thirdDistancerEl).toHaveValue(id1);
+    expect(firstDistancerEl).toHaveValue(secondGroupId);
     expect(
-      within(firstGroupEl)
+      within(secondGroupEditor)
         .getAllByRole("listitem")
-        .filter((listitem) => listitem.textContent === id3)
+        .filter((listitem) => listitem.textContent === firstGroupId)
+    ).toHaveLength(1);
+    expect(secondDistancerEl).toHaveValue(thirdGroupId);
+    expect(
+      within(thirdGroupEditor)
+        .getAllByRole("listitem")
+        .filter((listitem) => listitem.textContent === secondGroupId)
+    ).toHaveLength(1);
+    expect(thirdDistancerEl).toHaveValue(firstGroupId);
+    expect(
+      within(firstGroupEditor)
+        .getAllByRole("listitem")
+        .filter((listitem) => listitem.textContent === thirdGroupId)
     ).toHaveLength(1);
 
     /*
@@ -880,17 +872,17 @@ describe("GroupTable Event Handlers", () => {
       test. Meaning: does this improve confidence. If so, extract into another
       test for switching back and forth.
     */
-    userEvent.selectOptions(firstDistancerEl, id3);
+    userEvent.selectOptions(firstDistancerEl, thirdGroupId);
     firstDistancerEl.blur();
 
-    expect(firstDistancerEl).toHaveValue(id3);
+    expect(firstDistancerEl).toHaveValue(thirdGroupId);
     expect(
-      within(thirdGroupEl)
+      within(thirdGroupEditor)
         .getAllByRole("listitem")
-        .filter((listitem) => listitem.textContent === id1)
+        .filter((listitem) => listitem.textContent === firstGroupId)
     ).toHaveLength(1);
     expect(
-      within(secondGroupEl).queryByRole("listitem")
+      within(secondGroupEditor).queryByRole("listitem")
     ).not.toBeInTheDocument();
   });
 
@@ -1016,6 +1008,94 @@ describe("GroupTable Event Handlers", () => {
     expect(
       within(editorEl).getByRole("textbox", { name: /name/i })
     ).toHaveDisplayValue(refinedName);
+  });
+
+  test("should split group", () => {
+    const newName = "A Cool Group";
+
+    render(<TabbedDisplay />);
+    createAnExpandedParticipantContainer();
+    createAnExpandedParticipantContainer();
+    createAnExpandedParticipantContainer();
+
+    const [firstMemberId, secondMemberId, thirdMemberId] = [
+      "Participant #1",
+      "Participant #2",
+      "Participant #3",
+    ];
+
+    createAnExpandedGroupContainer();
+
+    userEvent.click(screen.getByRole("tab", { name: /groups/i }));
+    userEvent.click(screen.getByRole("button", { name: /add/i }));
+
+    const addMemberModal = screen.getByRole("dialog", {
+      name: /select participant/i,
+    });
+    userEvent.click(
+      within(addMemberModal).getByRole("checkbox", { name: firstMemberId })
+    );
+    userEvent.click(
+      within(addMemberModal).getByRole("checkbox", { name: secondMemberId })
+    );
+    userEvent.click(
+      within(addMemberModal).getByRole("checkbox", { name: thirdMemberId })
+    );
+    userEvent.click(
+      within(addMemberModal).getByRole("button", { name: /add/i })
+    );
+
+    userEvent.click(screen.getByRole("button", { name: /split/i }));
+
+    const modalEl = screen.getByRole("dialog", { name: /transfer members/i });
+    const firstMemberRow = within(modalEl).getByRole("row", {
+      name: firstMemberId,
+    });
+    let secondMemberRow = within(modalEl).getByRole("row", {
+      name: secondMemberId,
+    });
+
+    userEvent.click(within(firstMemberRow).getByRole("button"));
+    userEvent.click(within(secondMemberRow).getByRole("button"));
+
+    secondMemberRow = within(modalEl).getByRole("row", {
+      name: secondMemberId,
+    });
+
+    userEvent.click(within(secondMemberRow).getByRole("button"));
+
+    const nameTextbox = within(modalEl).getByRole("textbox", {
+      name: /new group name/i,
+    });
+
+    userEvent.clear(nameTextbox);
+    userEvent.type(nameTextbox, newName);
+    userEvent.click(within(modalEl).getByRole("button", { name: /split/i }));
+
+    const [originalGroupRow, splinteredGroupRow] = screen.getAllByRole("row", {
+      name: /group/i,
+    });
+    const originalMembersTable = within(originalGroupRow).getByRole("table", {
+      name: /members/i,
+    });
+
+    const expandEls = screen.getAllByRole("button", { name: /group details/i });
+    userEvent.click(expandEls[expandEls.length - 1]);
+
+    const splinteredMembersTable = within(splinteredGroupRow).getByRole(
+      "table",
+      { name: /members/i }
+    );
+
+    expect(
+      within(splinteredMembersTable).getByRole("row", { name: firstMemberId })
+    ).toBeInTheDocument();
+    expect(
+      within(originalMembersTable).getByRole("row", { name: secondMemberId })
+    ).toBeInTheDocument();
+    expect(
+      within(originalMembersTable).getByRole("row", { name: thirdMemberId })
+    ).toBeInTheDocument();
   });
 
   describe("Confirmation tests", () => {

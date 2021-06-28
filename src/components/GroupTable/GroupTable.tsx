@@ -28,6 +28,7 @@ interface State {
   rawCombiningName: string | undefined;
   validCombiningName: string | undefined;
   originalMembers: Participant[];
+  splinteredGroupName: string;
   splinteredMembers: Participant[];
 }
 
@@ -60,6 +61,7 @@ export default class GroupTable extends React.Component<Props, State> {
       rawCombiningName: undefined,
       validCombiningName: undefined,
       originalMembers: [],
+      splinteredGroupName: GroupTable.DEFAULT_SPLINTERED_NAME,
       splinteredMembers: [],
     };
 
@@ -80,6 +82,7 @@ export default class GroupTable extends React.Component<Props, State> {
       this.handleCancelCombiningClick.bind(this);
     this.handleCancelSplittingClick =
       this.handleCancelSplittingClick.bind(this);
+    this.handleSplittingSubmit = this.handleSplittingSubmit.bind(this);
 
     this.renderRow = this.renderRow.bind(this);
     this.renderCombinableGroupCheckbox =
@@ -133,6 +136,23 @@ export default class GroupTable extends React.Component<Props, State> {
       deletingModalShown: true,
       selectedIndex: index,
     });
+  }
+
+  private handleSplittingSubmit() {
+    const { groups, onGroupsChange } = this.props;
+    const { splinteredGroupName, splinteredMembers } = this.state;
+    const idNum = this.sequenceGenerator.nextNum();
+    const newGroup = {
+      id: `GROUP-${idNum}`,
+      name: splinteredGroupName,
+      distancerId: GroupContainer.getInvalidGroupId(),
+      pursuersIds: [],
+      participants: splinteredMembers,
+    };
+
+    if (onGroupsChange) onGroupsChange([...groups, newGroup]);
+
+    this.closeSplittingModal();
   }
 
   private handleCancelSplittingClick() {
@@ -471,38 +491,42 @@ export default class GroupTable extends React.Component<Props, State> {
           aria={{ labelledby: headerId }}
         >
           <h2 id={headerId}>Transfer members</h2>
-          <div>
-            <table>
-              <caption>{selectedGroup.name}</caption>
-              <thead>
-                <tr>
-                  <th>Member</th>
-                  <th>Transfer</th>
-                </tr>
-              </thead>
-              <tbody>{originalMembers.map(this.renderOriginalMemberRow)}</tbody>
-            </table>
-            <br />
+          <form onSubmit={this.handleSplittingSubmit}>
             <div>
-              <label id={newNameInputId}>
-                New group name
-                <input />
-              </label>
-              <div role="grid" aria-labelledby={newNameInputId}>
-                <div role="row">
-                  <span role="columnheader">Member</span>
-                  <span role="columnheader">Transfer</span>
+              <table>
+                <caption>{selectedGroup.name}</caption>
+                <thead>
+                  <tr>
+                    <th>Member</th>
+                    <th>Transfer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {originalMembers.map(this.renderOriginalMemberRow)}
+                </tbody>
+              </table>
+              <br />
+              <div>
+                <label id={newNameInputId}>
+                  New group name
+                  <input />
+                </label>
+                <div role="grid" aria-labelledby={newNameInputId}>
+                  <div role="row">
+                    <span role="columnheader">Member</span>
+                    <span role="columnheader">Transfer</span>
+                  </div>
+                  {splinteredMembers.length > 0
+                    ? splinteredMembers.map(this.renderNewMemberRow)
+                    : GroupTable.renderMemberPlaceholder()}
                 </div>
-                {splinteredMembers.length > 0
-                  ? splinteredMembers.map(this.renderNewMemberRow)
-                  : GroupTable.renderMemberPlaceholder()}
               </div>
             </div>
-          </div>
-          <div>
-            <Button onClick={this.handleCancelSplittingClick}>CANCEL</Button>
-            <Button>SPLIT</Button>
-          </div>
+            <div>
+              <Button onClick={this.handleCancelSplittingClick}>CANCEL</Button>
+              <Button type="submit">SPLIT</Button>
+            </div>
+          </form>
         </Modal>
       )
     );
