@@ -1072,18 +1072,18 @@ describe("GroupTable Event Handlers", () => {
     userEvent.type(nameTextbox, newName);
     userEvent.click(within(modalEl).getByRole("button", { name: /split/i }));
 
-    const [originalGroupRow, splinteredGroupRow] = screen.getAllByRole("row", {
-      name: /group/i,
+    const [originalGroupEl, splinteredGroupEl] = screen.getAllByRole("row", {
+      name: /group-\d+/i,
     });
-    const originalMembersTable = within(originalGroupRow).getByRole("table", {
+    const originalMembersTable = within(originalGroupEl).getByRole("rowgroup", {
       name: /members/i,
     });
 
     const expandEls = screen.getAllByRole("button", { name: /group details/i });
     userEvent.click(expandEls[expandEls.length - 1]);
 
-    const splinteredMembersTable = within(splinteredGroupRow).getByRole(
-      "table",
+    const splinteredMembersTable = within(splinteredGroupEl).getByRole(
+      "rowgroup",
       { name: /members/i }
     );
 

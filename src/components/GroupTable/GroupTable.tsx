@@ -28,7 +28,8 @@ interface State {
   rawCombiningName: string | undefined;
   validCombiningName: string | undefined;
   originalMembers: Participant[];
-  splinteredGroupName: string;
+  rawSplinteredGroupName: string;
+  validSplinteredGroupName: string;
   splinteredMembers: Participant[];
 }
 
@@ -61,7 +62,8 @@ export default class GroupTable extends React.Component<Props, State> {
       rawCombiningName: undefined,
       validCombiningName: undefined,
       originalMembers: [],
-      splinteredGroupName: GroupTable.DEFAULT_SPLINTERED_NAME,
+      rawSplinteredGroupName: GroupTable.DEFAULT_SPLINTERED_NAME,
+      validSplinteredGroupName: GroupTable.DEFAULT_SPLINTERED_NAME,
       splinteredMembers: [],
     };
 
@@ -83,6 +85,7 @@ export default class GroupTable extends React.Component<Props, State> {
     this.handleCancelSplittingClick =
       this.handleCancelSplittingClick.bind(this);
     this.handleSplittingSubmit = this.handleSplittingSubmit.bind(this);
+    this.handleNewGroupNameChange = this.handleNewGroupNameChange.bind(this);
 
     this.renderRow = this.renderRow.bind(this);
     this.renderCombinableGroupCheckbox =
@@ -140,16 +143,21 @@ export default class GroupTable extends React.Component<Props, State> {
 
   private handleSplittingSubmit() {
     const { groups, onGroupsChange } = this.props;
-    const { splinteredGroupName, splinteredMembers } = this.state;
+    const { validSplinteredGroupName, splinteredMembers } = this.state;
     const idNum = this.sequenceGenerator.nextNum();
     const newGroup = {
       id: `GROUP-${idNum}`,
-      name: splinteredGroupName,
+      name: validSplinteredGroupName,
       distancerId: GroupContainer.getInvalidGroupId(),
       pursuersIds: [],
       participants: splinteredMembers,
     };
 
+    /*
+    TODO (Coul Greer): Do not allow user to create an empty group when
+    splitting. This means that zero users in the new group should disable the
+    committing button or should ignore the would-be, empty created group.
+    */
     if (onGroupsChange) onGroupsChange([...groups, newGroup]);
 
     this.closeSplittingModal();
@@ -281,6 +289,14 @@ export default class GroupTable extends React.Component<Props, State> {
 
       return { originalMembers, splinteredMembers };
     });
+  }
+
+  private handleNewGroupNameChange(event: React.FormEvent<HTMLInputElement>) {
+    const { value } = event.currentTarget;
+
+    if (value) this.setState({ validSplinteredGroupName: value });
+
+    this.setState({ rawSplinteredGroupName: value });
   }
 
   /*
@@ -479,6 +495,7 @@ export default class GroupTable extends React.Component<Props, State> {
       selectedIndex,
       originalMembers,
       splinteredMembers,
+      rawSplinteredGroupName,
     } = this.state;
     const selectedGroup = groups[selectedIndex];
     const headerId = `split-modal-header-${this.id}`;
@@ -487,45 +504,55 @@ export default class GroupTable extends React.Component<Props, State> {
     return (
       selectedGroup && (
         <Modal
+          className="Modal__Content"
+          overlayClassName="Modal__Overlay"
           isOpen={splittingModalShown}
           onRequestClose={this.handleCancelSplittingClick}
           aria={{ labelledby: headerId }}
         >
           <h2 id={headerId}>Transfer members</h2>
           <form onSubmit={this.handleSplittingSubmit}>
-            <div>
-              <table>
-                <caption>{selectedGroup.name}</caption>
-                <thead>
-                  <tr>
-                    <th>Member</th>
-                    <th>Transfer</th>
-                  </tr>
-                </thead>
-                <tbody>
+            <div className="card card--dark">
+              <h2>{selectedGroup.name}</h2>
+              <div role="grid" aria-label={selectedGroup.name}>
+                <div role="rowgroup" aria-label="members">
                   {originalMembers.map(this.renderOriginalMemberRow)}
-                </tbody>
-              </table>
-              <br />
-              <div>
-                <label id={newNameInputId}>
-                  New group name
-                  <input />
-                </label>
-                <div role="grid" aria-labelledby={newNameInputId}>
-                  <div role="row">
-                    <span role="columnheader">Member</span>
-                    <span role="columnheader">Transfer</span>
-                  </div>
+                </div>
+              </div>
+            </div>
+            <br />
+            <div className="card card--dark">
+              <label id={newNameInputId}>
+                <span className="input__label">New group name</span>
+                <input
+                  className="textbox textbox--full-width"
+                  value={rawSplinteredGroupName}
+                  onChange={this.handleNewGroupNameChange}
+                  type="text"
+                />
+              </label>
+              <div role="grid" aria-labelledby={newNameInputId}>
+                <div role="rowgroup" aria-label="members">
                   {splinteredMembers.length > 0
                     ? splinteredMembers.map(this.renderNewMemberRow)
                     : GroupTable.renderMemberPlaceholder()}
                 </div>
               </div>
             </div>
-            <div>
-              <Button onClick={this.handleCancelSplittingClick}>CANCEL</Button>
-              <Button type="submit">SPLIT</Button>
+            <div className="Modal__Content__options">
+              <Button
+                className="button button--medium button--on-dark button--outlined"
+                onClick={this.handleCancelSplittingClick}
+              >
+                CANCEL
+              </Button>
+              <Button
+                className="button button--text button--on-dark button--medium"
+                disabled={splinteredMembers.length < 1}
+                type="submit"
+              >
+                SPLIT
+              </Button>
             </div>
           </form>
         </Modal>
@@ -613,35 +640,71 @@ export default class GroupTable extends React.Component<Props, State> {
 
   private static renderMemberPlaceholder() {
     return (
-      <div role="row" aria-label="placeholder">
-        <span role="cell"> </span>
-        <span role="cell"> </span>
+      <div
+        className="GroupTable__row card card--dark"
+        role="row"
+        aria-label="placeholder"
+      >
+        <span role="gridcell">---</span>
+        <span role="gridcell">
+          <Button
+            className="button button--small button--text button--on-dark"
+            disabled
+          >
+            <span className="material-icons">block</span>
+          </Button>
+        </span>
       </div>
     );
   }
 
   private renderOriginalMemberRow(member: Participant) {
+    const { originalMembers } = this.state;
+
     return (
-      <tr key={member.id} aria-label={member.name}>
-        <td>{member.name}</td>
-        <td>
-          <Button onClick={() => this.handleOriginalMemberClick(member)}>
-            <span>arrow_downward</span>
+      <div
+        className="GroupTable__row card card--dark"
+        key={member.id}
+        role="row"
+        aria-label={member.name}
+      >
+        <span role="gridcell">{member.name}</span>
+        <span role="gridcell">
+          <Button
+            className="button button--small button--on-dark button--text"
+            disabled={originalMembers.length < 2}
+            aria-label={`Move ${member.name}`}
+            onClick={() => this.handleOriginalMemberClick(member)}
+          >
+            <span className="material-icons" aria-hidden>
+              arrow_downward
+            </span>
           </Button>
-        </td>
-      </tr>
+        </span>
+      </div>
     );
   }
 
   private renderNewMemberRow(member: Participant) {
     return (
-      <div key={member.id} role="row" aria-label={member.name}>
-        <div role="gridcell">{member.name}</div>
-        <div role="gridcell">
-          <Button onClick={() => this.handleNewMemberClick(member)}>
-            <span>arrow_upward</span>
+      <div
+        className="GroupTable__row card card--dark"
+        key={member.id}
+        role="row"
+        aria-label={member.name}
+      >
+        <span role="gridcell">{member.name}</span>
+        <span role="gridcell">
+          <Button
+            className="button button--small button--on-dark button--text"
+            aria-label={`Move ${member.name}`}
+            onClick={() => this.handleNewMemberClick(member)}
+          >
+            <span className="material-icons" aria-hidden>
+              arrow_upward
+            </span>
           </Button>
-        </div>
+        </span>
       </div>
     );
   }

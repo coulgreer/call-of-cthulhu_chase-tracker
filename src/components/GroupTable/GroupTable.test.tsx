@@ -486,7 +486,7 @@ describe("Splitting", () => {
     userEvent.click(screen.getByRole("button", { name: /split/i }));
 
     const modalEl = screen.getByRole("dialog", { name: headerText });
-    const originalMembersEl = within(modalEl).getByRole("table", {
+    const originalMembersEl = within(modalEl).getByRole("grid", {
       name: originalGroup.name,
     });
     const newMembersEl = within(modalEl).getByRole("grid", {
@@ -497,42 +497,40 @@ describe("Splitting", () => {
       within(modalEl).getByRole("heading", { name: headerText })
     ).toBeInTheDocument();
     expect(
-      within(originalMembersEl).getByRole("columnheader", { name: /member/i })
-    ).toBeInTheDocument();
-    expect(
-      within(originalMembersEl).getByRole("columnheader", { name: /transfer/i })
-    ).toBeInTheDocument();
-    expect(
       within(originalMembersEl).getByRole("row", { name: firstMember })
     ).toBeInTheDocument();
     expect(
-      within(originalMembersEl).getByRole("cell", { name: firstMember })
+      within(originalMembersEl).getByRole("gridcell", { name: firstMember })
     ).toBeInTheDocument();
     expect(
       within(originalMembersEl).getByRole("row", { name: secondMember })
     ).toBeInTheDocument();
     expect(
-      within(originalMembersEl).getByRole("cell", { name: secondMember })
+      within(originalMembersEl).getByRole("gridcell", { name: secondMember })
     ).toBeInTheDocument();
     expect(
       within(originalMembersEl).getByRole("row", { name: thirdMember })
     ).toBeInTheDocument();
     expect(
-      within(originalMembersEl).getByRole("cell", { name: thirdMember })
+      within(originalMembersEl).getByRole("gridcell", { name: thirdMember })
     ).toBeInTheDocument();
     expect(
-      within(originalMembersEl).getAllByRole("cell", {
-        name: /arrow_downward/i,
+      within(originalMembersEl).getByRole("button", {
+        name: new RegExp(`move ${firstMember}`, "i"),
       })
-    ).toHaveLength(participants.length);
+    ).toBeInTheDocument();
+    expect(
+      within(originalMembersEl).getByRole("button", {
+        name: new RegExp(`move ${secondMember}`, "i"),
+      })
+    ).toBeInTheDocument();
+    expect(
+      within(originalMembersEl).getByRole("button", {
+        name: new RegExp(`move ${thirdMember}`, "i"),
+      })
+    ).toBeInTheDocument();
     expect(
       within(modalEl).getByRole("textbox", { name: /new group name/i })
-    ).toBeInTheDocument();
-    expect(
-      within(newMembersEl).getByRole("columnheader", { name: /member/i })
-    ).toBeInTheDocument();
-    expect(
-      within(newMembersEl).getByRole("columnheader", { name: /transfer/i })
     ).toBeInTheDocument();
     expect(
       within(newMembersEl).getByRole("row", { name: /placeholder/i })
@@ -542,7 +540,7 @@ describe("Splitting", () => {
     ).toBeInTheDocument();
     expect(
       within(modalEl).getByRole("button", { name: /split/i })
-    ).toBeInTheDocument();
+    ).toBeDisabled();
   });
 
   test("should switch members between groups", () => {
@@ -564,7 +562,7 @@ describe("Splitting", () => {
     userEvent.click(screen.getByRole("button", { name: /split/i }));
 
     const modalEl = screen.getByRole("dialog", { name: headerText });
-    const originalMembersEl = within(modalEl).getByRole("table", {
+    const originalMembersEl = within(modalEl).getByRole("grid", {
       name: originalGroup.name,
     });
     const newMembersEl = within(modalEl).getByRole("grid", {
@@ -622,6 +620,36 @@ describe("Splitting", () => {
     render(<GroupTable groups={groups} />);
 
     expect(screen.getByRole("button", { name: /split/i })).toBeDisabled();
+  });
+
+  test("should disable move member button", () => {
+    const participants = [createDummyParticipant(), createDummyParticipant()];
+    const groups = [createDummyGroupWithParticipants(participants)];
+    const [{ name: firstParticipant }, { name: secondParticipant }] =
+      participants;
+
+    render(<GroupTable groups={groups} />);
+
+    userEvent.click(screen.getByRole("button", { name: /split/i }));
+
+    const modal = screen.getByRole("dialog", { name: headerText });
+
+    userEvent.click(
+      within(modal).getByRole("button", {
+        name: new RegExp(`move ${firstParticipant}`, "i"),
+      })
+    );
+
+    expect(
+      within(modal).getByRole("button", {
+        name: new RegExp(`move ${firstParticipant}`, "i"),
+      })
+    ).not.toBeDisabled();
+    expect(
+      within(modal).getByRole("button", {
+        name: new RegExp(`move ${secondParticipant}`, "i"),
+      })
+    ).toBeDisabled();
   });
 });
 

@@ -11,7 +11,7 @@
 
   /* COLORS: Brand */
   --dark-jungle-green: 20, 28, 23;
-  --component-background: rgba(var(--middle-blue-green), 0.24);
+  --component-background: rgba(var(--middle-blue-green), 0.12);
 
   /* Brand: Primary */
   --middle-blue-green: 143, 204, 184;
@@ -304,6 +304,17 @@ input[type="number"] {
 
 .combobox--full-width {
   width: 100%;
+}
+
+/* Card */
+.card {
+  border-radius: 10px;
+  padding: 6px;
+  margin: 4px;
+}
+
+.card--dark {
+  background-color: var(--component-background);
 }
 
 /* Modals */

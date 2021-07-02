@@ -27,3 +27,17 @@
 .GroupTable__row-control .button__overlay {
   border-radius: 0 4px 4px 0;
 }
+
+.GroupTable__row.card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+}
+
+.GroupTable__row {
+  padding: 3px 4px;
+}
+
+.GroupTable__row * {
+  margin: 0 3px;
+}
