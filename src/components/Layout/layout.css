@@ -322,7 +322,7 @@ input[type="number"] {
   z-index: 2;
 }
 
-.Modal__Content {
+.Modal {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -336,11 +336,7 @@ input[type="number"] {
   background-color: rgb(var(--dark-jungle-green));
 }
 
-.Modal__Content__text {
-  margin: 6px;
-}
-
-.Modal__Content__options {
+.Modal__options {
   display: flex;
   float: right;
   margin-top: 24px;

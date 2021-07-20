@@ -163,6 +163,7 @@ export default class GroupTable extends React.Component<Props, State> {
     this.closeSplittingModal();
   }
 
+  // FIXME (Coul Greer): Move all the splinteredMembers back to the originalMembers.
   private handleCancelSplittingClick() {
     this.setState({
       splittingModalShown: false,
@@ -352,6 +353,10 @@ export default class GroupTable extends React.Component<Props, State> {
     const { groups } = this.props;
     const newGroups = [...groups];
 
+    /*
+    FIXME (Coul Greer): Make sure to remove deleted group from other groups. This means
+    as a Distancer and Pursuer.
+    */
     const deleteGroup = (i: number) => {
       const { id: groupId } = groups[i];
       const results = groupId.match(new RegExp(/\d+$/)) || [];
@@ -389,18 +394,12 @@ export default class GroupTable extends React.Component<Props, State> {
     );
   }
 
-  private renderRow({ id, participants: members }: Group, index: number) {
+  private renderRow({ id, name, participants: members }: Group, index: number) {
     const { groups, participants } = this.props;
 
     return (
-      <div
-        className="GroupTable__row-container"
-        tabIndex={0}
-        role="row"
-        aria-label={id}
-        key={id}
-      >
-        <div role="gridcell">
+      <div className="GroupTable__row-container" role="row" key={id}>
+        <div role="gridcell" aria-label={`${name} Editor`}>
           <div className="GroupContainer__merge-control-container">
             <Button
               className="button button--small button--outlined button--on-dark"
@@ -459,18 +458,17 @@ export default class GroupTable extends React.Component<Props, State> {
 
     return (
       <Modal
-        className="Modal__Content"
+        className="Modal"
         overlayClassName="Modal__Overlay"
-        contentLabel="Confirm Removal"
         isOpen={deletingModalShown}
         onRequestClose={this.handleCancelDeletingClick}
         aria={{ labelledby: headerId }}
       >
-        <h2 id={headerId} className="Modal__Content__text">
+        <h2 id={headerId} className="Modal__header">
           Would you like to delete the selected group?
         </h2>
         <hr />
-        <div className="Modal__Content__options">
+        <div className="Modal__options">
           <Button
             className="button button--contained button--on-dark button--medium"
             onClick={this.handleCancelDeletingClick}
@@ -504,27 +502,27 @@ export default class GroupTable extends React.Component<Props, State> {
     return (
       selectedGroup && (
         <Modal
-          className="Modal__Content"
+          className="Modal"
           overlayClassName="Modal__Overlay"
           isOpen={splittingModalShown}
           onRequestClose={this.handleCancelSplittingClick}
           aria={{ labelledby: headerId }}
         >
-          <h2 id={headerId}>Transfer members</h2>
           <form onSubmit={this.handleSplittingSubmit}>
+            <h2 id={headerId}>Transfer members</h2>
             <div className="card card--dark">
-              <h2>{selectedGroup.name}</h2>
+              <h3>{selectedGroup.name}</h3>
               <div role="grid" aria-label={selectedGroup.name}>
-                <div role="rowgroup" aria-label="members">
+                <div role="rowgroup">
                   {originalMembers.map(this.renderOriginalMemberRow)}
                 </div>
               </div>
             </div>
-            <br />
             <div className="card card--dark">
-              <label id={newNameInputId}>
+              <label>
                 <span className="input__label">New group name</span>
                 <input
+                  id={newNameInputId}
                   className="textbox textbox--full-width"
                   value={rawSplinteredGroupName}
                   onChange={this.handleNewGroupNameChange}
@@ -532,14 +530,14 @@ export default class GroupTable extends React.Component<Props, State> {
                 />
               </label>
               <div role="grid" aria-labelledby={newNameInputId}>
-                <div role="rowgroup" aria-label="members">
+                <div role="rowgroup">
                   {splinteredMembers.length > 0
                     ? splinteredMembers.map(this.renderNewMemberRow)
                     : GroupTable.renderMemberPlaceholder()}
                 </div>
               </div>
             </div>
-            <div className="Modal__Content__options">
+            <div className="Modal__options">
               <Button
                 className="button button--medium button--on-dark button--outlined"
                 onClick={this.handleCancelSplittingClick}
@@ -568,18 +566,17 @@ export default class GroupTable extends React.Component<Props, State> {
       rawCombiningName = "Default",
     } = this.state;
     const currentGroup = groups[selectedIndex];
-    const headerId = `combine-modal-header-${this.id}`;
 
     return (
       currentGroup && (
         <Modal
-          className="Modal__Content"
+          className="Modal"
           overlayClassName="Modal__Overlay"
+          contentLabel="Combine groups"
           isOpen={combiningModalShown}
           onRequestClose={this.handleCancelCombiningClick}
-          aria={{ labelledby: headerId }}
         >
-          <h2 id={headerId}>Would you like to merge the selected groups?</h2>
+          <h2>Would you like to merge the selected groups?</h2>
           <form onSubmit={this.handleCombiningSubmit}>
             <label>
               <span className="input__label">New Name</span>
@@ -599,7 +596,7 @@ export default class GroupTable extends React.Component<Props, State> {
             <p className="text--small">
               {GroupTable.getCombiningWarningMessage()}
             </p>
-            <div className="Modal__Content__options">
+            <div className="Modal__options">
               <Button
                 className="button button--outlined button--on-dark button--medium"
                 onClick={this.handleCancelCombiningClick}
@@ -666,7 +663,6 @@ export default class GroupTable extends React.Component<Props, State> {
         className="GroupTable__row card card--dark"
         key={member.id}
         role="row"
-        aria-label={member.name}
       >
         <span role="gridcell">{member.name}</span>
         <span role="gridcell">
@@ -691,7 +687,6 @@ export default class GroupTable extends React.Component<Props, State> {
         className="GroupTable__row card card--dark"
         key={member.id}
         role="row"
-        aria-label={member.name}
       >
         <span role="gridcell">{member.name}</span>
         <span role="gridcell">

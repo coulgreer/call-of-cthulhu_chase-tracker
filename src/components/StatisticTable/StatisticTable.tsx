@@ -174,13 +174,13 @@ export default class StatisticTable extends React.Component<Props, State> {
 
     return (
       <Modal
-        className="Modal__Content"
+        className="Modal"
         overlayClassName="Modal__Overlay"
         contentLabel="Rename the Statistic"
         isOpen={modalShown}
         onRequestClose={this.closeModal}
       >
-        <h2 className="Modal__Content__text">Rename the Statistic</h2>
+        <h2 className="Modal__header">Rename the Statistic</h2>
         <hr />
         <form onSubmit={this.handleSubmit}>
           <label>
@@ -195,7 +195,7 @@ export default class StatisticTable extends React.Component<Props, State> {
             />
           </label>
           <hr />
-          <div className="Modal__Content__options">
+          <div className="Modal__options">
             <Button
               className="button button--medium button--outlined button--on-dark"
               onClick={this.closeModal}

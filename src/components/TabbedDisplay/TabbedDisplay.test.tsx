@@ -771,6 +771,8 @@ describe("ParticipantTable Event Handlers", () => {
 });
 
 describe("GroupTable Event Handlers", () => {
+  const tableHeadRowCount = 3;
+
   test("should render properly when a group is created", () => {
     render(<TabbedDisplay />);
 
@@ -788,16 +790,24 @@ describe("GroupTable Event Handlers", () => {
     createAnExpandedParticipantContainer();
     createAnExpandedGroupContainer();
 
+    const groupCount = 1;
+
     userEvent.click(screen.getByRole("tab", { name: /groups/i }));
-    userEvent.click(screen.getByRole("button", { name: /add/i }));
 
-    userEvent.click(screen.getByRole("checkbox"));
-    userEvent.click(
-      within(screen.getByRole("dialog")).getByRole("button", { name: /add/i })
+    const gridEl = screen.getByRole("grid", { name: /groups/i });
+
+    userEvent.click(within(gridEl).getByRole("button", { name: /add/i }));
+
+    const modalEl = screen.getByRole("dialog", { name: /participant/i });
+
+    userEvent.click(within(modalEl).getByRole("checkbox"));
+    userEvent.click(within(modalEl).getByRole("button", { name: /add/i }));
+
+    const tableEl = screen.getByRole("table", { name: /members/i });
+
+    expect(within(tableEl).getAllByRole("row")).toHaveLength(
+      tableHeadRowCount + groupCount
     );
-
-    const tableDataEl = screen.getByRole("rowgroup", { name: /members/i });
-    expect(within(tableDataEl).getAllByRole("row")).toHaveLength(1);
   });
 
   test("should delete pre-existing group when its associated delete button is pressed", () => {
@@ -830,15 +840,22 @@ describe("GroupTable Event Handlers", () => {
     createAnExpandedGroupContainer();
     createAnExpandedGroupContainer();
 
-    const firstGroupEditor = screen.getByRole("row", { name: firstGroupId });
+    const gridEl = screen.getByRole("grid", { name: /groups/i });
+    const firstGroupEditor = within(gridEl).getByRole("gridcell", {
+      name: /1.*editor/i,
+    });
     const firstDistancerEl = within(firstGroupEditor).getByRole("combobox", {
       name: /distancer/i,
     });
-    const secondGroupEditor = screen.getByRole("row", { name: secondGroupId });
+    const secondGroupEditor = within(gridEl).getByRole("gridcell", {
+      name: /2.*editor/i,
+    });
     const secondDistancerEl = within(secondGroupEditor).getByRole("combobox", {
       name: /distancer/i,
     });
-    const thirdGroupEditor = screen.getByRole("row", { name: thirdGroupId });
+    const thirdGroupEditor = within(gridEl).getByRole("gridcell", {
+      name: /3.*editor/i,
+    });
     const thirdDistancerEl = within(thirdGroupEditor).getByRole("combobox", {
       name: /distancer/i,
     });
@@ -893,14 +910,14 @@ describe("GroupTable Event Handlers", () => {
     createAnExpandedGroupContainer();
     createAnExpandedGroupContainer();
 
-    const gridEl = screen.getByRole("grid");
-    const editorEl = screen.getByRole("gridcell", {
+    const gridEl = screen.getByRole("grid", { name: /groups/i });
+    const editorEl = within(gridEl).getByRole("gridcell", {
       name: /group 1 editor/i,
     });
 
     userEvent.click(within(editorEl).getByRole("button", { name: /combine/i }));
 
-    const modalEl = screen.getByRole("dialog");
+    const modalEl = screen.getByRole("dialog", { name: /combine/i });
 
     userEvent.click(
       within(modalEl).getByRole("checkbox", { name: /group 2/i })
@@ -910,18 +927,9 @@ describe("GroupTable Event Handlers", () => {
     );
     userEvent.click(within(modalEl).getByRole("button", { name: /combine/i }));
 
-    expect(
-      within(gridEl).getByRole("row", { name: /group-1/i })
-    ).toBeInTheDocument();
-    expect(
-      within(gridEl).queryByRole("row", { name: /group-2/i })
-    ).not.toBeInTheDocument();
-    expect(
-      within(gridEl).queryByRole("row", { name: /group-3/i })
-    ).not.toBeInTheDocument();
-    expect(
-      within(gridEl).getByRole("row", { name: /group-4/i })
-    ).toBeInTheDocument();
+    const tableEl = within(editorEl).getByRole("table", { name: /members/i });
+
+    expect(within(tableEl).getAllByRole("row")).toHaveLength(4);
   });
 
   test("should rename group", () => {
@@ -1014,6 +1022,7 @@ describe("GroupTable Event Handlers", () => {
     const newName = "A Cool Group";
 
     render(<TabbedDisplay />);
+
     createAnExpandedParticipantContainer();
     createAnExpandedParticipantContainer();
     createAnExpandedParticipantContainer();
@@ -1029,9 +1038,11 @@ describe("GroupTable Event Handlers", () => {
     userEvent.click(screen.getByRole("tab", { name: /groups/i }));
     userEvent.click(screen.getByRole("button", { name: /add/i }));
 
+    const groupGridEl = screen.getByRole("grid", { name: /groups/i });
     const addMemberModal = screen.getByRole("dialog", {
       name: /select participant/i,
     });
+
     userEvent.click(
       within(addMemberModal).getByRole("checkbox", { name: firstMemberId })
     );
@@ -1045,45 +1056,54 @@ describe("GroupTable Event Handlers", () => {
       within(addMemberModal).getByRole("button", { name: /add/i })
     );
 
-    userEvent.click(screen.getByRole("button", { name: /split/i }));
+    userEvent.click(
+      within(groupGridEl).getByRole("button", { name: /split/i })
+    );
 
-    const modalEl = screen.getByRole("dialog", { name: /transfer members/i });
-    const firstMemberRow = within(modalEl).getByRole("row", {
+    const splitGroupModal = screen.getByRole("dialog", {
+      name: /transfer members/i,
+    });
+    const firstMemberRow = within(splitGroupModal).getByRole("row", {
       name: firstMemberId,
     });
-    let secondMemberRow = within(modalEl).getByRole("row", {
+    let secondMemberRow = within(splitGroupModal).getByRole("row", {
       name: secondMemberId,
     });
 
     userEvent.click(within(firstMemberRow).getByRole("button"));
     userEvent.click(within(secondMemberRow).getByRole("button"));
 
-    secondMemberRow = within(modalEl).getByRole("row", {
+    secondMemberRow = within(splitGroupModal).getByRole("row", {
       name: secondMemberId,
     });
 
     userEvent.click(within(secondMemberRow).getByRole("button"));
 
-    const nameTextbox = within(modalEl).getByRole("textbox", {
+    const nameTextbox = within(splitGroupModal).getByRole("textbox", {
       name: /new group name/i,
     });
 
     userEvent.clear(nameTextbox);
     userEvent.type(nameTextbox, newName);
-    userEvent.click(within(modalEl).getByRole("button", { name: /split/i }));
+    userEvent.click(
+      within(splitGroupModal).getByRole("button", { name: /split/i })
+    );
 
-    const [originalGroupEl, splinteredGroupEl] = screen.getAllByRole("row", {
-      name: /group-\d+/i,
+    const originalGroupEl = within(groupGridEl).getByRole("gridcell", {
+      name: /group 1/i,
     });
-    const originalMembersTable = within(originalGroupEl).getByRole("rowgroup", {
+    const splinteredGroupEl = within(groupGridEl).getByRole("gridcell", {
+      name: new RegExp(newName),
+    });
+    const originalMembersTable = within(originalGroupEl).getByRole("table", {
       name: /members/i,
     });
-
     const expandEls = screen.getAllByRole("button", { name: /group details/i });
+
     userEvent.click(expandEls[expandEls.length - 1]);
 
     const splinteredMembersTable = within(splinteredGroupEl).getByRole(
-      "rowgroup",
+      "table",
       { name: /members/i }
     );
 

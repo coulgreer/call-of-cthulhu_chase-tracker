@@ -153,6 +153,7 @@ export default class GroupContainer extends React.Component<Props, State> {
     this.setState({ newMemberModalShown: true });
   }
 
+  // FIXME (Coul Greer): Reset the selectedParticipantsIds.
   private handleCancelMemberAdditionClick() {
     this.setState({ newMemberModalShown: false });
   }
@@ -339,7 +340,7 @@ export default class GroupContainer extends React.Component<Props, State> {
     pursuersIds.push(this.currentGroup.id);
   }
 
-  private renderMainContent() {
+  private renderSummaryContent() {
     const { expansionShown } = this.state;
 
     return (
@@ -403,7 +404,7 @@ export default class GroupContainer extends React.Component<Props, State> {
     );
   }
 
-  private renderParticipantModal() {
+  private renderMemberAdditionModal() {
     const { participants } = this.props;
     const { newMemberModalShown } = this.state;
 
@@ -411,24 +412,22 @@ export default class GroupContainer extends React.Component<Props, State> {
 
     return (
       <Modal
-        className="Modal__Content"
+        className="Modal"
         overlayClassName="Modal__Overlay"
-        contentLabel="Select Participant"
+        contentLabel="Select participants"
         isOpen={newMemberModalShown}
         onRequestClose={this.handleCancelMemberAdditionClick}
       >
-        <h2 className="Modal__Content__text">
-          Select Participant To Add To Group
-        </h2>
-        <hr />
         <form onSubmit={this.handleMemberAdditionSubmit}>
-          {availableParticipants.length > 0 ? (
-            availableParticipants.map(this.renderParticipantCheckbox)
-          ) : (
-            <p>{GroupContainer.getNoAvailableParticipantWarningMessage()}</p>
-          )}
-          <hr />
-          <div className="Modal__Content__options">
+          <h2 className="Modal__header">Select Participant To Add To Group</h2>
+          <div>
+            {availableParticipants.length > 0 ? (
+              availableParticipants.map(this.renderParticipantCheckbox)
+            ) : (
+              <p>{GroupContainer.getNoAvailableParticipantWarningMessage()}</p>
+            )}
+          </div>
+          <div className="Modal__options">
             <Button
               className="button button--outlined button--on-dark button--medium"
               onClick={this.handleCancelMemberAdditionClick}
@@ -451,7 +450,7 @@ export default class GroupContainer extends React.Component<Props, State> {
   private static renderChaseName() {
     return (
       <div className="GroupContainer__section-container">
-        <h2 className="GroupContainer__title" aria-label="Chase name">
+        <h2 className="GroupContainer__title">
           Chase Name: <em>{GroupContainer.getDefaultChaseName()}</em>
         </h2>
       </div>
@@ -544,7 +543,7 @@ export default class GroupContainer extends React.Component<Props, State> {
               aria-label="Member with the highest MOV"
             >
               <td className="material-icons-outlined">arrow_upward</td>
-              <td>
+              <td className="GroupContainer__cell--summarize">
                 {this.highestMovementRateMember?.name ||
                   GroupContainer.PLACEHOLDER_MEMBER_NAME}
               </td>
@@ -576,7 +575,7 @@ export default class GroupContainer extends React.Component<Props, State> {
               <th>MOV</th>
             </tr>
           </thead>
-          <tbody aria-label="All Members">
+          <tbody>
             {this.hasMembers()
               ? currentParticipants.map(this.renderMember)
               : GroupContainer.renderMemberWarning(warningId)}
@@ -665,13 +664,11 @@ export default class GroupContainer extends React.Component<Props, State> {
   }
 
   render() {
-    const { name } = this.currentGroup;
-
     return (
-      <div className="GroupContainer" aria-label={`${name} Editor`}>
-        {this.renderMainContent()}
+      <div className="GroupContainer">
+        {this.renderSummaryContent()}
         {this.renderExpandedContent()}
-        {this.renderParticipantModal()}
+        {this.renderMemberAdditionModal()}
       </div>
     );
   }

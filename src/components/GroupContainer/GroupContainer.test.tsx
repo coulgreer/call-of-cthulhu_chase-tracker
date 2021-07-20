@@ -22,10 +22,12 @@ const distancingAndPursuingGroupName = "Group 2";
 const pursuingGroupName = "Group 3";
 
 const DEFAULT_PROPS: {
+  ownedIndex: number;
   groups: Group[];
   participants: Participant[];
   handleGroupChange: (g: Group) => void;
 } = {
+  ownedIndex: 0,
   groups: [
     createGroup(
       "0",
@@ -69,19 +71,19 @@ const DEFAULT_PROPS: {
 };
 
 const isolatedGroupIndex = 0;
-const centralGroupIndex = 2;
+const centralizedGroupIndex = 2;
 
-describe("Prop Rendering", () => {
+describe("Initial State", () => {
   test("should render properly when collapsed", () => {
-    const { groups } = DEFAULT_PROPS;
+    const { groups, ownedIndex } = DEFAULT_PROPS;
 
-    render(<GroupContainer ownedIndex={isolatedGroupIndex} groups={groups} />);
+    render(<GroupContainer ownedIndex={ownedIndex} groups={groups} />);
+
+    const expandEl = screen.getByRole("button", { name: /group details/i });
 
     expect(screen.getByRole("textbox", { name: /name/i })).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /group details/i })
-    ).toBeInTheDocument();
-
+    expect(expandEl).toHaveAttribute("aria-expanded", "false");
+    expect(expandEl).toHaveAttribute("aria-controls");
     expect(screen.queryByText(/chase name/i)).not.toBeInTheDocument();
     expect(
       screen.queryByRole("combobox", { name: /distancer/i })
@@ -96,17 +98,16 @@ describe("Prop Rendering", () => {
 
   describe("when expanded", () => {
     test("should render properly when ommitting all optional props", () => {
-      const { groups } = DEFAULT_PROPS;
+      const { groups, ownedIndex } = DEFAULT_PROPS;
 
-      render(
-        <GroupContainer ownedIndex={isolatedGroupIndex} groups={groups} />
-      );
-      userEvent.click(screen.getByRole("button", { name: /group details/i }));
+      render(<GroupContainer ownedIndex={ownedIndex} groups={groups} />);
 
-      expect(
-        screen.getByRole("textbox", { name: /name/i })
-      ).toBeInTheDocument();
+      const expandEl = screen.getByRole("button", { name: /group details/i });
 
+      userEvent.click(expandEl);
+
+      expect(expandEl).toHaveAttribute("aria-expanded", "true");
+      expect(expandEl).toHaveAttribute("aria-controls");
       expect(
         screen.getByText((content, element) => {
           if (!element) return false;
@@ -129,105 +130,44 @@ describe("Prop Rendering", () => {
           return hasText(element) && childrenDontHaveText;
         })
       ).toBeInTheDocument();
-
       expect(
         screen.getByRole("combobox", { name: /distancer/i })
       ).toBeInTheDocument();
-
       expect(
         screen.getByRole("heading", { name: /pursuers/i })
       ).toBeInTheDocument();
       expect(
         screen.getByText(GroupContainer.getNoPursuerWarningMessage())
       ).toBeInTheDocument();
-
       expect(
         screen.getByRole("heading", { name: /members/i })
       ).toBeInTheDocument();
       expect(
         screen.getByText(GroupContainer.getNoMemberWarningMessage())
       ).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: /add/i })).toBeDisabled();
-    });
-
-    test("should render properly when including all optional props and at least one participant is given", () => {
-      const { groups, participants, handleGroupChange } = DEFAULT_PROPS;
-
-      render(
-        <GroupContainer
-          ownedIndex={isolatedGroupIndex}
-          groups={groups}
-          participants={participants}
-          onGroupChange={handleGroupChange}
-        />
-      );
-      userEvent.click(screen.getByRole("button", { name: /group details/i }));
-
-      expect(
-        screen.getByRole("textbox", { name: /name/i })
-      ).toBeInTheDocument();
-
-      expect(
-        screen.getByText((content, element) => {
-          if (!element) return false;
-
-          const hasText = (node: Element) => {
-            if (node.textContent === null) return false;
-
-            const regex = new RegExp(
-              `chase name: ${GroupContainer.getDefaultChaseName()}`,
-              "i"
-            );
-
-            return regex.test(node.textContent);
-          };
-
-          const childrenDontHaveText = Array.from(element.children).every(
-            (child) => !hasText(child)
-          );
-
-          return hasText(element) && childrenDontHaveText;
-        })
-      ).toBeInTheDocument();
-
-      userEvent.click(screen.getByRole("combobox", { name: /distancer/i }));
-
-      expect(
-        screen.getByRole("heading", { name: /pursuers/i })
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText(GroupContainer.getNoPursuerWarningMessage())
-      ).toBeInTheDocument();
-
-      expect(
-        screen.getByRole("heading", { name: /members/i })
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText(GroupContainer.getNoMemberWarningMessage())
-      ).toBeInTheDocument();
-
       expect(screen.getByRole("button", { name: /add/i })).toBeInTheDocument();
     });
 
     describe("Participants", () => {
-      test("should enable add button when 'participants' has at least one element", () => {
-        const { groups, participants } = DEFAULT_PROPS;
+      test("should enable add button", () => {
+        const { groups } = DEFAULT_PROPS;
+        const populated = [createDummyParticipant()];
 
         render(
           <GroupContainer
             ownedIndex={isolatedGroupIndex}
             groups={groups}
-            participants={participants}
+            participants={populated}
           />
         );
+
         userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
         expect(screen.getByRole("button", { name: /add/i })).not.toBeDisabled();
       });
 
-      test("should disable add button when 'participants' is empty", () => {
+      test("should disable add button", () => {
         const { groups } = DEFAULT_PROPS;
-
         const empty: Participant[] = [];
 
         render(
@@ -237,6 +177,7 @@ describe("Prop Rendering", () => {
             participants={empty}
           />
         );
+
         userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
         expect(screen.getByRole("button", { name: /add/i })).toBeDisabled();
@@ -270,7 +211,9 @@ describe("Distancer Display", () => {
   test("should hide warning and display current distancer when a group has a distancer", () => {
     const { groups } = DEFAULT_PROPS;
 
-    render(<GroupContainer ownedIndex={centralGroupIndex} groups={groups} />);
+    render(
+      <GroupContainer ownedIndex={centralizedGroupIndex} groups={groups} />
+    );
     userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
     expect(
@@ -294,7 +237,9 @@ describe("Pursuer Display", () => {
   test("should hide warning and display current pursuer(s) when a group has any pursuers", () => {
     const { groups } = DEFAULT_PROPS;
 
-    render(<GroupContainer ownedIndex={centralGroupIndex} groups={groups} />);
+    render(
+      <GroupContainer ownedIndex={centralizedGroupIndex} groups={groups} />
+    );
     userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
     expect(
@@ -309,50 +254,47 @@ describe("Pursuer Display", () => {
   });
 });
 
-describe("Member Display", () => {
+describe("Members Display", () => {
   describe("Boundary Movement Ratings", () => {
     test("should render members properly when none exist on the group", () => {
-      const { groups } = DEFAULT_PROPS;
+      const groups = [createDummyGroupWithParticipants([])];
 
-      render(
-        <GroupContainer ownedIndex={isolatedGroupIndex} groups={groups} />
-      );
+      render(<GroupContainer ownedIndex={0} groups={groups} />);
+
       userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
       const tableEl = screen.getByRole("table", { name: /members/i });
+
       expect(tableEl).toHaveAttribute(
         "aria-describedby",
         expect.stringMatching(/member-table-warning-.+/i)
       );
-
       expect(
-        screen.getByRole("cell", { name: /arrow_upward/i })
+        within(tableEl).getByRole("cell", { name: /arrow_upward/i })
       ).toBeInTheDocument();
       expect(
-        screen.getByRole("cell", { name: /arrow_downward/i })
-      ).toBeInTheDocument();
-      expect(screen.getAllByRole("cell", { name: /---/i })).toHaveLength(2);
-      expect(screen.getAllByRole("cell", { name: /N\/A/i })).toHaveLength(2);
-
-      expect(
-        screen.getByRole("columnheader", { name: /icon/i })
+        within(tableEl).getByRole("cell", { name: /arrow_downward/i })
       ).toBeInTheDocument();
       expect(
-        screen.getByRole("columnheader", { name: /name/i })
+        within(tableEl).getAllByRole("cell", { name: /---/i })
+      ).toHaveLength(2);
+      expect(
+        within(tableEl).getAllByRole("cell", { name: /N\/A/i })
+      ).toHaveLength(2);
+      expect(
+        within(tableEl).getByRole("columnheader", { name: /icon/i })
       ).toBeInTheDocument();
       expect(
-        screen.getByRole("columnheader", { name: /mov/i })
-      ).toBeInTheDocument();
-
-      expect(
-        screen.getByRole("rowgroup", { name: /all members/i })
+        within(tableEl).getByRole("columnheader", { name: /name/i })
       ).toBeInTheDocument();
       expect(
-        screen.getByRole("cell", {
+        within(tableEl).getByRole("columnheader", { name: /mov/i })
+      ).toBeInTheDocument();
+      expect(
+        within(tableEl).getByRole("cell", {
           name: GroupContainer.getNoMemberWarningMessage(),
         })
       ).toBeInTheDocument();
-
       expect(screen.getByRole("button", { name: /add/i })).toBeInTheDocument();
     });
 
@@ -363,6 +305,7 @@ describe("Member Display", () => {
       const [firstParticipant] = participants;
 
       render(<GroupContainer ownedIndex={0} groups={groups} />);
+
       userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
       const tableEl = screen.getByRole("table", { name: /members/i });
@@ -385,7 +328,6 @@ describe("Member Display", () => {
           name: `${firstParticipant.movementRate}`,
         })
       ).toHaveLength(3);
-
       expect(
         within(tableEl).getByRole("row", {
           name: /member with the highest mov/i,
@@ -396,7 +338,6 @@ describe("Member Display", () => {
           name: /member with the lowest mov/i,
         })
       ).not.toHaveClass(GroupContainer.LOWEST_MOVEMENT_CLASS_NAME);
-
       expect(
         screen.getByRole("columnheader", { name: /icon/i })
       ).toBeInTheDocument();
@@ -406,19 +347,14 @@ describe("Member Display", () => {
       expect(
         screen.getByRole("columnheader", { name: /mov/i })
       ).toBeInTheDocument();
-
-      const tableBodyEl = within(tableEl).getByRole("rowgroup", {
-        name: /members/i,
-      });
-
       expect(
-        within(tableBodyEl).getByRole("row", { name: firstParticipant.name })
+        within(tableEl).getByRole("row", { name: firstParticipant.name })
       ).not.toHaveClass(GroupContainer.HIGHEST_MOVEMENT_CLASS_NAME);
       expect(
-        within(tableBodyEl).getByRole("row", { name: firstParticipant.name })
+        within(tableEl).getByRole("row", { name: firstParticipant.name })
       ).not.toHaveClass(GroupContainer.LOWEST_MOVEMENT_CLASS_NAME);
       expect(
-        within(tableBodyEl).getByRole("cell", { name: /warning/i })
+        within(tableEl).getByRole("cell", { name: /warning/i })
       ).toBeInTheDocument();
 
       expect(within(tableEl).getAllByRole("row")).toHaveLength(4);
@@ -427,7 +363,6 @@ describe("Member Display", () => {
     test("should render properly when at least two participants exist with differing movement ratings", () => {
       const lowestMOV = 1;
       const highestMOV = 11;
-
       const participants = [
         createParticipant(
           "p1",
@@ -450,12 +385,11 @@ describe("Member Display", () => {
           true
         ),
       ];
-
       const [lowestMovParticipant, highestMovParticipant] = participants;
-
       const groups = [createDummyGroupWithParticipants(participants)];
 
       render(<GroupContainer ownedIndex={0} groups={groups} />);
+
       userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
       const tableEl = screen.getByRole("table", { name: /members/i });
@@ -466,7 +400,6 @@ describe("Member Display", () => {
       expect(
         within(tableEl).getByRole("cell", { name: /arrow_downward/i })
       ).toBeInTheDocument();
-
       expect(
         within(tableEl).getAllByRole("cell", {
           name: lowestMovParticipant.name,
@@ -477,7 +410,6 @@ describe("Member Display", () => {
           name: `${lowestMovParticipant.movementRate}`,
         })
       ).toHaveLength(2);
-
       expect(
         within(tableEl).getAllByRole("cell", {
           name: highestMovParticipant.name,
@@ -488,7 +420,6 @@ describe("Member Display", () => {
           name: `${highestMovParticipant.movementRate}`,
         })
       ).toHaveLength(2);
-
       expect(
         within(tableEl).getByRole("row", {
           name: /member with the highest mov/i,
@@ -499,7 +430,6 @@ describe("Member Display", () => {
           name: /member with the lowest mov/i,
         })
       ).toHaveClass(GroupContainer.LOWEST_MOVEMENT_CLASS_NAME);
-
       expect(
         screen.getByRole("columnheader", { name: /icon/i })
       ).toBeInTheDocument();
@@ -509,35 +439,26 @@ describe("Member Display", () => {
       expect(
         screen.getByRole("columnheader", { name: /mov/i })
       ).toBeInTheDocument();
-
-      const tableBodyEl = within(tableEl).getByRole("rowgroup", {
-        name: /members/i,
-      });
-
       expect(
-        within(tableBodyEl).getByRole("row", {
+        within(tableEl).getByRole("row", {
           name: highestMovParticipant.name,
         })
       ).toHaveClass(GroupContainer.HIGHEST_MOVEMENT_CLASS_NAME);
       expect(
-        within(tableBodyEl).getByRole("row", {
+        within(tableEl).getByRole("row", {
           name: lowestMovParticipant.name,
         })
       ).toHaveClass(GroupContainer.LOWEST_MOVEMENT_CLASS_NAME);
-
       expect(
-        within(tableBodyEl).getAllByRole("cell", { name: /warning/i })
+        within(tableEl).getAllByRole("cell", { name: /warning/i })
       ).toHaveLength(2);
-
-      expect(within(tableEl).getAllByRole("row")).toHaveLength(5);
     });
   });
 
   test("should trigger 'handleGroupChange' and close modal", () => {
     const { groups, participants } = DEFAULT_PROPS;
     const handleGroupChange = jest.fn();
-
-    const [first, second, third] = participants;
+    const [{ name: first }] = participants;
 
     render(
       <GroupContainer
@@ -547,23 +468,14 @@ describe("Member Display", () => {
         onGroupChange={handleGroupChange}
       />
     );
-    userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
+    userEvent.click(screen.getByRole("button", { name: /details/i }));
     userEvent.click(screen.getByRole("button", { name: /add/i }));
 
-    userEvent.click(
-      screen.getByRole("checkbox", { name: new RegExp(first.name) })
-    );
-    expect(
-      screen.getByRole("checkbox", { name: new RegExp(second.name) })
-    ).toBeInTheDocument();
-    userEvent.click(
-      screen.getByRole("checkbox", { name: new RegExp(third.name) })
-    );
+    const modalEl = screen.getByRole("dialog", { name: /participant/i });
 
-    userEvent.click(
-      within(screen.getByRole("dialog")).getByRole("button", { name: /add/i })
-    );
+    userEvent.click(within(modalEl).getByRole("checkbox", { name: first }));
+    userEvent.click(within(modalEl).getByRole("button", { name: /add/i }));
 
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     expect(handleGroupChange).toBeCalled();
@@ -572,7 +484,6 @@ describe("Member Display", () => {
   // TODO (Coul Greer): Add a test for ungrouping a participant
   test("should update participant's flag for representing group ownership", () => {
     const { groups, handleGroupChange } = DEFAULT_PROPS;
-
     const participants = [createDummyParticipant(), createDummyParticipant()];
     const [first] = participants;
 
@@ -584,17 +495,16 @@ describe("Member Display", () => {
         onGroupChange={handleGroupChange}
       />
     );
+
     userEvent.click(screen.getByRole("button", { name: /group details/i }));
-
-    expect(first.isGrouped).toBeFalsy();
-
     userEvent.click(screen.getByRole("button", { name: /add/i }));
+
+    const modalEl = screen.getByRole("dialog", { name: /participant/i });
+
     userEvent.click(
-      screen.getByRole("checkbox", { name: new RegExp(first.name) })
+      within(modalEl).getByRole("checkbox", { name: first.name })
     );
-    userEvent.click(
-      within(screen.getByRole("dialog")).getByRole("button", { name: /add/i })
-    );
+    userEvent.click(within(modalEl).getByRole("button", { name: /add/i }));
 
     expect(first.isGrouped).toBeTruthy();
   });
@@ -611,13 +521,13 @@ describe("Member Display", () => {
       />
     );
 
-    userEvent.click(screen.getByRole("button", { name: /group details/i }));
+    userEvent.click(screen.getByRole("button", { name: /details/i }));
     userEvent.click(screen.getByRole("button", { name: /add/i }));
 
-    const modalEl = screen.getByRole("dialog");
+    const modalEl = screen.getByRole("dialog", { name: /participant/i });
+
     userEvent.click(within(modalEl).getByRole("checkbox"));
     userEvent.click(within(modalEl).getByRole("button", { name: /add/i }));
-
     userEvent.click(screen.getByRole("button", { name: /add/i }));
 
     expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
@@ -625,7 +535,7 @@ describe("Member Display", () => {
       screen.getByText(GroupContainer.getNoAvailableParticipantWarningMessage())
     ).toBeInTheDocument();
     expect(
-      within(screen.getByRole("dialog")).getByRole("button", { name: /add/i })
+      within(modalEl).getByRole("button", { name: /add/i })
     ).toBeDisabled();
   });
 
@@ -635,13 +545,11 @@ describe("Member Display", () => {
       createDummyParticipant(true),
       createDummyParticipant(),
     ];
-
     const [
       { name: firstDummyName },
       groupedParticipant,
       { name: secondDummyName },
     ] = participants;
-
     const groups = [createDummyGroupWithParticipants([groupedParticipant])];
 
     render(
@@ -651,11 +559,12 @@ describe("Member Display", () => {
         participants={participants}
       />
     );
-    userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
+    userEvent.click(screen.getByRole("button", { name: /group details/i }));
     userEvent.click(screen.getByRole("button", { name: /add/i }));
 
-    const modalEl = screen.getByRole("dialog");
+    const modalEl = screen.getByRole("dialog", { name: /participants/i });
+
     expect(
       within(modalEl).getByRole("checkbox", {
         name: firstDummyName,
@@ -675,7 +584,6 @@ describe("Member Display", () => {
 
   test("should exclude participants already owned by any other group", () => {
     const groups = [createDummyGroup()];
-
     const orphanedParticipant = createDummyParticipant(false);
     const fosteredParticipant = createDummyParticipant(true);
     const participants = [orphanedParticipant, fosteredParticipant];
@@ -687,11 +595,12 @@ describe("Member Display", () => {
         participants={participants}
       />
     );
-    userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
+    userEvent.click(screen.getByRole("button", { name: /details/i }));
     userEvent.click(screen.getByRole("button", { name: /add/i }));
 
-    const modalEl = screen.getByRole("dialog");
+    const modalEl = screen.getByRole("dialog", { name: /participants/i });
+
     expect(
       within(modalEl).getByRole("checkbox", {
         name: new RegExp(orphanedParticipant.name),
@@ -708,7 +617,6 @@ describe("Member Display", () => {
     const domesticParticipant = createDummyParticipant(true);
     const foreignParticipant = createDummyParticipant(true);
     const participants = [domesticParticipant, foreignParticipant];
-
     const groups = [createDummyGroupWithParticipants([domesticParticipant])];
 
     render(
@@ -718,11 +626,12 @@ describe("Member Display", () => {
         participants={participants}
       />
     );
-    userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
+    userEvent.click(screen.getByRole("button", { name: /details/i }));
     userEvent.click(screen.getByRole("button", { name: /add/i }));
 
-    const modalEl = screen.getByRole("dialog");
+    const modalEl = screen.getByRole("dialog", { name: /participant/i });
+
     expect(
       within(modalEl).getByRole("button", { name: /add/i })
     ).toBeDisabled();

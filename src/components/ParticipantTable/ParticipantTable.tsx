@@ -101,17 +101,17 @@ export default class ParticipantTable extends Component<Props, State> {
 
     return (
       <Modal
-        className="Modal__Content"
+        className="Modal"
         overlayClassName="Modal__Overlay"
         contentLabel="Confirm Removal"
         isOpen={modalShown}
         onRequestClose={this.closeModal}
       >
-        <h2 className="Modal__Content__text">
+        <h2 className="Modal__header">
           Would You Like To Delete This Participant?
         </h2>
         <hr />
-        <div className="Modal__Content__options">
+        <div className="Modal__options">
           <Button
             className="button button--contained button--on-dark button--medium"
             onClick={this.closeModal}

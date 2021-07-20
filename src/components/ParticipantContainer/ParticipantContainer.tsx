@@ -602,7 +602,7 @@ export default class ParticipantContainer extends React.Component<
     */
     return (
       <Modal
-        className="Modal__Content"
+        className="Modal"
         overlayClassName="Modal__Overlay"
         contentLabel="Select Speed Statistic"
         isOpen={modalShown}
@@ -627,7 +627,7 @@ export default class ParticipantContainer extends React.Component<
             </label>
           ))}
           <hr />
-          <div className="Modal__Content__options">
+          <div className="Modal__options">
             <Button
               className="button button--outlined button--on-dark button--small"
               onClick={this.closeModal}
