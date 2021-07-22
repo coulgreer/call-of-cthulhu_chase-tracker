@@ -163,7 +163,7 @@ describe("Callback Triggering", () => {
 
     userEvent.click(screen.getByRole("button", { name: /create group/i }));
 
-    expect(handleGroupsChange).toBeCalled();
+    expect(handleGroupsChange).toBeCalledTimes(1);
   });
 
   test("should trigger update on group change", () => {
@@ -193,11 +193,53 @@ describe("Callback Triggering", () => {
     );
     userEvent.click(within(modalEl).getByRole("button", { name: /add/i }));
 
-    expect(handleGroupsChange).toBeCalled();
+    expect(handleGroupsChange).toBeCalledTimes(1);
+  });
+
+  test("should trigger 'distancerChange'", () => {
+    const { groups } = DEFAULT_PROPS;
+    const [group1, group2, group3] = groups;
+    const handleGroupsChange = jest.fn();
+
+    render(<GroupTable groups={groups} onGroupsChange={handleGroupsChange} />);
+
+    const gridEl = screen.getByRole("grid", { name: /groups/i });
+    const [firstRow, secondRow, thirdRow] = within(gridEl).getAllByRole("row");
+
+    userEvent.click(
+      within(firstRow).getByRole("button", { name: /group details/i })
+    );
+    userEvent.click(
+      within(secondRow).getByRole("button", { name: /group details/i })
+    );
+    userEvent.click(
+      within(thirdRow).getByRole("button", { name: /group details/i })
+    );
+
+    const firstDistancerEl = within(firstRow).getByRole("combobox", {
+      name: /distancer/i,
+    });
+    const secondDistancerEl = within(secondRow).getByRole("combobox", {
+      name: /distancer/i,
+    });
+    const thirdDistancerEl = within(thirdRow).getByRole("combobox", {
+      name: /distancer/i,
+    });
+
+    userEvent.selectOptions(firstDistancerEl, group2.name);
+    userEvent.selectOptions(secondDistancerEl, group3.name);
+    userEvent.selectOptions(thirdDistancerEl, group1.name);
+    thirdDistancerEl.blur();
+
+    expect(firstDistancerEl).toHaveValue(group2.id);
+    expect(secondDistancerEl).toHaveValue(group3.id);
+    expect(thirdDistancerEl).toHaveValue(group1.id);
+
+    expect(handleGroupsChange).toBeCalledTimes(6);
   });
 });
 
-describe("Deleting a group", () => {
+describe("Delete Group Button", () => {
   const headerText = /Would you like to delete the selected group\?/i;
 
   test("should render modal properly", () => {
@@ -290,7 +332,7 @@ describe("Deleting a group", () => {
   });
 });
 
-describe("Combining Groups", () => {
+describe("Combine Groups Button", () => {
   const headerText = /Would you like to merge the selected groups\?/i;
 
   test("should disable button", () => {
@@ -439,8 +481,23 @@ describe("Combining Groups", () => {
   });
 });
 
-describe("Splitting a Group", () => {
+describe("Split Group Button", () => {
   const headerText = /Transfer members/i;
+
+  test("should disable button", () => {
+    const participants = [createDummyParticipant()];
+    const groups = [createDummyGroupWithParticipants(participants)];
+
+    render(<GroupTable groups={groups} />);
+
+    const gridEl = screen.getByRole("grid", { name: /groups/i });
+
+    expect(
+      within(gridEl).getByRole("button", { name: /split/i })
+    ).toBeDisabled();
+  });
+
+  // TODO (Coul Greer): Add a test for enabling the button.
 
   test("should open modal", () => {
     const participants = [createDummyParticipant(), createDummyParticipant()];
@@ -475,7 +532,7 @@ describe("Splitting a Group", () => {
     ).not.toBeInTheDocument();
   });
 
-  test("should close modal when 'cancel' is clicked", () => {
+  test("should close modal when cancellation button is clicked", () => {
     const participants = [createDummyParticipant(), createDummyParticipant()];
     const groups = [createDummyGroupWithParticipants(participants)];
 
@@ -638,21 +695,6 @@ describe("Splitting a Group", () => {
     expect(nameTextbox).toHaveValue(newName);
   });
 
-  test("should disable split button", () => {
-    const participants = [createDummyParticipant()];
-    const groups = [createDummyGroupWithParticipants(participants)];
-
-    render(<GroupTable groups={groups} />);
-
-    const gridEl = screen.getByRole("grid", { name: /groups/i });
-
-    expect(
-      within(gridEl).getByRole("button", { name: /split/i })
-    ).toBeDisabled();
-  });
-
-  // TODO (Coul Greer): Add a test to enable the split button.
-
   test("should disable move member button", () => {
     const participants = [createDummyParticipant(), createDummyParticipant()];
     const groups = [createDummyGroupWithParticipants(participants)];
@@ -686,46 +728,4 @@ describe("Splitting a Group", () => {
   });
 
   // TODO (Coul Greer): Add a test to enable the transfer member button.
-});
-
-test("should trigger 'distancerChange'", () => {
-  const { groups } = DEFAULT_PROPS;
-  const [group1, group2, group3] = groups;
-  const handleGroupsChange = jest.fn();
-
-  render(<GroupTable groups={groups} onGroupsChange={handleGroupsChange} />);
-
-  const gridEl = screen.getByRole("grid", { name: /groups/i });
-  const [firstRow, secondRow, thirdRow] = within(gridEl).getAllByRole("row");
-
-  userEvent.click(
-    within(firstRow).getByRole("button", { name: /group details/i })
-  );
-  userEvent.click(
-    within(secondRow).getByRole("button", { name: /group details/i })
-  );
-  userEvent.click(
-    within(thirdRow).getByRole("button", { name: /group details/i })
-  );
-
-  const firstDistancerEl = within(firstRow).getByRole("combobox", {
-    name: /distancer/i,
-  });
-  const secondDistancerEl = within(secondRow).getByRole("combobox", {
-    name: /distancer/i,
-  });
-  const thirdDistancerEl = within(thirdRow).getByRole("combobox", {
-    name: /distancer/i,
-  });
-
-  userEvent.selectOptions(firstDistancerEl, group2.name);
-  userEvent.selectOptions(secondDistancerEl, group3.name);
-  userEvent.selectOptions(thirdDistancerEl, group1.name);
-  thirdDistancerEl.blur();
-
-  expect(firstDistancerEl).toHaveValue(group2.id);
-  expect(secondDistancerEl).toHaveValue(group3.id);
-  expect(thirdDistancerEl).toHaveValue(group1.id);
-
-  expect(handleGroupsChange).toBeCalledTimes(6);
 });

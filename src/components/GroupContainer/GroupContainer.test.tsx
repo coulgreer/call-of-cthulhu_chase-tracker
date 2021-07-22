@@ -148,8 +148,8 @@ describe("Initial State", () => {
       expect(screen.getByRole("button", { name: /add/i })).toBeInTheDocument();
     });
 
-    describe("Participants", () => {
-      test("should enable add button", () => {
+    describe("Add Members Button", () => {
+      test("should be enabled", () => {
         const { groups } = DEFAULT_PROPS;
         const populated = [createDummyParticipant()];
 
@@ -166,7 +166,7 @@ describe("Initial State", () => {
         expect(screen.getByRole("button", { name: /add/i })).not.toBeDisabled();
       });
 
-      test("should disable add button", () => {
+      test("should be disabled", () => {
         const { groups } = DEFAULT_PROPS;
         const empty: Participant[] = [];
 
@@ -186,8 +186,10 @@ describe("Initial State", () => {
   });
 });
 
+// TODO (Coul Greer): Add tests for Group name textbox
+
 describe("Distancer Display", () => {
-  test("should show warning message when a group does not have a distancer", () => {
+  test("should show warning message and display placeholder distancer", () => {
     const { groups } = DEFAULT_PROPS;
 
     render(<GroupContainer ownedIndex={1} groups={groups} />);
@@ -208,7 +210,7 @@ describe("Distancer Display", () => {
     );
   });
 
-  test("should hide warning and display current distancer when a group has a distancer", () => {
+  test("should hide warning message and display current distancer", () => {
     const { groups } = DEFAULT_PROPS;
 
     render(
@@ -223,7 +225,7 @@ describe("Distancer Display", () => {
 });
 
 describe("Pursuer Display", () => {
-  test("should show warning message when a group does not have at least one pursuer", () => {
+  test("should show warning messager", () => {
     const { groups } = DEFAULT_PROPS;
 
     render(<GroupContainer ownedIndex={3} groups={groups} />);
@@ -234,7 +236,7 @@ describe("Pursuer Display", () => {
     ).toBeInTheDocument();
   });
 
-  test("should hide warning and display current pursuer(s) when a group has any pursuers", () => {
+  test("should hide warning and display pursuers", () => {
     const { groups } = DEFAULT_PROPS;
 
     render(
@@ -255,8 +257,8 @@ describe("Pursuer Display", () => {
 });
 
 describe("Members Display", () => {
-  describe("Boundary Movement Ratings", () => {
-    test("should render members properly when none exist on the group", () => {
+  describe("Table", () => {
+    test("should render properly when no members exist on the group", () => {
       const groups = [createDummyGroupWithParticipants([])];
 
       render(<GroupContainer ownedIndex={0} groups={groups} />);
@@ -455,186 +457,163 @@ describe("Members Display", () => {
     });
   });
 
-  test("should trigger 'handleGroupChange' and close modal", () => {
-    const { groups, participants } = DEFAULT_PROPS;
-    const handleGroupChange = jest.fn();
-    const [{ name: first }] = participants;
+  describe("Modal", () => {
+    test("should trigger 'handleGroupChange' and close modal", () => {
+      const groups = [createDummyGroup()];
+      const participants = [createDummyParticipant()];
+      const handleGroupChange = jest.fn();
+      const [{ name: first }] = participants;
 
-    render(
-      <GroupContainer
-        ownedIndex={isolatedGroupIndex}
-        groups={groups}
-        participants={participants}
-        onGroupChange={handleGroupChange}
-      />
-    );
+      render(
+        <GroupContainer
+          ownedIndex={0}
+          groups={groups}
+          participants={participants}
+          onGroupChange={handleGroupChange}
+        />
+      );
 
-    userEvent.click(screen.getByRole("button", { name: /details/i }));
-    userEvent.click(screen.getByRole("button", { name: /add/i }));
+      userEvent.click(screen.getByRole("button", { name: /details/i }));
+      userEvent.click(screen.getByRole("button", { name: /add/i }));
 
-    const modalEl = screen.getByRole("dialog", { name: /participant/i });
+      const modalEl = screen.getByRole("dialog", { name: /participant/i });
 
-    userEvent.click(within(modalEl).getByRole("checkbox", { name: first }));
-    userEvent.click(within(modalEl).getByRole("button", { name: /add/i }));
+      userEvent.click(within(modalEl).getByRole("checkbox", { name: first }));
+      userEvent.click(within(modalEl).getByRole("button", { name: /add/i }));
 
-    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-    expect(handleGroupChange).toBeCalled();
-  });
+      expect(modalEl).not.toBeInTheDocument();
+      expect(handleGroupChange).toBeCalledTimes(1);
+    });
 
-  // TODO (Coul Greer): Add a test for ungrouping a participant
-  test("should update participant's flag for representing group ownership", () => {
-    const { groups, handleGroupChange } = DEFAULT_PROPS;
-    const participants = [createDummyParticipant(), createDummyParticipant()];
-    const [first] = participants;
+    // TODO (Coul Greer): Add a test for ungrouping a participant
+    test("should render properly when all participants are in a group", () => {
+      const groups = [createDummyGroup()];
+      const participants = [createDummyParticipant(true)];
 
-    render(
-      <GroupContainer
-        ownedIndex={isolatedGroupIndex}
-        groups={groups}
-        participants={participants}
-        onGroupChange={handleGroupChange}
-      />
-    );
+      render(
+        <GroupContainer
+          ownedIndex={0}
+          groups={groups}
+          participants={participants}
+        />
+      );
 
-    userEvent.click(screen.getByRole("button", { name: /group details/i }));
-    userEvent.click(screen.getByRole("button", { name: /add/i }));
+      userEvent.click(screen.getByRole("button", { name: /details/i }));
+      userEvent.click(screen.getByRole("button", { name: /add/i }));
 
-    const modalEl = screen.getByRole("dialog", { name: /participant/i });
+      const modalEl = screen.getByRole("dialog", { name: /participant/i });
 
-    userEvent.click(
-      within(modalEl).getByRole("checkbox", { name: first.name })
-    );
-    userEvent.click(within(modalEl).getByRole("button", { name: /add/i }));
+      expect(within(modalEl).queryByRole("checkbox")).not.toBeInTheDocument();
+      expect(
+        within(modalEl).getByText(
+          GroupContainer.getNoAvailableParticipantWarningMessage()
+        )
+      ).toBeInTheDocument();
+      expect(
+        within(modalEl).getByRole("button", { name: /cancel/i })
+      ).toBeInTheDocument();
+      expect(
+        within(modalEl).getByRole("button", { name: /add/i })
+      ).toBeDisabled();
+    });
 
-    expect(first.isGrouped).toBeTruthy();
-  });
+    test("should exclude participants already owned by the given group", () => {
+      const participants = [
+        createDummyParticipant(),
+        createDummyParticipant(true),
+        createDummyParticipant(),
+      ];
+      const [
+        { name: firstDummyName },
+        groupedParticipant,
+        { name: secondDummyName },
+      ] = participants;
+      const groups = [createDummyGroupWithParticipants([groupedParticipant])];
 
-  test("should render properly when all participants are already owned by a group", () => {
-    const { groups } = DEFAULT_PROPS;
-    const participants = [createDummyParticipant()];
+      render(
+        <GroupContainer
+          ownedIndex={0}
+          groups={groups}
+          participants={participants}
+        />
+      );
 
-    render(
-      <GroupContainer
-        ownedIndex={isolatedGroupIndex}
-        groups={groups}
-        participants={participants}
-      />
-    );
+      userEvent.click(screen.getByRole("button", { name: /group details/i }));
+      userEvent.click(screen.getByRole("button", { name: /add/i }));
 
-    userEvent.click(screen.getByRole("button", { name: /details/i }));
-    userEvent.click(screen.getByRole("button", { name: /add/i }));
+      const modalEl = screen.getByRole("dialog", { name: /participants/i });
 
-    const modalEl = screen.getByRole("dialog", { name: /participant/i });
+      expect(
+        within(modalEl).getByRole("checkbox", {
+          name: firstDummyName,
+        })
+      ).toBeInTheDocument();
+      expect(
+        within(modalEl).queryByRole("checkbox", {
+          name: groupedParticipant.name,
+        })
+      ).not.toBeInTheDocument();
+      expect(
+        within(modalEl).getByRole("checkbox", {
+          name: secondDummyName,
+        })
+      ).toBeInTheDocument();
+    });
 
-    userEvent.click(within(modalEl).getByRole("checkbox"));
-    userEvent.click(within(modalEl).getByRole("button", { name: /add/i }));
-    userEvent.click(screen.getByRole("button", { name: /add/i }));
+    test("should exclude participants already owned by any other group", () => {
+      const groups = [createDummyGroup()];
+      const orphanedParticipant = createDummyParticipant();
+      const fosteredParticipant = createDummyParticipant(true);
+      const participants = [orphanedParticipant, fosteredParticipant];
 
-    expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
-    expect(
-      screen.getByText(GroupContainer.getNoAvailableParticipantWarningMessage())
-    ).toBeInTheDocument();
-    expect(
-      within(modalEl).getByRole("button", { name: /add/i })
-    ).toBeDisabled();
-  });
+      render(
+        <GroupContainer
+          ownedIndex={0}
+          groups={groups}
+          participants={participants}
+        />
+      );
 
-  test("should exclude participants already owned by the given group", () => {
-    const participants = [
-      createDummyParticipant(),
-      createDummyParticipant(true),
-      createDummyParticipant(),
-    ];
-    const [
-      { name: firstDummyName },
-      groupedParticipant,
-      { name: secondDummyName },
-    ] = participants;
-    const groups = [createDummyGroupWithParticipants([groupedParticipant])];
+      userEvent.click(screen.getByRole("button", { name: /details/i }));
+      userEvent.click(screen.getByRole("button", { name: /add/i }));
 
-    render(
-      <GroupContainer
-        ownedIndex={0}
-        groups={groups}
-        participants={participants}
-      />
-    );
+      const modalEl = screen.getByRole("dialog", { name: /participants/i });
 
-    userEvent.click(screen.getByRole("button", { name: /group details/i }));
-    userEvent.click(screen.getByRole("button", { name: /add/i }));
+      expect(
+        within(modalEl).getByRole("checkbox", {
+          name: new RegExp(orphanedParticipant.name),
+        })
+      ).toBeInTheDocument();
+      expect(
+        within(modalEl).queryByRole("checkbox", {
+          name: new RegExp(fosteredParticipant.name),
+        })
+      ).not.toBeInTheDocument();
+    });
 
-    const modalEl = screen.getByRole("dialog", { name: /participants/i });
+    test("should disable add button when all participants are owned", () => {
+      const domesticParticipant = createDummyParticipant(true);
+      const foreignParticipant = createDummyParticipant(true);
+      const participants = [domesticParticipant, foreignParticipant];
+      const groups = [createDummyGroupWithParticipants([domesticParticipant])];
 
-    expect(
-      within(modalEl).getByRole("checkbox", {
-        name: firstDummyName,
-      })
-    ).toBeInTheDocument();
-    expect(
-      within(modalEl).queryByRole("checkbox", {
-        name: groupedParticipant.name,
-      })
-    ).not.toBeInTheDocument();
-    expect(
-      within(modalEl).getByRole("checkbox", {
-        name: secondDummyName,
-      })
-    ).toBeInTheDocument();
-  });
+      render(
+        <GroupContainer
+          ownedIndex={0}
+          groups={groups}
+          participants={participants}
+        />
+      );
 
-  test("should exclude participants already owned by any other group", () => {
-    const groups = [createDummyGroup()];
-    const orphanedParticipant = createDummyParticipant(false);
-    const fosteredParticipant = createDummyParticipant(true);
-    const participants = [orphanedParticipant, fosteredParticipant];
+      userEvent.click(screen.getByRole("button", { name: /details/i }));
+      userEvent.click(screen.getByRole("button", { name: /add/i }));
 
-    render(
-      <GroupContainer
-        ownedIndex={0}
-        groups={groups}
-        participants={participants}
-      />
-    );
+      const modalEl = screen.getByRole("dialog", { name: /participant/i });
 
-    userEvent.click(screen.getByRole("button", { name: /details/i }));
-    userEvent.click(screen.getByRole("button", { name: /add/i }));
-
-    const modalEl = screen.getByRole("dialog", { name: /participants/i });
-
-    expect(
-      within(modalEl).getByRole("checkbox", {
-        name: new RegExp(orphanedParticipant.name),
-      })
-    ).toBeInTheDocument();
-    expect(
-      within(modalEl).queryByRole("checkbox", {
-        name: new RegExp(fosteredParticipant.name),
-      })
-    ).not.toBeInTheDocument();
-  });
-
-  test("should disable add button when all participants are owned", () => {
-    const domesticParticipant = createDummyParticipant(true);
-    const foreignParticipant = createDummyParticipant(true);
-    const participants = [domesticParticipant, foreignParticipant];
-    const groups = [createDummyGroupWithParticipants([domesticParticipant])];
-
-    render(
-      <GroupContainer
-        ownedIndex={0}
-        groups={groups}
-        participants={participants}
-      />
-    );
-
-    userEvent.click(screen.getByRole("button", { name: /details/i }));
-    userEvent.click(screen.getByRole("button", { name: /add/i }));
-
-    const modalEl = screen.getByRole("dialog", { name: /participant/i });
-
-    expect(
-      within(modalEl).getByRole("button", { name: /add/i })
-    ).toBeDisabled();
+      expect(
+        within(modalEl).getByRole("button", { name: /add/i })
+      ).toBeDisabled();
+    });
   });
 });
 
