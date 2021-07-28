@@ -27,6 +27,29 @@ function createAnExpandedParticipantContainer() {
   userEvent.click(expandEls[expandEls.length - 1]);
 }
 
+let origErrorConsole: (...data: any[]) => void;
+
+beforeEach(() => {
+  origErrorConsole = window.console.error;
+
+  window.console.error = (...args) => {
+    const firstArg = args.length > 0 && args[0];
+
+    const shouldBeIgnored =
+      firstArg &&
+      typeof firstArg === "string" &&
+      firstArg.includes("Not implemented: HTMLFormElement.prototype.submit");
+
+    if (!shouldBeIgnored) {
+      origErrorConsole(...args);
+    }
+  };
+});
+
+afterEach(() => {
+  window.console.error = origErrorConsole;
+});
+
 test("should render properly", () => {
   render(<TabbedDisplay />);
 
@@ -883,24 +906,6 @@ describe("GroupTable Event Handlers", () => {
         .getAllByRole("listitem")
         .filter((listitem) => listitem.textContent === thirdGroupId)
     ).toHaveLength(1);
-
-    /*
-      TODO (Coul Greer): Think about if this last assert is necessary for the
-      test. Meaning: does this improve confidence. If so, extract into another
-      test for switching back and forth.
-    */
-    userEvent.selectOptions(firstDistancerEl, thirdGroupId);
-    firstDistancerEl.blur();
-
-    expect(firstDistancerEl).toHaveValue(thirdGroupId);
-    expect(
-      within(thirdGroupEditor)
-        .getAllByRole("listitem")
-        .filter((listitem) => listitem.textContent === firstGroupId)
-    ).toHaveLength(1);
-    expect(
-      within(secondGroupEditor).queryByRole("listitem")
-    ).not.toBeInTheDocument();
   });
 
   test("should combine groups", () => {
@@ -986,36 +991,7 @@ describe("GroupTable Event Handlers", () => {
 
     expect(
       within(editorEl).getByRole("textbox", { name: /name/i })
-    ).toHaveDisplayValue(validName);
-  });
-
-  test("should trim new name", () => {
-    const paddedName = "   Valid   ";
-    const refinedName = paddedName.trim();
-
-    render(<TabbedDisplay />);
-    createAnExpandedGroupContainer();
-    createAnExpandedGroupContainer();
-
-    const editorEl = screen.getByRole("gridcell", {
-      name: /group 1 editor/i,
-    });
-
-    userEvent.click(within(editorEl).getByRole("button", { name: /combine/i }));
-
-    const modalEl = screen.getByRole("dialog");
-    const newNameEl = within(modalEl).getByRole("textbox", { name: /name/i });
-
-    userEvent.click(
-      within(modalEl).getByRole("checkbox", { name: /group 2/i })
-    );
-    userEvent.clear(newNameEl);
-    userEvent.type(newNameEl, paddedName);
-    userEvent.click(within(modalEl).getByRole("button", { name: /combine/i }));
-
-    expect(
-      within(editorEl).getByRole("textbox", { name: /name/i })
-    ).toHaveDisplayValue(refinedName);
+    ).toHaveValue(validName);
   });
 
   test("should split group", () => {
@@ -1188,5 +1164,78 @@ describe("Confirmation Tests", () => {
     expect(
       within(highestMovRow).getByRole("cell", { name: `${newMov}` })
     ).toBeInTheDocument();
+  });
+
+  test("should combine groups when combining groups on more than one separate occassion", () => {
+    render(<TabbedDisplay />);
+
+    createAnExpandedGroupContainer();
+    createAnExpandedGroupContainer();
+    createAnExpandedGroupContainer();
+
+    const gridEl = screen.getByRole("grid", { name: /groups/i });
+    const [firstCell, secondCell, lastCell] = within(gridEl).getAllByRole(
+      "gridcell",
+      { name: /editor/i }
+    );
+
+    userEvent.click(
+      within(firstCell).getByRole("button", { name: /combine/i })
+    );
+
+    let modalEl = screen.getByRole("dialog", { name: /combine/i });
+
+    userEvent.click(within(modalEl).getByRole("checkbox", { name: /2/ }));
+    userEvent.click(within(modalEl).getByRole("button", { name: /combine/i }));
+    userEvent.click(
+      within(firstCell).getByRole("button", { name: /combine/i })
+    );
+
+    modalEl = screen.getByRole("dialog", { name: /combine/i });
+
+    userEvent.click(within(modalEl).getByRole("checkbox", { name: /3/ }));
+    userEvent.click(within(modalEl).getByRole("button", { name: /combine/i }));
+
+    expect(firstCell).toBeInTheDocument();
+    expect(secondCell).not.toBeInTheDocument();
+    expect(lastCell).not.toBeInTheDocument();
+  });
+
+  test("should combine groups when adding groups out of sequential order", () => {
+    render(<TabbedDisplay />);
+
+    createAnExpandedGroupContainer();
+    createAnExpandedGroupContainer();
+    createAnExpandedGroupContainer();
+    createAnExpandedGroupContainer();
+    createAnExpandedGroupContainer();
+
+    const gridEl = screen.getByRole("grid", { name: /groups/i });
+    const [firstCell, secondCell, thirdCell, fourthCell, lastCell] = within(
+      gridEl
+    ).getAllByRole("gridcell", { name: /editor/i });
+
+    userEvent.click(
+      within(firstCell).getByRole("button", { name: /combine/i })
+    );
+
+    const modalEl = screen.getByRole("dialog", { name: /combine/i });
+    const [firstCheckbox, secondCheckbox, thirdCheckbox, lastCheckbox] =
+      within(modalEl).getAllByRole("checkbox");
+
+    userEvent.click(lastCheckbox);
+    userEvent.click(firstCheckbox);
+    userEvent.click(secondCheckbox);
+    userEvent.click(thirdCheckbox);
+    userEvent.click(within(modalEl).getByRole("button", { name: /combine/i }));
+    userEvent.click(
+      within(firstCell).getByRole("button", { name: /combine/i })
+    );
+
+    expect(firstCell).toBeInTheDocument();
+    expect(secondCell).not.toBeInTheDocument();
+    expect(thirdCell).not.toBeInTheDocument();
+    expect(fourthCell).not.toBeInTheDocument();
+    expect(lastCell).not.toBeInTheDocument();
   });
 });

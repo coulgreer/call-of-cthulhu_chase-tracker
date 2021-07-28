@@ -73,6 +73,29 @@ const DEFAULT_PROPS: {
 const isolatedGroupIndex = 0;
 const centralizedGroupIndex = 2;
 
+let origErrorConsole: (...data: any[]) => void;
+
+beforeEach(() => {
+  origErrorConsole = window.console.error;
+
+  window.console.error = (...args) => {
+    const firstArg = args.length > 0 && args[0];
+
+    const shouldBeIgnored =
+      firstArg &&
+      typeof firstArg === "string" &&
+      firstArg.includes("Not implemented: HTMLFormElement.prototype.submit");
+
+    if (!shouldBeIgnored) {
+      origErrorConsole(...args);
+    }
+  };
+});
+
+afterEach(() => {
+  window.console.error = origErrorConsole;
+});
+
 describe("Initial State", () => {
   test("should render properly when collapsed", () => {
     const { groups, ownedIndex } = DEFAULT_PROPS;
@@ -186,7 +209,23 @@ describe("Initial State", () => {
   });
 });
 
-// TODO (Coul Greer): Add tests for Group name textbox
+describe("Group Name", () => {
+  test("should change to prior, valid name", () => {
+    const newGroupName = "Weyland Yutani";
+    const groups = [createDummyGroup()];
+
+    render(<GroupContainer ownedIndex={0} groups={groups} />);
+
+    const nameEl = screen.getByRole("textbox", { name: /name/i });
+
+    userEvent.clear(nameEl);
+    userEvent.type(nameEl, newGroupName);
+    userEvent.clear(nameEl);
+    nameEl.blur();
+
+    expect(nameEl).toHaveValue(newGroupName);
+  });
+});
 
 describe("Distancer Display", () => {
   test("should show warning message and display placeholder distancer", () => {

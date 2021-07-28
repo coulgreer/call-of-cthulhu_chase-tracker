@@ -142,14 +142,12 @@ describe("Participant name rendering", () => {
 
   test("should render the last valid name when name changed to empty string", () => {
     const validName = "Valid";
-    const invalidName = "";
     render(<ParticipantContainer participant={DEFAULT_PROPS.participant} />);
 
     const inputEl = screen.getByRole("textbox", { name: /name/i });
     userEvent.clear(inputEl);
     userEvent.type(inputEl, validName);
     userEvent.clear(inputEl);
-    userEvent.type(inputEl, invalidName);
     inputEl.blur();
 
     expect(inputEl).toHaveDisplayValue(validName);

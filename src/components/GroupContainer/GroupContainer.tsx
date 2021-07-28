@@ -20,6 +20,8 @@ interface Props {
 
 interface State {
   hasDistancer: boolean;
+  rawGroupName: string;
+  validGroupName: string;
   selectedParticipantsIds: string[];
   expansionShown: boolean;
   newMemberModalShown: boolean;
@@ -85,6 +87,8 @@ export default class GroupContainer extends React.Component<Props, State> {
     this.currentGroup = groups[ownedIndex];
     this.state = {
       hasDistancer: true,
+      rawGroupName: this.currentGroup.name,
+      validGroupName: this.currentGroup.name,
       selectedParticipantsIds: [],
       expansionShown: false,
       newMemberModalShown: false,
@@ -106,6 +110,7 @@ export default class GroupContainer extends React.Component<Props, State> {
     this.handleCancelMemberAdditionClick =
       this.handleCancelMemberAdditionClick.bind(this);
     this.handleNameChange = this.handleNameChange.bind(this);
+    this.handleNameBlur = this.handleNameBlur.bind(this);
 
     // Helpers
     this.findParticipantById = this.findParticipantById.bind(this);
@@ -113,6 +118,18 @@ export default class GroupContainer extends React.Component<Props, State> {
     this.renderParticipantCheckbox = this.renderParticipantCheckbox.bind(this);
     this.renderOption = this.renderOption.bind(this);
     this.renderMember = this.renderMember.bind(this);
+  }
+
+  static getDerivedStateFromProps(props: Props, state: State) {
+    const { groups, ownedIndex } = props;
+    const { validGroupName } = state;
+    const tempGroup = groups[ownedIndex];
+
+    if (tempGroup.name !== validGroupName) {
+      return { rawGroupName: tempGroup.name, validGroupName: tempGroup.name };
+    }
+
+    return null;
   }
 
   private handleToggleClick() {
@@ -142,11 +159,24 @@ export default class GroupContainer extends React.Component<Props, State> {
   }
 
   private handleNameChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const { onGroupChange } = this.props;
     const { value } = event.currentTarget;
 
-    this.currentGroup.name = value;
-    if (onGroupChange) onGroupChange(this.currentGroup);
+    if (value) {
+      this.currentGroup.name = value;
+      this.setState({ validGroupName: value });
+    }
+
+    this.setState({ rawGroupName: value });
+  }
+
+  private handleNameBlur() {
+    const { onGroupChange } = this.props;
+
+    this.setState((state) => {
+      if (onGroupChange) onGroupChange(this.currentGroup);
+
+      return { rawGroupName: state.validGroupName };
+    });
   }
 
   private handleInitiateMemberAdditionClick() {
@@ -341,7 +371,7 @@ export default class GroupContainer extends React.Component<Props, State> {
   }
 
   private renderSummaryContent() {
-    const { expansionShown } = this.state;
+    const { rawGroupName, expansionShown } = this.state;
 
     return (
       <div className="GroupContainer__main-container">
@@ -349,8 +379,9 @@ export default class GroupContainer extends React.Component<Props, State> {
           <span className="input__label">Name</span>
           <input
             className="textbox textbox--full-width"
-            value={this.currentGroup.name}
+            value={rawGroupName}
             onChange={this.handleNameChange}
+            onBlur={this.handleNameBlur}
           />
         </label>
         <Button

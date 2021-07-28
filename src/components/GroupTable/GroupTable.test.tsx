@@ -90,6 +90,29 @@ const DEFAULT_PROPS: {
   handleGroupsChange: jest.fn(),
 };
 
+let origErrorConsole: (...data: any[]) => void;
+
+beforeEach(() => {
+  origErrorConsole = window.console.error;
+
+  window.console.error = (...args) => {
+    const firstArg = args.length > 0 && args[0];
+
+    const shouldBeIgnored =
+      firstArg &&
+      typeof firstArg === "string" &&
+      firstArg.includes("Not implemented: HTMLFormElement.prototype.submit");
+
+    if (!shouldBeIgnored) {
+      origErrorConsole(...args);
+    }
+  };
+});
+
+afterEach(() => {
+  window.console.error = origErrorConsole;
+});
+
 describe("Initial State", () => {
   describe("when no groups exist", () => {
     const empty: Group[] = [];
@@ -150,7 +173,37 @@ describe("Initial State", () => {
       ).toBeInTheDocument();
     });
 
-    // TODO (Coul Greer): Add a test for when optional props are all included.
+    test("should render properly when including all optional props", () => {
+      const { warningMessage, groups, participants, handleGroupsChange } =
+        DEFAULT_PROPS;
+      const { length: rowCount } = groups;
+      const cellsPerRow = 2;
+      const totalCellCount = rowCount * cellsPerRow;
+
+      render(
+        <GroupTable
+          warningMessage={warningMessage}
+          groups={groups}
+          participants={participants}
+          onGroupsChange={handleGroupsChange}
+        />
+      );
+
+      const gridEl = screen.getByRole("grid", { name: /groups/i });
+
+      expect(within(gridEl).getAllByRole("gridcell")).toHaveLength(
+        totalCellCount
+      );
+      expect(
+        within(gridEl).getAllByRole("button", { name: /split/i })
+      ).toHaveLength(rowCount);
+      expect(
+        within(gridEl).getAllByRole("button", { name: /combine/i })
+      ).toHaveLength(rowCount);
+      expect(
+        screen.getByRole("button", { name: /create group/i })
+      ).toBeInTheDocument();
+    });
   });
 });
 
@@ -335,397 +388,573 @@ describe("Delete Group Button", () => {
 describe("Combine Groups Button", () => {
   const headerText = /Would you like to merge the selected groups\?/i;
 
-  test("should disable button", () => {
-    const groups = [createDummyGroup()];
+  describe("Button", () => {
+    test("should disable button", () => {
+      const groups = [createDummyGroup()];
 
-    render(<GroupTable groups={groups} />);
+      render(<GroupTable groups={groups} />);
 
-    const gridEl = screen.getByRole("grid", { name: /groups/i });
+      const gridEl = screen.getByRole("grid", { name: /groups/i });
 
-    expect(
-      within(gridEl).getByRole("button", { name: /combine/i })
-    ).toBeDisabled();
-  });
-
-  test("should enable button", () => {
-    const groups = [createDummyGroup(), createDummyGroup()];
-
-    render(<GroupTable groups={groups} />);
-
-    const gridEl = screen.getByRole("grid", { name: /groups/i });
-    const [anyCombineButtonEl] = within(gridEl).getAllByRole("button", {
-      name: /combine/i,
+      expect(
+        within(gridEl).getByRole("button", { name: /combine/i })
+      ).toBeDisabled();
     });
 
-    expect(anyCombineButtonEl).not.toBeDisabled();
+    test("should enable button", () => {
+      const groups = [createDummyGroup(), createDummyGroup()];
+
+      render(<GroupTable groups={groups} />);
+
+      const gridEl = screen.getByRole("grid", { name: /groups/i });
+      const [anyCombineButtonEl] = within(gridEl).getAllByRole("button", {
+        name: /combine/i,
+      });
+
+      expect(anyCombineButtonEl).not.toBeDisabled();
+    });
   });
 
-  test("should open modal", () => {
-    const { groups } = DEFAULT_PROPS;
+  describe("Modal", () => {
+    test("should open modal", () => {
+      const { groups } = DEFAULT_PROPS;
 
-    render(<GroupTable groups={groups} />);
+      render(<GroupTable groups={groups} />);
 
-    const gridEl = screen.getByRole("grid", { name: /groups/i });
-    const [first] = within(gridEl).getAllByRole("row");
+      const gridEl = screen.getByRole("grid", { name: /groups/i });
+      const [first] = within(gridEl).getAllByRole("row");
 
-    userEvent.click(within(first).getByRole("button", { name: /combine/i }));
+      userEvent.click(within(first).getByRole("button", { name: /combine/i }));
 
-    expect(screen.getByRole("dialog", { name: /groups/i })).toBeInTheDocument();
-  });
-
-  test("should close modal when 'esc' is pressed", () => {
-    const { groups } = DEFAULT_PROPS;
-
-    render(<GroupTable groups={groups} />);
-
-    const gridEl = screen.getByRole("grid", { name: /groups/i });
-    const [first] = within(gridEl).getAllByRole("row");
-
-    userEvent.click(within(first).getByRole("button", { name: /combine/i }));
-    userEvent.keyboard("{esc}");
-
-    expect(
-      screen.queryByRole("dialog", { name: headerText })
-    ).not.toBeInTheDocument();
-  });
-
-  test("should close modal when cancellation button is clicked", () => {
-    const { groups } = DEFAULT_PROPS;
-
-    render(<GroupTable groups={groups} />);
-
-    const gridEl = screen.getByRole("grid", { name: /groups/i });
-    const [first] = within(gridEl).getAllByRole("row");
-
-    userEvent.click(within(first).getByRole("button", { name: /combine/i }));
-
-    const modalEl = screen.getByRole("dialog", { name: /groups/i });
-
-    userEvent.click(within(modalEl).getByRole("button", { name: /cancel/i }));
-
-    expect(modalEl).not.toBeInTheDocument();
-  });
-
-  test("should render modal properly", () => {
-    const groups = [createDummyGroup(), createDummyGroup()];
-
-    render(<GroupTable groups={groups} />);
-
-    const gridEl = screen.getByRole("grid", { name: /groups/i });
-    const [first] = within(gridEl).getAllByRole("row");
-
-    userEvent.click(within(first).getByRole("button", { name: /combine/i }));
-
-    const modalEl = screen.getByRole("dialog", { name: /groups/i });
-
-    expect(
-      within(modalEl).getByRole("heading", { name: headerText })
-    ).toBeInTheDocument();
-    expect(
-      within(modalEl).getByRole("textbox", { name: /new name/i })
-    ).toBeInTheDocument();
-    expect(within(modalEl).getAllByRole("checkbox")).toHaveLength(
-      groups.length - 1
-    );
-    expect(
-      within(modalEl).getByText(GroupTable.getCombiningWarningMessage())
-    ).toBeInTheDocument();
-    expect(
-      within(modalEl).getByRole("button", { name: /cancel/i })
-    ).toBeInTheDocument();
-    expect(
-      within(modalEl).getByRole("button", { name: /combine/i })
-    ).toBeInTheDocument();
-  });
-
-  test("should trigger 'onGroupsChange' groups and transfer members", () => {
-    const handleGroupsChange = jest.fn();
-    const groups = [
-      createDummyGroupWithParticipants([]),
-      createDummyGroupWithParticipants([
-        createDummyParticipant(),
-        createDummyParticipant(),
-      ]),
-    ];
-
-    const [
-      { participants, name: dominantGroupName },
-      { name: subservientGroupName },
-    ] = groups;
-
-    render(<GroupTable groups={groups} onGroupsChange={handleGroupsChange} />);
-
-    const editorEl = screen.getByRole("gridcell", {
-      name: new RegExp(`${dominantGroupName} editor`, "i"),
+      expect(
+        screen.getByRole("dialog", { name: /groups/i })
+      ).toBeInTheDocument();
     });
 
-    userEvent.click(within(editorEl).getByRole("button", { name: /combine/i }));
+    test("should close modal when 'esc' is pressed", () => {
+      const { groups } = DEFAULT_PROPS;
 
-    const modalEl = screen.getByRole("dialog");
+      render(<GroupTable groups={groups} />);
 
-    userEvent.click(
-      within(modalEl).getByRole("checkbox", { name: subservientGroupName })
-    );
-    userEvent.click(within(modalEl).getByRole("button", { name: /combine/i }));
-    userEvent.click(
-      within(editorEl).getByRole("button", { name: /group details/i })
-    );
+      const gridEl = screen.getByRole("grid", { name: /groups/i });
+      const [first] = within(gridEl).getAllByRole("row");
 
-    const tableEl = within(editorEl).getByRole("table");
+      userEvent.click(within(first).getByRole("button", { name: /combine/i }));
+      userEvent.keyboard("{esc}");
 
-    expect(handleGroupsChange).toBeCalledTimes(1);
-    expect(modalEl).not.toBeInTheDocument();
-    expect(within(tableEl).getAllByRole("row")).toHaveLength(
-      participants.length + membersTableHeadRowCount
-    );
+      expect(
+        screen.queryByRole("dialog", { name: headerText })
+      ).not.toBeInTheDocument();
+    });
+
+    test("should close modal when cancellation button is clicked", () => {
+      const { groups } = DEFAULT_PROPS;
+
+      render(<GroupTable groups={groups} />);
+
+      const gridEl = screen.getByRole("grid", { name: /groups/i });
+      const [first] = within(gridEl).getAllByRole("row");
+
+      userEvent.click(within(first).getByRole("button", { name: /combine/i }));
+
+      const modalEl = screen.getByRole("dialog", { name: /groups/i });
+
+      userEvent.click(within(modalEl).getByRole("button", { name: /cancel/i }));
+
+      expect(modalEl).not.toBeInTheDocument();
+    });
+
+    test("should render modal properly", () => {
+      const groups = [createDummyGroup(), createDummyGroup()];
+
+      render(<GroupTable groups={groups} />);
+
+      const gridEl = screen.getByRole("grid", { name: /groups/i });
+      const [first] = within(gridEl).getAllByRole("row");
+
+      userEvent.click(within(first).getByRole("button", { name: /combine/i }));
+
+      const modalEl = screen.getByRole("dialog", { name: /groups/i });
+
+      expect(
+        within(modalEl).getByRole("heading", { name: headerText })
+      ).toBeInTheDocument();
+      expect(
+        within(modalEl).getByRole("textbox", { name: /new name/i })
+      ).toBeInTheDocument();
+      expect(within(modalEl).getAllByRole("checkbox")).toHaveLength(
+        groups.length - 1
+      );
+      expect(
+        within(modalEl).getByText(GroupTable.getCombiningWarningMessage())
+      ).toBeInTheDocument();
+      expect(
+        within(modalEl).getByRole("button", { name: /cancel/i })
+      ).toBeInTheDocument();
+      expect(
+        within(modalEl).getByRole("button", { name: /combine/i })
+      ).toBeInTheDocument();
+    });
+
+    test("should trigger 'onGroupsChange' groups and transfer members", () => {
+      const handleGroupsChange = jest.fn();
+      const groups = [
+        createDummyGroupWithParticipants([]),
+        createDummyGroupWithParticipants([
+          createDummyParticipant(),
+          createDummyParticipant(),
+        ]),
+      ];
+
+      const [
+        { participants, name: dominantGroupName },
+        { name: subservientGroupName },
+      ] = groups;
+
+      render(
+        <GroupTable groups={groups} onGroupsChange={handleGroupsChange} />
+      );
+
+      const editorEl = screen.getByRole("gridcell", {
+        name: new RegExp(`${dominantGroupName} editor`, "i"),
+      });
+
+      userEvent.click(
+        within(editorEl).getByRole("button", { name: /combine/i })
+      );
+
+      const modalEl = screen.getByRole("dialog");
+
+      userEvent.click(
+        within(modalEl).getByRole("checkbox", { name: subservientGroupName })
+      );
+      userEvent.click(
+        within(modalEl).getByRole("button", { name: /combine/i })
+      );
+      userEvent.click(
+        within(editorEl).getByRole("button", { name: /group details/i })
+      );
+
+      const tableEl = within(editorEl).getByRole("table");
+
+      expect(handleGroupsChange).toBeCalledTimes(1);
+      expect(modalEl).not.toBeInTheDocument();
+      expect(within(tableEl).getAllByRole("row")).toHaveLength(
+        participants.length + membersTableHeadRowCount
+      );
+    });
   });
 });
 
 describe("Split Group Button", () => {
   const headerText = /Transfer members/i;
 
-  test("should disable button", () => {
-    const participants = [createDummyParticipant()];
-    const groups = [createDummyGroupWithParticipants(participants)];
+  describe("Button", () => {
+    test("should disable button", () => {
+      const participants = [createDummyParticipant(true)];
+      const groups = [createDummyGroupWithParticipants(participants)];
 
-    render(<GroupTable groups={groups} />);
+      render(<GroupTable groups={groups} />);
 
-    const gridEl = screen.getByRole("grid", { name: /groups/i });
+      const gridEl = screen.getByRole("grid", { name: /groups/i });
 
-    expect(
-      within(gridEl).getByRole("button", { name: /split/i })
-    ).toBeDisabled();
-  });
-
-  // TODO (Coul Greer): Add a test for enabling the button.
-
-  test("should open modal", () => {
-    const participants = [createDummyParticipant(), createDummyParticipant()];
-    const groups = [createDummyGroupWithParticipants(participants)];
-
-    render(<GroupTable groups={groups} />);
-
-    const gridEl = screen.getByRole("grid", { name: /groups/i });
-    const [first] = within(gridEl).getAllByRole("row");
-
-    userEvent.click(within(first).getByRole("button", { name: /split/i }));
-
-    expect(
-      screen.getByRole("dialog", { name: headerText })
-    ).toBeInTheDocument();
-  });
-
-  test("should close modal when 'esc' is pressed", () => {
-    const participants = [createDummyParticipant(), createDummyParticipant()];
-    const groups = [createDummyGroupWithParticipants(participants)];
-
-    render(<GroupTable groups={groups} />);
-
-    const gridEl = screen.getByRole("grid", { name: /groups/i });
-    const [first] = within(gridEl).getAllByRole("row");
-
-    userEvent.click(within(first).getByRole("button", { name: /split/i }));
-    userEvent.keyboard("{esc}");
-
-    expect(
-      screen.queryByRole("dialog", { name: headerText })
-    ).not.toBeInTheDocument();
-  });
-
-  test("should close modal when cancellation button is clicked", () => {
-    const participants = [createDummyParticipant(), createDummyParticipant()];
-    const groups = [createDummyGroupWithParticipants(participants)];
-
-    render(<GroupTable groups={groups} />);
-
-    const gridEl = screen.getByRole("grid", { name: /groups/i });
-    const [first] = within(gridEl).getAllByRole("row");
-
-    userEvent.click(within(first).getByRole("button", { name: /split/i }));
-
-    const modalEl = screen.getByRole("dialog", { name: headerText });
-
-    userEvent.click(within(modalEl).getByRole("button", { name: /cancel/i }));
-
-    expect(modalEl).not.toBeInTheDocument();
-  });
-
-  test("should render modal properly", () => {
-    const participants = [
-      createDummyParticipant(),
-      createDummyParticipant(),
-      createDummyParticipant(),
-    ];
-    const groups = [createDummyGroupWithParticipants(participants)];
-    const [
-      { name: firstMember },
-      { name: secondMember },
-      { name: thirdMember },
-    ] = participants;
-    const [originalGroup] = groups;
-
-    render(<GroupTable groups={groups} />);
-
-    const gridEl = screen.getByRole("grid", { name: /groups/i });
-
-    userEvent.click(within(gridEl).getByRole("button", { name: /split/i }));
-
-    const modalEl = screen.getByRole("dialog", { name: headerText });
-    const originalMembersEl = within(modalEl).getByRole("grid", {
-      name: originalGroup.name,
-    });
-    const newMembersEl = within(modalEl).getByRole("grid", {
-      name: /new group/i,
+      expect(
+        within(gridEl).getByRole("button", { name: /split/i })
+      ).toBeDisabled();
     });
 
-    expect(
-      within(modalEl).getByRole("heading", { name: headerText })
-    ).toBeInTheDocument();
-    expect(
-      within(originalMembersEl).getByRole("gridcell", { name: firstMember })
-    ).toBeInTheDocument();
-    expect(
-      within(originalMembersEl).getByRole("button", {
-        name: new RegExp(`move ${firstMember}`, "i"),
-      })
-    ).toBeInTheDocument();
-    expect(
-      within(originalMembersEl).getByRole("gridcell", { name: secondMember })
-    ).toBeInTheDocument();
-    expect(
-      within(originalMembersEl).getByRole("button", {
-        name: new RegExp(`move ${secondMember}`, "i"),
-      })
-    ).toBeInTheDocument();
-    expect(
-      within(originalMembersEl).getByRole("gridcell", { name: thirdMember })
-    ).toBeInTheDocument();
-    expect(
-      within(originalMembersEl).getByRole("button", {
-        name: new RegExp(`move ${thirdMember}`, "i"),
-      })
-    ).toBeInTheDocument();
-    expect(
-      within(modalEl).getByRole("textbox", {
-        name: /new group name/i,
-      })
-    ).toBeInTheDocument();
-    expect(
-      within(newMembersEl).getByRole("row", { name: /placeholder/i })
-    ).toBeInTheDocument();
-    expect(
-      within(modalEl).getByRole("button", { name: /cancel/i })
-    ).toBeInTheDocument();
-    expect(
-      within(modalEl).getByRole("button", { name: /split/i })
-    ).toBeDisabled();
+    test("should enable button", () => {
+      const participants = [
+        createDummyParticipant(true),
+        createDummyParticipant(true),
+      ];
+      const groups = [createDummyGroupWithParticipants(participants)];
+
+      render(<GroupTable groups={groups} />);
+
+      const gridEl = screen.getByRole("grid", { name: /groups/i });
+
+      expect(
+        within(gridEl).getByRole("button", { name: /split/i })
+      ).not.toBeDisabled();
+    });
   });
 
-  test("should switch members between groups", () => {
-    const participants = [
-      createDummyParticipant(),
-      createDummyParticipant(),
-      createDummyParticipant(),
-    ];
-    const groups = [createDummyGroupWithParticipants(participants)];
-    const [
-      { name: firstMember },
-      { name: secondMember },
-      { name: thirdMember },
-    ] = participants;
-    const [{ name: originalGroup }] = groups;
+  describe("Modal", () => {
+    test("should open modal", () => {
+      const participants = [createDummyParticipant(), createDummyParticipant()];
+      const groups = [createDummyGroupWithParticipants(participants)];
 
-    render(<GroupTable groups={groups} />);
+      render(<GroupTable groups={groups} />);
 
-    const gridEl = screen.getByRole("grid", { name: /groups/i });
+      const gridEl = screen.getByRole("grid", { name: /groups/i });
+      const [first] = within(gridEl).getAllByRole("row");
 
-    userEvent.click(within(gridEl).getByRole("button", { name: /split/i }));
+      userEvent.click(within(first).getByRole("button", { name: /split/i }));
 
-    const modalEl = screen.getByRole("dialog", { name: headerText });
-    const originalMembersEl = within(modalEl).getByRole("grid", {
-      name: originalGroup,
-    });
-    const newMembersEl = within(modalEl).getByRole("grid", {
-      name: /new group/i,
+      expect(
+        screen.getByRole("dialog", { name: headerText })
+      ).toBeInTheDocument();
     });
 
-    const firstMemberRow = screen.getByRole("row", { name: firstMember });
-    let secondMemberRow = screen.getByRole("row", { name: secondMember });
+    test("should close modal when 'esc' is pressed", () => {
+      const participants = [createDummyParticipant(), createDummyParticipant()];
+      const groups = [createDummyGroupWithParticipants(participants)];
 
-    userEvent.click(within(firstMemberRow).getByRole("button"));
-    userEvent.click(within(secondMemberRow).getByRole("button"));
+      render(<GroupTable groups={groups} />);
 
-    secondMemberRow = screen.getByRole("row", { name: secondMember });
-    userEvent.click(within(secondMemberRow).getByRole("button"));
+      const gridEl = screen.getByRole("grid", { name: /groups/i });
+      const [first] = within(gridEl).getAllByRole("row");
 
-    expect(
-      within(originalMembersEl).getByRole("row", { name: secondMember })
-    ).toBeInTheDocument();
-    expect(
-      within(originalMembersEl).getByRole("row", { name: thirdMember })
-    ).toBeInTheDocument();
-    expect(
-      within(newMembersEl).getByRole("row", { name: firstMember })
-    ).toBeInTheDocument();
-  });
+      userEvent.click(within(first).getByRole("button", { name: /split/i }));
+      userEvent.keyboard("{esc}");
 
-  test("should update new group name", () => {
-    const newName = "A Cool Group";
-    const participants = [
-      createDummyParticipant(),
-      createDummyParticipant(),
-      createDummyParticipant(),
-    ];
-    const groups = [createDummyGroupWithParticipants(participants)];
-
-    render(<GroupTable groups={groups} />);
-
-    const gridEl = screen.getByRole("grid", { name: /groups/i });
-
-    userEvent.click(within(gridEl).getByRole("button", { name: /split/i }));
-
-    const modalEl = screen.getByRole("dialog", { name: headerText });
-    const nameTextbox = within(modalEl).getByRole("textbox", {
-      name: /new group name/i,
+      expect(
+        screen.queryByRole("dialog", { name: headerText })
+      ).not.toBeInTheDocument();
     });
 
-    userEvent.clear(nameTextbox);
-    userEvent.type(nameTextbox, newName);
+    test("should close modal when cancellation button is clicked", () => {
+      const participants = [createDummyParticipant(), createDummyParticipant()];
+      const groups = [createDummyGroupWithParticipants(participants)];
 
-    expect(nameTextbox).toHaveValue(newName);
+      render(<GroupTable groups={groups} />);
+
+      const gridEl = screen.getByRole("grid", { name: /groups/i });
+      const [first] = within(gridEl).getAllByRole("row");
+
+      userEvent.click(within(first).getByRole("button", { name: /split/i }));
+
+      const modalEl = screen.getByRole("dialog", { name: headerText });
+
+      userEvent.click(within(modalEl).getByRole("button", { name: /cancel/i }));
+
+      expect(modalEl).not.toBeInTheDocument();
+    });
+
+    test("should render modal properly", () => {
+      const participants = [
+        createDummyParticipant(),
+        createDummyParticipant(),
+        createDummyParticipant(),
+      ];
+      const groups = [createDummyGroupWithParticipants(participants)];
+      const [
+        { name: firstMember },
+        { name: secondMember },
+        { name: thirdMember },
+      ] = participants;
+      const [originalGroup] = groups;
+
+      render(<GroupTable groups={groups} />);
+
+      const gridEl = screen.getByRole("grid", { name: /groups/i });
+
+      userEvent.click(within(gridEl).getByRole("button", { name: /split/i }));
+
+      const modalEl = screen.getByRole("dialog", { name: headerText });
+      const originalMembersEl = within(modalEl).getByRole("grid", {
+        name: originalGroup.name,
+      });
+      const newMembersEl = within(modalEl).getByRole("grid", {
+        name: /new group/i,
+      });
+
+      expect(
+        within(modalEl).getByRole("heading", { name: headerText })
+      ).toBeInTheDocument();
+      expect(
+        within(originalMembersEl).getByRole("gridcell", { name: firstMember })
+      ).toBeInTheDocument();
+      expect(
+        within(originalMembersEl).getByRole("button", {
+          name: new RegExp(`move ${firstMember}`, "i"),
+        })
+      ).toBeInTheDocument();
+      expect(
+        within(originalMembersEl).getByRole("gridcell", { name: secondMember })
+      ).toBeInTheDocument();
+      expect(
+        within(originalMembersEl).getByRole("button", {
+          name: new RegExp(`move ${secondMember}`, "i"),
+        })
+      ).toBeInTheDocument();
+      expect(
+        within(originalMembersEl).getByRole("gridcell", { name: thirdMember })
+      ).toBeInTheDocument();
+      expect(
+        within(originalMembersEl).getByRole("button", {
+          name: new RegExp(`move ${thirdMember}`, "i"),
+        })
+      ).toBeInTheDocument();
+      expect(
+        within(modalEl).getByRole("textbox", {
+          name: /new group name/i,
+        })
+      ).toBeInTheDocument();
+      expect(
+        within(newMembersEl).getByRole("row", { name: /placeholder/i })
+      ).toBeInTheDocument();
+      expect(
+        within(modalEl).getByRole("button", { name: /cancel/i })
+      ).toBeInTheDocument();
+      expect(
+        within(modalEl).getByRole("button", { name: /split/i })
+      ).toBeDisabled();
+    });
+
+    describe("New Group Name Textbox", () => {
+      test("should update new group name", () => {
+        const newName = "A Cool Group";
+        const participants = [
+          createDummyParticipant(),
+          createDummyParticipant(),
+          createDummyParticipant(),
+        ];
+        const groups = [createDummyGroupWithParticipants(participants)];
+
+        render(<GroupTable groups={groups} />);
+
+        const gridEl = screen.getByRole("grid", { name: /groups/i });
+
+        userEvent.click(within(gridEl).getByRole("button", { name: /split/i }));
+
+        const modalEl = screen.getByRole("dialog", { name: headerText });
+        const nameTextbox = within(modalEl).getByRole("textbox", {
+          name: /new group name/i,
+        });
+
+        userEvent.clear(nameTextbox);
+        userEvent.type(nameTextbox, newName);
+
+        expect(nameTextbox).toHaveValue(newName);
+      });
+
+      test("should reset to prior, valid name when left blank", () => {
+        const newGroupName = "Slytherin";
+        const participants = [
+          createDummyParticipant(true),
+          createDummyParticipant(true),
+        ];
+        const groups = [createDummyGroupWithParticipants(participants)];
+
+        render(<GroupTable groups={groups} />);
+
+        const gridEl = screen.getByRole("grid", { name: /groups/i });
+
+        userEvent.click(within(gridEl).getByRole("button", { name: /split/i }));
+
+        const modalEl = screen.getByRole("dialog", { name: /members/i });
+        const nameEl = within(modalEl).getByRole("textbox", { name: /new/i });
+
+        userEvent.clear(nameEl);
+        userEvent.type(nameEl, newGroupName);
+        userEvent.clear(nameEl);
+        nameEl.blur();
+
+        expect(nameEl).toHaveValue(newGroupName);
+      });
+
+      test("should reset when canceling", () => {
+        const newGroupName = "The Chosen";
+        const groups = [
+          createDummyGroupWithParticipants([
+            createDummyParticipant(true),
+            createDummyParticipant(true),
+          ]),
+        ];
+
+        render(<GroupTable groups={groups} />);
+
+        const gridEl = screen.getByRole("grid", { name: /groups/i });
+
+        userEvent.click(within(gridEl).getByRole("button", { name: /split/i }));
+
+        let modalEl = screen.getByRole("dialog", { name: /members/i });
+        let nameEl = within(modalEl).getByRole("textbox", { name: /new/i });
+
+        userEvent.clear(nameEl);
+        userEvent.type(nameEl, newGroupName);
+        userEvent.click(
+          within(modalEl).getByRole("button", { name: /cancel/i })
+        );
+        userEvent.click(within(gridEl).getByRole("button", { name: /split/i }));
+
+        modalEl = screen.getByRole("dialog", { name: /members/i });
+        nameEl = within(modalEl).getByRole("textbox", { name: /new/i });
+
+        expect(nameEl).not.toHaveValue(newGroupName);
+      });
+
+      test("should reset when splitting", () => {
+        const newGroupName = "Invading Martians";
+        const groups = [
+          createDummyGroupWithParticipants([
+            createDummyParticipant(true),
+            createDummyParticipant(true),
+            createDummyParticipant(true),
+          ]),
+        ];
+
+        render(<GroupTable groups={groups} />);
+
+        const gridEl = screen.getByRole("grid", { name: /groups/i });
+
+        userEvent.click(within(gridEl).getByRole("button", { name: /split/i }));
+
+        let modalEl = screen.getByRole("dialog", { name: /members/i });
+        let nameEl = within(modalEl).getByRole("textbox", { name: /new/i });
+        const [firstMoveButton] = within(modalEl).getAllByRole("button", {
+          name: /move/i,
+        });
+
+        userEvent.clear(nameEl);
+        userEvent.type(nameEl, newGroupName);
+        userEvent.click(firstMoveButton);
+        userEvent.click(
+          within(modalEl).getByRole("button", { name: /split/i })
+        );
+        userEvent.click(within(gridEl).getByRole("button", { name: /split/i }));
+
+        modalEl = screen.getByRole("dialog", { name: /members/i });
+        nameEl = within(modalEl).getByRole("textbox", { name: /new/i });
+
+        expect(nameEl).not.toHaveValue(newGroupName);
+      });
+    });
+
+    describe("Move-Member Button", () => {
+      test("should toggle enable/disable", () => {
+        const participants = [
+          createDummyParticipant(),
+          createDummyParticipant(),
+        ];
+        const groups = [createDummyGroupWithParticipants(participants)];
+        const [{ name: firstParticipant }, { name: secondParticipant }] =
+          participants;
+
+        render(<GroupTable groups={groups} />);
+
+        const gridEl = screen.getByRole("grid", { name: /groups/i });
+
+        userEvent.click(within(gridEl).getByRole("button", { name: /split/i }));
+
+        const modalEl = screen.getByRole("dialog", { name: headerText });
+
+        userEvent.click(
+          within(modalEl).getByRole("button", {
+            name: new RegExp(`move ${firstParticipant}`, "i"),
+          })
+        );
+
+        expect(
+          within(modalEl).getByRole("button", {
+            name: new RegExp(`move ${firstParticipant}`, "i"),
+          })
+        ).not.toBeDisabled();
+        expect(
+          within(modalEl).getByRole("button", {
+            name: new RegExp(`move ${secondParticipant}`, "i"),
+          })
+        ).toBeDisabled();
+      });
+
+      test("should switch members between groups", () => {
+        const participants = [
+          createDummyParticipant(),
+          createDummyParticipant(),
+          createDummyParticipant(),
+        ];
+        const groups = [createDummyGroupWithParticipants(participants)];
+        const [
+          { name: firstMember },
+          { name: secondMember },
+          { name: thirdMember },
+        ] = participants;
+        const [{ name: originalGroup }] = groups;
+
+        render(<GroupTable groups={groups} />);
+
+        const gridEl = screen.getByRole("grid", { name: /groups/i });
+
+        userEvent.click(within(gridEl).getByRole("button", { name: /split/i }));
+
+        const modalEl = screen.getByRole("dialog", { name: headerText });
+        const originalMembersEl = within(modalEl).getByRole("grid", {
+          name: originalGroup,
+        });
+        const newMembersEl = within(modalEl).getByRole("grid", {
+          name: /new group/i,
+        });
+
+        const firstMemberRow = screen.getByRole("row", { name: firstMember });
+        let secondMemberRow = screen.getByRole("row", { name: secondMember });
+
+        userEvent.click(within(firstMemberRow).getByRole("button"));
+        userEvent.click(within(secondMemberRow).getByRole("button"));
+
+        secondMemberRow = screen.getByRole("row", { name: secondMember });
+        userEvent.click(within(secondMemberRow).getByRole("button"));
+
+        expect(
+          within(originalMembersEl).getByRole("row", { name: secondMember })
+        ).toBeInTheDocument();
+        expect(
+          within(originalMembersEl).getByRole("row", { name: thirdMember })
+        ).toBeInTheDocument();
+        expect(
+          within(newMembersEl).getByRole("row", { name: firstMember })
+        ).toBeInTheDocument();
+      });
+    });
+
+    describe("Confirmation Button", () => {
+      test("should enable button", () => {
+        const participants = [
+          createDummyParticipant(true),
+          createDummyParticipant(true),
+        ];
+        const groups = [createDummyGroupWithParticipants(participants)];
+        const [{ name: firstAvailableParticipant }] = participants;
+
+        render(<GroupTable groups={groups} participants={participants} />);
+
+        const gridEl = screen.getByRole("grid", { name: /groups/i });
+
+        userEvent.click(within(gridEl).getByRole("button", { name: /split/i }));
+
+        const modalEl = screen.getByRole("dialog", { name: /member/i });
+
+        userEvent.click(
+          within(modalEl).getByRole("button", {
+            name: new RegExp(`move ${firstAvailableParticipant}`, "i"),
+          })
+        );
+
+        expect(
+          within(modalEl).getByRole("button", { name: /split/i })
+        ).not.toBeDisabled();
+      });
+
+      test("should disable button", () => {
+        const participants = [
+          createDummyParticipant(true),
+          createDummyParticipant(true),
+        ];
+        const groups = [createDummyGroupWithParticipants(participants)];
+
+        render(<GroupTable groups={groups} participants={participants} />);
+
+        const gridEl = screen.getByRole("grid", { name: /groups/i });
+
+        userEvent.click(within(gridEl).getByRole("button", { name: /split/i }));
+
+        const modalEl = screen.getByRole("dialog", { name: /member/i });
+
+        expect(
+          within(modalEl).getByRole("button", { name: /split/i })
+        ).toBeDisabled();
+      });
+    });
   });
-
-  test("should disable move member button", () => {
-    const participants = [createDummyParticipant(), createDummyParticipant()];
-    const groups = [createDummyGroupWithParticipants(participants)];
-    const [{ name: firstParticipant }, { name: secondParticipant }] =
-      participants;
-
-    render(<GroupTable groups={groups} />);
-
-    const gridEl = screen.getByRole("grid", { name: /groups/i });
-
-    userEvent.click(within(gridEl).getByRole("button", { name: /split/i }));
-
-    const modalEl = screen.getByRole("dialog", { name: headerText });
-
-    userEvent.click(
-      within(modalEl).getByRole("button", {
-        name: new RegExp(`move ${firstParticipant}`, "i"),
-      })
-    );
-
-    expect(
-      within(modalEl).getByRole("button", {
-        name: new RegExp(`move ${firstParticipant}`, "i"),
-      })
-    ).not.toBeDisabled();
-    expect(
-      within(modalEl).getByRole("button", {
-        name: new RegExp(`move ${secondParticipant}`, "i"),
-      })
-    ).toBeDisabled();
-  });
-
-  // TODO (Coul Greer): Add a test to enable the transfer member button.
 });

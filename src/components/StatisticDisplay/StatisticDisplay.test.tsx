@@ -1,4 +1,5 @@
 import React from "react";
+
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
@@ -98,6 +99,9 @@ describe("Threshold class names", () => {
       upperWarning: threshold,
       upperLimit: threshold,
     };
+    const spy = jest.spyOn(console, "error");
+
+    spy.mockImplementation(() => {});
 
     expect(() => {
       render(
@@ -108,6 +112,8 @@ describe("Threshold class names", () => {
         />
       );
     }).toThrow();
+
+    spy.mockRestore();
   });
 
   test("should throw error when upper warning threshold is greater than upper limit threshold", () => {
@@ -118,6 +124,9 @@ describe("Threshold class names", () => {
       upperWarning,
       upperLimit,
     };
+    const spy = jest.spyOn(console, "error");
+
+    spy.mockImplementation(() => {});
 
     expect(() => {
       render(
@@ -128,6 +137,8 @@ describe("Threshold class names", () => {
         />
       );
     }).toThrow();
+
+    spy.mockRestore();
   });
 
   test("should throw error when lower warning and lower limit are equal", () => {
@@ -137,6 +148,9 @@ describe("Threshold class names", () => {
       lowerWarning: threshold,
       upperLimit: DEFAULT_PROPS.upperLimit,
     };
+    const spy = jest.spyOn(console, "error");
+
+    spy.mockImplementation(() => {});
 
     expect(() => {
       render(
@@ -147,6 +161,8 @@ describe("Threshold class names", () => {
         />
       );
     }).toThrow();
+
+    spy.mockRestore();
   });
 
   test("should throw error when lower warning threshold is less than lower limit threshold", () => {
@@ -157,6 +173,9 @@ describe("Threshold class names", () => {
       lowerWarning,
       lowerLimit,
     };
+    const spy = jest.spyOn(console, "error");
+
+    spy.mockImplementation(() => {});
 
     expect(() => {
       render(
@@ -167,6 +186,8 @@ describe("Threshold class names", () => {
         />
       );
     }).toThrow();
+
+    spy.mockRestore();
   });
 
   test("should throw error when lower bound and upper bound intercept", () => {
@@ -176,6 +197,9 @@ describe("Threshold class names", () => {
       lowerWarning: 5,
       lowerLimit: 2,
     };
+    const spy = jest.spyOn(console, "error");
+
+    spy.mockImplementation(() => {});
 
     expect(() => {
       render(
@@ -186,6 +210,8 @@ describe("Threshold class names", () => {
         />
       );
     }).toThrow();
+
+    spy.mockRestore();
   });
 
   describe("Lower Warning threshold", () => {
@@ -292,6 +318,9 @@ describe("Threshold class names", () => {
 
     test("should throw error when value is below lower limit threshold", () => {
       const currentValue = (lowerLimit - 1).toString();
+      const spy = jest.spyOn(console, "error");
+
+      spy.mockImplementation(() => {});
 
       expect(() => {
         render(
@@ -302,6 +331,8 @@ describe("Threshold class names", () => {
           />
         );
       }).toThrow();
+
+      spy.mockRestore();
     });
   });
 
@@ -409,6 +440,9 @@ describe("Threshold class names", () => {
 
     test("should throw error when value is above upper limit threshold", () => {
       const currentValue = (upperLimit + 1).toString();
+      const spy = jest.spyOn(console, "error");
+
+      spy.mockImplementation(() => {});
 
       expect(() => {
         render(
@@ -419,6 +453,8 @@ describe("Threshold class names", () => {
           />
         );
       }).toThrow();
+
+      spy.mockRestore();
     });
   });
 });

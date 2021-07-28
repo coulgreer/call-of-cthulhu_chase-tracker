@@ -46,6 +46,36 @@ export default class GroupTable extends React.Component<Props, State> {
     return "This process will remove the selected group and move its members into the initiating group.";
   }
 
+  static areGroupsEqual(g1: Group | string, g2: Group | string) {
+    if (GroupTable.isGroup(g1) && GroupTable.isGroup(g2)) {
+      return g1.id === g2.id;
+    }
+
+    return g1 === g2;
+  }
+
+  static isGroup(object: any): object is Group {
+    return (object as Group).id !== undefined;
+  }
+
+  private static transferParticipants(
+    dominantGroup: Group,
+    subservientGroup: Group | Group[]
+  ) {
+    const transferParticipant = (group: Group) => {
+      const { participants: dominantGroupsParticipants } = dominantGroup;
+      const { participants: subservientGroupParticipants } = group;
+
+      dominantGroupsParticipants.push(...subservientGroupParticipants);
+    };
+
+    if (Array.isArray(subservientGroup)) {
+      subservientGroup.forEach(transferParticipant);
+    } else {
+      transferParticipant(subservientGroup);
+    }
+  }
+
   private id;
 
   private sequenceGenerator;
@@ -86,6 +116,7 @@ export default class GroupTable extends React.Component<Props, State> {
       this.handleCancelSplittingClick.bind(this);
     this.handleSplittingSubmit = this.handleSplittingSubmit.bind(this);
     this.handleNewGroupNameChange = this.handleNewGroupNameChange.bind(this);
+    this.handleNewGroupNameBlur = this.handleNewGroupNameBlur.bind(this);
 
     this.renderRow = this.renderRow.bind(this);
     this.renderCombinableGroupCheckbox =
@@ -141,7 +172,9 @@ export default class GroupTable extends React.Component<Props, State> {
     });
   }
 
-  private handleSplittingSubmit() {
+  private handleSplittingSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
     const { groups, onGroupsChange } = this.props;
     const { validSplinteredGroupName, splinteredMembers } = this.state;
     const idNum = this.sequenceGenerator.nextNum();
@@ -153,11 +186,6 @@ export default class GroupTable extends React.Component<Props, State> {
       participants: splinteredMembers,
     };
 
-    /*
-    TODO (Coul Greer): Do not allow user to create an empty group when
-    splitting. This means that zero users in the new group should disable the
-    committing button or should ignore the would-be, empty created group.
-    */
     if (onGroupsChange) onGroupsChange([...groups, newGroup]);
 
     this.closeSplittingModal();
@@ -166,6 +194,8 @@ export default class GroupTable extends React.Component<Props, State> {
   // FIXME (Coul Greer): Move all the splinteredMembers back to the originalMembers.
   private handleCancelSplittingClick() {
     this.setState({
+      rawSplinteredGroupName: GroupTable.DEFAULT_SPLINTERED_NAME,
+      validSplinteredGroupName: GroupTable.DEFAULT_SPLINTERED_NAME,
       splittingModalShown: false,
       selectedIndex: -1,
       originalMembers: [],
@@ -185,7 +215,9 @@ export default class GroupTable extends React.Component<Props, State> {
     });
   }
 
-  private handleCombiningSubmit() {
+  private handleCombiningSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
     const { groups, onGroupsChange } = this.props;
     const { selectedIndex, selectedCombining, validCombiningName } = this.state;
 
@@ -197,10 +229,7 @@ export default class GroupTable extends React.Component<Props, State> {
       );
 
       GroupTable.transferParticipants(dominantGroup, subservientGroups);
-      if (validCombiningName) {
-        dominantGroup.name = validCombiningName;
-        this.setState({ validCombiningName: undefined });
-      }
+      if (validCombiningName) dominantGroup.name = validCombiningName;
       const newGroups = this.deleteGroups(mergingGroupIndices);
 
       if (onGroupsChange) onGroupsChange(newGroups);
@@ -222,6 +251,7 @@ export default class GroupTable extends React.Component<Props, State> {
       combiningModalShown: true,
       selectedIndex: index,
       rawCombiningName: currentGroupName,
+      validCombiningName: currentGroupName,
     });
   }
 
@@ -253,9 +283,8 @@ export default class GroupTable extends React.Component<Props, State> {
 
   private handleCombiningNameChange(event: React.FormEvent<HTMLInputElement>) {
     const { value } = event.currentTarget;
-    const trimmedValue = value.trim();
 
-    if (trimmedValue) this.setState({ validCombiningName: trimmedValue });
+    if (value) this.setState({ validCombiningName: value });
 
     this.setState({ rawCombiningName: value });
   }
@@ -300,41 +329,10 @@ export default class GroupTable extends React.Component<Props, State> {
     this.setState({ rawSplinteredGroupName: value });
   }
 
-  /*
-  TODO (Coul Greer): Check for order of class members to eliminate this issue
-  or learn more about its working
-  */
-  static areGroupsEqual(group1: Group, group2: Group): boolean;
-  static areGroupsEqual(groupId1: string, groupId2: string): boolean;
-  // eslint-disable-next-line react/sort-comp
-  static areGroupsEqual(g1: any, g2: any) {
-    if (GroupTable.isGroup(g1) && GroupTable.isGroup(g2)) {
-      return g1.id === g2.id;
-    }
-
-    return g1 === g2;
-  }
-
-  static isGroup(object: any): object is Group {
-    return (object as Group).id !== undefined;
-  }
-
-  private static transferParticipants(
-    dominantGroup: Group,
-    subservientGroup: Group | Group[]
-  ) {
-    const transferParticipant = (group: Group) => {
-      const { participants: dominantGroupsParticipants } = dominantGroup;
-      const { participants: subservientGroupParticipants } = group;
-
-      dominantGroupsParticipants.push(...subservientGroupParticipants);
-    };
-
-    if (Array.isArray(subservientGroup)) {
-      subservientGroup.forEach(transferParticipant);
-    } else {
-      transferParticipant(subservientGroup);
-    }
+  private handleNewGroupNameBlur() {
+    this.setState((state) => ({
+      rawSplinteredGroupName: state.validSplinteredGroupName,
+    }));
   }
 
   private closeDeletingModal() {
@@ -342,11 +340,19 @@ export default class GroupTable extends React.Component<Props, State> {
   }
 
   private closeSplittingModal() {
-    this.setState({ splittingModalShown: false });
+    this.setState({
+      rawSplinteredGroupName: GroupTable.DEFAULT_SPLINTERED_NAME,
+      validSplinteredGroupName: GroupTable.DEFAULT_SPLINTERED_NAME,
+      splittingModalShown: false,
+    });
   }
 
   private closeCombiningModal() {
-    this.setState((state) => ({ ...state, combiningModalShown: false }));
+    this.setState((state) => ({
+      ...state,
+      selectedCombining: [],
+      combiningModalShown: false,
+    }));
   }
 
   private deleteGroups(index: number | number[]) {
@@ -367,6 +373,7 @@ export default class GroupTable extends React.Component<Props, State> {
     };
 
     if (Array.isArray(index)) {
+      index.sort();
       for (let i = 0; i < index.length; i += 1) {
         deleteGroup(index[i] - i);
       }
@@ -526,6 +533,7 @@ export default class GroupTable extends React.Component<Props, State> {
                   className="textbox textbox--full-width"
                   value={rawSplinteredGroupName}
                   onChange={this.handleNewGroupNameChange}
+                  onBlur={this.handleNewGroupNameBlur}
                   type="text"
                 />
               </label>
