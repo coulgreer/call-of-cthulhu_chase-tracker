@@ -690,4 +690,59 @@ describe("Confirmation Tests", () => {
       within(rowEl).queryByRole("cell", { name: /warning/i })
     ).not.toBeInTheDocument();
   });
+
+  test("should add participant once when participants are reselected after initial canceling", () => {
+    const participants = [createDummyParticipant(), createDummyParticipant()];
+    const groups = [createDummyGroupWithParticipants([])];
+    const [{ name: firstParticipant }, { name: secondParticipant }] =
+      participants;
+    const headerRowCount = 3;
+
+    render(
+      <GroupContainer
+        groups={groups}
+        ownedIndex={0}
+        participants={participants}
+      />
+    );
+
+    userEvent.click(screen.getByRole("button", { name: /details/i }));
+
+    const tableEl = screen.getByRole("table", { name: /members/i });
+
+    userEvent.click(screen.getByRole("button", { name: /add/i }));
+
+    let modalEl = screen.getByRole("dialog", { name: /participants/i });
+
+    userEvent.click(
+      within(modalEl).getByRole("checkbox", {
+        name: new RegExp(`${firstParticipant}`, "i"),
+      })
+    );
+    userEvent.click(
+      within(modalEl).getByRole("checkbox", {
+        name: new RegExp(`${secondParticipant}`, "i"),
+      })
+    );
+    userEvent.click(within(modalEl).getByRole("button", { name: /cancel/i }));
+    userEvent.click(screen.getByRole("button", { name: /add/i }));
+
+    modalEl = screen.getByRole("dialog", { name: /participants/i });
+
+    userEvent.click(
+      within(modalEl).getByRole("checkbox", {
+        name: new RegExp(`${firstParticipant}`, "i"),
+      })
+    );
+    userEvent.click(
+      within(modalEl).getByRole("checkbox", {
+        name: new RegExp(`${secondParticipant}`, "i"),
+      })
+    );
+    userEvent.click(within(modalEl).getByRole("button", { name: /add/i }));
+
+    expect(within(tableEl).getAllByRole("row")).toHaveLength(
+      headerRowCount + participants.length
+    );
+  });
 });

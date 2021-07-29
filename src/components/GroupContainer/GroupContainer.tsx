@@ -180,10 +180,9 @@ export default class GroupContainer extends React.Component<Props, State> {
   }
 
   private handleInitiateMemberAdditionClick() {
-    this.setState({ newMemberModalShown: true });
+    this.setState({ selectedParticipantsIds: [], newMemberModalShown: true });
   }
 
-  // FIXME (Coul Greer): Reset the selectedParticipantsIds.
   private handleCancelMemberAdditionClick() {
     this.setState({ newMemberModalShown: false });
   }
@@ -213,9 +212,7 @@ export default class GroupContainer extends React.Component<Props, State> {
   private handleCheckboxChange(event: React.FormEvent<HTMLInputElement>) {
     const { value, checked } = event.currentTarget;
 
-    this.setState((state) => {
-      const { selectedParticipantsIds } = state;
-
+    this.setState(({ selectedParticipantsIds }) => {
       if (checked) {
         selectedParticipantsIds.push(value);
       } else {
