@@ -1238,4 +1238,57 @@ describe("Confirmation Tests", () => {
     expect(fourthCell).not.toBeInTheDocument();
     expect(lastCell).not.toBeInTheDocument();
   });
+
+  test("should keep participants when canceling splitting", () => {
+    const participantCount = 3;
+    const membersTableHeadRowCount = 3;
+
+    render(<TabbedDisplay />);
+
+    createAnExpandedParticipantContainer();
+    createAnExpandedParticipantContainer();
+    createAnExpandedParticipantContainer();
+    createAnExpandedGroupContainer();
+
+    userEvent.click(screen.getByRole("tab", { name: /group/i }));
+
+    const editorEl = screen.getByRole("gridcell", { name: /editor/i });
+
+    userEvent.click(
+      within(editorEl).getByRole("button", { name: /group details/i })
+    );
+    userEvent.click(within(editorEl).getByRole("button", { name: /add/i }));
+
+    const addParticipantModal = screen.getByRole("dialog", {
+      name: /participants/i,
+    });
+    const [firstCheckbox, secondCheckbox, thirdCheckbox] =
+      within(addParticipantModal).getAllByRole("checkbox");
+
+    userEvent.click(firstCheckbox);
+    userEvent.click(secondCheckbox);
+    userEvent.click(thirdCheckbox);
+    userEvent.click(
+      within(addParticipantModal).getByRole("button", { name: /add/i })
+    );
+    userEvent.click(within(editorEl).getByRole("button", { name: /split/i }));
+
+    const splitGroupModal = screen.getByRole("dialog", { name: /member/i });
+    const [firstMember, secondMember] = within(splitGroupModal).getAllByRole(
+      "button",
+      { name: /move/i }
+    );
+
+    userEvent.click(firstMember);
+    userEvent.click(secondMember);
+    userEvent.click(
+      within(splitGroupModal).getByRole("button", { name: /cancel/i })
+    );
+
+    const tableEl = within(editorEl).getByRole("table");
+
+    expect(within(tableEl).getAllByRole("row")).toHaveLength(
+      participantCount + membersTableHeadRowCount
+    );
+  });
 });

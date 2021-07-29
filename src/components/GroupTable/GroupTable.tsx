@@ -176,7 +176,12 @@ export default class GroupTable extends React.Component<Props, State> {
     event.preventDefault();
 
     const { groups, onGroupsChange } = this.props;
-    const { validSplinteredGroupName, splinteredMembers } = this.state;
+    const {
+      selectedIndex,
+      validSplinteredGroupName,
+      splinteredMembers,
+      originalMembers,
+    } = this.state;
     const idNum = this.sequenceGenerator.nextNum();
     const newGroup = {
       id: `GROUP-${idNum}`,
@@ -186,12 +191,13 @@ export default class GroupTable extends React.Component<Props, State> {
       participants: splinteredMembers,
     };
 
+    groups[selectedIndex].participants = originalMembers;
+
     if (onGroupsChange) onGroupsChange([...groups, newGroup]);
 
     this.closeSplittingModal();
   }
 
-  // FIXME (Coul Greer): Move all the splinteredMembers back to the originalMembers.
   private handleCancelSplittingClick() {
     this.setState({
       rawSplinteredGroupName: GroupTable.DEFAULT_SPLINTERED_NAME,
@@ -205,12 +211,12 @@ export default class GroupTable extends React.Component<Props, State> {
 
   private handleInitiateSplittingClick(index: number) {
     const { groups } = this.props;
-    const selectedGroup = groups[index];
+    const { participants } = groups[index];
 
     this.setState({
       splittingModalShown: true,
       selectedIndex: index,
-      originalMembers: selectedGroup.participants,
+      originalMembers: [...participants],
       splinteredMembers: [],
     });
   }
