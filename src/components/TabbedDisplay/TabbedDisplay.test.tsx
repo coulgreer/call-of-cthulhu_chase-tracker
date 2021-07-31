@@ -1291,4 +1291,56 @@ describe("Confirmation Tests", () => {
       participantCount + membersTableHeadRowCount
     );
   });
+
+  test("should remove group from other groups when the target group is deleted", () => {
+    const getValue = (element: HTMLElement) =>
+      within(element)
+        .getByRole("textbox", { name: /name/i })
+        .getAttribute("value") ?? "value not found";
+
+    render(<TabbedDisplay />);
+
+    createAnExpandedGroupContainer();
+    createAnExpandedGroupContainer();
+    createAnExpandedGroupContainer();
+
+    userEvent.click(screen.getByRole("tab", { name: /group/i }));
+
+    const gridEl = screen.getByRole("grid", { name: /groups/i });
+    const [firstEditor, secondEditor, thirdEditor] = within(
+      gridEl
+    ).getAllByRole("gridcell", { name: /editor/i });
+    const firstGroupName = getValue(firstEditor);
+    const secondGroupName = getValue(secondEditor);
+    const thirdGroupName = getValue(thirdEditor);
+
+    userEvent.selectOptions(
+      within(firstEditor).getByRole("combobox", { name: /distancer/i }),
+      secondGroupName
+    );
+    userEvent.selectOptions(
+      within(secondEditor).getByRole("combobox", { name: /distancer/i }),
+      thirdGroupName
+    );
+    userEvent.selectOptions(
+      within(thirdEditor).getByRole("combobox", { name: /distancer/i }),
+      firstGroupName
+    );
+    userEvent.click(
+      within(gridEl).getAllByRole("button", { name: /delete/i })[1]
+    );
+
+    const deleteGroupModal = screen.getByRole("dialog", {
+      name: /delete group/i,
+    });
+
+    userEvent.click(
+      within(deleteGroupModal).getByRole("button", { name: /delete/i })
+    );
+
+    expect(
+      within(firstEditor).getByRole("combobox", { name: /distancer/i })
+    ).not.toHaveValue(secondGroupName);
+    expect(within(thirdEditor).queryByRole("list")).not.toBeInTheDocument();
+  });
 });

@@ -76,6 +76,17 @@ export default class GroupTable extends React.Component<Props, State> {
     }
   }
 
+  static dissociateGroup(groups: Group[], { id: groupId, distancerId }: Group) {
+    const distancer = groups.find(({ id }) => distancerId === id);
+
+    if (distancer) {
+      const deletedPursuerIndex = distancer.pursuersIds.findIndex(
+        (id) => groupId === id
+      );
+      distancer.pursuersIds.splice(deletedPursuerIndex, 1);
+    }
+  }
+
   private id;
 
   private sequenceGenerator;
@@ -365,29 +376,31 @@ export default class GroupTable extends React.Component<Props, State> {
     const { groups } = this.props;
     const newGroups = [...groups];
 
-    /*
-    FIXME (Coul Greer): Make sure to remove deleted group from other groups. This means
-    as a Distancer and Pursuer.
-    */
-    const deleteGroup = (i: number) => {
-      const { id: groupId } = groups[i];
-      const results = groupId.match(new RegExp(/\d+$/)) || [];
-      const result = results[0];
-
-      this.sequenceGenerator.remove(Number.parseInt(result, 10));
-      newGroups.splice(i, 1);
-    };
-
     if (Array.isArray(index)) {
       index.sort();
-      for (let i = 0; i < index.length; i += 1) {
-        deleteGroup(index[i] - i);
-      }
+      index.forEach((value, i) => {
+        const targetGroup = newGroups[index[i] - i];
+
+        this.removeGroup(newGroups, targetGroup);
+        GroupTable.dissociateGroup(newGroups, targetGroup);
+      });
     } else {
-      deleteGroup(index);
+      const targetGroup = newGroups[index];
+
+      this.removeGroup(newGroups, targetGroup);
+      GroupTable.dissociateGroup(newGroups, targetGroup);
     }
 
     return newGroups;
+  }
+
+  private removeGroup(groups: Group[], { id: groupId }: Group) {
+    const index = groups.findIndex(({ id }) => id === groupId);
+    const results = groupId.match(new RegExp(/\d+$/)) || [];
+    const result = results[0];
+
+    this.sequenceGenerator.remove(Number.parseInt(result, 10));
+    groups.splice(index, 1);
   }
 
   private renderWarning() {
@@ -467,7 +480,6 @@ export default class GroupTable extends React.Component<Props, State> {
 
   private renderDeletionModal() {
     const { deletingModalShown } = this.state;
-    const headerId = `delete-modal-header-${this.id}`;
 
     return (
       <Modal
@@ -475,9 +487,9 @@ export default class GroupTable extends React.Component<Props, State> {
         overlayClassName="Modal__Overlay"
         isOpen={deletingModalShown}
         onRequestClose={this.handleCancelDeletingClick}
-        aria={{ labelledby: headerId }}
+        contentLabel="Delete group"
       >
-        <h2 id={headerId} className="Modal__header">
+        <h2 className="Modal__header">
           Would you like to delete the selected group?
         </h2>
         <hr />

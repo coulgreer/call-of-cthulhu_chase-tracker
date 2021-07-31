@@ -305,7 +305,7 @@ describe("Delete Group Button", () => {
 
     userEvent.click(within(first).getByRole("button", { name: /delete/i }));
 
-    const modalEl = screen.getByRole("dialog", { name: headerText });
+    const modalEl = screen.getByRole("dialog", { name: /delete.*group/i });
 
     expect(
       within(modalEl).getByRole("heading", { name: headerText })
@@ -334,7 +334,7 @@ describe("Delete Group Button", () => {
       })
     );
 
-    const modalEl = screen.getByRole("dialog", { name: headerText });
+    const modalEl = screen.getByRole("dialog", { name: /delete.*group/i });
 
     userEvent.click(within(modalEl).getByRole("button", { name: /delete/i }));
 
@@ -376,7 +376,7 @@ describe("Delete Group Button", () => {
       })
     );
 
-    const modalEl = screen.getByRole("dialog", { name: headerText });
+    const modalEl = screen.getByRole("dialog", { name: /delete.*group/i });
 
     userEvent.click(within(modalEl).getByRole("button", { name: /cancel/i }));
 
