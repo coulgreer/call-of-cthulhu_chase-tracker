@@ -196,8 +196,8 @@ export default class GroupContainer extends React.Component<Props, State> {
       .map(this.findParticipantById)
       .filter((participant): participant is Participant => !!participant);
     selectedParticipants.forEach((participant) => {
-      // eslint-disable-next-line no-param-reassign
-      participant.isGrouped = true;
+      const p = participant;
+      p.isGrouped = true;
     });
 
     this.currentGroup.participants =

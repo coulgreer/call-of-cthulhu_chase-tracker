@@ -524,7 +524,6 @@ describe("Members Display", () => {
       expect(handleGroupChange).toBeCalledTimes(1);
     });
 
-    // TODO (Coul Greer): Add a test for ungrouping a participant
     test("should render properly when all participants are in a group", () => {
       const groups = [createDummyGroup()];
       const participants = [createDummyParticipant(true)];

@@ -76,7 +76,10 @@ export default class GroupTable extends React.Component<Props, State> {
     }
   }
 
-  static dissociateGroup(groups: Group[], { id: groupId, distancerId }: Group) {
+  private static dissociateGroup(
+    groups: Group[],
+    { id: groupId, distancerId }: Group
+  ) {
     const distancer = groups.find(({ id }) => distancerId === id);
 
     if (distancer) {
@@ -85,6 +88,13 @@ export default class GroupTable extends React.Component<Props, State> {
       );
       distancer.pursuersIds.splice(deletedPursuerIndex, 1);
     }
+  }
+
+  private static relieveParticipants({ participants }: Group) {
+    participants.forEach((participant) => {
+      const p = participant;
+      p.isGrouped = false;
+    });
   }
 
   private id;
@@ -381,12 +391,14 @@ export default class GroupTable extends React.Component<Props, State> {
       index.forEach((value, i) => {
         const targetGroup = newGroups[index[i] - i];
 
+        GroupTable.relieveParticipants(targetGroup);
         this.removeGroup(newGroups, targetGroup);
         GroupTable.dissociateGroup(newGroups, targetGroup);
       });
     } else {
       const targetGroup = newGroups[index];
 
+      GroupTable.relieveParticipants(targetGroup);
       this.removeGroup(newGroups, targetGroup);
       GroupTable.dissociateGroup(newGroups, targetGroup);
     }

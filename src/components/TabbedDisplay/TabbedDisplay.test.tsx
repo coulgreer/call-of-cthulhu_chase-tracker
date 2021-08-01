@@ -1343,4 +1343,57 @@ describe("Confirmation Tests", () => {
     ).not.toHaveValue(secondGroupName);
     expect(within(thirdEditor).queryByRole("list")).not.toBeInTheDocument();
   });
+
+  test("should relieve participants to be assigned to another group when their assigned group is deleted", () => {
+    render(<TabbedDisplay />);
+
+    createAnExpandedParticipantContainer();
+    createAnExpandedParticipantContainer();
+    createAnExpandedGroupContainer();
+    createAnExpandedGroupContainer();
+
+    userEvent.click(screen.getByRole("tab", { name: /group/i }));
+
+    const gridEl = screen.getByRole("grid", { name: /groups/i });
+    const [firstEditor, secondEditor] = within(gridEl).getAllByRole(
+      "gridcell",
+      {
+        name: /editor/i,
+      }
+    );
+    const [firstDeleteButton] = within(gridEl).getAllByRole("button", {
+      name: /delete/i,
+    });
+
+    userEvent.click(within(firstEditor).getByRole("button", { name: /add/i }));
+
+    let memberAdditionModal = screen.getByRole("dialog", {
+      name: /participant/i,
+    });
+    const [firstParticipant] = within(memberAdditionModal).getAllByRole(
+      "checkbox",
+      { name: /participant/i }
+    );
+
+    userEvent.click(firstParticipant);
+    userEvent.click(
+      within(memberAdditionModal).getByRole("button", { name: /add/i })
+    );
+    userEvent.click(firstDeleteButton);
+
+    const groupDeletionModal = screen.getByRole("dialog", { name: /delete/i });
+
+    userEvent.click(
+      within(groupDeletionModal).getByRole("button", { name: /delete/i })
+    );
+    userEvent.click(within(secondEditor).getByRole("button", { name: /add/i }));
+
+    memberAdditionModal = screen.getByRole("dialog", {
+      name: /participant/i,
+    });
+
+    expect(within(memberAdditionModal).getAllByRole("checkbox")).toHaveLength(
+      2
+    );
+  });
 });
