@@ -24,7 +24,8 @@ interface State {
   validGroupName: string;
   selectedParticipantsIds: string[];
   expansionShown: boolean;
-  newMemberModalShown: boolean;
+  addMemberModalShown: boolean;
+  removeMemberModalShown: boolean;
 }
 
 export default class GroupContainer extends React.Component<Props, State> {
@@ -91,7 +92,8 @@ export default class GroupContainer extends React.Component<Props, State> {
       validGroupName: this.currentGroup.name,
       selectedParticipantsIds: [],
       expansionShown: false,
-      newMemberModalShown: false,
+      addMemberModalShown: false,
+      removeMemberModalShown: false,
     };
 
     this.id = nanoid();
@@ -99,22 +101,30 @@ export default class GroupContainer extends React.Component<Props, State> {
     this.lowestMovementRateMember = null;
     this.highestMovementRateMember = null;
 
-    // Event handlers
     this.handleToggleClick = this.handleToggleClick.bind(this);
     this.handleDistancerBlur = this.handleDistancerBlur.bind(this);
-    this.handleCheckboxChange = this.handleCheckboxChange.bind(this);
-    this.handleInitiateMemberAdditionClick =
-      this.handleInitiateMemberAdditionClick.bind(this);
-    this.handleMemberAdditionSubmit =
-      this.handleMemberAdditionSubmit.bind(this);
-    this.handleCancelMemberAdditionClick =
-      this.handleCancelMemberAdditionClick.bind(this);
+    this.handleParticipantCheckboxChange =
+      this.handleParticipantCheckboxChange.bind(this);
+
     this.handleNameChange = this.handleNameChange.bind(this);
     this.handleNameBlur = this.handleNameBlur.bind(this);
 
-    // Helpers
+    this.handleInitiateMemberAdditionClick =
+      this.handleInitiateMemberAdditionClick.bind(this);
+    this.handleCancelMemberAdditionClick =
+      this.handleCancelMemberAdditionClick.bind(this);
+    this.handleMemberAdditionSubmit =
+      this.handleMemberAdditionSubmit.bind(this);
+
+    this.handleInitiateMemberRemovalClick =
+      this.handleInitiateMemberRemovalClick.bind(this);
+    this.handleCancelMemberRemovalClick =
+      this.handleCancelMemberRemovalClick.bind(this);
+    this.handleMemberRemovalSubmit = this.handleMemberRemovalSubmit.bind(this);
+
     this.findParticipantById = this.findParticipantById.bind(this);
     this.isAvailable = this.isAvailable.bind(this);
+
     this.renderParticipantCheckbox = this.renderParticipantCheckbox.bind(this);
     this.renderOption = this.renderOption.bind(this);
     this.renderMember = this.renderMember.bind(this);
@@ -180,11 +190,11 @@ export default class GroupContainer extends React.Component<Props, State> {
   }
 
   private handleInitiateMemberAdditionClick() {
-    this.setState({ selectedParticipantsIds: [], newMemberModalShown: true });
+    this.setState({ selectedParticipantsIds: [], addMemberModalShown: true });
   }
 
   private handleCancelMemberAdditionClick() {
-    this.setState({ newMemberModalShown: false });
+    this.setState({ addMemberModalShown: false });
   }
 
   private handleMemberAdditionSubmit() {
@@ -195,21 +205,59 @@ export default class GroupContainer extends React.Component<Props, State> {
     const selectedParticipants = selectedParticipantsIds
       .map(this.findParticipantById)
       .filter((participant): participant is Participant => !!participant);
+
     selectedParticipants.forEach((participant) => {
       const p = participant;
       p.isGrouped = true;
     });
+    currentParticipants.push(...selectedParticipants);
 
-    this.currentGroup.participants =
-      selectedParticipants.concat(currentParticipants);
     if (onGroupChange) onGroupChange(this.currentGroup);
-
-    this.setState({ selectedParticipantsIds: [] });
 
     this.handleCancelMemberAdditionClick();
   }
 
-  private handleCheckboxChange(event: React.FormEvent<HTMLInputElement>) {
+  private handleInitiateMemberRemovalClick() {
+    this.setState({
+      selectedParticipantsIds: [],
+      removeMemberModalShown: true,
+    });
+  }
+
+  private handleCancelMemberRemovalClick() {
+    this.setState({ removeMemberModalShown: false });
+  }
+
+  private handleMemberRemovalSubmit() {
+    const { onGroupChange } = this.props;
+    const { selectedParticipantsIds } = this.state;
+    const { participants: currentParticipants } = this.currentGroup;
+
+    const selectedParticipants = selectedParticipantsIds
+      .map(this.findParticipantById)
+      .filter((participant): participant is Participant => !!participant);
+    const selectedParticipantsIndices = selectedParticipantsIds
+      .map((selectedParticipantId) =>
+        currentParticipants.findIndex(({ id }) => selectedParticipantId === id)
+      )
+      .sort();
+
+    selectedParticipants.forEach((participant) => {
+      const p = participant;
+      p.isGrouped = false;
+    });
+    selectedParticipantsIndices.forEach((index, i) => {
+      currentParticipants.splice(index - i, 1);
+    });
+
+    if (onGroupChange) onGroupChange(this.currentGroup);
+
+    this.handleCancelMemberRemovalClick();
+  }
+
+  private handleParticipantCheckboxChange(
+    event: React.FormEvent<HTMLInputElement>
+  ) {
     const { value, checked } = event.currentTarget;
 
     this.setState(({ selectedParticipantsIds }) => {
@@ -268,16 +316,12 @@ export default class GroupContainer extends React.Component<Props, State> {
     return result;
   }
 
-  private findParticipantById(id: string) {
+  private findParticipantById(targetId: string) {
     const { participants } = this.props;
 
     if (!participants) return undefined;
 
-    const index = participants.findIndex(
-      (participant) => id === participant.id
-    );
-
-    return participants[index];
+    return participants.find(({ id }) => targetId === id);
   }
 
   private hasBoundaryMovementRate(participant: Participant) {
@@ -305,14 +349,14 @@ export default class GroupContainer extends React.Component<Props, State> {
     return this.lowestMovementRateMember.movementRate === movementRate;
   }
 
-  private isAvailable(participant: Participant) {
-    if (participant.isGrouped) return false;
+  private isAvailable({ id: targetId, isGrouped }: Participant) {
+    if (isGrouped) return false;
 
     const { participants: ownedParticipants } = this.currentGroup;
     let isAvailable = true;
 
-    ownedParticipants.forEach((ownedParticipant) => {
-      if (ownedParticipant.id === participant.id) isAvailable = false;
+    ownedParticipants.forEach(({ id }) => {
+      if (id === targetId) isAvailable = false;
     });
 
     return isAvailable;
@@ -434,7 +478,7 @@ export default class GroupContainer extends React.Component<Props, State> {
 
   private renderMemberAdditionModal() {
     const { participants } = this.props;
-    const { newMemberModalShown } = this.state;
+    const { addMemberModalShown } = this.state;
 
     const availableParticipants = participants?.filter(this.isAvailable) ?? [];
 
@@ -443,7 +487,7 @@ export default class GroupContainer extends React.Component<Props, State> {
         className="Modal"
         overlayClassName="Modal__Overlay"
         contentLabel="Select participants"
-        isOpen={newMemberModalShown}
+        isOpen={addMemberModalShown}
         onRequestClose={this.handleCancelMemberAdditionClick}
       >
         <form onSubmit={this.handleMemberAdditionSubmit}>
@@ -468,6 +512,40 @@ export default class GroupContainer extends React.Component<Props, State> {
               disabled={!(availableParticipants.length > 0)}
             >
               ADD
+            </Button>
+          </div>
+        </form>
+      </Modal>
+    );
+  }
+
+  private renderMemberRemovalModal() {
+    const { removeMemberModalShown } = this.state;
+    const { participants } = this.currentGroup;
+
+    return (
+      <Modal
+        className="Modal"
+        overlayClassName="Modal__Overlay"
+        contentLabel="Remove member"
+        isOpen={removeMemberModalShown}
+        onRequestClose={this.handleCancelMemberRemovalClick}
+      >
+        <form onSubmit={this.handleMemberRemovalSubmit}>
+          <h2 className="Modal__header">Remove members from group</h2>
+          <div>{participants.map(this.renderParticipantCheckbox)}</div>
+          <div className="Modal__options">
+            <Button
+              className="button button--outlined button--on-dark button--medium"
+              onClick={this.handleCancelMemberRemovalClick}
+            >
+              CANCEL
+            </Button>
+            <Button
+              className="button button--text button--on-dark button--medium"
+              type="submit"
+            >
+              REMOVE
             </Button>
           </div>
         </form>
@@ -609,13 +687,22 @@ export default class GroupContainer extends React.Component<Props, State> {
               : GroupContainer.renderMemberWarning(warningId)}
           </tbody>
         </table>
-        <Button
-          className="button button--outlined button--on-light button--medium"
-          onClick={this.handleInitiateMemberAdditionClick}
-          disabled={!this.hasValidParticipantCount()}
-        >
-          ADD
-        </Button>
+        <div className="GroupContainer__button-list">
+          <Button
+            className="button button--outlined button--on-light button--small"
+            onClick={this.handleInitiateMemberAdditionClick}
+            disabled={!this.hasValidParticipantCount()}
+          >
+            ADD
+          </Button>
+          <Button
+            className="button button--outlined button--on-light button--small"
+            onClick={this.handleInitiateMemberRemovalClick}
+            disabled={!this.hasMembers()}
+          >
+            REMOVE
+          </Button>
+        </div>
       </div>
     );
   }
@@ -678,7 +765,7 @@ export default class GroupContainer extends React.Component<Props, State> {
             className="checkbox__input"
             type="checkbox"
             value={id}
-            onChange={this.handleCheckboxChange}
+            onChange={this.handleParticipantCheckboxChange}
           />
           <span className="checkbox__checkmark">
             <span className="material-icons" aria-hidden>
@@ -697,6 +784,7 @@ export default class GroupContainer extends React.Component<Props, State> {
         {this.renderSummaryContent()}
         {this.renderExpandedContent()}
         {this.renderMemberAdditionModal()}
+        {this.renderMemberRemovalModal()}
       </div>
     );
   }

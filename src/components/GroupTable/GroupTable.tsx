@@ -60,7 +60,7 @@ export default class GroupTable extends React.Component<Props, State> {
 
   private static transferParticipants(
     dominantGroup: Group,
-    subservientGroup: Group | Group[]
+    subservientGroups: Group[]
   ) {
     const transferParticipant = (group: Group) => {
       const { participants: dominantGroupsParticipants } = dominantGroup;
@@ -69,11 +69,7 @@ export default class GroupTable extends React.Component<Props, State> {
       dominantGroupsParticipants.push(...subservientGroupParticipants);
     };
 
-    if (Array.isArray(subservientGroup)) {
-      subservientGroup.forEach(transferParticipant);
-    } else {
-      transferParticipant(subservientGroup);
-    }
+    subservientGroups.forEach(transferParticipant);
   }
 
   private static dissociateGroup(
@@ -382,21 +378,21 @@ export default class GroupTable extends React.Component<Props, State> {
     }));
   }
 
-  private deleteGroups(index: number | number[]) {
+  private deleteGroups(targetIndices: number | number[]) {
     const { groups } = this.props;
     const newGroups = [...groups];
 
-    if (Array.isArray(index)) {
-      index.sort();
-      index.forEach((value, i) => {
-        const targetGroup = newGroups[index[i] - i];
+    if (Array.isArray(targetIndices)) {
+      targetIndices.sort();
+      targetIndices.forEach((targetIndex, i) => {
+        const targetGroup = newGroups[targetIndex - i];
 
         GroupTable.relieveParticipants(targetGroup);
         this.removeGroup(newGroups, targetGroup);
         GroupTable.dissociateGroup(newGroups, targetGroup);
       });
     } else {
-      const targetGroup = newGroups[index];
+      const targetGroup = newGroups[targetIndices];
 
       GroupTable.relieveParticipants(targetGroup);
       this.removeGroup(newGroups, targetGroup);

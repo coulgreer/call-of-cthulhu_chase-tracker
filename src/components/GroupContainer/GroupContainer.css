@@ -57,6 +57,10 @@
   color: rgba(var(--cultured), var(--text-emphasis--high));
 }
 
+.GroupContainer__button-list {
+  display: flex;
+}
+
 .GroupContainer__cell--summarize {
   max-width: 0;
   overflow: hidden;

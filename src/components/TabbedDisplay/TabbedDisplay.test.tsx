@@ -1094,6 +1094,95 @@ describe("GroupTable Event Handlers", () => {
     ).toBeInTheDocument();
   });
 
+  test("should remove member", () => {
+    render(<TabbedDisplay />);
+
+    createAnExpandedParticipantContainer();
+    createAnExpandedParticipantContainer();
+    createAnExpandedGroupContainer();
+
+    userEvent.click(screen.getByRole("tab", { name: /group/i }));
+
+    const gridEl = screen.getByRole("grid", { name: /groups/i });
+    const editorEl = within(gridEl).getByRole("gridcell", { name: /editor/i });
+    const tableEl = within(editorEl).getByRole("table");
+
+    userEvent.click(within(editorEl).getByRole("button", { name: /add/i }));
+
+    const memberAdditionModal = screen.getByRole("dialog", {
+      name: /participants/i,
+    });
+
+    const [firstCheckbox, secondCheckbox] =
+      within(memberAdditionModal).getAllByRole("checkbox");
+    userEvent.click(firstCheckbox);
+    userEvent.click(secondCheckbox);
+    userEvent.click(
+      within(memberAdditionModal).getByRole("button", { name: /add/i })
+    );
+
+    userEvent.click(within(editorEl).getByRole("button", { name: /remove/i }));
+
+    const memberRemovalModal = screen.getByRole("dialog", { name: /member/i });
+
+    userEvent.click(within(memberRemovalModal).getAllByRole("checkbox")[0]);
+    userEvent.click(
+      within(memberRemovalModal).getByRole("button", { name: /remove/i })
+    );
+
+    const participantCount = 1;
+
+    expect(within(tableEl).getAllByRole("row")).toHaveLength(
+      tableHeadRowCount + participantCount
+    );
+  });
+
+  test("should remove members when selected non-sequentially", () => {
+    render(<TabbedDisplay />);
+
+    createAnExpandedParticipantContainer();
+    createAnExpandedParticipantContainer();
+    createAnExpandedParticipantContainer();
+    createAnExpandedGroupContainer();
+
+    userEvent.click(screen.getByRole("tab", { name: /group/i }));
+
+    const gridEl = screen.getByRole("grid", { name: /groups/i });
+    const editorEl = within(gridEl).getByRole("gridcell", { name: /editor/i });
+    const tableEl = within(editorEl).getByRole("table");
+
+    userEvent.click(within(editorEl).getByRole("button", { name: /add/i }));
+
+    const memberAdditionModal = screen.getByRole("dialog", {
+      name: /participants/i,
+    });
+    let [firstCheckbox, secondCheckbox, thirdCheckbox] =
+      within(memberAdditionModal).getAllByRole("checkbox");
+    userEvent.click(firstCheckbox);
+    userEvent.click(secondCheckbox);
+    userEvent.click(thirdCheckbox);
+    userEvent.click(
+      within(memberAdditionModal).getByRole("button", { name: /add/i })
+    );
+
+    userEvent.click(within(editorEl).getByRole("button", { name: /remove/i }));
+
+    const memberRemovalModal = screen.getByRole("dialog", { name: /member/i });
+
+    [firstCheckbox, secondCheckbox, thirdCheckbox] =
+      within(memberRemovalModal).getAllByRole("checkbox");
+
+    userEvent.click(thirdCheckbox);
+    userEvent.click(firstCheckbox);
+    userEvent.click(
+      within(memberRemovalModal).getByRole("button", { name: /remove/i })
+    );
+
+    expect(
+      within(tableEl).getAllByRole("cell", { name: /participant.*2/i })
+    ).toHaveLength(3);
+  });
+
   describe("Confirmation tests", () => {
     test("should maintain state when tabbed display are switched", () => {
       render(<TabbedDisplay />);

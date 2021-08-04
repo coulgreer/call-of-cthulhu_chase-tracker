@@ -168,7 +168,68 @@ describe("Initial State", () => {
       expect(
         screen.getByText(GroupContainer.getNoMemberWarningMessage())
       ).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: /add/i })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /add/i })).toBeDisabled();
+      expect(screen.getByRole("button", { name: /remove/i })).toBeDisabled();
+    });
+
+    test("should render properly when including all optional props and at least one participant is given", () => {
+      const { groups, participants, handleGroupChange } = DEFAULT_PROPS;
+
+      render(
+        <GroupContainer
+          ownedIndex={isolatedGroupIndex}
+          groups={groups}
+          participants={participants}
+          onGroupChange={handleGroupChange}
+        />
+      );
+      userEvent.click(screen.getByRole("button", { name: /group details/i }));
+
+      expect(
+        screen.getByRole("textbox", { name: /name/i })
+      ).toBeInTheDocument();
+
+      expect(
+        screen.getByText((content, element) => {
+          if (!element) return false;
+
+          const hasText = (node: Element) => {
+            if (node.textContent === null) return false;
+
+            const regex = new RegExp(
+              `chase name: ${GroupContainer.getDefaultChaseName()}`,
+              "i"
+            );
+
+            return regex.test(node.textContent);
+          };
+
+          const childrenDontHaveText = Array.from(element.children).every(
+            (child) => !hasText(child)
+          );
+
+          return hasText(element) && childrenDontHaveText;
+        })
+      ).toBeInTheDocument();
+
+      userEvent.click(screen.getByRole("combobox", { name: /distancer/i }));
+
+      expect(
+        screen.getByRole("heading", { name: /pursuers/i })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(GroupContainer.getNoPursuerWarningMessage())
+      ).toBeInTheDocument();
+
+      expect(
+        screen.getByRole("heading", { name: /members/i })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(GroupContainer.getNoMemberWarningMessage())
+      ).toBeInTheDocument();
+
+      expect(screen.getByRole("button", { name: /add/i })).not.toBeDisabled();
+      expect(screen.getByRole("button", { name: /remove/i })).toBeDisabled();
     });
 
     describe("Add Members Button", () => {
@@ -204,6 +265,21 @@ describe("Initial State", () => {
         userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
         expect(screen.getByRole("button", { name: /add/i })).toBeDisabled();
+      });
+
+      test("should enable remove button", () => {
+        const participants = [
+          createDummyParticipant(),
+          createDummyParticipant(),
+        ];
+        const groups = [createDummyGroupWithParticipants(participants)];
+
+        render(<GroupContainer ownedIndex={0} groups={groups} />);
+        userEvent.click(screen.getByRole("button", { name: /group details/i }));
+
+        expect(
+          screen.getByRole("button", { name: /remove/i })
+        ).not.toBeDisabled();
       });
     });
   });
@@ -337,6 +413,7 @@ describe("Members Display", () => {
         })
       ).toBeInTheDocument();
       expect(screen.getByRole("button", { name: /add/i })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /remove/i })).toBeDisabled();
     });
 
     test("should render properly when one participant exists in the group", () => {
@@ -496,7 +573,7 @@ describe("Members Display", () => {
     });
   });
 
-  describe("Modal", () => {
+  describe("Member Addition Modal", () => {
     test("should trigger 'handleGroupChange' and close modal", () => {
       const groups = [createDummyGroup()];
       const participants = [createDummyParticipant()];
@@ -651,6 +728,117 @@ describe("Members Display", () => {
       expect(
         within(modalEl).getByRole("button", { name: /add/i })
       ).toBeDisabled();
+    });
+  });
+
+  describe("Member Removal Modal", () => {
+    test("should open modal", () => {
+      const participants = [
+        createDummyParticipant(true),
+        createDummyParticipant(true),
+      ];
+      const groups = [createDummyGroupWithParticipants(participants)];
+
+      render(<GroupContainer ownedIndex={0} groups={groups} />);
+
+      userEvent.click(screen.getByRole("button", { name: /details/i }));
+      userEvent.click(screen.getByRole("button", { name: /remove/i }));
+
+      expect(
+        screen.getByRole("dialog", { name: /remove/i })
+      ).toBeInTheDocument();
+    });
+
+    test("should close modal when 'cancel' button is clicked", () => {
+      const participants = [
+        createDummyParticipant(true),
+        createDummyParticipant(true),
+      ];
+      const groups = [createDummyGroupWithParticipants(participants)];
+
+      render(<GroupContainer ownedIndex={0} groups={groups} />);
+
+      userEvent.click(screen.getByRole("button", { name: /details/i }));
+      userEvent.click(screen.getByRole("button", { name: /remove/i }));
+      userEvent.click(screen.getByRole("button", { name: /cancel/i }));
+
+      expect(
+        screen.queryByRole("dialog", { name: /remove/i })
+      ).not.toBeInTheDocument();
+    });
+
+    test("should close modal when 'esc' is pressed", () => {
+      const participants = [
+        createDummyParticipant(true),
+        createDummyParticipant(true),
+      ];
+      const groups = [createDummyGroupWithParticipants(participants)];
+
+      render(<GroupContainer ownedIndex={0} groups={groups} />);
+
+      userEvent.click(screen.getByRole("button", { name: /details/i }));
+      userEvent.click(screen.getByRole("button", { name: /remove/i }));
+      userEvent.keyboard("{esc}");
+
+      expect(
+        screen.queryByRole("dialog", { name: /remove/i })
+      ).not.toBeInTheDocument();
+    });
+
+    test("should trigger 'handleGroupChange' and close modal", () => {
+      const handleGroupChange = jest.fn();
+      const participants = [
+        createDummyParticipant(true),
+        createDummyParticipant(true),
+      ];
+      const groups = [createDummyGroupWithParticipants(participants)];
+
+      render(
+        <GroupContainer
+          ownedIndex={0}
+          groups={groups}
+          onGroupChange={handleGroupChange}
+        />
+      );
+
+      userEvent.click(screen.getByRole("button", { name: /details/i }));
+      userEvent.click(screen.getByRole("button", { name: /remove/i }));
+
+      const modalEl = screen.getByRole("dialog", { name: /remove/i });
+
+      userEvent.click(within(modalEl).getByRole("button", { name: /remove/i }));
+
+      expect(handleGroupChange).toBeCalledTimes(1);
+      expect(modalEl).not.toBeInTheDocument();
+    });
+
+    test("should render modal properly", () => {
+      const memberCount = 2;
+      const participants = [
+        createDummyParticipant(true),
+        createDummyParticipant(true),
+      ];
+      const groups = [createDummyGroupWithParticipants(participants)];
+
+      render(<GroupContainer ownedIndex={0} groups={groups} />);
+
+      userEvent.click(screen.getByRole("button", { name: /details/i }));
+      userEvent.click(screen.getByRole("button", { name: /remove/i }));
+
+      const modalEl = screen.getByRole("dialog", { name: /remove/i });
+
+      expect(
+        within(modalEl).getByRole("heading", { name: /remove.*group/i })
+      ).toBeInTheDocument();
+      expect(within(modalEl).getAllByRole("checkbox")).toHaveLength(
+        memberCount
+      );
+      expect(
+        within(modalEl).getByRole("button", { name: /cancel/i })
+      ).toBeInTheDocument();
+      expect(
+        within(modalEl).getByRole("button", { name: /remove/i })
+      ).toBeInTheDocument();
     });
   });
 });
