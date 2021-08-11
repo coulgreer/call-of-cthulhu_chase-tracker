@@ -7,18 +7,10 @@ import "@testing-library/jest-dom/extend-expect";
 import ParticipantTable from ".";
 
 import { Participant } from "../../types";
+import ParticipantBuilder from "../../utils/participant-builder";
 
-function createParticipant(id: string): Participant {
-  return {
-    id,
-    name: id,
-    dexterity: 15,
-    movementRate: 3,
-    derivedSpeed: 1,
-    speedStatistics: [],
-    hazardStatistics: [],
-    isGrouped: false,
-  };
+function createNamedParticipant(name: string): Participant {
+  return new ParticipantBuilder().withName(name).build();
 }
 
 const DEFAULT_PROPS: {
@@ -29,9 +21,9 @@ const DEFAULT_PROPS: {
   onParticipantChange: (p: Participant) => void;
 } = {
   participants: [
-    createParticipant("0"),
-    createParticipant("1"),
-    createParticipant("2"),
+    createNamedParticipant("0"),
+    createNamedParticipant("1"),
+    createNamedParticipant("2"),
   ],
   warningMessage:
     "Shame. No prey for the chase. Still, keep your wits about you.",

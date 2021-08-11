@@ -8,7 +8,9 @@ export default interface Participant {
   name: string;
   dexterity: number;
   movementRate: number;
+  speedModifier: number;
   derivedSpeed: number;
+  actionCount: number;
   speedStatistics: Statistic[];
   hazardStatistics: Statistic[];
   isGrouped: boolean;

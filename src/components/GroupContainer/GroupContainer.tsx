@@ -29,10 +29,6 @@ interface State {
 }
 
 export default class GroupContainer extends React.Component<Props, State> {
-  static getInvalidGroupId() {
-    return "N/A";
-  }
-
   static getDefaultChaseName() {
     return "DEFAULT Chase";
   }
@@ -151,13 +147,11 @@ export default class GroupContainer extends React.Component<Props, State> {
   private handleDistancerBlur(event: React.ChangeEvent<HTMLSelectElement>) {
     const { groups, onGroupChange } = this.props;
     const { value } = event.currentTarget;
-    const { distancerId: oldDistancerId } = this.currentGroup;
-    const newDistancer = groups.find((group) => group.id === value);
-    const oldDistancer = groups.find((group) => group.id === oldDistancerId);
+    const { distancer: oldDistancer } = this.currentGroup;
+    const newDistancer = groups.find(({ id }) => id === value) ?? null;
 
     this.removeDistancer();
-
-    if (newDistancer) this.addDistancer(newDistancer);
+    this.addDistancer(newDistancer);
 
     this.setState({ hasDistancer: this.hasDistancer() });
 
@@ -363,9 +357,9 @@ export default class GroupContainer extends React.Component<Props, State> {
   }
 
   private hasDistancer() {
-    const { distancerId } = this.currentGroup;
+    const { distancer } = this.currentGroup;
 
-    return distancerId !== GroupContainer.getInvalidGroupId();
+    return distancer !== null;
   }
 
   private hasValidParticipantCount() {
@@ -375,9 +369,9 @@ export default class GroupContainer extends React.Component<Props, State> {
   }
 
   private hasPursuers() {
-    const { pursuersIds } = this.currentGroup;
+    const { pursuers } = this.currentGroup;
 
-    return pursuersIds.length > 0;
+    return pursuers.length > 0;
   }
 
   private hasMembers() {
@@ -387,28 +381,26 @@ export default class GroupContainer extends React.Component<Props, State> {
   }
 
   private removeDistancer() {
-    const { groups } = this.props;
-    const { id: currentGroupId, distancerId: oldDistancerId } =
-      this.currentGroup;
+    if (!this.currentGroup.distancer) return;
 
-    const oldDistancer = groups.find((group) => oldDistancerId === group.id);
+    const { onGroupChange } = this.props;
+    const { id: currentGroupId, distancer: oldDistancer } = this.currentGroup;
+    const { pursuers } = oldDistancer;
+    const pursuerIndex = pursuers.findIndex(({ id }) => id === currentGroupId);
 
-    if (oldDistancer) {
-      const { pursuersIds } = oldDistancer;
-      const pursuerIndex = pursuersIds.findIndex(
-        (pursuerId) => pursuerId === currentGroupId
-      );
+    pursuers.splice(pursuerIndex, 1);
 
-      pursuersIds.splice(pursuerIndex, 1);
-    }
+    this.currentGroup.distancer = null;
 
-    this.currentGroup.distancerId = GroupContainer.getInvalidGroupId();
+    if (onGroupChange) onGroupChange(oldDistancer);
   }
 
-  private addDistancer({ id, pursuersIds }: Group) {
-    this.currentGroup.distancerId = id;
+  private addDistancer(distancer: Group | null) {
+    this.currentGroup.distancer = distancer;
 
-    pursuersIds.push(this.currentGroup.id);
+    if (distancer === null) return;
+
+    distancer.pursuers.push(this.currentGroup);
   }
 
   private renderSummaryContent() {
@@ -578,7 +570,7 @@ export default class GroupContainer extends React.Component<Props, State> {
             onBlur={this.handleDistancerBlur}
             aria-describedby={hasDistancer ? undefined : warningMessageId}
           >
-            <option key="default" value={GroupContainer.getInvalidGroupId()}>
+            <option key="default" value="default">
               [N/A]
             </option>
             {groups.map(this.renderOption)}
@@ -596,7 +588,7 @@ export default class GroupContainer extends React.Component<Props, State> {
   }
 
   private renderPursuers() {
-    const { pursuersIds } = this.currentGroup;
+    const { pursuers } = this.currentGroup;
 
     const pursuerLabelId = `pursuers-heading-${this.id}`;
     const warningMessageId = `pursuers-list-warning-${this.id}`;
@@ -612,7 +604,7 @@ export default class GroupContainer extends React.Component<Props, State> {
         </h2>
         {this.hasPursuers() ? (
           <ul aria-labelledby={pursuerLabelId}>
-            {pursuersIds.map(GroupContainer.renderPursuer)}
+            {pursuers.map(GroupContainer.renderPursuer)}
           </ul>
         ) : (
           <p id={warningMessageId} className="centered error text--small">
@@ -707,20 +699,20 @@ export default class GroupContainer extends React.Component<Props, State> {
     );
   }
 
-  private renderOption(group: Group, index: number) {
+  private renderOption({ id, name }: Group, index: number) {
     const { ownedIndex } = this.props;
 
     return (
       ownedIndex !== index && (
-        <option key={group.id} value={group.id}>
-          {group.name}
+        <option key={id} value={id}>
+          {name}
         </option>
       )
     );
   }
 
-  private static renderPursuer(pursuerId: string) {
-    return <li key={pursuerId}>{pursuerId}</li>;
+  private static renderPursuer({ id }: Group) {
+    return <li key={id}>{id}</li>;
   }
 
   private renderMember(participant: Participant) {

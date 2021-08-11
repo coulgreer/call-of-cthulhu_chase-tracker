@@ -72,18 +72,13 @@ export default class GroupTable extends React.Component<Props, State> {
     subservientGroups.forEach(transferParticipant);
   }
 
-  private static dissociateGroup(
-    groups: Group[],
-    { id: groupId, distancerId }: Group
-  ) {
-    const distancer = groups.find(({ id }) => distancerId === id);
+  private static dissociateGroup({ id: groupId, distancer }: Group) {
+    if (!distancer) return;
 
-    if (distancer) {
-      const deletedPursuerIndex = distancer.pursuersIds.findIndex(
-        (id) => groupId === id
-      );
-      distancer.pursuersIds.splice(deletedPursuerIndex, 1);
-    }
+    const { pursuers } = distancer;
+
+    const deletedPursuerIndex = pursuers.findIndex(({ id }) => groupId === id);
+    pursuers.splice(deletedPursuerIndex, 1);
   }
 
   private static relieveParticipants({ participants }: Group) {
@@ -159,8 +154,8 @@ export default class GroupTable extends React.Component<Props, State> {
       {
         id: `GROUP-${idNum}`,
         name: `Group ${idNum}`,
-        distancerId: GroupContainer.getInvalidGroupId(),
-        pursuersIds: [],
+        distancer: null,
+        pursuers: [],
         participants: [],
       },
     ];
@@ -203,8 +198,8 @@ export default class GroupTable extends React.Component<Props, State> {
     const newGroup = {
       id: `GROUP-${idNum}`,
       name: validSplinteredGroupName,
-      distancerId: GroupContainer.getInvalidGroupId(),
-      pursuersIds: [],
+      distancer: null,
+      pursuers: [],
       participants: splinteredMembers,
     };
 
@@ -389,14 +384,14 @@ export default class GroupTable extends React.Component<Props, State> {
 
         GroupTable.relieveParticipants(targetGroup);
         this.removeGroup(newGroups, targetGroup);
-        GroupTable.dissociateGroup(newGroups, targetGroup);
+        GroupTable.dissociateGroup(targetGroup);
       });
     } else {
       const targetGroup = newGroups[targetIndices];
 
       GroupTable.relieveParticipants(targetGroup);
       this.removeGroup(newGroups, targetGroup);
-      GroupTable.dissociateGroup(newGroups, targetGroup);
+      GroupTable.dissociateGroup(targetGroup);
     }
 
     return newGroups;

@@ -4,22 +4,48 @@ import { screen, render, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import GroupContainer from ".";
-import {
-  createDummyParticipant,
-  createParticipant,
-} from "../../utils/participant-factory";
-import {
-  createGroup,
-  createDummyGroupWithParticipants,
-  createDummyGroup,
-} from "../../utils/group-factory";
+import ParticipantBuilder from "../../utils/participant-builder";
+import GroupBuilder from "../../utils/group-builder";
 
 import { Group, Participant } from "../../types";
 
-const isolatedGroupName = "Group 0";
-const distancingGroupName = "Group 1";
-const distancingAndPursuingGroupName = "Group 2";
-const pursuingGroupName = "Group 3";
+function createDummyParticipant(isGrouped = false) {
+  return new ParticipantBuilder().setGrouped(isGrouped).build();
+}
+
+function createDummyGroup() {
+  return new GroupBuilder().build();
+}
+
+function createDummyGroupWithParticipants(participants: Participant[]) {
+  return new GroupBuilder().withParticipants(participants).build();
+}
+
+const isolatedGroup = new GroupBuilder().withName("Group A").build();
+const distancingGroup = new GroupBuilder()
+  .withName("Group B")
+  .withParticipants([createDummyParticipant(true)])
+  .build();
+const distancingAndPursuingGroup = new GroupBuilder()
+  .withName("Group C")
+  .withDistancer(distancingGroup)
+  .withParticipants([
+    createDummyParticipant(true),
+    createDummyParticipant(true),
+  ])
+  .build();
+const pursuingGroup = new GroupBuilder()
+  .withName("Group D")
+  .withDistancer(distancingAndPursuingGroup)
+  .withParticipants([
+    createDummyParticipant(true),
+    createDummyParticipant(true),
+    createDummyParticipant(true),
+  ])
+  .build();
+
+distancingGroup.pursuers.push(distancingAndPursuingGroup);
+distancingAndPursuingGroup.pursuers.push(pursuingGroup);
 
 const DEFAULT_PROPS: {
   ownedIndex: number;
@@ -29,38 +55,10 @@ const DEFAULT_PROPS: {
 } = {
   ownedIndex: 0,
   groups: [
-    createGroup(
-      "0",
-      isolatedGroupName,
-      GroupContainer.getInvalidGroupId(),
-      [],
-      []
-    ),
-    createGroup(
-      "1",
-      distancingGroupName,
-      GroupContainer.getInvalidGroupId(),
-      [distancingAndPursuingGroupName],
-      [createDummyParticipant(true)]
-    ),
-    createGroup(
-      "2",
-      distancingAndPursuingGroupName,
-      distancingGroupName,
-      [pursuingGroupName],
-      [createDummyParticipant(true), createDummyParticipant(true)]
-    ),
-    createGroup(
-      "3",
-      pursuingGroupName,
-      distancingAndPursuingGroupName,
-      [],
-      [
-        createDummyParticipant(true),
-        createDummyParticipant(true),
-        createDummyParticipant(true),
-      ]
-    ),
+    isolatedGroup,
+    distancingGroup,
+    distancingAndPursuingGroup,
+    pursuingGroup,
   ],
   participants: [
     createDummyParticipant(),
@@ -269,8 +267,8 @@ describe("Initial State", () => {
 
       test("should enable remove button", () => {
         const participants = [
-          createDummyParticipant(),
-          createDummyParticipant(),
+          createDummyParticipant(true),
+          createDummyParticipant(true),
         ];
         const groups = [createDummyGroupWithParticipants(participants)];
 
@@ -482,26 +480,16 @@ describe("Members Display", () => {
       const lowestMOV = 1;
       const highestMOV = 11;
       const participants = [
-        createParticipant(
-          "p1",
-          "Participant 1",
-          15,
-          lowestMOV,
-          1,
-          [],
-          [],
-          true
-        ),
-        createParticipant(
-          "p2",
-          "Participant 2",
-          50,
-          highestMOV,
-          2,
-          [],
-          [],
-          true
-        ),
+        new ParticipantBuilder()
+          .withName("Participant 1")
+          .withMovementRate(lowestMOV)
+          .setGrouped(true)
+          .build(),
+        new ParticipantBuilder()
+          .withName("Participant 2")
+          .withMovementRate(highestMOV)
+          .setGrouped(true)
+          .build(),
       ];
       const [lowestMovParticipant, highestMovParticipant] = participants;
       const groups = [createDummyGroupWithParticipants(participants)];
@@ -850,18 +838,21 @@ describe("Confirmation Tests", () => {
     const middlingMOV = highestMOV - lowestMOV;
 
     const participants = [
-      createParticipant("p1", "Participant 1", 15, lowestMOV, 1, [], [], true),
-      createParticipant(
-        "p2",
-        "Participant 2",
-        15,
-        middlingMOV,
-        1,
-        [],
-        [],
-        true
-      ),
-      createParticipant("p3", "Participant 3", 50, highestMOV, 2, [], [], true),
+      new ParticipantBuilder()
+        .withName("Participant 1")
+        .withMovementRate(lowestMOV)
+        .setGrouped(true)
+        .build(),
+      new ParticipantBuilder()
+        .withName("Participant 2")
+        .withMovementRate(middlingMOV)
+        .setGrouped(true)
+        .build(),
+      new ParticipantBuilder()
+        .withName("Participant 3")
+        .withMovementRate(highestMOV)
+        .setGrouped(true)
+        .build(),
     ];
 
     const [, { name: middlingName }] = participants;

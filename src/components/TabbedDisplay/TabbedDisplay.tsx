@@ -67,15 +67,15 @@ export default class TabbedDisplay extends React.Component<Props, State> {
     const idNum = this.participantSequenceGenerator.nextNum();
     const id = `${ParticipantTable.DEFAULT_NAME} #${idNum}`;
 
-    this.setState((state) => {
-      const { participants } = state;
-
+    this.setState(({ participants }) => {
       participants.push({
         id,
         name: id,
         dexterity: 15,
         movementRate: 2,
-        derivedSpeed: 1,
+        speedModifier: 1,
+        derivedSpeed: 3,
+        actionCount: 1,
         speedStatistics: ParticipantContainer.DEFAULT_SPEED_STATISTICS,
         hazardStatistics: ParticipantContainer.DEFAULT_HAZARD_STATISTICS,
         isGrouped: false,

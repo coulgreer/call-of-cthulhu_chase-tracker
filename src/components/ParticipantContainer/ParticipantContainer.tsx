@@ -29,7 +29,7 @@ interface State {
   currentName: string;
   dexterity: WrappedStatistic;
   movementRate: WrappedStatistic;
-  derivedSpeed: WrappedStatistic;
+  speedModifier: WrappedStatistic;
   speedStatistics: WrappedStatistic[];
   hazardStatistics: WrappedStatistic[];
 }
@@ -137,14 +137,14 @@ export default class ParticipantContainer extends React.Component<
   }
 
   private static initializeDerivedSpeed({
-    derivedSpeed,
+    speedModifier,
   }: Participant): WrappedStatistic {
     return {
       statistic: {
-        name: "Speed",
-        score: derivedSpeed,
+        name: "SPD Mod",
+        score: speedModifier,
       },
-      currentValue: derivedSpeed.toString(),
+      currentValue: speedModifier.toString(),
     };
   }
 
@@ -245,7 +245,7 @@ export default class ParticipantContainer extends React.Component<
       currentName: participant.name,
       dexterity: ParticipantContainer.initializeDexterity(participant),
       movementRate: ParticipantContainer.initializeMovementRate(participant),
-      derivedSpeed: ParticipantContainer.initializeDerivedSpeed(participant),
+      speedModifier: ParticipantContainer.initializeDerivedSpeed(participant),
       speedStatistics: this.initializeSpeedStatistics(participant),
       hazardStatistics: this.initializeHazardStatistics(participant),
     };
@@ -286,18 +286,16 @@ export default class ParticipantContainer extends React.Component<
   }
 
   private handleDerivedSpeedChange(value: string) {
-    this.setState((state) => {
-      const { derivedSpeed } = state;
-      const { statistic } = derivedSpeed;
+    this.setState(({ speedModifier }) => {
+      const spdMod = speedModifier;
 
-      statistic.score = ParticipantContainer.parseValidScore(
+      spdMod.statistic.score = ParticipantContainer.parseValidScore(
         value,
-        derivedSpeed
+        spdMod
       );
+      spdMod.currentValue = value;
 
-      derivedSpeed.currentValue = value;
-
-      return { derivedSpeed };
+      return { speedModifier: spdMod };
     });
   }
 
@@ -372,20 +370,16 @@ export default class ParticipantContainer extends React.Component<
   }
 
   private handleDerivedSpeedBlur() {
-    this.setState((state, props) => {
-      const { participant, onParticipantChange } = props;
-      const { derivedSpeed } = state;
+    this.setState(({ speedModifier }, { participant, onParticipantChange }) => {
+      const spdMod = speedModifier;
+      const p = participant;
 
-      const {
-        statistic: { score },
-      } = derivedSpeed;
-
-      participant.derivedSpeed = score;
+      p.speedModifier = spdMod.statistic.score;
       if (onParticipantChange) onParticipantChange(participant);
 
-      derivedSpeed.currentValue = score.toString();
+      spdMod.currentValue = spdMod.statistic.score.toString();
 
-      return { derivedSpeed };
+      return { speedModifier: spdMod };
     });
   }
 
@@ -576,13 +570,13 @@ export default class ParticipantContainer extends React.Component<
   }
 
   private updateSpeedModifier(modifier: number) {
-    this.setState((state) => {
-      const { derivedSpeed } = state;
+    this.setState(({ speedModifier }) => {
+      const spdMod = speedModifier;
 
-      derivedSpeed.statistic.score = modifier;
-      derivedSpeed.currentValue = modifier.toString();
+      spdMod.statistic.score = modifier;
+      spdMod.currentValue = modifier.toString();
 
-      return { derivedSpeed };
+      return { speedModifier: spdMod };
     });
   }
 
@@ -653,7 +647,7 @@ export default class ParticipantContainer extends React.Component<
       currentName,
       dexterity,
       movementRate,
-      derivedSpeed,
+      speedModifier,
     } = this.state;
 
     return (
@@ -686,7 +680,7 @@ export default class ParticipantContainer extends React.Component<
             )}
             {DisplayFactory.createStatisticDisplay(
               "StatisticDisplay--vertical",
-              derivedSpeed,
+              speedModifier,
               (value) => this.handleDerivedSpeedChange(value),
               () => this.handleDerivedSpeedBlur()
             )}

@@ -15,7 +15,9 @@ const DEFAULT_PROPS: {
     name: "Default Name",
     dexterity: 15,
     movementRate: 2,
-    derivedSpeed: 0,
+    speedModifier: 0,
+    derivedSpeed: 2,
+    actionCount: 1,
     speedStatistics: ParticipantContainer.DEFAULT_SPEED_STATISTICS,
     hazardStatistics: ParticipantContainer.DEFAULT_HAZARD_STATISTICS,
     isGrouped: false,
@@ -42,8 +44,8 @@ describe("Collapse/Expand detailed data", () => {
     ).not.toBeVisible();
 
     expect(screen.getByLabelText(/dex/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/speed/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/speed/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/spd.*mod/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/spd.*mod/i)).toBeInTheDocument();
 
     expect(
       screen.getByRole("button", { name: /generate/i })
@@ -94,7 +96,7 @@ describe("Collapse/Expand detailed data", () => {
 
     expect(screen.getByLabelText(/dex/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/mov/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/speed/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/spd.*mod/i)).toBeInTheDocument();
 
     expect(
       screen.getByRole("button", { name: /generate/i })
@@ -248,7 +250,7 @@ describe("Statistic Display event handlers", () => {
       );
 
       const statisticDisplayEl = screen.getByRole("spinbutton", {
-        name: /speed/i,
+        name: /spd.*mod/i,
       });
       userEvent.clear(statisticDisplayEl);
       userEvent.type(statisticDisplayEl, validScore.toString());
@@ -379,7 +381,7 @@ describe("Statistic Display event handlers", () => {
       );
 
       const statisticDisplayEl = screen.getByRole("spinbutton", {
-        name: /speed/i,
+        name: /spd.*mod/i,
       });
       userEvent.clear(statisticDisplayEl);
       userEvent.type(statisticDisplayEl, validScore.toString());
@@ -512,7 +514,7 @@ describe("Statistic Display event handlers", () => {
       );
 
       const statisticDisplayEl = screen.getByRole("spinbutton", {
-        name: /speed/i,
+        name: /spd.*mod/i,
       });
       userEvent.clear(statisticDisplayEl);
       userEvent.type(statisticDisplayEl, validScore.toString());

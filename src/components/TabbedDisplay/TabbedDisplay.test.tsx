@@ -5,7 +5,6 @@ import userEvent from "@testing-library/user-event";
 
 import TabbedDisplay from ".";
 import GroupTable from "../GroupTable";
-import GroupContainer from "../GroupContainer";
 import ParticipantTable from "../ParticipantTable";
 import ParticipantContainer from "../ParticipantContainer";
 
@@ -186,7 +185,7 @@ describe("ParticipantTable Event Handlers", () => {
           render(<TabbedDisplay />);
           createAnExpandedParticipantContainer();
 
-          const speedEl = screen.getByRole("spinbutton", { name: /speed/i });
+          const speedEl = screen.getByRole("spinbutton", { name: /spd.*mod/i });
           userEvent.clear(speedEl);
           userEvent.type(speedEl, validScore.toString());
           speedEl.blur();
@@ -230,7 +229,7 @@ describe("ParticipantTable Event Handlers", () => {
           render(<TabbedDisplay />);
           createAnExpandedParticipantContainer();
 
-          const speedEl = screen.getByRole("spinbutton", { name: /speed/i });
+          const speedEl = screen.getByRole("spinbutton", { name: /spd.*mod/i });
           userEvent.clear(speedEl);
           userEvent.type(speedEl, validScore.toString());
 
@@ -279,7 +278,7 @@ describe("ParticipantTable Event Handlers", () => {
           render(<TabbedDisplay />);
           createAnExpandedParticipantContainer();
 
-          const speedEl = screen.getByRole("spinbutton", { name: /speed/i });
+          const speedEl = screen.getByRole("spinbutton", { name: /spd.*mod/i });
           userEvent.clear(speedEl);
           userEvent.type(speedEl, validScore.toString());
 
@@ -1201,7 +1200,7 @@ describe("GroupTable Event Handlers", () => {
       expect(screen.getByRole("grid")).toBeInTheDocument();
     });
 
-    test("should not crash when changing distancer to 'none'", () => {
+    test("should not crash when changing distancer to 'default'", () => {
       render(<TabbedDisplay />);
       userEvent.click(screen.getByRole("tab", { name: /group/i }));
       userEvent.click(screen.getByRole("button", { name: /create group/i }));
@@ -1210,7 +1209,7 @@ describe("GroupTable Event Handlers", () => {
       expect(() =>
         userEvent.selectOptions(
           screen.getByRole("combobox", { name: /distancer/i }),
-          GroupContainer.getInvalidGroupId()
+          "default"
         )
       ).not.toThrowError();
     });

@@ -4,42 +4,56 @@ import { screen, render, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import GroupTable from ".";
-import GroupContainer from "../GroupContainer";
-import {
-  createDummyGroup,
-  createDummyGroupWithParticipants,
-} from "../../utils/group-factory";
 
 import { Group, Participant } from "../../types";
-import { createDummyParticipant } from "../../utils/participant-factory";
 
-function createParticipant(id: string): Participant {
-  return {
-    id,
-    name: id,
-    dexterity: 15,
-    movementRate: 3,
-    derivedSpeed: 1,
-    speedStatistics: [],
-    hazardStatistics: [],
-    isGrouped: false,
-  };
+import GroupBuilder from "../../utils/group-builder";
+import ParticipantBuilder from "../../utils/participant-builder";
+
+function createDummyGroup() {
+  return new GroupBuilder().build();
+}
+
+function createDummyGroupWithParticipants(participants: Participant[]) {
+  return new GroupBuilder().withParticipants(participants).build();
+}
+
+function createDummyParticipant(isGrouped = false) {
+  return new ParticipantBuilder().setGrouped(isGrouped).build();
+}
+
+function createNamedParticipant(name: string): Participant {
+  return new ParticipantBuilder().withName(name).build();
 }
 
 const membersTableHeadRowCount = 3;
 
-const isolatedGroupName = "Group 0";
-const distancingGroupName = "Group 1";
-const distancingAndPursuingGroupName = "Group 2";
-const pursuingGroupName = "Group 3";
+const participant1 = createNamedParticipant("Participant 00");
+const participant2 = createNamedParticipant("Participant 01");
+const participant3 = createNamedParticipant("Participant 02");
+const participant4 = createNamedParticipant("Participant 03");
+const participant5 = createNamedParticipant("Participant 04");
+const participant6 = createNamedParticipant("Participant 05");
+const participant7 = createNamedParticipant("Participant 06");
 
-const participant1 = createParticipant("Participant 00");
-const participant2 = createParticipant("Participant 01");
-const participant3 = createParticipant("Participant 02");
-const participant4 = createParticipant("Participant 03");
-const participant5 = createParticipant("Participant 04");
-const participant6 = createParticipant("Participant 05");
-const participant7 = createParticipant("Participant 06");
+const isolatedGroup = new GroupBuilder().withName("Group A").build();
+const distancingGroup = new GroupBuilder()
+  .withName("Group B")
+  .withParticipants([participant1])
+  .build();
+const distancingAndPursuingGroup = new GroupBuilder()
+  .withName("Group C")
+  .withDistancer(distancingGroup)
+  .withParticipants([participant2, participant3])
+  .build();
+const pursuingGroup = new GroupBuilder()
+  .withName("Group D")
+  .withDistancer(distancingAndPursuingGroup)
+  .withParticipants([participant4, participant5, participant6])
+  .build();
+
+distancingGroup.pursuers.push(distancingAndPursuingGroup);
+distancingAndPursuingGroup.pursuers.push(pursuingGroup);
 
 const DEFAULT_PROPS: {
   groups: Group[];
@@ -48,34 +62,10 @@ const DEFAULT_PROPS: {
   handleGroupsChange: (g: Group[]) => void;
 } = {
   groups: [
-    {
-      id: "0",
-      name: isolatedGroupName,
-      distancerId: GroupContainer.getInvalidGroupId(),
-      pursuersIds: [],
-      participants: [],
-    },
-    {
-      id: "1",
-      name: distancingGroupName,
-      distancerId: GroupContainer.getInvalidGroupId(),
-      pursuersIds: [distancingAndPursuingGroupName],
-      participants: [participant1],
-    },
-    {
-      id: "2",
-      name: distancingAndPursuingGroupName,
-      distancerId: distancingGroupName,
-      pursuersIds: [pursuingGroupName],
-      participants: [participant2, participant3],
-    },
-    {
-      id: "3",
-      name: pursuingGroupName,
-      distancerId: distancingAndPursuingGroupName,
-      pursuersIds: [],
-      participants: [participant4, participant5, participant6],
-    },
+    isolatedGroup,
+    distancingGroup,
+    distancingAndPursuingGroup,
+    pursuingGroup,
   ],
   participants: [
     participant1,
@@ -288,7 +278,7 @@ describe("Callback Triggering", () => {
     expect(secondDistancerEl).toHaveValue(group3.id);
     expect(thirdDistancerEl).toHaveValue(group1.id);
 
-    expect(handleGroupsChange).toBeCalledTimes(6);
+    expect(handleGroupsChange).toBeCalledTimes(8);
   });
 });
 
