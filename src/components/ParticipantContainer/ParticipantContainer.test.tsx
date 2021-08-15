@@ -25,7 +25,7 @@ const DEFAULT_PROPS: {
   onParticipantChange: jest.fn(),
 };
 
-describe("Collapse/Expand detailed data", () => {
+describe("Initial State", () => {
   const { participant } = DEFAULT_PROPS;
 
   const [constitution, driveAuto, ride, aircraft, boat] =
@@ -34,27 +34,23 @@ describe("Collapse/Expand detailed data", () => {
   const [strength, climb, swim, dodge, brawl, handgun, rifle] =
     participant.hazardStatistics;
 
-  test("should render participant information properly when collapsed", () => {
+  test("should render properly when collapsed", () => {
     render(<ParticipantContainer participant={participant} />);
 
+    expect(screen.getByText(/actions.+/i)).toBeInTheDocument();
     expect(screen.getByRole("textbox", { name: /name/i })).toBeInTheDocument();
-
     expect(
       screen.queryByText(ParticipantContainer.WARNING_MESSAGE)
     ).not.toBeVisible();
-
     expect(screen.getByLabelText(/dex/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/spd.*mod/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/spd.*mod/i)).toBeInTheDocument();
-
+    expect(screen.getByLabelText(/spd/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/spd/i)).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /generate/i })
     ).toBeInTheDocument();
-
     expect(
       screen.getByRole("button", { name: /participant details/i })
     ).toBeInTheDocument();
-
     expect(
       screen.queryByRole("heading", { name: /speed stats/i })
     ).not.toBeInTheDocument();
@@ -63,11 +59,9 @@ describe("Collapse/Expand detailed data", () => {
     expect(screen.queryByLabelText(ride.name)).not.toBeInTheDocument();
     expect(screen.queryByLabelText(aircraft.name)).not.toBeInTheDocument();
     expect(screen.queryByLabelText(boat.name)).not.toBeInTheDocument();
-
     expect(
       screen.queryByRole("heading", { name: /hazard stats/i })
     ).not.toBeInTheDocument();
-
     expect(screen.queryByLabelText(strength.name)).not.toBeInTheDocument();
     expect(screen.queryByLabelText(climb.name)).not.toBeInTheDocument();
     expect(screen.queryByLabelText(swim.name)).not.toBeInTheDocument();
@@ -81,13 +75,14 @@ describe("Collapse/Expand detailed data", () => {
     ).toHaveLength(0);
   });
 
-  test("should render participant information properly when expanded", () => {
+  test("should render properly when expanded", () => {
     render(<ParticipantContainer participant={participant} />);
 
     userEvent.click(
       screen.getByRole("button", { name: /participant details/i })
     );
 
+    expect(screen.getByText(/actions.+/i)).toBeInTheDocument();
     expect(screen.getByRole("textbox", { name: /name/i })).toBeInTheDocument();
 
     expect(
@@ -96,7 +91,7 @@ describe("Collapse/Expand detailed data", () => {
 
     expect(screen.getByLabelText(/dex/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/mov/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/spd.*mod/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/spd/i)).toBeInTheDocument();
 
     expect(
       screen.getByRole("button", { name: /generate/i })
@@ -250,7 +245,7 @@ describe("Statistic Display event handlers", () => {
       );
 
       const statisticDisplayEl = screen.getByRole("spinbutton", {
-        name: /spd.*mod/i,
+        name: /spd/i,
       });
       userEvent.clear(statisticDisplayEl);
       userEvent.type(statisticDisplayEl, validScore.toString());
@@ -381,7 +376,7 @@ describe("Statistic Display event handlers", () => {
       );
 
       const statisticDisplayEl = screen.getByRole("spinbutton", {
-        name: /spd.*mod/i,
+        name: /spd/i,
       });
       userEvent.clear(statisticDisplayEl);
       userEvent.type(statisticDisplayEl, validScore.toString());
@@ -514,7 +509,7 @@ describe("Statistic Display event handlers", () => {
       );
 
       const statisticDisplayEl = screen.getByRole("spinbutton", {
-        name: /spd.*mod/i,
+        name: /spd/i,
       });
       userEvent.clear(statisticDisplayEl);
       userEvent.type(statisticDisplayEl, validScore.toString());

@@ -129,10 +129,13 @@ test("should trigger update when participant changes", () => {
 });
 
 describe("Delete Participant", () => {
-  const { participants } = DEFAULT_PROPS;
-  const [participant] = participants;
-
   test("should trigger deletion of given particpant", () => {
+    const participants = [
+      new ParticipantBuilder().build(),
+      new ParticipantBuilder().build(),
+    ];
+    const [participant] = participants;
+
     const onDeleteParticipantClick = jest.fn();
 
     render(
@@ -157,6 +160,9 @@ describe("Delete Participant", () => {
   });
 
   describe("when canceling", () => {
+    const { participants } = DEFAULT_PROPS;
+    const [participant] = participants;
+
     test("should abort deletion when 'esc' is pressed", () => {
       const onDeleteParticipantClick = jest.fn();
 

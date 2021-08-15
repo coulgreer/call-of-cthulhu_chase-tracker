@@ -1,0 +1,9 @@
+.ChaseControls {
+  display: grid;
+  grid-template-columns: auto auto;
+  width: 100%;
+}
+
+.ChaseControls--active {
+  box-shadow: inset 0 0 20px #000;
+}

@@ -142,18 +142,22 @@ export default class ParticipantTable extends Component<Props, State> {
     return participants.map((participant) => (
       <div className="ParticipantTable__row" role="row" key={participant.id}>
         <ParticipantContainer
+          role="gridcell"
+          aria-label={`${participant.name} editor`}
           participant={participant}
           onParticipantChange={() => this.handleParticipantChange(participant)}
         />
-        <Button
-          className="ParticipantTable__row-control button button--contained button--on-dark"
-          aria-label={`Remove: ${participant.id}`}
-          onClick={() => this.promptParticipantRemoval(participant)}
-        >
-          <span className="material-icons" aria-hidden>
-            remove_circle
-          </span>
-        </Button>
+        <div role="gridcell">
+          <Button
+            className="ParticipantTable__row-control button button--contained button--on-dark"
+            onClick={() => this.promptParticipantRemoval(participant)}
+            aria-label={`Remove: ${participant.id}`}
+          >
+            <span className="material-icons" aria-hidden>
+              remove_circle
+            </span>
+          </Button>
+        </div>
       </div>
     ));
   }

@@ -9,6 +9,8 @@ import StatisticTable from "../StatisticTable";
 import { WrappedStatistic } from "../StatisticDisplay";
 import DisplayFactory from "../StatisticDisplay/DisplayFactory";
 
+import ChaseStartContext from "../../contexts/ChaseStartContext";
+
 import "./ParticipantContainer.css";
 
 import UniqueSequenceGenerator from "../../utils/unique-sequence-generator";
@@ -37,9 +39,11 @@ interface State {
 const SEQUENCE_START = 0;
 
 export default class ParticipantContainer extends React.Component<
-  Props,
+  Props & React.HTMLProps<HTMLElement>,
   State
 > {
+  static contextType = ChaseStartContext;
+
   static get WARNING_MESSAGE() {
     return "Even Elder Ones have a title. You ought follow suit.";
   }
@@ -141,7 +145,7 @@ export default class ParticipantContainer extends React.Component<
   }: Participant): WrappedStatistic {
     return {
       statistic: {
-        name: "SPD Mod",
+        name: "SPD",
         score: speedModifier,
       },
       currentValue: speedModifier.toString(),
@@ -375,6 +379,7 @@ export default class ParticipantContainer extends React.Component<
       const p = participant;
 
       p.speedModifier = spdMod.statistic.score;
+      p.derivedSpeed = p.speedModifier + p.movementRate;
       if (onParticipantChange) onParticipantChange(participant);
 
       spdMod.currentValue = spdMod.statistic.score.toString();
@@ -384,20 +389,17 @@ export default class ParticipantContainer extends React.Component<
   }
 
   private handleMovementRateBlur() {
-    this.setState((state, props) => {
-      const { participant, onParticipantChange } = props;
-      const { movementRate } = state;
+    this.setState(({ movementRate }, { participant, onParticipantChange }) => {
+      const mov = movementRate;
+      const p = participant;
 
-      const {
-        statistic: { score },
-      } = movementRate;
-
-      participant.movementRate = score;
+      p.movementRate = mov.statistic.score;
+      p.derivedSpeed = p.speedModifier + p.movementRate;
       if (onParticipantChange) onParticipantChange(participant);
 
-      movementRate.currentValue = score.toString();
+      mov.currentValue = mov.statistic.score.toString();
 
-      return { movementRate };
+      return { movementRate: mov };
     });
   }
 
@@ -640,6 +642,16 @@ export default class ParticipantContainer extends React.Component<
     );
   }
 
+  private renderActionCount() {
+    const {
+      participant: { isGrouped, actionCount },
+    } = this.props;
+    const hasChaseStarted = this.context;
+    return (
+      <p>Actions : {isGrouped && hasChaseStarted ? actionCount : "N/A"}</p>
+    );
+  }
+
   private renderMainDisplay() {
     const {
       expansionShown,
@@ -781,8 +793,11 @@ export default class ParticipantContainer extends React.Component<
   }
 
   render() {
+    const { role, "aria-label": ariaLabel } = this.props;
+
     return (
-      <div className="ParticipantContainer">
+      <div role={role} aria-label={ariaLabel} className="ParticipantContainer">
+        {this.renderActionCount()}
         {this.renderMainDisplay()}
         {this.renderExpansiveDisplay()}
         {this.renderSpeedStatisticModal()}

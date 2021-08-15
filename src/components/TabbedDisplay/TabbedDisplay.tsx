@@ -5,13 +5,13 @@ import GroupTable from "../GroupTable";
 import ParticipantTable from "../ParticipantTable";
 import ParticipantContainer from "../ParticipantContainer";
 
+import ChaseStartContext from "../../contexts/ChaseStartContext";
+
 import { Group, Participant } from "../../types";
 
 import UniqueSequenceGen from "../../utils/unique-sequence-generator";
 
 import "./TabbedDisplay.css";
-
-interface Props {}
 
 interface State {
   displayedIndex: number;
@@ -21,14 +21,44 @@ interface State {
 
 const SEQUENCE_START = 0;
 
-/* 
-TODO (Coul Greer): Think about adding Redux to the project due to Participants
-and Groups being needed in multiple components.
-*/
-export default class TabbedDisplay extends React.Component<Props, State> {
+export default class TabbedDisplay extends React.Component<{}, State> {
+  static contextType = ChaseStartContext;
+
+  private static parseChases(groups: Group[]) {
+    const chases: Group[][] = [];
+
+    groups.forEach((group) => {
+      const { pursuers } = group;
+      const distancerId = group.distancer?.id;
+      let relativeChase = [];
+      const hasRelativeInChase = !!(
+        chases.find((chase) => {
+          relativeChase = chase;
+
+          return chase.find(({ id: groupId }) => groupId === distancerId);
+        }) ||
+        chases.find((chase) => {
+          relativeChase = chase;
+
+          return chase.find(({ id: groupId }) =>
+            pursuers.find(({ id: pursuerId }) => groupId === pursuerId)
+          );
+        })
+      );
+
+      if (hasRelativeInChase) {
+        relativeChase.push(group);
+      } else {
+        chases.push([group]);
+      }
+    });
+
+    return chases;
+  }
+
   private participantSequenceGenerator;
 
-  constructor(props: Props) {
+  constructor(props: any) {
     super(props);
 
     this.state = { displayedIndex: 0, groups: [], participants: [] };
@@ -44,6 +74,10 @@ export default class TabbedDisplay extends React.Component<Props, State> {
 
     // Group Table Event Handlers
     this.handleGroupsChange = this.handleGroupsChange.bind(this);
+  }
+
+  componentDidUpdate() {
+    this.calculateActions();
   }
 
   private handleClick(index: number) {
@@ -92,6 +126,49 @@ export default class TabbedDisplay extends React.Component<Props, State> {
 
   private handleGroupsChange(newGroups: Group[]) {
     this.setState({ groups: newGroups });
+  }
+
+  private calculateActions() {
+    const { groups } = this.state;
+    const chases = TabbedDisplay.parseChases(groups);
+
+    const sortParticipants = (
+      { derivedSpeed: spd1 }: Participant,
+      { derivedSpeed: spd2 }: Participant
+    ) => {
+      if (spd1 > spd2) {
+        return 1;
+      }
+
+      if (spd1 < spd2) {
+        return -1;
+      }
+
+      return 0;
+    };
+
+    chases.forEach((chase) => {
+      const allParticipants = chase.map(({ participants }) => participants);
+      const flatParticipants = allParticipants.reduce(
+        (acc, curVal) => acc.concat(curVal),
+        []
+      );
+
+      flatParticipants.sort(sortParticipants);
+
+      let actionCount = 0;
+      let highestDerivedSpeed = flatParticipants[0]?.derivedSpeed - 1 ?? 0;
+      flatParticipants.forEach((participant) => {
+        const p = participant;
+
+        if (highestDerivedSpeed < p.derivedSpeed) {
+          actionCount += 1;
+          highestDerivedSpeed = p.derivedSpeed;
+        }
+
+        p.actionCount = actionCount;
+      });
+    });
   }
 
   private removeParticipantFromSequence(participant: Participant) {
@@ -158,7 +235,7 @@ export default class TabbedDisplay extends React.Component<Props, State> {
     ];
 
     return (
-      <main className="TabbedDisplay">
+      <>
         <div className="TabbedDisplay__tabs" role="tablist">
           {displays.map((display, index) => (
             <Button
@@ -190,7 +267,7 @@ export default class TabbedDisplay extends React.Component<Props, State> {
             );
           })}
         </div>
-      </main>
+      </>
     );
   }
 }

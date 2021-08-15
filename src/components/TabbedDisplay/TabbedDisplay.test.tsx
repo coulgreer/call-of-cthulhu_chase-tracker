@@ -52,8 +52,6 @@ afterEach(() => {
 test("should render properly", () => {
   render(<TabbedDisplay />);
 
-  expect(screen.getByRole("main")).toBeInTheDocument();
-
   expect(screen.getByRole("tab", { name: /participants/i })).toHaveClass(
     "TabbedDisplay__tab--enabled"
   );
@@ -185,7 +183,7 @@ describe("ParticipantTable Event Handlers", () => {
           render(<TabbedDisplay />);
           createAnExpandedParticipantContainer();
 
-          const speedEl = screen.getByRole("spinbutton", { name: /spd.*mod/i });
+          const speedEl = screen.getByRole("spinbutton", { name: /spd/i });
           userEvent.clear(speedEl);
           userEvent.type(speedEl, validScore.toString());
           speedEl.blur();
@@ -229,7 +227,7 @@ describe("ParticipantTable Event Handlers", () => {
           render(<TabbedDisplay />);
           createAnExpandedParticipantContainer();
 
-          const speedEl = screen.getByRole("spinbutton", { name: /spd.*mod/i });
+          const speedEl = screen.getByRole("spinbutton", { name: /spd/i });
           userEvent.clear(speedEl);
           userEvent.type(speedEl, validScore.toString());
 
@@ -278,7 +276,7 @@ describe("ParticipantTable Event Handlers", () => {
           render(<TabbedDisplay />);
           createAnExpandedParticipantContainer();
 
-          const speedEl = screen.getByRole("spinbutton", { name: /spd.*mod/i });
+          const speedEl = screen.getByRole("spinbutton", { name: /spd/i });
           userEvent.clear(speedEl);
           userEvent.type(speedEl, validScore.toString());
 
