@@ -107,11 +107,7 @@ describe("ParticipantTable Event Handlers", () => {
     createAnExpandedParticipantContainer();
     createAnExpandedParticipantContainer();
 
-    userEvent.click(
-      screen.getByRole("button", {
-        name: new RegExp(`remove: ${ParticipantTable.DEFAULT_NAME} #1`, "i"),
-      })
-    );
+    userEvent.click(screen.getByRole("button", { name: /remove:.*1/i }));
     userEvent.click(screen.getByRole("button", { name: /^delete$/i }));
 
     expect(screen.getAllByRole("row")).toHaveLength(2);
@@ -129,17 +125,9 @@ describe("ParticipantTable Event Handlers", () => {
     userEvent.click(createParticipantButton);
     userEvent.click(createParticipantButton);
     userEvent.click(createParticipantButton);
-    userEvent.click(
-      screen.getByRole("button", {
-        name: new RegExp(`remove: ${ParticipantTable.DEFAULT_NAME} #2`, "i"),
-      })
-    );
+    userEvent.click(screen.getByRole("button", { name: /remove:.*2/i }));
     userEvent.click(screen.getByRole("button", { name: /delete/i }));
-    userEvent.click(
-      screen.getByRole("button", {
-        name: new RegExp(`remove: ${ParticipantTable.DEFAULT_NAME} #4`, "i"),
-      })
-    );
+    userEvent.click(screen.getByRole("button", { name: /remove:.*4/i }));
     userEvent.click(screen.getByRole("button", { name: /delete/i }));
     userEvent.click(createParticipantButton);
 
@@ -733,20 +721,12 @@ describe("ParticipantTable Event Handlers", () => {
       userEvent.click(createParticipantButton);
 
       // Delete a participant that's not at the end of the sequence.
-      userEvent.click(
-        screen.getByRole("button", {
-          name: new RegExp(`remove: ${ParticipantTable.DEFAULT_NAME} #1$`, "i"),
-        })
-      );
+      userEvent.click(screen.getByRole("button", { name: /remove:.*1$/i }));
       userEvent.click(screen.getByRole("button", { name: /delete/i }));
 
       /* Then, delete another participant that starts with a differing digit
        *  from the first, but is not at the end of the sequence. */
-      userEvent.click(
-        screen.getByRole("button", {
-          name: new RegExp(`remove: ${ParticipantTable.DEFAULT_NAME} #3$`, "i"),
-        })
-      );
+      userEvent.click(screen.getByRole("button", { name: /remove:.*3$/i }));
       userEvent.click(screen.getByRole("button", { name: /delete/i }));
 
       // Replenish the participants.

@@ -137,11 +137,11 @@ export default class GroupTable extends React.Component<Props, State> {
     this.renderNewMemberRow = this.renderNewMemberRow.bind(this);
   }
 
-  private handleGroupChange(newGroup: Group) {
+  private handleGroupChange(target: Group) {
     const { groups, onGroupsChange } = this.props;
 
-    const targetIndex = groups.findIndex((group) => group.id === newGroup.id);
-    groups.splice(targetIndex, 1, newGroup);
+    const targetIndex = groups.findIndex(({ id }) => id === target.id);
+    groups.splice(targetIndex, 1, target);
 
     if (onGroupsChange) onGroupsChange([...groups]);
   }
@@ -423,6 +423,9 @@ export default class GroupTable extends React.Component<Props, State> {
     );
   }
 
+  /* TODO (Coul Greer): AHA! Take the render row and implement it directly by
+  removing the callback. Maybe use a callback for rendering the gridcells if
+  nesting too deeply is a concern */
   private renderRow({ id, name, participants: members }: Group, index: number) {
     const { groups, participants } = this.props;
 

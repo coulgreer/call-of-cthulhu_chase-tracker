@@ -1,29 +1,97 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import ParticipantContainer from ".";
 
 import { Participant } from "../../types";
 
+import ParticipantBuilder from "../../utils/participant-builder";
+
 const DEFAULT_PROPS: {
   participant: Participant;
   onParticipantChange: (p: Participant) => void;
 } = {
-  participant: {
-    id: "DefaultID 1",
-    name: "Default Name",
-    dexterity: 15,
-    movementRate: 2,
-    speedModifier: 0,
-    derivedSpeed: 2,
-    actionCount: 1,
-    speedStatistics: ParticipantContainer.DEFAULT_SPEED_STATISTICS,
-    hazardStatistics: ParticipantContainer.DEFAULT_HAZARD_STATISTICS,
-    isGrouped: false,
-  },
+  participant: new ParticipantBuilder()
+    .withHazardStatistics(ParticipantContainer.DEFAULT_HAZARD_STATISTICS)
+    .withSpeedStatistics(ParticipantContainer.DEFAULT_SPEED_STATISTICS)
+    .build(),
   onParticipantChange: jest.fn(),
 };
+
+function setup() {
+  const participant = new ParticipantBuilder()
+    .withHazardStatistics(ParticipantContainer.DEFAULT_HAZARD_STATISTICS)
+    .withSpeedStatistics(ParticipantContainer.DEFAULT_SPEED_STATISTICS)
+    .build();
+  const handleParticipantChange = jest.fn();
+
+  render(
+    <ParticipantContainer
+      participant={participant}
+      onParticipantChange={handleParticipantChange}
+    />
+  );
+
+  const nameInput = screen.getByRole("textbox", { name: /name/i });
+  const dexterityInput = screen.getByRole("spinbutton", { name: /dex/i });
+  const speedModifierInput = screen.getByRole("spinbutton", { name: /spd/i });
+  const movementRateInput = screen.getByRole("spinbutton", { name: /mov/i });
+
+  const changeNameInput = (name: string) => {
+    userEvent.clear(nameInput);
+    userEvent.type(nameInput, name);
+  };
+  const clearNameInput = () => userEvent.clear(nameInput);
+  const changeDexterityInput = (value: string) => {
+    userEvent.clear(dexterityInput);
+    userEvent.type(dexterityInput, value);
+  };
+  const clearDexterityInput = () => userEvent.clear(dexterityInput);
+  const changeSpeedModifierInput = (value: string) => {
+    userEvent.clear(speedModifierInput);
+    userEvent.type(speedModifierInput, value);
+  };
+  const clearSpeedModifierInput = () => userEvent.clear(speedModifierInput);
+  const changeMovementRateInput = (value: string) => {
+    userEvent.clear(movementRateInput);
+    userEvent.type(movementRateInput, value);
+  };
+  const clearMovementRateInput = () => userEvent.clear(movementRateInput);
+
+  return {
+    participant,
+    handleParticipantChange,
+    changeNameInput,
+    clearNameInput,
+    changeDexterityInput,
+    clearDexterityInput,
+    changeSpeedModifierInput,
+    clearSpeedModifierInput,
+    changeMovementRateInput,
+    clearMovementRateInput,
+  };
+}
+
+function setupExpandedContainer() {
+  const utils = setup();
+  userEvent.click(screen.getByRole("button", { name: /participant details/i }));
+
+  const changeStatisticInput = (name: string, value: string) => {
+    const regEx = new RegExp(name, "i");
+    const input = screen.getByRole("spinbutton", { name: regEx });
+    userEvent.clear(input);
+    userEvent.type(input, value);
+  };
+  const clearStatisticInput = (name: string) => {
+    const regEx = new RegExp(name, "i");
+    const input = screen.getByRole("spinbutton", { name: regEx });
+    userEvent.clear(input);
+  };
+
+  return { ...utils, changeStatisticInput, clearStatisticInput };
+}
 
 describe("Initial State", () => {
   const { participant } = DEFAULT_PROPS;
@@ -125,502 +193,404 @@ describe("Initial State", () => {
   });
 });
 
-describe("Participant name rendering", () => {
-  test("should render given name when changed from default name", () => {
+describe("Participant Name", () => {
+  test("should update participant name", () => {
     const newName = "Test Name";
-    render(<ParticipantContainer participant={DEFAULT_PROPS.participant} />);
-
+    const { participant, handleParticipantChange, changeNameInput } = setup();
     const inputEl = screen.getByRole("textbox", { name: /name/i });
-    userEvent.clear(inputEl);
-    userEvent.type(inputEl, newName);
 
-    expect(inputEl).toHaveValue(newName);
+    changeNameInput(newName);
+    inputEl.blur();
+
+    expect(inputEl).toHaveDisplayValue(newName);
+    expect(handleParticipantChange).toBeCalledTimes(1);
+    expect(handleParticipantChange).toBeCalledWith(participant);
   });
 
-  test("should render the last valid name when name changed to empty string", () => {
+  test("should revert name to prior, valid value when the name id changed to empty string", () => {
     const validName = "Valid";
-    render(<ParticipantContainer participant={DEFAULT_PROPS.participant} />);
-
+    const {
+      participant,
+      handleParticipantChange,
+      changeNameInput,
+      clearNameInput,
+    } = setup();
     const inputEl = screen.getByRole("textbox", { name: /name/i });
-    userEvent.clear(inputEl);
-    userEvent.type(inputEl, validName);
-    userEvent.clear(inputEl);
+
+    changeNameInput(validName);
+    clearNameInput();
     inputEl.blur();
 
     expect(inputEl).toHaveDisplayValue(validName);
+    expect(handleParticipantChange).toBeCalledTimes(1);
+    expect(handleParticipantChange).toBeCalledWith(participant);
   });
 
-  test("should render the last valid name when name changed to invalid value with trailing and/or leading spaces", () => {
+  test("should revert name to prior, valid value when name changed to whitespace", () => {
     const validName = "Valid";
     const invalidName = "    ";
-    const handleParticipantChange = jest.fn();
-
-    render(
-      <ParticipantContainer
-        participant={DEFAULT_PROPS.participant}
-        onParticipantChange={handleParticipantChange}
-      />
-    );
-
+    const { participant, handleParticipantChange, changeNameInput } = setup();
     const inputEl = screen.getByRole("textbox", { name: /name/i });
-    userEvent.clear(inputEl);
-    userEvent.type(inputEl, validName);
-    userEvent.clear(inputEl);
 
-    expect(
-      screen.getByText(ParticipantContainer.WARNING_MESSAGE)
-    ).toBeInTheDocument();
-
-    userEvent.type(inputEl, invalidName);
+    changeNameInput(validName);
+    changeNameInput(invalidName);
     inputEl.blur();
 
-    expect(
-      screen.queryByText(ParticipantContainer.WARNING_MESSAGE)
-    ).not.toBeVisible();
     expect(inputEl).toHaveDisplayValue(validName);
-
-    expect(handleParticipantChange).toBeCalled();
+    expect(handleParticipantChange).toBeCalledTimes(1);
+    expect(handleParticipantChange).toBeCalledWith(participant);
   });
 
-  test("should render with a warning message when an invalid name is displayed then hide the message upon receiving a valid character", () => {
-    const validName = "valid";
-    render(<ParticipantContainer participant={DEFAULT_PROPS.participant} />);
-
+  test("should display warning message when an invalid name is displayed", () => {
+    const { handleParticipantChange, clearNameInput } = setup();
     const inputEl = screen.getByRole("textbox", { name: /name/i });
-    userEvent.clear(inputEl);
 
-    expect(
-      screen.getByText(ParticipantContainer.WARNING_MESSAGE)
-    ).toBeInTheDocument();
+    clearNameInput();
+
     expect(inputEl).toHaveDisplayValue("");
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      ParticipantContainer.WARNING_MESSAGE
+    );
+    expect(handleParticipantChange).not.toBeCalled();
+  });
 
-    userEvent.type(inputEl, validName);
+  test("should hide warning message when receiving a valid character", () => {
+    const validName = "valid";
+    const { handleParticipantChange, changeNameInput, clearNameInput } =
+      setup();
+    const inputEl = screen.getByRole("textbox", { name: /name/i });
 
-    expect(
-      screen.queryByText(ParticipantContainer.WARNING_MESSAGE)
-    ).not.toBeVisible();
+    clearNameInput();
+    changeNameInput(validName);
+
     expect(inputEl).toHaveDisplayValue(validName);
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(handleParticipantChange).not.toBeCalled();
   });
 });
 
-describe("Statistic Display event handlers", () => {
-  const validScore = 11;
-  const [firstHazardStatistic] = ParticipantContainer.DEFAULT_HAZARD_STATISTICS;
-  const [firstSpeedStatistic] = ParticipantContainer.DEFAULT_SPEED_STATISTICS;
-
+describe("Statistic Display", () => {
   describe("when changing to valid score", () => {
-    test("should revert dexterity score to prior valid score", () => {
-      const participant = Object.assign(DEFAULT_PROPS.participant);
-      const handleParticipantChange = jest.fn();
-
-      render(
-        <ParticipantContainer
-          participant={participant}
-          onParticipantChange={handleParticipantChange}
-        />
-      );
-
-      const statisticDisplayEl = screen.getByRole("spinbutton", {
+    test("should update dexterity score", () => {
+      const validScore = "11";
+      const { participant, handleParticipantChange, changeDexterityInput } =
+        setup();
+      const dexterityInput = screen.getByRole("spinbutton", {
         name: /dex/i,
       });
-      userEvent.clear(statisticDisplayEl);
-      userEvent.type(statisticDisplayEl, validScore.toString());
-      statisticDisplayEl.blur();
 
-      expect(statisticDisplayEl).toHaveDisplayValue(validScore.toString());
-      expect(statisticDisplayEl).toHaveValue(validScore);
+      changeDexterityInput(validScore);
+      dexterityInput.blur();
 
-      expect(handleParticipantChange).toBeCalled();
+      expect(dexterityInput).toHaveDisplayValue(validScore);
+      expect(handleParticipantChange).toBeCalledTimes(1);
+      expect(handleParticipantChange).toBeCalledWith(participant);
     });
 
-    test("should revert derived speed score to prior valid score", () => {
-      const participant = Object.assign(DEFAULT_PROPS.participant);
-      const handleParticipantChange = jest.fn();
-
-      render(
-        <ParticipantContainer
-          participant={participant}
-          onParticipantChange={handleParticipantChange}
-        />
-      );
-
-      const statisticDisplayEl = screen.getByRole("spinbutton", {
+    test("should update speed modifier", () => {
+      const validScore = "11";
+      const { participant, handleParticipantChange, changeSpeedModifierInput } =
+        setup();
+      const speedModifierInput = screen.getByRole("spinbutton", {
         name: /spd/i,
       });
-      userEvent.clear(statisticDisplayEl);
-      userEvent.type(statisticDisplayEl, validScore.toString());
-      statisticDisplayEl.blur();
 
-      expect(statisticDisplayEl).toHaveDisplayValue(validScore.toString());
-      expect(statisticDisplayEl).toHaveValue(validScore);
+      changeSpeedModifierInput(validScore);
+      speedModifierInput.blur();
 
-      expect(handleParticipantChange).toBeCalled();
+      expect(speedModifierInput).toHaveDisplayValue(validScore);
+      expect(handleParticipantChange).toBeCalledTimes(1);
+      expect(handleParticipantChange).toBeCalledWith(participant);
     });
 
-    test("should revert movement rate score to prior valid score", () => {
-      const participant = Object.assign(DEFAULT_PROPS.participant);
-      const handleParticipantChange = jest.fn();
-
-      render(
-        <ParticipantContainer
-          participant={participant}
-          onParticipantChange={handleParticipantChange}
-        />
-      );
-
-      const statisticDisplayEl = screen.getByRole("spinbutton", {
+    test("should update movement rate score", () => {
+      const validScore = "11";
+      const { participant, handleParticipantChange, changeMovementRateInput } =
+        setup();
+      const movementRateInput = screen.getByRole("spinbutton", {
         name: /mov/i,
       });
-      userEvent.clear(statisticDisplayEl);
-      userEvent.type(statisticDisplayEl, validScore.toString());
-      statisticDisplayEl.blur();
 
-      expect(statisticDisplayEl).toHaveDisplayValue(validScore.toString());
-      expect(statisticDisplayEl).toHaveValue(validScore);
+      changeMovementRateInput(validScore);
+      movementRateInput.blur();
 
-      expect(handleParticipantChange).toBeCalled();
+      expect(movementRateInput).toHaveDisplayValue(validScore);
+      expect(handleParticipantChange).toBeCalledTimes(1);
+      expect(handleParticipantChange).toBeCalledWith(participant);
     });
 
-    test("should update hazard statistic's score", () => {
-      const participant = Object.assign(DEFAULT_PROPS.participant);
-      const handleParticipantChange = jest.fn();
-
-      render(
-        <ParticipantContainer
-          participant={participant}
-          onParticipantChange={handleParticipantChange}
-        />
-      );
-      userEvent.click(
-        screen.getByRole("button", { name: /participant details/i })
-      );
-
-      const statisticDisplayEl = screen.getByRole("spinbutton", {
-        name: firstHazardStatistic.name,
+    test("should update hazard statistic score", () => {
+      const validScore = "11";
+      const [{ name: statisticName }] =
+        ParticipantContainer.DEFAULT_HAZARD_STATISTICS;
+      const { participant, handleParticipantChange, changeStatisticInput } =
+        setupExpandedContainer();
+      const hazardStatisticInput = screen.getByRole("spinbutton", {
+        name: statisticName,
       });
-      userEvent.clear(statisticDisplayEl);
-      userEvent.type(statisticDisplayEl, validScore.toString());
-      statisticDisplayEl.blur();
 
-      expect(statisticDisplayEl).toHaveDisplayValue(validScore.toString());
-      expect(statisticDisplayEl).toHaveValue(validScore);
+      changeStatisticInput(statisticName, validScore);
+      hazardStatisticInput.blur();
 
-      expect(handleParticipantChange).toBeCalled();
+      expect(hazardStatisticInput).toHaveDisplayValue(validScore);
+      expect(handleParticipantChange).toBeCalledTimes(1);
+      expect(handleParticipantChange).toBeCalledWith(participant);
     });
 
-    test("should update speed statistic's score", () => {
-      const participant = Object.assign(DEFAULT_PROPS.participant);
-      const handleParticipantChange = jest.fn();
-
-      render(
-        <ParticipantContainer
-          participant={participant}
-          onParticipantChange={handleParticipantChange}
-        />
-      );
-      userEvent.click(
-        screen.getByRole("button", { name: /participant details/i })
-      );
-
-      const statisticDisplayEl = screen.getByRole("spinbutton", {
-        name: firstSpeedStatistic.name,
+    test("should update speed statistic score", () => {
+      const validScore = "11";
+      const [{ name: statisticName }] =
+        ParticipantContainer.DEFAULT_SPEED_STATISTICS;
+      const { participant, handleParticipantChange, changeStatisticInput } =
+        setupExpandedContainer();
+      const speedStatisticInput = screen.getByRole("spinbutton", {
+        name: statisticName,
       });
-      userEvent.clear(statisticDisplayEl);
-      userEvent.type(statisticDisplayEl, validScore.toString());
-      statisticDisplayEl.blur();
 
-      expect(statisticDisplayEl).toHaveDisplayValue(validScore.toString());
-      expect(statisticDisplayEl).toHaveValue(validScore);
+      changeStatisticInput(statisticName, validScore);
+      speedStatisticInput.blur();
 
-      expect(handleParticipantChange).toBeCalled();
+      expect(speedStatisticInput).toHaveDisplayValue(validScore);
+      expect(handleParticipantChange).toBeCalledTimes(1);
+      expect(handleParticipantChange).toBeCalledWith(participant);
     });
   });
 
   describe("when changing to invalid score", () => {
-    const invalidScore = "   ";
-
-    test("should revert dexterity score to prior valid score", () => {
-      const participant = Object.assign(DEFAULT_PROPS.participant);
-      const handleParticipantChange = jest.fn();
-
-      render(
-        <ParticipantContainer
-          participant={participant}
-          onParticipantChange={handleParticipantChange}
-        />
-      );
-
-      const statisticDisplayEl = screen.getByRole("spinbutton", {
+    test("should revert dexterity score to prior, valid score", () => {
+      const validScore = "11";
+      const invalidScore = "   ";
+      const { participant, handleParticipantChange, changeDexterityInput } =
+        setup();
+      const dexterityInput = screen.getByRole("spinbutton", {
         name: /dex/i,
       });
-      userEvent.clear(statisticDisplayEl);
-      userEvent.type(statisticDisplayEl, validScore.toString());
-      userEvent.type(statisticDisplayEl, invalidScore);
-      statisticDisplayEl.blur();
 
-      expect(statisticDisplayEl).toHaveDisplayValue(validScore.toString());
-      expect(statisticDisplayEl).toHaveValue(validScore);
+      changeDexterityInput(validScore);
+      changeDexterityInput(invalidScore);
+      dexterityInput.blur();
 
-      expect(handleParticipantChange).toBeCalled();
+      expect(dexterityInput).toHaveDisplayValue(validScore);
+      expect(handleParticipantChange).toBeCalledTimes(1);
+      expect(handleParticipantChange).toBeCalledWith(participant);
     });
 
-    test("should revert derived speed score to prior valid score", () => {
-      const participant = Object.assign(DEFAULT_PROPS.participant);
-      const handleParticipantChange = jest.fn();
-
-      render(
-        <ParticipantContainer
-          participant={participant}
-          onParticipantChange={handleParticipantChange}
-        />
-      );
-
-      const statisticDisplayEl = screen.getByRole("spinbutton", {
+    test("should revert speed modifier to prior, valid score", () => {
+      const validScore = "11";
+      const invalidScore = "   ";
+      const { participant, handleParticipantChange, changeSpeedModifierInput } =
+        setup();
+      const speedModifierInput = screen.getByRole("spinbutton", {
         name: /spd/i,
       });
-      userEvent.clear(statisticDisplayEl);
-      userEvent.type(statisticDisplayEl, validScore.toString());
-      userEvent.type(statisticDisplayEl, invalidScore);
-      statisticDisplayEl.blur();
 
-      expect(statisticDisplayEl).toHaveDisplayValue(validScore.toString());
-      expect(statisticDisplayEl).toHaveValue(validScore);
+      changeSpeedModifierInput(validScore);
+      changeSpeedModifierInput(invalidScore);
+      speedModifierInput.blur();
 
-      expect(handleParticipantChange).toBeCalled();
+      expect(speedModifierInput).toHaveDisplayValue(validScore);
+      expect(handleParticipantChange).toBeCalledTimes(1);
+      expect(handleParticipantChange).toBeCalledWith(participant);
     });
 
-    test("should revert movement rate score to prior valid score", () => {
-      const participant = Object.assign(DEFAULT_PROPS.participant);
-      const handleParticipantChange = jest.fn();
-
-      render(
-        <ParticipantContainer
-          participant={participant}
-          onParticipantChange={handleParticipantChange}
-        />
-      );
-
-      const statisticDisplayEl = screen.getByRole("spinbutton", {
+    test("should revert movement rate score to prior, valid score", () => {
+      const validScore = "11";
+      const invalidScore = "   ";
+      const { participant, handleParticipantChange, changeMovementRateInput } =
+        setup();
+      const movementRateInput = screen.getByRole("spinbutton", {
         name: /mov/i,
       });
-      userEvent.clear(statisticDisplayEl);
-      userEvent.type(statisticDisplayEl, validScore.toString());
-      userEvent.type(statisticDisplayEl, invalidScore);
-      statisticDisplayEl.blur();
 
-      expect(statisticDisplayEl).toHaveDisplayValue(validScore.toString());
-      expect(statisticDisplayEl).toHaveValue(validScore);
+      changeMovementRateInput(validScore);
+      changeMovementRateInput(invalidScore);
+      movementRateInput.blur();
 
-      expect(handleParticipantChange).toBeCalled();
+      expect(movementRateInput).toHaveDisplayValue(validScore);
+      expect(handleParticipantChange).toBeCalledTimes(1);
+      expect(handleParticipantChange).toBeCalledWith(participant);
     });
 
-    test("should revert to hazard statistic's prior valid score", () => {
-      const participant = Object.assign(DEFAULT_PROPS.participant);
-      const handleParticipantChange = jest.fn();
-
-      render(
-        <ParticipantContainer
-          participant={participant}
-          onParticipantChange={handleParticipantChange}
-        />
-      );
-      userEvent.click(
-        screen.getByRole("button", { name: /participant details/i })
-      );
-
-      const statisticDisplayEl = screen.getByRole("spinbutton", {
-        name: firstHazardStatistic.name,
+    test("should revert hazard statistic to prior, valid score", () => {
+      const validScore = "11";
+      const invalidScore = "   ";
+      const [{ name: statisticName }] =
+        ParticipantContainer.DEFAULT_HAZARD_STATISTICS;
+      const { participant, handleParticipantChange, changeStatisticInput } =
+        setupExpandedContainer();
+      const hazardStatisticInput = screen.getByRole("spinbutton", {
+        name: statisticName,
       });
-      userEvent.clear(statisticDisplayEl);
-      userEvent.type(statisticDisplayEl, validScore.toString());
-      userEvent.type(statisticDisplayEl, invalidScore);
-      statisticDisplayEl.blur();
 
-      expect(statisticDisplayEl).toHaveDisplayValue(validScore.toString());
-      expect(statisticDisplayEl).toHaveValue(validScore);
+      changeStatisticInput(statisticName, validScore);
+      changeStatisticInput(statisticName, invalidScore);
+      hazardStatisticInput.blur();
 
-      expect(handleParticipantChange).toBeCalled();
+      expect(hazardStatisticInput).toHaveDisplayValue(validScore);
+      expect(handleParticipantChange).toBeCalledTimes(1);
+      expect(handleParticipantChange).toBeCalledWith(participant);
     });
 
-    test("should revert to speed statistic's prior valid score", () => {
-      const participant = Object.assign(DEFAULT_PROPS.participant);
-      const handleParticipantChange = jest.fn();
+    test("should revert speed statistic to prior, valid score", () => {
+      const validScore = "11";
+      const invalidScore = "   ";
+      const [{ name: statisticName }] =
+        ParticipantContainer.DEFAULT_HAZARD_STATISTICS;
+      const { participant, handleParticipantChange, changeStatisticInput } =
+        setupExpandedContainer();
 
-      render(
-        <ParticipantContainer
-          participant={participant}
-          onParticipantChange={handleParticipantChange}
-        />
-      );
-      userEvent.click(
-        screen.getByRole("button", { name: /participant details/i })
-      );
-
-      const statisticDisplayEl = screen.getByRole("spinbutton", {
-        name: firstSpeedStatistic.name,
+      const speedStatisticInput = screen.getByRole("spinbutton", {
+        name: statisticName,
       });
-      userEvent.clear(statisticDisplayEl);
-      userEvent.type(statisticDisplayEl, validScore.toString());
-      userEvent.type(statisticDisplayEl, invalidScore);
-      statisticDisplayEl.blur();
 
-      expect(statisticDisplayEl).toHaveDisplayValue(validScore.toString());
-      expect(statisticDisplayEl).toHaveValue(validScore);
+      changeStatisticInput(statisticName, validScore);
+      changeStatisticInput(statisticName, invalidScore);
+      speedStatisticInput.blur();
 
-      expect(handleParticipantChange).toBeCalled();
+      expect(speedStatisticInput).toHaveDisplayValue(validScore);
+      expect(handleParticipantChange).toBeCalledTimes(1);
+      expect(handleParticipantChange).toBeCalledWith(participant);
     });
   });
 
   describe("when leaving score blank", () => {
-    test("should revert dexterity score to prior valid score", () => {
-      const participant = Object.assign(DEFAULT_PROPS.participant);
-      const handleParticipantChange = jest.fn();
-
-      render(
-        <ParticipantContainer
-          participant={participant}
-          onParticipantChange={handleParticipantChange}
-        />
-      );
-
-      const statisticDisplayEl = screen.getByRole("spinbutton", {
+    test("should revert dexterity score to prior, valid score", () => {
+      const validScore = "11";
+      const {
+        participant,
+        handleParticipantChange,
+        changeDexterityInput,
+        clearDexterityInput,
+      } = setup();
+      const dexterityInput = screen.getByRole("spinbutton", {
         name: /dex/i,
       });
-      userEvent.clear(statisticDisplayEl);
-      userEvent.type(statisticDisplayEl, validScore.toString());
-      userEvent.clear(statisticDisplayEl);
-      statisticDisplayEl.blur();
 
-      expect(statisticDisplayEl).toHaveDisplayValue(validScore.toString());
-      expect(statisticDisplayEl).toHaveValue(validScore);
+      changeDexterityInput(validScore);
+      clearDexterityInput();
+      dexterityInput.blur();
 
-      expect(handleParticipantChange).toBeCalled();
+      expect(dexterityInput).toHaveDisplayValue(validScore);
+      expect(handleParticipantChange).toBeCalledTimes(1);
+      expect(handleParticipantChange).toBeCalledWith(participant);
     });
 
-    test("should revert derived speed score to prior valid score", () => {
-      const participant = Object.assign(DEFAULT_PROPS.participant);
-      const handleParticipantChange = jest.fn();
-
-      render(
-        <ParticipantContainer
-          participant={participant}
-          onParticipantChange={handleParticipantChange}
-        />
-      );
-
-      const statisticDisplayEl = screen.getByRole("spinbutton", {
+    test("should revert derived speed score to prior, valid score", () => {
+      const validScore = "11";
+      const {
+        participant,
+        handleParticipantChange,
+        changeSpeedModifierInput,
+        clearSpeedModifierInput,
+      } = setup();
+      const speedModifierInput = screen.getByRole("spinbutton", {
         name: /spd/i,
       });
-      userEvent.clear(statisticDisplayEl);
-      userEvent.type(statisticDisplayEl, validScore.toString());
-      userEvent.clear(statisticDisplayEl);
-      statisticDisplayEl.blur();
 
-      expect(statisticDisplayEl).toHaveDisplayValue(validScore.toString());
-      expect(statisticDisplayEl).toHaveValue(validScore);
+      changeSpeedModifierInput(validScore);
+      clearSpeedModifierInput();
+      speedModifierInput.blur();
 
-      expect(handleParticipantChange).toBeCalled();
+      expect(speedModifierInput).toHaveDisplayValue(validScore);
+      expect(handleParticipantChange).toBeCalledTimes(1);
+      expect(handleParticipantChange).toBeCalledWith(participant);
     });
 
-    test("should revert movement rate score to prior valid score", () => {
-      const participant = Object.assign(DEFAULT_PROPS.participant);
-      const handleParticipantChange = jest.fn();
-
-      render(
-        <ParticipantContainer
-          participant={participant}
-          onParticipantChange={handleParticipantChange}
-        />
-      );
-
-      const statisticDisplayEl = screen.getByRole("spinbutton", {
+    test("should revert movement rate score to prior, valid score", () => {
+      const validScore = "11";
+      const {
+        participant,
+        handleParticipantChange,
+        changeMovementRateInput,
+        clearMovementRateInput,
+      } = setup();
+      const movementRateInput = screen.getByRole("spinbutton", {
         name: /mov/i,
       });
-      userEvent.clear(statisticDisplayEl);
-      userEvent.type(statisticDisplayEl, validScore.toString());
-      userEvent.clear(statisticDisplayEl);
-      statisticDisplayEl.blur();
 
-      expect(statisticDisplayEl).toHaveDisplayValue(validScore.toString());
-      expect(statisticDisplayEl).toHaveValue(validScore);
+      changeMovementRateInput(validScore);
+      clearMovementRateInput();
+      movementRateInput.blur();
 
-      expect(handleParticipantChange).toBeCalled();
+      expect(movementRateInput).toHaveDisplayValue(validScore);
+      expect(handleParticipantChange).toBeCalledTimes(1);
+      expect(handleParticipantChange).toBeCalledWith(participant);
     });
 
-    test("should revert to hazard statistic's prior valid score", () => {
-      const participant = Object.assign(DEFAULT_PROPS.participant);
-      const handleParticipantChange = jest.fn();
-
-      render(
-        <ParticipantContainer
-          participant={participant}
-          onParticipantChange={handleParticipantChange}
-        />
-      );
-      userEvent.click(
-        screen.getByRole("button", { name: /participant details/i })
-      );
-
-      const statisticDisplayEl = screen.getByRole("spinbutton", {
-        name: firstHazardStatistic.name,
+    test("should revert hazard statistic to prior, valid score", () => {
+      const validScore = "11";
+      const [{ name: statisticName }] =
+        ParticipantContainer.DEFAULT_HAZARD_STATISTICS;
+      const {
+        participant,
+        handleParticipantChange,
+        changeStatisticInput,
+        clearStatisticInput,
+      } = setupExpandedContainer();
+      const hazardStatisticInput = screen.getByRole("spinbutton", {
+        name: statisticName,
       });
-      userEvent.clear(statisticDisplayEl);
-      userEvent.type(statisticDisplayEl, validScore.toString());
-      userEvent.clear(statisticDisplayEl);
-      statisticDisplayEl.blur();
 
-      expect(statisticDisplayEl).toHaveDisplayValue(validScore.toString());
-      expect(statisticDisplayEl).toHaveValue(validScore);
+      changeStatisticInput(statisticName, validScore);
+      clearStatisticInput(statisticName);
+      hazardStatisticInput.blur();
 
-      expect(handleParticipantChange).toBeCalled();
+      expect(hazardStatisticInput).toHaveDisplayValue(validScore);
+      expect(handleParticipantChange).toBeCalledTimes(1);
+      expect(handleParticipantChange).toBeCalledWith(participant);
     });
 
-    test("should revert to speed statistic's prior valid score", () => {
-      const participant = Object.assign(DEFAULT_PROPS.participant);
-      const handleParticipantChange = jest.fn();
-
-      render(
-        <ParticipantContainer
-          participant={participant}
-          onParticipantChange={handleParticipantChange}
-        />
-      );
-      userEvent.click(
-        screen.getByRole("button", { name: /participant details/i })
-      );
-
-      const statisticDisplayEl = screen.getByRole("spinbutton", {
-        name: firstSpeedStatistic.name,
+    test("should revert speed statistic to prior, valid score", () => {
+      const validScore = "11";
+      const [{ name: statisticName }] =
+        ParticipantContainer.DEFAULT_SPEED_STATISTICS;
+      const {
+        participant,
+        handleParticipantChange,
+        changeStatisticInput,
+        clearStatisticInput,
+      } = setupExpandedContainer();
+      const speedStatisticInput = screen.getByRole("spinbutton", {
+        name: statisticName,
       });
-      userEvent.clear(statisticDisplayEl);
-      userEvent.type(statisticDisplayEl, validScore.toString());
-      userEvent.clear(statisticDisplayEl);
-      statisticDisplayEl.blur();
 
-      expect(statisticDisplayEl).toHaveDisplayValue(validScore.toString());
-      expect(statisticDisplayEl).toHaveValue(validScore);
+      changeStatisticInput(statisticName, validScore);
+      clearStatisticInput(statisticName);
+      speedStatisticInput.blur();
 
-      expect(handleParticipantChange).toBeCalled();
+      expect(speedStatisticInput).toHaveDisplayValue(validScore);
+      expect(handleParticipantChange).toBeCalledTimes(1);
+      expect(handleParticipantChange).toBeCalledWith(participant);
     });
   });
 });
 
 describe("Modal", () => {
-  test("should reveal modal when 'generate speed modifier' button is pressed", () => {
-    render(<ParticipantContainer participant={DEFAULT_PROPS.participant} />);
+  test("should reveal modal when 'generate' button is clicked", () => {
+    setup();
 
     userEvent.click(screen.getByRole("button", { name: /generate/i }));
 
     expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
 
-  test("should close modal when any button is pressed", () => {
-    render(<ParticipantContainer participant={DEFAULT_PROPS.participant} />);
+  test("should close modal when 'esc' is pressed", () => {
+    setup();
+
+    userEvent.click(screen.getByRole("button", { name: /generate/i }));
+    userEvent.keyboard("{esc}");
+
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  test("should close modal when 'cancel' button is clicked", () => {
+    setup();
+
     userEvent.click(screen.getByRole("button", { name: /generate/i }));
 
-    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    const modal = screen.getByRole("dialog");
 
-    userEvent.type(screen.getByRole("dialog"), "{esc}");
+    userEvent.click(within(modal).getByRole("button", { name: /cancel/i }));
 
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });

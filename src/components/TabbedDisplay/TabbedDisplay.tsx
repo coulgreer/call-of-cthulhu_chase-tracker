@@ -3,13 +3,10 @@ import React from "react";
 import Button from "../Button";
 import GroupTable from "../GroupTable";
 import ParticipantTable from "../ParticipantTable";
-import ParticipantContainer from "../ParticipantContainer";
 
 import ChaseStartContext from "../../contexts/ChaseStartContext";
 
 import { Group, Participant } from "../../types";
-
-import UniqueSequenceGen from "../../utils/unique-sequence-generator";
 
 import "./TabbedDisplay.css";
 
@@ -18,8 +15,6 @@ interface State {
   groups: Group[];
   participants: Participant[];
 }
-
-const SEQUENCE_START = 0;
 
 export default class TabbedDisplay extends React.Component<{}, State> {
   static contextType = ChaseStartContext;
@@ -56,23 +51,12 @@ export default class TabbedDisplay extends React.Component<{}, State> {
     return chases;
   }
 
-  private participantSequenceGenerator;
-
   constructor(props: any) {
     super(props);
 
     this.state = { displayedIndex: 0, groups: [], participants: [] };
 
-    this.participantSequenceGenerator = new UniqueSequenceGen(SEQUENCE_START);
-
-    // Participant Table Event Handlers
-    this.handleCreateParticipantClick =
-      this.handleCreateParticipantClick.bind(this);
-    this.handleDeleteParticipantClick =
-      this.handleDeleteParticipantClick.bind(this);
-    this.handleParticipantChange = this.handleParticipantChange.bind(this);
-
-    // Group Table Event Handlers
+    this.handleParticipantsChange = this.handleParticipantsChange.bind(this);
     this.handleGroupsChange = this.handleGroupsChange.bind(this);
   }
 
@@ -84,48 +68,12 @@ export default class TabbedDisplay extends React.Component<{}, State> {
     this.setState({ displayedIndex: index });
   }
 
-  private handleParticipantChange(target: Participant) {
-    this.setState((state) => {
-      const participants = [...state.participants];
-
-      const targetIndex = participants.findIndex(
-        (participant) => participant.id === target.id
-      );
-      participants[targetIndex] = target;
-
-      return { participants };
-    });
-  }
-
-  private handleCreateParticipantClick() {
-    const idNum = this.participantSequenceGenerator.nextNum();
-    const id = `${ParticipantTable.DEFAULT_NAME} #${idNum}`;
-
-    this.setState(({ participants }) => {
-      participants.push({
-        id,
-        name: id,
-        dexterity: 15,
-        movementRate: 2,
-        speedModifier: 1,
-        derivedSpeed: 3,
-        actionCount: 1,
-        speedStatistics: ParticipantContainer.DEFAULT_SPEED_STATISTICS,
-        hazardStatistics: ParticipantContainer.DEFAULT_HAZARD_STATISTICS,
-        isGrouped: false,
-      });
-
-      return { participants };
-    });
-  }
-
-  private handleDeleteParticipantClick(participant: Participant) {
-    this.removeParticipantFromSequence(participant);
-    this.removeParticipantFromTable(participant);
-  }
-
   private handleGroupsChange(newGroups: Group[]) {
     this.setState({ groups: newGroups });
+  }
+
+  private handleParticipantsChange(newParticipants: Participant[]) {
+    this.setState({ participants: newParticipants });
   }
 
   private calculateActions() {
@@ -171,30 +119,6 @@ export default class TabbedDisplay extends React.Component<{}, State> {
     });
   }
 
-  private removeParticipantFromSequence(participant: Participant) {
-    const results = participant.id.match(/[0-9]+$/);
-
-    if (!results) {
-      throw Error(
-        `The given participant ID -- ${participant.id} -- should be formatted with trailing digits.`
-      );
-    }
-
-    const idNum = Number.parseInt(results[0], 10);
-    this.participantSequenceGenerator.remove(idNum);
-  }
-
-  private removeParticipantFromTable(participant: Participant) {
-    this.setState((state) => {
-      const { participants } = state;
-      const targetIndex = participants.indexOf(participant);
-
-      participants.splice(targetIndex, 1);
-
-      return { participants };
-    });
-  }
-
   private isActive(index: number) {
     const { displayedIndex } = this.state;
 
@@ -221,9 +145,7 @@ export default class TabbedDisplay extends React.Component<{}, State> {
       <ParticipantTable
         warningMessage="No poor souls for the chase. Still, keep your wits about you."
         participants={participants}
-        onCreateParticipantClick={this.handleCreateParticipantClick}
-        onDeleteParticipantClick={this.handleDeleteParticipantClick}
-        onParticipantChange={this.handleParticipantChange}
+        onParticipantsChange={this.handleParticipantsChange}
       />
     );
   }

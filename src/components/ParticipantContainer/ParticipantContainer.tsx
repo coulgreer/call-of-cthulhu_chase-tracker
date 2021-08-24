@@ -202,9 +202,9 @@ export default class ParticipantContainer extends React.Component<
 
   private id;
 
-  private speedStatSequence: UniqueSequenceGenerator;
+  private speedStatSequence;
 
-  private hazardStatSequence: UniqueSequenceGenerator;
+  private hazardStatSequence;
 
   constructor(props: Props) {
     super(props);
@@ -213,30 +213,39 @@ export default class ParticipantContainer extends React.Component<
     this.speedStatSequence = new UniqueSequenceGenerator(SEQUENCE_START);
     this.hazardStatSequence = new UniqueSequenceGenerator(SEQUENCE_START);
 
-    this.toggleExpansion = this.toggleExpansion.bind(this);
-    this.openModal = this.openModal.bind(this);
-    this.closeModal = this.closeModal.bind(this);
+    this.handleToggleExpansionClick =
+      this.handleToggleExpansionClick.bind(this);
+    this.handleInitiateSpeedModifierGenerationClick =
+      this.handleInitiateSpeedModifierGenerationClick.bind(this);
+    this.handleCancelSpeedModifierGenerationClick =
+      this.handleCancelSpeedModifierGenerationClick.bind(this);
 
     this.handleNameChange = this.handleNameChange.bind(this);
     this.handleNameBlur = this.handleNameBlur.bind(this);
 
     // Speed Statistic method binds
-    this.createSpeedStatistic = this.createSpeedStatistic.bind(this);
-    this.deleteSpeedStatistic = this.deleteSpeedStatistic.bind(this);
-    this.renameSpeedStatistic = this.renameSpeedStatistic.bind(this);
+    this.handleCreateSpeedStatisticClick =
+      this.handleCreateSpeedStatisticClick.bind(this);
+    this.handleDeleteSpeedStatisticClick =
+      this.handleDeleteSpeedStatisticClick.bind(this);
+    this.handleRenameSpeedStatisticClick =
+      this.handleRenameSpeedStatisticClick.bind(this);
     this.handleSpeedStatisticChange =
       this.handleSpeedStatisticChange.bind(this);
     this.handleSpeedStatisticBlur = this.handleSpeedStatisticBlur.bind(this);
 
     // Hazard Statistic method binds
-    this.createHazardStatistic = this.createHazardStatistic.bind(this);
-    this.deleteHazardStatistic = this.deleteHazardStatistic.bind(this);
-    this.renameHazardStatistic = this.renameHazardStatistic.bind(this);
+    this.handleCreateHazardStatisticClick =
+      this.handleCreateHazardStatisticClick.bind(this);
+    this.handleDeleteHazardStatisticClick =
+      this.handleDeleteHazardStatisticClick.bind(this);
+    this.handleRenameHazardStatisticClick =
+      this.handleRenameHazardStatisticClick.bind(this);
     this.handleHazardStatisticChange =
       this.handleHazardStatisticChange.bind(this);
     this.handleHazardStatisticBlur = this.handleHazardStatisticBlur.bind(this);
 
-    this.calculateSpeedModifier = this.calculateSpeedModifier.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
     this.handleSelectionChange = this.handleSelectionChange.bind(this);
 
     const { participant } = this.props;
@@ -271,21 +280,34 @@ export default class ParticipantContainer extends React.Component<
 
   private handleNameBlur() {
     const { participant, onParticipantChange } = this.props;
+
     if (onParticipantChange) onParticipantChange(participant);
 
     this.setState({ currentName: participant.name, nameWarningShown: false });
   }
 
   private handleDexterityChange(value: string) {
-    this.setState((state) => {
-      const { dexterity } = state;
-      const { statistic } = dexterity;
+    this.setState(({ dexterity }) => {
+      const dex = dexterity;
 
-      statistic.score = ParticipantContainer.parseValidScore(value, dexterity);
+      dex.statistic.score = ParticipantContainer.parseValidScore(value, dex);
+      dex.currentValue = value;
 
-      dexterity.currentValue = value;
+      return { dexterity: dex };
+    });
+  }
 
-      return { dexterity };
+  private handleDexterityBlur() {
+    this.setState(({ dexterity }, { participant, onParticipantChange }) => {
+      const dex = dexterity;
+      const p = participant;
+
+      p.dexterity = dex.statistic.score;
+      dex.currentValue = p.dexterity.toString();
+
+      if (onParticipantChange) onParticipantChange(p);
+
+      return { dexterity: dex };
     });
   }
 
@@ -303,76 +325,6 @@ export default class ParticipantContainer extends React.Component<
     });
   }
 
-  private handleMovementRateChange(value: string) {
-    this.setState((state) => {
-      const { movementRate } = state;
-      const { statistic } = movementRate;
-
-      statistic.score = ParticipantContainer.parseValidScore(
-        value,
-        movementRate
-      );
-
-      movementRate.currentValue = value;
-
-      return { movementRate };
-    });
-  }
-
-  private handleSpeedStatisticChange(index: number, value: string) {
-    this.setState((state) => {
-      const { speedStatistics } = state;
-      const wrappedStatistic = speedStatistics[index];
-      const { statistic } = wrappedStatistic;
-
-      statistic.score = ParticipantContainer.parseValidScore(
-        value,
-        wrappedStatistic
-      );
-
-      wrappedStatistic.currentValue = value;
-
-      speedStatistics[index] = wrappedStatistic;
-      return { speedStatistics };
-    });
-  }
-
-  private handleHazardStatisticChange(index: number, value: string) {
-    this.setState((state) => {
-      const { hazardStatistics } = state;
-      const wrappedStatistic = hazardStatistics[index];
-      const { statistic } = wrappedStatistic;
-
-      statistic.score = ParticipantContainer.parseValidScore(
-        value,
-        wrappedStatistic
-      );
-
-      wrappedStatistic.currentValue = value;
-
-      hazardStatistics[index] = wrappedStatistic;
-      return { hazardStatistics };
-    });
-  }
-
-  private handleDexterityBlur() {
-    this.setState((state, props) => {
-      const { participant, onParticipantChange } = props;
-      const { dexterity } = state;
-
-      const {
-        statistic: { score },
-      } = dexterity;
-
-      participant.dexterity = score;
-      if (onParticipantChange) onParticipantChange(participant);
-
-      dexterity.currentValue = score.toString();
-
-      return { dexterity };
-    });
-  }
-
   private handleDerivedSpeedBlur() {
     this.setState(({ speedModifier }, { participant, onParticipantChange }) => {
       const spdMod = speedModifier;
@@ -380,11 +332,22 @@ export default class ParticipantContainer extends React.Component<
 
       p.speedModifier = spdMod.statistic.score;
       p.derivedSpeed = p.speedModifier + p.movementRate;
+      spdMod.currentValue = p.speedModifier.toString();
+
       if (onParticipantChange) onParticipantChange(participant);
 
-      spdMod.currentValue = spdMod.statistic.score.toString();
-
       return { speedModifier: spdMod };
+    });
+  }
+
+  private handleMovementRateChange(value: string) {
+    this.setState(({ movementRate }) => {
+      const mov = movementRate;
+
+      mov.statistic.score = ParticipantContainer.parseValidScore(value, mov);
+      mov.currentValue = value;
+
+      return { movementRate: mov };
     });
   }
 
@@ -395,56 +358,191 @@ export default class ParticipantContainer extends React.Component<
 
       p.movementRate = mov.statistic.score;
       p.derivedSpeed = p.speedModifier + p.movementRate;
-      if (onParticipantChange) onParticipantChange(participant);
+      mov.currentValue = p.movementRate.toString();
 
-      mov.currentValue = mov.statistic.score.toString();
+      if (onParticipantChange) onParticipantChange(participant);
 
       return { movementRate: mov };
     });
   }
 
-  private handleSpeedStatisticBlur(index: number) {
-    this.setState((state, props) => {
-      const { participant, onParticipantChange } = props;
-      const { speedStatistics } = state;
-      const wrappedStatistic = speedStatistics[index];
-      const { score } = wrappedStatistic.statistic;
+  private handleSpeedStatisticChange(index: number, value: string) {
+    this.setState(({ speedStatistics }) => {
+      const spdStats = speedStatistics;
+      const wrappedStatistic = spdStats[index];
 
-      speedStatistics[index] = wrappedStatistic;
-      participant.speedStatistics = speedStatistics.map(
-        (statistic) => statistic.statistic
+      wrappedStatistic.statistic.score = ParticipantContainer.parseValidScore(
+        value,
+        wrappedStatistic
       );
-      if (onParticipantChange) onParticipantChange(participant);
+      wrappedStatistic.currentValue = value;
 
-      wrappedStatistic.currentValue = score.toString();
+      return { speedStatistics: spdStats };
+    });
+  }
+
+  private handleSpeedStatisticBlur(index: number) {
+    this.setState(
+      ({ speedStatistics }, { participant, onParticipantChange }) => {
+        const spdStats = speedStatistics;
+        const p = participant;
+        const wrappedStatistic = spdStats[index];
+
+        p.speedStatistics = spdStats.map(({ statistic }) => statistic);
+        wrappedStatistic.currentValue =
+          p.speedStatistics[index].score.toString();
+
+        if (onParticipantChange) onParticipantChange(participant);
+
+        return { speedStatistics: spdStats };
+      }
+    );
+  }
+
+  private handleHazardStatisticChange(index: number, value: string) {
+    this.setState(({ hazardStatistics }) => {
+      const hzrdStats = hazardStatistics;
+      const wrappedStatistic = hzrdStats[index];
+
+      wrappedStatistic.statistic.score = ParticipantContainer.parseValidScore(
+        value,
+        wrappedStatistic
+      );
+      wrappedStatistic.currentValue = value;
+
+      return { hazardStatistics: hzrdStats };
+    });
+  }
+
+  private handleHazardStatisticBlur(index: number) {
+    this.setState(
+      ({ hazardStatistics }, { participant, onParticipantChange }) => {
+        const hzrdStats = hazardStatistics;
+        const p = participant;
+        const wrappedStatistic = hzrdStats[index];
+
+        p.hazardStatistics = hazardStatistics.map(({ statistic }) => statistic);
+        wrappedStatistic.currentValue =
+          p.hazardStatistics[index].score.toString();
+
+        if (onParticipantChange) onParticipantChange(participant);
+
+        return { hazardStatistics };
+      }
+    );
+  }
+
+  private handleSelectionChange(event: React.ChangeEvent<HTMLInputElement>) {
+    this.setState({ selectedStatisticScore: event.currentTarget.value });
+  }
+
+  private handleSubmit() {
+    const { selectedStatisticScore } = this.state;
+    const modifier = ParticipantContainer.generateSpeedModifier(
+      Number.parseInt(selectedStatisticScore, 10)
+    );
+
+    this.updateSpeedModifier(modifier);
+
+    this.handleCancelSpeedModifierGenerationClick();
+  }
+
+  private handleToggleExpansionClick() {
+    this.setState(({ expansionShown }) => ({
+      expansionShown: !expansionShown,
+    }));
+  }
+
+  private handleInitiateSpeedModifierGenerationClick() {
+    this.setState({ modalShown: true });
+  }
+
+  private handleCancelSpeedModifierGenerationClick() {
+    this.setState({ modalShown: false });
+  }
+
+  private handleCreateSpeedStatisticClick() {
+    const idNum = this.speedStatSequence.nextNum();
+    const startingScore = 15;
+
+    this.setState(({ speedStatistics }) => ({
+      speedStatistics: [
+        ...speedStatistics,
+        {
+          statistic: {
+            name: `${ParticipantContainer.DEFAULT_STAT_NAME} #${idNum}`,
+            score: startingScore,
+          },
+          currentValue: startingScore.toString(),
+          key: idNum,
+        },
+      ],
+    }));
+  }
+
+  private handleDeleteSpeedStatisticClick(index: number) {
+    this.setState(({ speedStatistics }) => {
+      const spdStats = speedStatistics;
+      const [removedData] = spdStats.splice(index, 1);
+
+      this.speedStatSequence.remove(removedData.key);
+
+      return { speedStatistics: spdStats };
+    });
+  }
+
+  private handleRenameSpeedStatisticClick(index: number, value: string) {
+    this.setState(({ speedStatistics }) => {
+      const spdStats = speedStatistics;
+      const wrappedStatistic = spdStats[index];
+
+      wrappedStatistic.statistic.name = value;
+      spdStats[index] = wrappedStatistic;
 
       return { speedStatistics };
     });
   }
 
-  private handleHazardStatisticBlur(index: number) {
-    this.setState((state, props) => {
-      const { participant, onParticipantChange } = props;
-      const { hazardStatistics } = state;
-      const wrappedStatistic = hazardStatistics[index];
-      const { score } = wrappedStatistic.statistic;
+  private handleCreateHazardStatisticClick() {
+    const idNum = this.hazardStatSequence.nextNum();
+    const startingScore = 15;
 
-      hazardStatistics[index] = wrappedStatistic;
-      participant.hazardStatistics = hazardStatistics.map(
-        (statistic) => statistic.statistic
-      );
-      if (onParticipantChange) onParticipantChange(participant);
+    this.setState(({ hazardStatistics }) => ({
+      hazardStatistics: [
+        ...hazardStatistics,
+        {
+          statistic: {
+            name: `${ParticipantContainer.DEFAULT_STAT_NAME} #${idNum}`,
+            score: startingScore,
+          },
+          currentValue: startingScore.toString(),
+          key: idNum,
+        },
+      ],
+    }));
+  }
 
-      wrappedStatistic.currentValue = score.toString();
+  private handleDeleteHazardStatisticClick(index: number) {
+    this.setState(({ hazardStatistics }) => {
+      const hzrdStats = hazardStatistics;
+      const [removedData] = hzrdStats.splice(index, 1);
 
-      return { hazardStatistics };
+      this.hazardStatSequence.remove(removedData.key);
+
+      return { hazardStatistics: hzrdStats };
     });
   }
 
-  private handleSelectionChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const { value } = event.currentTarget;
+  private handleRenameHazardStatisticClick(index: number, value: string) {
+    this.setState(({ hazardStatistics }) => {
+      const hzrdStats = hazardStatistics;
+      const wrappedStatistic = hzrdStats[index];
 
-    this.setState({ selectedStatisticScore: value });
+      wrappedStatistic.statistic.name = value;
+      hzrdStats[index] = wrappedStatistic;
+
+      return { hazardStatistics: hzrdStats };
+    });
   }
 
   private initializeSpeedStatistics({
@@ -465,110 +563,6 @@ export default class ParticipantContainer extends React.Component<
       currentValue: statistic.score.toString(),
       key: this.hazardStatSequence.nextNum(),
     }));
-  }
-
-  private calculateSpeedModifier() {
-    const { selectedStatisticScore } = this.state;
-
-    const modifier = ParticipantContainer.generateSpeedModifier(
-      Number.parseInt(selectedStatisticScore, 10)
-    );
-    this.updateSpeedModifier(modifier);
-    this.closeModal();
-  }
-
-  private toggleExpansion() {
-    this.setState((state) => ({
-      expansionShown: !state.expansionShown,
-    }));
-  }
-
-  private createSpeedStatistic() {
-    const key = this.speedStatSequence.nextNum();
-    const startingScore = 15;
-    const newData: WrappedStatistic = {
-      statistic: {
-        name: `${ParticipantContainer.DEFAULT_STAT_NAME} #${key}`,
-        score: startingScore,
-      },
-      currentValue: startingScore.toString(),
-      key,
-    };
-
-    this.setState((state) => ({
-      speedStatistics: [...state.speedStatistics, newData],
-    }));
-  }
-
-  private deleteSpeedStatistic(index: number) {
-    this.setState((state) => {
-      const { speedStatistics } = state;
-      const [removedData] = speedStatistics.splice(index, 1);
-
-      this.speedStatSequence.remove(removedData.key);
-
-      return { speedStatistics };
-    });
-  }
-
-  private renameSpeedStatistic(index: number, value: string) {
-    this.setState((state) => {
-      const { speedStatistics } = state;
-      const wrappedStatistic = speedStatistics[index];
-
-      wrappedStatistic.statistic.name = value;
-      speedStatistics[index] = wrappedStatistic;
-
-      return { speedStatistics };
-    });
-  }
-
-  private createHazardStatistic() {
-    const key = this.hazardStatSequence.nextNum();
-    const startingScore = 15;
-    const newData = {
-      statistic: {
-        name: `${ParticipantContainer.DEFAULT_STAT_NAME} #${key}`,
-        score: startingScore,
-      },
-      currentValue: startingScore.toString(),
-      key,
-    };
-
-    this.setState((state) => ({
-      hazardStatistics: [...state.hazardStatistics, newData],
-    }));
-  }
-
-  private deleteHazardStatistic(index: number) {
-    this.setState((state) => {
-      const { hazardStatistics } = state;
-      const [removedData] = hazardStatistics.splice(index, 1);
-
-      this.hazardStatSequence.remove(removedData.key);
-
-      return { hazardStatistics };
-    });
-  }
-
-  private renameHazardStatistic(index: number, value: string) {
-    this.setState((state) => {
-      const { hazardStatistics } = state;
-      const wrappedStatistic = hazardStatistics[index];
-
-      wrappedStatistic.statistic.name = value;
-      hazardStatistics[index] = wrappedStatistic;
-
-      return { hazardStatistics };
-    });
-  }
-
-  private openModal() {
-    this.setState({ modalShown: true });
-  }
-
-  private closeModal() {
-    this.setState({ modalShown: false });
   }
 
   private updateSpeedModifier(modifier: number) {
@@ -602,11 +596,11 @@ export default class ParticipantContainer extends React.Component<
         overlayClassName="Modal__Overlay"
         contentLabel="Select Speed Statistic"
         isOpen={modalShown}
-        onRequestClose={this.closeModal}
+        onRequestClose={this.handleCancelSpeedModifierGenerationClick}
       >
         <h2>Select a Speed Statistic</h2>
         <hr />
-        <form onSubmit={this.calculateSpeedModifier}>
+        <form onSubmit={this.handleSubmit}>
           {speedStatistics.map((wrappedStatistic) => (
             <label className="radio-button" key={wrappedStatistic.key}>
               <input
@@ -626,7 +620,7 @@ export default class ParticipantContainer extends React.Component<
           <div className="Modal__options">
             <Button
               className="button button--outlined button--on-dark button--small"
-              onClick={this.closeModal}
+              onClick={this.handleCancelSpeedModifierGenerationClick}
             >
               CANCEL
             </Button>
@@ -679,6 +673,7 @@ export default class ParticipantContainer extends React.Component<
           style={{
             visibility: nameWarningShown ? "visible" : "hidden",
           }}
+          role="alert"
         >
           {ParticipantContainer.WARNING_MESSAGE}
         </p>
@@ -704,7 +699,7 @@ export default class ParticipantContainer extends React.Component<
             )}
             <Button
               className="button button--outlined button--on-dark button--small"
-              onClick={this.openModal}
+              onClick={this.handleInitiateSpeedModifierGenerationClick}
             >
               GENERATE
             </Button>
@@ -714,7 +709,7 @@ export default class ParticipantContainer extends React.Component<
             aria-label="Participant Details"
             aria-expanded={expansionShown}
             aria-controls={`${ParticipantContainer.EXPANSION_PREFIX}-${this.id}`}
-            onClick={this.toggleExpansion}
+            onClick={this.handleToggleExpansionClick}
           >
             {expansionShown ? (
               <span className="material-icons" aria-hidden>
@@ -766,9 +761,9 @@ export default class ParticipantContainer extends React.Component<
       <StatisticTable
         title={title}
         data={speedStatistics}
-        onCreateClick={this.createSpeedStatistic}
-        onDeleteClick={this.deleteSpeedStatistic}
-        onRenameStatistic={this.renameSpeedStatistic}
+        onCreateClick={this.handleCreateSpeedStatisticClick}
+        onDeleteClick={this.handleDeleteSpeedStatisticClick}
+        onRenameStatistic={this.handleRenameSpeedStatisticClick}
         onStatisticValueChange={this.handleSpeedStatisticChange}
         onStatisticValueBlur={this.handleSpeedStatisticBlur}
       />
@@ -783,9 +778,9 @@ export default class ParticipantContainer extends React.Component<
       <StatisticTable
         title={title}
         data={hazardStatistics}
-        onCreateClick={this.createHazardStatistic}
-        onDeleteClick={this.deleteHazardStatistic}
-        onRenameStatistic={this.renameHazardStatistic}
+        onCreateClick={this.handleCreateHazardStatisticClick}
+        onDeleteClick={this.handleDeleteHazardStatisticClick}
+        onRenameStatistic={this.handleRenameHazardStatisticClick}
         onStatisticValueChange={this.handleHazardStatisticChange}
         onStatisticValueBlur={this.handleHazardStatisticBlur}
       />

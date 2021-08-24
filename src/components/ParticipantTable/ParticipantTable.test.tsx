@@ -16,9 +16,7 @@ function createNamedParticipant(name: string): Participant {
 const DEFAULT_PROPS: {
   participants: Participant[];
   warningMessage: string;
-  onCreateParticipantClick: () => void;
-  onDeleteParticipantClick: (p: Participant | null) => void;
-  onParticipantChange: (p: Participant) => void;
+  onParticipantsChange: (p: Participant[]) => void;
 } = {
   participants: [
     createNamedParticipant("0"),
@@ -27,12 +25,10 @@ const DEFAULT_PROPS: {
   ],
   warningMessage:
     "Shame. No prey for the chase. Still, keep your wits about you.",
-  onCreateParticipantClick: jest.fn(),
-  onDeleteParticipantClick: jest.fn(),
-  onParticipantChange: jest.fn(),
+  onParticipantsChange: jest.fn(),
 };
 
-describe("Prop Rendering", () => {
+describe("Initial State", () => {
   const { participants } = DEFAULT_PROPS;
 
   describe("when no participants exist", () => {
@@ -51,20 +47,13 @@ describe("Prop Rendering", () => {
     });
 
     test("should render properly when including all optional props", () => {
-      const {
-        warningMessage,
-        onCreateParticipantClick,
-        onDeleteParticipantClick,
-        onParticipantChange,
-      } = DEFAULT_PROPS;
+      const { warningMessage, onParticipantsChange } = DEFAULT_PROPS;
 
       render(
         <ParticipantTable
           participants={empty}
           warningMessage={warningMessage}
-          onCreateParticipantClick={onCreateParticipantClick}
-          onDeleteParticipantClick={onDeleteParticipantClick}
-          onParticipantChange={onParticipantChange}
+          onParticipantsChange={onParticipantsChange}
         />
       );
 
@@ -92,120 +81,127 @@ describe("Prop Rendering", () => {
 });
 
 test("should trigger creation of a participant", () => {
-  const { participants } = DEFAULT_PROPS;
-  const onCreateParticipantClick = jest.fn();
+  const empty: Participant[] = [];
+  const handleParticipantsChange = jest.fn();
 
   render(
     <ParticipantTable
-      participants={participants}
-      onCreateParticipantClick={onCreateParticipantClick}
+      participants={empty}
+      onParticipantsChange={handleParticipantsChange}
     />
   );
 
   userEvent.click(screen.getByRole("button", { name: /create participant/i }));
 
-  expect(onCreateParticipantClick).toBeCalled();
+  expect(handleParticipantsChange).toBeCalledTimes(1);
+  expect(handleParticipantsChange).not.toBeCalledWith(empty);
 });
 
 test("should trigger update when participant changes", () => {
-  const { participants } = DEFAULT_PROPS;
-  const onParticipantChange = jest.fn();
+  const participants = [
+    new ParticipantBuilder().build(),
+    new ParticipantBuilder().build(),
+    new ParticipantBuilder().build(),
+  ];
+  const handleParticipantsChange = jest.fn();
   const newName = "Test Name";
 
   render(
     <ParticipantTable
       participants={participants}
-      onParticipantChange={onParticipantChange}
+      onParticipantsChange={handleParticipantsChange}
     />
   );
 
-  const [rowEl] = screen.getAllByRole("row");
-  const nameTextboxEl = within(rowEl).getByRole("textbox", { name: /name/i });
+  const [nameInput] = screen.getAllByRole("textbox", { name: /name/i });
 
-  userEvent.type(nameTextboxEl, newName);
-  nameTextboxEl.blur();
+  userEvent.type(nameInput, newName);
+  nameInput.blur();
 
-  expect(onParticipantChange).toBeCalled();
+  expect(handleParticipantsChange).toBeCalledTimes(1);
+  expect(handleParticipantsChange).toBeCalledWith(participants);
 });
 
-describe("Delete Participant", () => {
+describe("Modal", () => {
   test("should trigger deletion of given particpant", () => {
     const participants = [
       new ParticipantBuilder().build(),
       new ParticipantBuilder().build(),
     ];
-    const [participant] = participants;
-
-    const onDeleteParticipantClick = jest.fn();
+    const handleParticipantsChange = jest.fn();
+    const [{ id: participantId }] = participants;
 
     render(
       <ParticipantTable
         participants={participants}
-        onDeleteParticipantClick={onDeleteParticipantClick}
+        onParticipantsChange={handleParticipantsChange}
       />
     );
 
     userEvent.click(
       screen.getByRole("button", {
-        name: new RegExp(`remove: ${participant.id}`, "i"),
+        name: new RegExp(`remove: ${participantId}`, "i"),
       })
     );
 
-    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    const modal = screen.getByRole("dialog");
 
-    userEvent.click(screen.getByRole("button", { name: /^delete$/i }));
+    userEvent.click(within(modal).getByRole("button", { name: /^delete$/i }));
 
-    expect(onDeleteParticipantClick).toBeCalled();
+    expect(handleParticipantsChange).toBeCalledTimes(1);
+    expect(handleParticipantsChange).not.toBeCalledWith(participants);
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
-  describe("when canceling", () => {
-    const { participants } = DEFAULT_PROPS;
-    const [participant] = participants;
+  test("should cancel deletion when 'esc' is pressed", () => {
+    const participants = [
+      new ParticipantBuilder().build(),
+      new ParticipantBuilder().build(),
+    ];
+    const handleParticipantsChange = jest.fn();
+    const [{ id: participantId }] = participants;
 
-    test("should abort deletion when 'esc' is pressed", () => {
-      const onDeleteParticipantClick = jest.fn();
+    render(
+      <ParticipantTable
+        participants={participants}
+        onParticipantsChange={handleParticipantsChange}
+      />
+    );
 
-      render(
-        <ParticipantTable
-          participants={participants}
-          onDeleteParticipantClick={onDeleteParticipantClick}
-        />
-      );
+    userEvent.click(
+      screen.getByRole("button", {
+        name: new RegExp(`remove: ${participantId}`, "i"),
+      })
+    );
+    userEvent.keyboard("{esc}");
 
-      userEvent.click(
-        screen.getByRole("button", {
-          name: new RegExp(`remove: ${participant.id}`, "i"),
-        })
-      );
+    expect(handleParticipantsChange).not.toBeCalled();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
 
-      expect(screen.getByRole("dialog")).toBeInTheDocument();
+  test("should cancel deletion when 'cancel' button is clicked", () => {
+    const participants = [
+      new ParticipantBuilder().build(),
+      new ParticipantBuilder().build(),
+    ];
+    const handleParticipantsChange = jest.fn();
+    const [{ id: participantId }] = participants;
 
-      userEvent.keyboard("{esc}");
+    render(
+      <ParticipantTable
+        participants={participants}
+        onParticipantsChange={handleParticipantsChange}
+      />
+    );
 
-      expect(onDeleteParticipantClick).not.toBeCalled();
-      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-    });
+    userEvent.click(
+      screen.getByRole("button", {
+        name: new RegExp(`remove: ${participantId}`, "i"),
+      })
+    );
+    userEvent.click(screen.getByRole("button", { name: /cancel/i }));
 
-    test("should abort deletion when 'cancel' button is clicked", () => {
-      const onDeleteParticipantClick = jest.fn();
-
-      render(
-        <ParticipantTable
-          participants={participants}
-          onDeleteParticipantClick={onDeleteParticipantClick}
-        />
-      );
-
-      userEvent.click(
-        screen.getByRole("button", {
-          name: new RegExp(`remove: ${participant.id}`, "i"),
-        })
-      );
-      userEvent.click(screen.getByRole("button", { name: /cancel/i }));
-
-      expect(onDeleteParticipantClick).not.toBeCalled();
-      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-    });
+    expect(handleParticipantsChange).not.toBeCalled();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 });
