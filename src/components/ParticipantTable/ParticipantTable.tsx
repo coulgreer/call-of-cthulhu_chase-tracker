@@ -27,10 +27,6 @@ const SEQUENCE_START = 0;
 export default class ParticipantTable extends Component<Props, State> {
   private static minimumParticipants = 1;
 
-  static get DEFAULT_NAME() {
-    return "Participant";
-  }
-
   static get DEFAULT_WARNING_MESSAGE() {
     return "No participants exist in this table";
   }
@@ -74,7 +70,7 @@ export default class ParticipantTable extends Component<Props, State> {
       ...participants,
       {
         id: `PARTICIPANT-${idNum}`,
-        name: `${ParticipantTable.DEFAULT_NAME} #${idNum}`,
+        name: `Participant #${idNum}`,
         dexterity: 15,
         movementRate: 2,
         speedModifier: 1,

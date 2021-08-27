@@ -29,7 +29,8 @@
     "heroku-postbuild": "gatsby build",
     "type-check": "npx tsc --noEmit",
     "lint": "npx eslint src --ext .js,.jsx,.ts,.tsx",
-    "test": "jest"
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
   "license": "0BSD",
   "dependencies": {

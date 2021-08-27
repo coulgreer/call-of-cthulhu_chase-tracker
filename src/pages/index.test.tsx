@@ -3,7 +3,7 @@ import React from "react";
 import { screen, render, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import { PureHome as Home } from "../index";
+import { PureHome as Home } from "./index";
 
 let origErrorConsole: (...data: any[]) => void;
 
