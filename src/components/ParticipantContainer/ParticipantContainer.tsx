@@ -1,7 +1,7 @@
 import React from "react";
 
 import { Transition, animated } from "react-spring/renderprops";
-import Modal from "react-modal";
+
 import { nanoid } from "nanoid";
 
 import Button from "../Button";
@@ -15,6 +15,7 @@ import "./ParticipantContainer.css";
 
 import UniqueSequenceGenerator from "../../utils/unique-sequence-generator";
 import { roll, Result } from "../../utils/roller";
+import { createFormModal } from "../Modal";
 
 import { Participant } from "../../types";
 
@@ -585,22 +586,10 @@ export default class ParticipantContainer extends React.Component<
   private renderSpeedStatisticModal() {
     const { modalShown, speedStatistics } = this.state;
 
-    /* 
-      TODO (Coul Greer): Disable the "CONFIRM" button when no option is
-      selected or when no speed statistics exist. Also, implement an error
-      message when no speed statistics exist.
-    */
-    return (
-      <Modal
-        className="Modal"
-        overlayClassName="Modal__Overlay"
-        contentLabel="Select Speed Statistic"
-        isOpen={modalShown}
-        onRequestClose={this.handleCancelSpeedModifierGenerationClick}
-      >
-        <h2>Select a Speed Statistic</h2>
-        <hr />
-        <form onSubmit={this.handleSubmit}>
+    const Header = <h2 className="Modal__header">Select a Speed Statistic</h2>;
+    const Content = (
+      <form onSubmit={this.handleSubmit}>
+        <div className="Modal__body">
           {speedStatistics.map((wrappedStatistic) => (
             <label className="radio-button" key={wrappedStatistic.key}>
               <input
@@ -616,23 +605,35 @@ export default class ParticipantContainer extends React.Component<
               </span>
             </label>
           ))}
-          <hr />
-          <div className="Modal__options">
-            <Button
-              className="button button--outlined button--on-dark button--small"
-              onClick={this.handleCancelSpeedModifierGenerationClick}
-            >
-              CANCEL
-            </Button>
-            <Button
-              className="button button--text button--on-dark button--small"
-              type="submit"
-            >
-              CONFIRM
-            </Button>
-          </div>
-        </form>
-      </Modal>
+        </div>
+        <div className="Modal__options">
+          <Button
+            className="button button--outlined button--on-dark button--small"
+            onClick={this.handleCancelSpeedModifierGenerationClick}
+          >
+            CANCEL
+          </Button>
+          <Button
+            className="button button--text button--on-dark button--small"
+            type="submit"
+          >
+            CONFIRM
+          </Button>
+        </div>
+      </form>
+    );
+
+    /* 
+      TODO (Coul Greer): Disable the "CONFIRM" button when no option is
+      selected or when no speed statistics exist. Also, implement an error
+      message when no speed statistics exist.
+    */
+    return createFormModal(
+      modalShown,
+      "Select speed statistic",
+      Header,
+      Content,
+      this.handleCancelSpeedModifierGenerationClick
     );
   }
 

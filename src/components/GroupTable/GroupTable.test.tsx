@@ -283,8 +283,6 @@ describe("Callback Triggering", () => {
 });
 
 describe("Delete Group Button", () => {
-  const headerText = /Would you like to delete the selected group\?/i;
-
   test("should render modal properly", () => {
     const { groups } = DEFAULT_PROPS;
 
@@ -298,7 +296,7 @@ describe("Delete Group Button", () => {
     const modalEl = screen.getByRole("dialog", { name: /delete.*group/i });
 
     expect(
-      within(modalEl).getByRole("heading", { name: headerText })
+      within(modalEl).getByRole("heading", { name: /delete/i })
     ).toBeInTheDocument();
     expect(
       within(modalEl).getByRole("button", { name: /cancel/i })
@@ -349,7 +347,7 @@ describe("Delete Group Button", () => {
 
     expect(handleGroupsChange).not.toBeCalled();
     expect(
-      screen.queryByRole("dialog", { name: headerText })
+      screen.queryByRole("dialog", { name: /delete/i })
     ).not.toBeInTheDocument();
   });
 
@@ -376,8 +374,6 @@ describe("Delete Group Button", () => {
 });
 
 describe("Combine Groups Button", () => {
-  const headerText = /Would you like to merge the selected groups\?/i;
-
   describe("Button", () => {
     test("should disable button", () => {
       const groups = [createDummyGroup()];
@@ -433,7 +429,7 @@ describe("Combine Groups Button", () => {
       userEvent.keyboard("{esc}");
 
       expect(
-        screen.queryByRole("dialog", { name: headerText })
+        screen.queryByRole("dialog", { name: /merge/i })
       ).not.toBeInTheDocument();
     });
 
@@ -467,7 +463,7 @@ describe("Combine Groups Button", () => {
       const modalEl = screen.getByRole("dialog", { name: /groups/i });
 
       expect(
-        within(modalEl).getByRole("heading", { name: headerText })
+        within(modalEl).getByRole("heading", { name: /merge/i })
       ).toBeInTheDocument();
       expect(
         within(modalEl).getByRole("textbox", { name: /new name/i })

@@ -1,0 +1,52 @@
+.ReactModalPortal * {
+  z-index: 2;
+}
+
+.Modal {
+  position: fixed;
+  box-sizing: border-box;
+  top: 50%;
+  left: 50%;
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  max-width: 360px;
+  max-height: 90%;
+  border-radius: 4px;
+  background-color: rgb(var(--dark-jungle-green));
+}
+
+.Modal__Overlay {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(
+    var(--rich-black-fogra-39),
+    var(--text-emphasis--high)
+  );
+}
+
+.Modal__header {
+  margin: 0;
+  padding: 0 3px;
+  box-shadow: 0 0 6px 0 #121212;
+}
+
+.Modal__header h2,
+h2.Modal__header {
+  padding: 6px 12px;
+}
+
+.Modal__body {
+  margin: 8px;
+  max-height: 60vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.Modal__options {
+  display: flex;
+  float: right;
+  margin-top: 24px;
+}

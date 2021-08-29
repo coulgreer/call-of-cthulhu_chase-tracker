@@ -104,6 +104,7 @@ h6 {
 
 p {
   line-height: 150%;
+  padding: 4px;
   margin: 0 0 1rem;
 }
 
@@ -315,43 +316,6 @@ input[type="number"] {
 
 .card--dark {
   background-color: var(--component-background);
-}
-
-/* Modals */
-.ReactModalPortal * {
-  z-index: 2;
-}
-
-.Modal {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  -ms-transform: translate(-50%, -50%);
-  transform: translate(-50%, -50%);
-  margin: 0;
-  border-radius: 4px;
-  padding: 6px;
-  max-width: 360px;
-  overflow: hidden;
-  background-color: rgb(var(--dark-jungle-green));
-}
-
-.Modal__options {
-  display: flex;
-  float: right;
-  margin-top: 24px;
-}
-
-.Modal__Overlay {
-  position: fixed;
-  left: 0;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(
-    var(--rich-black-fogra-39),
-    var(--text-emphasis--high)
-  );
 }
 
 /* Miscellaneous */

@@ -1,6 +1,5 @@
 import React from "react";
 
-import Modal from "react-modal";
 import { nanoid } from "nanoid";
 
 import GroupContainer from "../GroupContainer";
@@ -11,6 +10,7 @@ import "./GroupTable.css";
 import { Group, Participant } from "../../types";
 
 import UniqueSequenceGen from "../../utils/unique-sequence-generator";
+import { createConfirmationalModal, createFormModal } from "../Modal";
 
 interface Props {
   groups: Group[];
@@ -487,33 +487,13 @@ export default class GroupTable extends React.Component<Props, State> {
   private renderDeletionModal() {
     const { deletingModalShown } = this.state;
 
-    return (
-      <Modal
-        className="Modal"
-        overlayClassName="Modal__Overlay"
-        isOpen={deletingModalShown}
-        onRequestClose={this.handleCancelDeletingClick}
-        contentLabel="Delete group"
-      >
-        <h2 className="Modal__header">
-          Would you like to delete the selected group?
-        </h2>
-        <hr />
-        <div className="Modal__options">
-          <Button
-            className="button button--contained button--on-dark button--medium"
-            onClick={this.handleCancelDeletingClick}
-          >
-            CANCEL
-          </Button>
-          <Button
-            className="button button--outlined button--on-dark button--medium"
-            onClick={this.handleDeletingClick}
-          >
-            DELETE
-          </Button>
-        </div>
-      </Modal>
+    return createConfirmationalModal(
+      "Would you like to delete the selected group?",
+      deletingModalShown,
+      this.handleCancelDeletingClick,
+      { text: "CANCEL", onClick: this.handleCancelDeletingClick },
+      { text: "DELETE", onSubmit: this.handleDeletingClick },
+      "Delete group"
     );
   }
 
@@ -527,66 +507,65 @@ export default class GroupTable extends React.Component<Props, State> {
       rawSplinteredGroupName,
     } = this.state;
     const selectedGroup = groups[selectedIndex];
-    const headerId = `split-modal-header-${this.id}`;
     const newNameInputId = `new-name-input-${this.id}`;
 
-    return (
-      selectedGroup && (
-        <Modal
-          className="Modal"
-          overlayClassName="Modal__Overlay"
-          isOpen={splittingModalShown}
-          onRequestClose={this.handleCancelSplittingClick}
-          aria={{ labelledby: headerId }}
-        >
-          <form onSubmit={this.handleSplittingSubmit}>
-            <h2 id={headerId}>Transfer members</h2>
-            <div className="card card--dark">
-              <h3>{selectedGroup.name}</h3>
-              <div role="grid" aria-label={selectedGroup.name}>
-                <div role="rowgroup">
-                  {originalMembers.map(this.renderOriginalMemberRow)}
-                </div>
+    const Header = <h2 className="Modal__header">Transfer members</h2>;
+    const Content = selectedGroup && (
+      <form onSubmit={this.handleSplittingSubmit}>
+        <div className="Modal__body">
+          <div className="card card--dark">
+            <h3>{selectedGroup.name}</h3>
+            <div role="grid" aria-label={selectedGroup.name}>
+              <div role="rowgroup">
+                {originalMembers.map(this.renderOriginalMemberRow)}
               </div>
             </div>
-            <div className="card card--dark">
-              <label>
-                <span className="input__label">New group name</span>
-                <input
-                  id={newNameInputId}
-                  className="textbox textbox--full-width"
-                  value={rawSplinteredGroupName}
-                  onChange={this.handleNewGroupNameChange}
-                  onBlur={this.handleNewGroupNameBlur}
-                  type="text"
-                />
-              </label>
-              <div role="grid" aria-labelledby={newNameInputId}>
-                <div role="rowgroup">
-                  {splinteredMembers.length > 0
-                    ? splinteredMembers.map(this.renderNewMemberRow)
-                    : GroupTable.renderMemberPlaceholder()}
-                </div>
+          </div>
+          <div className="card card--dark">
+            <label>
+              <span className="input__label">New group name</span>
+              <input
+                id={newNameInputId}
+                className="textbox textbox--full-width"
+                value={rawSplinteredGroupName}
+                onChange={this.handleNewGroupNameChange}
+                onBlur={this.handleNewGroupNameBlur}
+                type="text"
+              />
+            </label>
+            <div role="grid" aria-labelledby={newNameInputId}>
+              <div role="rowgroup">
+                {splinteredMembers.length > 0
+                  ? splinteredMembers.map(this.renderNewMemberRow)
+                  : GroupTable.renderMemberPlaceholder()}
               </div>
             </div>
-            <div className="Modal__options">
-              <Button
-                className="button button--medium button--on-dark button--outlined"
-                onClick={this.handleCancelSplittingClick}
-              >
-                CANCEL
-              </Button>
-              <Button
-                className="button button--text button--on-dark button--medium"
-                disabled={splinteredMembers.length < 1}
-                type="submit"
-              >
-                SPLIT
-              </Button>
-            </div>
-          </form>
-        </Modal>
-      )
+          </div>
+        </div>
+        <div className="Modal__options">
+          <Button
+            className="button button--medium button--on-dark button--outlined"
+            onClick={this.handleCancelSplittingClick}
+          >
+            CANCEL
+          </Button>
+          <Button
+            className="button button--text button--on-dark button--medium"
+            disabled={splinteredMembers.length < 1}
+            type="submit"
+          >
+            SPLIT
+          </Button>
+        </div>
+      </form>
+    );
+
+    return createFormModal(
+      splittingModalShown,
+      "Transfer members",
+      Header,
+      Content,
+      this.handleCancelSplittingClick
     );
   }
 
@@ -598,53 +577,52 @@ export default class GroupTable extends React.Component<Props, State> {
       rawCombiningName = "Default",
     } = this.state;
     const currentGroup = groups[selectedIndex];
+    const Header = <h2 className="Modal__header">Select groups to merge</h2>;
+    const Content = currentGroup && (
+      <form onSubmit={this.handleCombiningSubmit}>
+        <div className="Modal__body">
+          <label>
+            <span className="input__label">New Name</span>
+            <input
+              className="textbox textbox--full-width"
+              type="text"
+              value={rawCombiningName}
+              onChange={this.handleCombiningNameChange}
+              onBlur={this.handleCombiningNameBlur}
+            />
+          </label>
+          <div>
+            {groups
+              .filter((group) => currentGroup.id !== group.id)
+              .map(this.renderCombinableGroupCheckbox)}
+          </div>
+          <p className="text--small">
+            {GroupTable.getCombiningWarningMessage()}
+          </p>
+        </div>
+        <div className="Modal__options">
+          <Button
+            className="button button--outlined button--on-dark button--medium"
+            onClick={this.handleCancelCombiningClick}
+          >
+            CANCEL
+          </Button>
+          <Button
+            className="button button--text button--on-dark button--medium"
+            type="submit"
+          >
+            COMBINE
+          </Button>
+        </div>
+      </form>
+    );
 
-    return (
-      currentGroup && (
-        <Modal
-          className="Modal"
-          overlayClassName="Modal__Overlay"
-          contentLabel="Combine groups"
-          isOpen={combiningModalShown}
-          onRequestClose={this.handleCancelCombiningClick}
-        >
-          <h2>Would you like to merge the selected groups?</h2>
-          <form onSubmit={this.handleCombiningSubmit}>
-            <label>
-              <span className="input__label">New Name</span>
-              <input
-                className="textbox textbox--full-width"
-                type="text"
-                value={rawCombiningName}
-                onChange={this.handleCombiningNameChange}
-                onBlur={this.handleCombiningNameBlur}
-              />
-            </label>
-            <div>
-              {groups
-                .filter((group) => currentGroup.id !== group.id)
-                .map(this.renderCombinableGroupCheckbox)}
-            </div>
-            <p className="text--small">
-              {GroupTable.getCombiningWarningMessage()}
-            </p>
-            <div className="Modal__options">
-              <Button
-                className="button button--outlined button--on-dark button--medium"
-                onClick={this.handleCancelCombiningClick}
-              >
-                CANCEL
-              </Button>
-              <Button
-                className="button button--text button--on-dark button--medium"
-                type="submit"
-              >
-                COMBINE
-              </Button>
-            </div>
-          </form>
-        </Modal>
-      )
+    return createFormModal(
+      combiningModalShown,
+      "Combine groups",
+      Header,
+      Content,
+      this.handleCancelCombiningClick
     );
   }
 

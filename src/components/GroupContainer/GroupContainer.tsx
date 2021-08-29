@@ -1,15 +1,16 @@
 import React from "react";
 
 import clsx from "clsx";
-import { Transition, animated } from "react-spring/renderprops";
-import Modal from "react-modal";
 import { nanoid } from "nanoid";
+
+import { Transition, animated } from "react-spring/renderprops";
 
 import Button from "../Button";
 
 import "./GroupContainer.css";
 
 import { Group, Participant } from "../../types";
+import { createFormModal } from "../Modal";
 
 interface Props {
   ownedIndex: number;
@@ -474,40 +475,42 @@ export default class GroupContainer extends React.Component<Props, State> {
 
     const availableParticipants = participants?.filter(this.isAvailable) ?? [];
 
-    return (
-      <Modal
-        className="Modal"
-        overlayClassName="Modal__Overlay"
-        contentLabel="Select participants"
-        isOpen={addMemberModalShown}
-        onRequestClose={this.handleCancelMemberAdditionClick}
-      >
-        <form onSubmit={this.handleMemberAdditionSubmit}>
-          <h2 className="Modal__header">Select Participant To Add To Group</h2>
-          <div>
-            {availableParticipants.length > 0 ? (
-              availableParticipants.map(this.renderParticipantCheckbox)
-            ) : (
-              <p>{GroupContainer.getNoAvailableParticipantWarningMessage()}</p>
-            )}
-          </div>
-          <div className="Modal__options">
-            <Button
-              className="button button--outlined button--on-dark button--medium"
-              onClick={this.handleCancelMemberAdditionClick}
-            >
-              CANCEL
-            </Button>
-            <Button
-              className="button button--text button--on-dark button--medium"
-              type="submit"
-              disabled={!(availableParticipants.length > 0)}
-            >
-              ADD
-            </Button>
-          </div>
-        </form>
-      </Modal>
+    const Header = (
+      <h2 className="Modal__header">Select Participant To Add To Group</h2>
+    );
+    const Content = (
+      <form onSubmit={this.handleMemberAdditionSubmit}>
+        <div className="Modal__body">
+          {availableParticipants.length > 0 ? (
+            availableParticipants.map(this.renderParticipantCheckbox)
+          ) : (
+            <p>{GroupContainer.getNoAvailableParticipantWarningMessage()}</p>
+          )}
+        </div>
+        <div className="Modal__options">
+          <Button
+            className="button button--outlined button--on-dark button--medium"
+            onClick={this.handleCancelMemberAdditionClick}
+          >
+            CANCEL
+          </Button>
+          <Button
+            className="button button--text button--on-dark button--medium"
+            type="submit"
+            disabled={!(availableParticipants.length > 0)}
+          >
+            ADD
+          </Button>
+        </div>
+      </form>
+    );
+
+    return createFormModal(
+      addMemberModalShown,
+      "Select participants",
+      Header,
+      Content,
+      this.handleCancelMemberAdditionClick
     );
   }
 
@@ -515,33 +518,35 @@ export default class GroupContainer extends React.Component<Props, State> {
     const { removeMemberModalShown } = this.state;
     const { participants } = this.currentGroup;
 
-    return (
-      <Modal
-        className="Modal"
-        overlayClassName="Modal__Overlay"
-        contentLabel="Remove member"
-        isOpen={removeMemberModalShown}
-        onRequestClose={this.handleCancelMemberRemovalClick}
-      >
-        <form onSubmit={this.handleMemberRemovalSubmit}>
-          <h2 className="Modal__header">Remove members from group</h2>
-          <div>{participants.map(this.renderParticipantCheckbox)}</div>
-          <div className="Modal__options">
-            <Button
-              className="button button--outlined button--on-dark button--medium"
-              onClick={this.handleCancelMemberRemovalClick}
-            >
-              CANCEL
-            </Button>
-            <Button
-              className="button button--text button--on-dark button--medium"
-              type="submit"
-            >
-              REMOVE
-            </Button>
-          </div>
-        </form>
-      </Modal>
+    const Header = <h2 className="Modal__header">Remove members from group</h2>;
+    const Content = (
+      <form onSubmit={this.handleMemberRemovalSubmit}>
+        <div className="Modal__body">
+          {participants.map(this.renderParticipantCheckbox)}
+        </div>
+        <div className="Modal__options">
+          <Button
+            className="button button--outlined button--on-dark button--medium"
+            onClick={this.handleCancelMemberRemovalClick}
+          >
+            CANCEL
+          </Button>
+          <Button
+            className="button button--text button--on-dark button--medium"
+            type="submit"
+          >
+            REMOVE
+          </Button>
+        </div>
+      </form>
+    );
+
+    return createFormModal(
+      removeMemberModalShown,
+      "Remove member",
+      Header,
+      Content,
+      this.handleCancelMemberRemovalClick
     );
   }
 

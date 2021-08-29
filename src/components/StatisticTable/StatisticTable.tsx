@@ -1,10 +1,9 @@
 import React from "react";
 
-import Modal from "react-modal";
-
 import Button from "../Button";
 import { WrappedStatistic } from "../StatisticDisplay";
 import DisplayFactory from "../StatisticDisplay/DisplayFactory";
+import { createFormModal } from "../Modal";
 
 import "./StatisticTable.css";
 
@@ -171,46 +170,43 @@ export default class StatisticTable extends React.Component<Props, State> {
 
   private renderModal() {
     const { modalShown, currentNewName } = this.state;
+    const Header = <h2 className="Modal__header">Rename the Statistic</h2>;
+    const Content = (
+      <form onSubmit={this.handleSubmit}>
+        <label className="Modal__body">
+          <span className="input__label">New Name</span>
+          <input
+            className="textbox textbox--full-width"
+            type="text"
+            value={currentNewName}
+            onChange={this.handleStatisticNameChange}
+            onBlur={this.handleStatisticNameBlur}
+            required
+          />
+        </label>
+        <div className="Modal__options">
+          <Button
+            className="button button--medium button--outlined button--on-dark"
+            onClick={this.closeModal}
+          >
+            CANCEL
+          </Button>
+          <Button
+            className="button button--medium button--text button--on-dark"
+            type="submit"
+          >
+            RENAME
+          </Button>
+        </div>
+      </form>
+    );
 
-    return (
-      <Modal
-        className="Modal"
-        overlayClassName="Modal__Overlay"
-        contentLabel="Rename the Statistic"
-        isOpen={modalShown}
-        onRequestClose={this.closeModal}
-      >
-        <h2 className="Modal__header">Rename the Statistic</h2>
-        <hr />
-        <form onSubmit={this.handleSubmit}>
-          <label>
-            <span className="input__label">New Name</span>
-            <input
-              className="textbox textbox--full-width"
-              type="text"
-              value={currentNewName}
-              onChange={this.handleStatisticNameChange}
-              onBlur={this.handleStatisticNameBlur}
-              required
-            />
-          </label>
-          <hr />
-          <div className="Modal__options">
-            <Button
-              className="button button--medium button--outlined button--on-dark"
-              onClick={this.closeModal}
-            >
-              CANCEL
-            </Button>
-            <Button
-              className="button button--medium button--text button--on-dark"
-              type="submit"
-            >
-              RENAME
-            </Button>
-          </div>
-        </form>
-      </Modal>
+    return createFormModal(
+      modalShown,
+      "Rename statistic",
+      Header,
+      Content,
+      this.closeModal
     );
   }
 

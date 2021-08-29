@@ -1,15 +1,14 @@
 import React, { Component } from "react";
-import Modal from "react-modal";
 
 import ParticipantContainer from "../ParticipantContainer";
+
 import Button from "../Button";
+import { createConfirmationalModal } from "../Modal";
 
 import "./ParticipantTable.css";
 
 import { Participant } from "../../types";
 import UniqueSequenceGenerator from "../../utils/unique-sequence-generator";
-
-if (process.env.NODE_ENV !== "test") Modal.setAppElement("#___gatsby");
 
 interface Props {
   participants: Participant[];
@@ -154,33 +153,13 @@ export default class ParticipantTable extends Component<Props, State> {
   private renderRemovalModal() {
     const { modalShown } = this.state;
 
-    return (
-      <Modal
-        className="Modal"
-        overlayClassName="Modal__Overlay"
-        contentLabel="Confirm Removal"
-        isOpen={modalShown}
-        onRequestClose={this.closeModal}
-      >
-        <h2 className="Modal__header">
-          Would You Like To Delete This Participant?
-        </h2>
-        <hr />
-        <div className="Modal__options">
-          <Button
-            className="button button--contained button--on-dark button--medium"
-            onClick={this.handleCancelParticipantDeletingClick}
-          >
-            CANCEL
-          </Button>
-          <Button
-            className="button button--outlined button--on-dark button--medium"
-            onClick={this.handleDeleteParticipantClick}
-          >
-            DELETE
-          </Button>
-        </div>
-      </Modal>
+    return createConfirmationalModal(
+      "Would You Like To Delete This Participant?",
+      modalShown,
+      this.closeModal,
+      { text: "CANCEL", onClick: this.handleCancelParticipantDeletingClick },
+      { text: "DELETE", onSubmit: this.handleDeleteParticipantClick },
+      "Confirm Removal"
     );
   }
 
