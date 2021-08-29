@@ -20,12 +20,6 @@ export default function Modal({
   contentLabel = "Modal",
   onCloseRequest,
 }: React.PropsWithChildren<Props>) {
-  if (isShown) {
-    document.body.style.overflow = "hidden";
-  } else {
-    document.body.style.overflow = "auto";
-  }
-
   return (
     <ReactModal
       className="Modal"

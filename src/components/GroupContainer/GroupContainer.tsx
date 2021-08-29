@@ -505,12 +505,15 @@ export default class GroupContainer extends React.Component<Props, State> {
       </form>
     );
 
-    return createFormModal(
-      addMemberModalShown,
-      "Select participants",
-      Header,
-      Content,
-      this.handleCancelMemberAdditionClick
+    return (
+      addMemberModalShown &&
+      createFormModal(
+        addMemberModalShown,
+        "Select participants",
+        Header,
+        Content,
+        this.handleCancelMemberAdditionClick
+      )
     );
   }
 
@@ -541,12 +544,15 @@ export default class GroupContainer extends React.Component<Props, State> {
       </form>
     );
 
-    return createFormModal(
-      removeMemberModalShown,
-      "Remove member",
-      Header,
-      Content,
-      this.handleCancelMemberRemovalClick
+    return (
+      removeMemberModalShown &&
+      createFormModal(
+        removeMemberModalShown,
+        "Remove member",
+        Header,
+        Content,
+        this.handleCancelMemberRemovalClick
+      )
     );
   }
 

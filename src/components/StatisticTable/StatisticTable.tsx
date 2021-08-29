@@ -201,12 +201,15 @@ export default class StatisticTable extends React.Component<Props, State> {
       </form>
     );
 
-    return createFormModal(
-      modalShown,
-      "Rename statistic",
-      Header,
-      Content,
-      this.closeModal
+    return (
+      modalShown &&
+      createFormModal(
+        modalShown,
+        "Rename statistic",
+        Header,
+        Content,
+        this.closeModal
+      )
     );
   }
 

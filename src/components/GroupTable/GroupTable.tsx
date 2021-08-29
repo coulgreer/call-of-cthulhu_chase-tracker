@@ -487,13 +487,16 @@ export default class GroupTable extends React.Component<Props, State> {
   private renderDeletionModal() {
     const { deletingModalShown } = this.state;
 
-    return createConfirmationalModal(
-      "Would you like to delete the selected group?",
-      deletingModalShown,
-      this.handleCancelDeletingClick,
-      { text: "CANCEL", onClick: this.handleCancelDeletingClick },
-      { text: "DELETE", onSubmit: this.handleDeletingClick },
-      "Delete group"
+    return (
+      deletingModalShown &&
+      createConfirmationalModal(
+        "Would you like to delete the selected group?",
+        deletingModalShown,
+        this.handleCancelDeletingClick,
+        { text: "CANCEL", onClick: this.handleCancelDeletingClick },
+        { text: "DELETE", onSubmit: this.handleDeletingClick },
+        "Delete group"
+      )
     );
   }
 
@@ -560,12 +563,15 @@ export default class GroupTable extends React.Component<Props, State> {
       </form>
     );
 
-    return createFormModal(
-      splittingModalShown,
-      "Transfer members",
-      Header,
-      Content,
-      this.handleCancelSplittingClick
+    return (
+      splittingModalShown &&
+      createFormModal(
+        splittingModalShown,
+        "Transfer members",
+        Header,
+        Content,
+        this.handleCancelSplittingClick
+      )
     );
   }
 
@@ -617,12 +623,15 @@ export default class GroupTable extends React.Component<Props, State> {
       </form>
     );
 
-    return createFormModal(
-      combiningModalShown,
-      "Combine groups",
-      Header,
-      Content,
-      this.handleCancelCombiningClick
+    return (
+      combiningModalShown &&
+      createFormModal(
+        combiningModalShown,
+        "Combine groups",
+        Header,
+        Content,
+        this.handleCancelCombiningClick
+      )
     );
   }
 

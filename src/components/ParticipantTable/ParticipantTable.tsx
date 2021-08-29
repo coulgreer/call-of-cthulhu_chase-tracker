@@ -153,13 +153,16 @@ export default class ParticipantTable extends Component<Props, State> {
   private renderRemovalModal() {
     const { modalShown } = this.state;
 
-    return createConfirmationalModal(
-      "Would You Like To Delete This Participant?",
-      modalShown,
-      this.closeModal,
-      { text: "CANCEL", onClick: this.handleCancelParticipantDeletingClick },
-      { text: "DELETE", onSubmit: this.handleDeleteParticipantClick },
-      "Confirm Removal"
+    return (
+      modalShown &&
+      createConfirmationalModal(
+        "Would You Like To Delete This Participant?",
+        modalShown,
+        this.closeModal,
+        { text: "CANCEL", onClick: this.handleCancelParticipantDeletingClick },
+        { text: "DELETE", onSubmit: this.handleDeleteParticipantClick },
+        "Confirm Removal"
+      )
     );
   }
 

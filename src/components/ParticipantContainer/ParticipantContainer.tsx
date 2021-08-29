@@ -628,12 +628,15 @@ export default class ParticipantContainer extends React.Component<
       selected or when no speed statistics exist. Also, implement an error
       message when no speed statistics exist.
     */
-    return createFormModal(
-      modalShown,
-      "Select speed statistic",
-      Header,
-      Content,
-      this.handleCancelSpeedModifierGenerationClick
+    return (
+      modalShown &&
+      createFormModal(
+        modalShown,
+        "Select speed statistic",
+        Header,
+        Content,
+        this.handleCancelSpeedModifierGenerationClick
+      )
     );
   }
 
