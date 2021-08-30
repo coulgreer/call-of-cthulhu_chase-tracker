@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 
-import clsx from "clsx";
+import classnames from "classnames";
 
 import Button from "../Button";
 import ChaseStartContext from "../../contexts/ChaseStartContext";
@@ -14,13 +14,25 @@ interface Props {
 
 function ChaseControls({ onStartButtonClick, onStopButtonClick }: Props) {
   const hasStarted = useContext(ChaseStartContext);
+  const startButtonClasses = classnames(
+    "button",
+    "button--medium",
+    "button--contained",
+    "button--on-dark",
+    { "ChaseControls--active": hasStarted }
+  );
+  const stopButtonClasses = classnames(
+    "button",
+    "button--medium",
+    "button--contained",
+    "button--on-dark",
+    { "ChaseControls--active": !hasStarted }
+  );
 
   return (
     <div className="ChaseControls" role="group" aria-label="chase controls">
       <Button
-        className={`button button--large, button--contained button--on-dark ${clsx(
-          hasStarted && "ChaseControls--active"
-        )}`}
+        className={startButtonClasses}
         onClick={onStartButtonClick}
         aria-label="Start"
       >
@@ -29,9 +41,7 @@ function ChaseControls({ onStartButtonClick, onStopButtonClick }: Props) {
         </span>
       </Button>
       <Button
-        className={`button button--large, button--contained button--on-dark ${clsx(
-          !hasStarted && "ChaseControls--active"
-        )}`}
+        className={stopButtonClasses}
         onClick={onStopButtonClick}
         aria-label="Stop"
       >

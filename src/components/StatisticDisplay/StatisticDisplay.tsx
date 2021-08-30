@@ -1,5 +1,6 @@
 import React from "react";
-import clsx from "clsx";
+
+import classnames from "classnames";
 
 import Range from "../../utils/range";
 
@@ -195,7 +196,7 @@ export default class StatisticDisplay extends React.Component<Props> {
     const { title, className, textboxClassName, currentValue } = this.props;
     const currentValueNum = Number.parseInt(currentValue, 10);
 
-    const inputClassName = clsx({
+    const inputClassName = classnames({
       [StatisticDisplay.UPPER_LIMIT_CLASS]:
         this.isValueAtUpperLimit(currentValueNum),
       [StatisticDisplay.UPPER_WARNING_CLASS]:

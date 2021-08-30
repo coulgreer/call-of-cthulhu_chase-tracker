@@ -1,6 +1,6 @@
 import React from "react";
 
-import clsx from "clsx";
+import classnames from "classnames";
 import { nanoid } from "nanoid";
 
 import { Transition, animated } from "react-spring/renderprops";
@@ -634,6 +634,13 @@ export default class GroupContainer extends React.Component<Props, State> {
     this.highestMovementRateMember = this.findMemberWithHighestMovementRate();
     this.lowestMovementRateMember = this.findMemberWithLowestMovementRate();
 
+    const highestMovementRowClasses = classnames({
+      [GroupContainer.HIGHEST_MOVEMENT_CLASS_NAME]: !this.areBoundariesEqual(),
+    });
+    const lowestMovementRowClasses = classnames({
+      [GroupContainer.LOWEST_MOVEMENT_CLASS_NAME]: !this.areBoundariesEqual(),
+    });
+
     return (
       <div className="GroupContainer__section-container">
         <table
@@ -645,10 +652,7 @@ export default class GroupContainer extends React.Component<Props, State> {
           </caption>
           <thead>
             <tr
-              className={clsx(
-                !this.areBoundariesEqual() &&
-                  GroupContainer.HIGHEST_MOVEMENT_CLASS_NAME
-              )}
+              className={highestMovementRowClasses}
               aria-label="Member with the highest MOV"
             >
               <td className="material-icons-outlined">arrow_upward</td>
@@ -662,10 +666,7 @@ export default class GroupContainer extends React.Component<Props, State> {
               </td>
             </tr>
             <tr
-              className={clsx(
-                !this.areBoundariesEqual() &&
-                  GroupContainer.LOWEST_MOVEMENT_CLASS_NAME
-              )}
+              className={lowestMovementRowClasses}
               aria-label="Member with the lowest MOV"
             >
               <td className="material-icons-outlined">arrow_downward</td>
@@ -727,6 +728,15 @@ export default class GroupContainer extends React.Component<Props, State> {
   }
 
   private renderMember(participant: Participant) {
+    const iconClasses = classnames(
+      "material-icons-outlined",
+      "GroupContainer__icon",
+      {
+        "GroupContainer__icon--hidden":
+          !this.hasBoundaryMovementRate(participant),
+      }
+    );
+
     return (
       <tr
         className={`${this.getBoundaryClassName(participant)}`}
@@ -734,10 +744,7 @@ export default class GroupContainer extends React.Component<Props, State> {
         key={participant.id}
       >
         <td
-          className={`material-icons-outlined GroupContainer__icon ${clsx({
-            "GroupContainer__icon--hidden":
-              !this.hasBoundaryMovementRate(participant),
-          })}`}
+          className={iconClasses}
           aria-hidden={!this.hasBoundaryMovementRate(participant)}
         >
           warning
