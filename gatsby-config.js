@@ -1,5 +1,8 @@
 module.exports = {
-  plugins: [`gatsby-plugin-react-helmet`, `gatsby-plugin-eslint`],
+  plugins: [
+    `gatsby-plugin-material-ui`,
+    `gatsby-plugin-react-helmet`,
+  ],
   siteMetadata: {
     title: "Call of Cthulhu: Chase Tracker",
     description:

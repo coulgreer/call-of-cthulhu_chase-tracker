@@ -24,6 +24,8 @@
   "rules": {
     "import/no-unresolved": "error",
     "jsx-a11y/label-has-associated-control": ["error", { "assert": "either" }],
+    "react/prop-types": "off",
+    "react/require-default-props": "off",
     "react/static-property-placement": ["error", "static public field"]
   },
   "settings": {
