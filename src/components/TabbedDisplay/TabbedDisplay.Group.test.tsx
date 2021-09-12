@@ -92,15 +92,12 @@ test("should delete pre-existing group when its associated delete button is pres
   createAnExpandedGroupContainer();
   createAnExpandedGroupContainer();
 
-  userEvent.click(
-    screen.getByRole("button", {
-      name: /delete group-2/i,
-    })
-  );
-
+  userEvent.click(screen.getAllByRole("button", { name: /delete/i })[0]);
   userEvent.click(screen.getByRole("button", { name: /^delete$/i }));
 
-  expect(screen.getAllByRole("row", { name: /group/i })).toHaveLength(2);
+  expect(screen.getAllByRole("row", { name: /group.*editor/i })).toHaveLength(
+    2
+  );
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
 });
 
@@ -259,7 +256,6 @@ test("should split group", () => {
   userEvent.click(screen.getByRole("tab", { name: /groups/i }));
   userEvent.click(screen.getByRole("button", { name: /add/i }));
 
-  const groupGridEl = screen.getByRole("grid", { name: /groups/i });
   const addMemberModal = screen.getByRole("dialog", {
     name: /select participant/i,
   });
@@ -275,7 +271,9 @@ test("should split group", () => {
   );
   userEvent.click(within(addMemberModal).getByRole("button", { name: /add/i }));
 
-  userEvent.click(within(groupGridEl).getByRole("button", { name: /split/i }));
+  const groupGrid = screen.getByRole("grid", { name: /groups/i });
+
+  userEvent.click(within(groupGrid).getByRole("button", { name: /split/i }));
 
   const splitGroupModal = screen.getByRole("dialog", {
     name: /transfer members/i,
@@ -306,22 +304,25 @@ test("should split group", () => {
     within(splitGroupModal).getByRole("button", { name: /split/i })
   );
 
-  const originalGroupEl = within(groupGridEl).getByRole("gridcell", {
+  const originalGroupCell = within(groupGrid).getByRole("gridcell", {
     name: /group 1/i,
   });
-  const splinteredGroupEl = within(groupGridEl).getByRole("gridcell", {
+  const splinteredGroupCell = within(groupGrid).getByRole("gridcell", {
     name: new RegExp(newName),
   });
-  const originalMembersTable = within(originalGroupEl).getByRole("table", {
+  const originalMembersTable = within(originalGroupCell).getByRole("table", {
     name: /members/i,
   });
-  const expandEls = screen.getAllByRole("button", { name: /group details/i });
-
-  userEvent.click(expandEls[expandEls.length - 1]);
-
-  const splinteredMembersTable = within(splinteredGroupEl).getByRole("table", {
-    name: /members/i,
+  const expandButtons = screen.getAllByRole("button", {
+    name: /group details/i,
   });
+
+  userEvent.click(expandButtons[expandButtons.length - 1]);
+
+  const splinteredMembersTable = within(splinteredGroupCell).getByRole(
+    "table",
+    { name: /members/i }
+  );
 
   expect(
     within(splinteredMembersTable).getByRole("row", { name: firstMemberId })
@@ -387,11 +388,11 @@ test("should remove members when selected non-sequentially", () => {
 
   userEvent.click(screen.getByRole("tab", { name: /group/i }));
 
-  const gridEl = screen.getByRole("grid", { name: /groups/i });
-  const editorEl = within(gridEl).getByRole("gridcell", { name: /editor/i });
-  const tableEl = within(editorEl).getByRole("table");
+  const grid = screen.getByRole("grid", { name: /groups/i });
+  const editor = within(grid).getByRole("gridcell", { name: /editor/i });
+  const table = within(editor).getByRole("table");
 
-  userEvent.click(within(editorEl).getByRole("button", { name: /add/i }));
+  userEvent.click(within(editor).getByRole("button", { name: /add/i }));
 
   const memberAdditionModal = screen.getByRole("dialog", {
     name: /participants/i,
@@ -405,7 +406,7 @@ test("should remove members when selected non-sequentially", () => {
     within(memberAdditionModal).getByRole("button", { name: /add/i })
   );
 
-  userEvent.click(within(editorEl).getByRole("button", { name: /remove/i }));
+  userEvent.click(within(editor).getByRole("button", { name: /remove/i }));
 
   const memberRemovalModal = screen.getByRole("dialog", { name: /member/i });
 
@@ -419,8 +420,8 @@ test("should remove members when selected non-sequentially", () => {
   );
 
   expect(
-    within(tableEl).getAllByRole("cell", { name: /participant.*2/i })
-  ).toHaveLength(3);
+    within(table).getByRole("cell", { name: /participant.*2/i })
+  ).toBeInTheDocument();
 });
 
 describe("Confirmation tests", () => {
@@ -441,7 +442,7 @@ describe("Confirmation tests", () => {
     expect(screen.getByRole("grid")).toBeInTheDocument();
   });
 
-  test("should not crash when changing distancer to 'default'", () => {
+  test("should not crash when changing distancer to default value", () => {
     render(<TabbedDisplay />);
     userEvent.click(screen.getByRole("tab", { name: /group/i }));
     userEvent.click(screen.getByRole("button", { name: /create group/i }));
@@ -450,7 +451,7 @@ describe("Confirmation tests", () => {
     expect(() =>
       userEvent.selectOptions(
         screen.getByRole("combobox", { name: /distancer/i }),
-        "default"
+        ""
       )
     ).not.toThrowError();
   });

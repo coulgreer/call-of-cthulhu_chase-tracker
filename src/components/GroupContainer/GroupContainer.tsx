@@ -1,18 +1,63 @@
-import React from "react";
-
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Box,
+  Button,
+  ButtonGroup,
+  Card,
+  CardContent,
+  Checkbox,
+  createStyles,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  Divider,
+  FormControl,
+  FormControlLabel,
+  FormGroup,
+  FormHelperText,
+  Grid,
+  InputLabel,
+  List,
+  ListItem,
+  NativeSelect,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography,
+} from "@material-ui/core";
+import { Theme, withStyles, WithStyles } from "@material-ui/core/styles";
 import classnames from "classnames";
 import { nanoid } from "nanoid";
-
-import { Transition, animated } from "react-spring/renderprops";
-
-import Button from "../Button";
-
+import React from "react";
+import { Group, Participant } from "../../types";
+import { createMuiFormModal } from "../Modal/Modal-factory";
 import "./GroupContainer.css";
 
-import { Group, Participant } from "../../types";
-import { createFormModal } from "../Modal";
+const styles = createStyles((theme: Theme) => ({
+  head: {
+    backgroundColor: "#000",
+    color: "#fff",
+  },
+  errorCard: {
+    backgroundColor: theme.palette.error.main,
+    color: theme.palette.error.contrastText,
+  },
+  highestRow: {
+    backgroundColor: "rgba(164, 0, 7, 0.87)",
+  },
+  lowestRow: {
+    backgroundColor: "rgba(0, 84, 133, 0.87)",
+  },
+}));
 
-interface Props {
+interface Props extends WithStyles {
   ownedIndex: number;
   groups: Group[];
   participants?: Participant[];
@@ -21,6 +66,7 @@ interface Props {
 
 interface State {
   hasDistancer: boolean;
+  distancerId: string;
   rawGroupName: string;
   validGroupName: string;
   selectedParticipantsIds: string[];
@@ -29,33 +75,10 @@ interface State {
   removeMemberModalShown: boolean;
 }
 
-export default class GroupContainer extends React.Component<Props, State> {
+class GroupContainer extends React.Component<Props, State> {
+  // TODO (Coul Greer): Remove any static variables/functions that are made public for testing
   static getDefaultChaseName() {
     return "DEFAULT Chase";
-  }
-
-  static getNoDistancerWarningMessage() {
-    return "No appetite for the hunt? In due time it will come. It always does...";
-  }
-
-  static getNoPursuerWarningMessage() {
-    return "These little birds fly free. They haven't noticed, yet.";
-  }
-
-  static getNoMemberWarningMessage() {
-    return "An emptiness, yet to be filled. This *thing* lacks purpose.";
-  }
-
-  static getNoAvailableParticipantWarningMessage() {
-    return "A place void of life... past or present. All claimed. None free.";
-  }
-
-  static get HIGHEST_MOVEMENT_CLASS_NAME() {
-    return "GroupContainer--highest";
-  }
-
-  static get LOWEST_MOVEMENT_CLASS_NAME() {
-    return "GroupContainer--lowest";
   }
 
   static get EXPANSION_PREFIX() {
@@ -85,6 +108,7 @@ export default class GroupContainer extends React.Component<Props, State> {
     this.currentGroup = groups[ownedIndex];
     this.state = {
       hasDistancer: true,
+      distancerId: "",
       rawGroupName: this.currentGroup.name,
       validGroupName: this.currentGroup.name,
       selectedParticipantsIds: [],
@@ -99,7 +123,7 @@ export default class GroupContainer extends React.Component<Props, State> {
     this.highestMovementRateMember = null;
 
     this.handleToggleClick = this.handleToggleClick.bind(this);
-    this.handleDistancerBlur = this.handleDistancerBlur.bind(this);
+    this.handleDistancerChange = this.handleDistancerChange.bind(this);
     this.handleParticipantCheckboxChange =
       this.handleParticipantCheckboxChange.bind(this);
 
@@ -122,7 +146,6 @@ export default class GroupContainer extends React.Component<Props, State> {
     this.findParticipantById = this.findParticipantById.bind(this);
     this.isAvailable = this.isAvailable.bind(this);
 
-    this.renderParticipantCheckbox = this.renderParticipantCheckbox.bind(this);
     this.renderOption = this.renderOption.bind(this);
     this.renderMember = this.renderMember.bind(this);
   }
@@ -145,16 +168,19 @@ export default class GroupContainer extends React.Component<Props, State> {
     }));
   }
 
-  private handleDistancerBlur(event: React.ChangeEvent<HTMLSelectElement>) {
+  private handleDistancerChange(event: React.ChangeEvent<{ value: unknown }>) {
     const { groups, onGroupChange } = this.props;
-    const { value } = event.currentTarget;
+    const { value } = event.target;
     const { distancer: oldDistancer } = this.currentGroup;
     const newDistancer = groups.find(({ id }) => id === value) ?? null;
 
     this.removeDistancer();
     this.addDistancer(newDistancer);
 
-    this.setState({ hasDistancer: this.hasDistancer() });
+    this.setState({
+      hasDistancer: this.hasDistancer(),
+      distancerId: value as string,
+    });
 
     if (onGroupChange) {
       onGroupChange(this.currentGroup);
@@ -251,9 +277,9 @@ export default class GroupContainer extends React.Component<Props, State> {
   }
 
   private handleParticipantCheckboxChange(
-    event: React.FormEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>
   ) {
-    const { value, checked } = event.currentTarget;
+    const { value, checked } = event.target;
 
     this.setState(({ selectedParticipantsIds }) => {
       if (checked) {
@@ -268,16 +294,17 @@ export default class GroupContainer extends React.Component<Props, State> {
   }
 
   private getBoundaryClassName(participant: Participant) {
+    const { classes } = this.props;
     const { movementRate } = participant;
 
     if (this.areBoundariesEqual()) return "";
 
     if (this.isHighestBoundary(movementRate)) {
-      return GroupContainer.HIGHEST_MOVEMENT_CLASS_NAME;
+      return classes.highestRow;
     }
 
     if (this.isLowestBoundary(movementRate)) {
-      return GroupContainer.LOWEST_MOVEMENT_CLASS_NAME;
+      return classes.lowestRow;
     }
 
     return "";
@@ -404,68 +431,178 @@ export default class GroupContainer extends React.Component<Props, State> {
     distancer.pursuers.push(this.currentGroup);
   }
 
-  private renderSummaryContent() {
+  private renderGroupData() {
     const { rawGroupName, expansionShown } = this.state;
 
+    const headerId = `group-header-${this.id}`;
+    const contentId = `${GroupContainer.EXPANSION_PREFIX}-${this.id}`;
+    const expandMoreIcon = (
+      <span className="material-icons" aria-hidden>
+        expand_more
+      </span>
+    );
+
     return (
-      <div className="GroupContainer__main-container">
-        <label>
-          <span className="input__label">Name</span>
-          <input
-            className="textbox textbox--full-width"
+      <Accordion expanded={expansionShown} onChange={this.handleToggleClick}>
+        <AccordionSummary
+          id={headerId}
+          expandIcon={expandMoreIcon}
+          aria-label={`Group details: ${rawGroupName}`}
+          aria-controls={contentId}
+        >
+          <TextField
+            id={`group-name-${this.id}`}
+            label="Name"
+            color="secondary"
             value={rawGroupName}
             onChange={this.handleNameChange}
             onBlur={this.handleNameBlur}
           />
-        </label>
-        <Button
-          className="button button--contained button--on-dark button--small button--circular"
-          aria-label="Group Details"
-          aria-expanded={expansionShown}
-          aria-controls={`${GroupContainer.EXPANSION_PREFIX}-${this.id}`}
-          onClick={this.handleToggleClick}
-        >
-          {expansionShown ? (
-            <span className="material-icons" aria-hidden>
-              expand_less
-            </span>
-          ) : (
-            <span className="material-icons" aria-hidden>
-              expand_more
-            </span>
-          )}
-        </Button>
-      </div>
+        </AccordionSummary>
+        <AccordionDetails id={contentId}>
+          <Box p={1}>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                {GroupContainer.renderChaseName()}
+              </Grid>
+              <Grid item xs={12}>
+                {this.renderDistancer()}
+              </Grid>
+              <Grid item xs={12}>
+                {this.renderPursuers()}
+              </Grid>
+              <Grid item xs={12}>
+                {this.renderMembers()}
+              </Grid>
+            </Grid>
+          </Box>
+        </AccordionDetails>
+      </Accordion>
     );
   }
 
-  private renderExpandedContent() {
-    const { expansionShown } = this.state;
+  private static renderChaseName() {
+    return (
+      <Typography variant="h2">
+        Chase Name: <em>{GroupContainer.getDefaultChaseName()}</em>
+      </Typography>
+    );
+  }
+
+  private renderDistancer() {
+    const { groups } = this.props;
+    const { hasDistancer, distancerId } = this.state;
+
+    const selectId = `distancer-select-${this.id}`;
 
     return (
-      <Transition
-        native
-        items={expansionShown}
-        from={{ height: 0, overflow: "hidden" }}
-        enter={{ height: "auto" }}
-        leave={{ height: 0 }}
+      <FormControl
+        fullWidth
+        variant="outlined"
+        color="secondary"
+        error={!hasDistancer}
       >
-        {(shown) =>
-          shown &&
-          ((props) => (
-            <animated.div
-              id={`${GroupContainer.EXPANSION_PREFIX}-${this.id}`}
-              style={props}
-              className="GroupContainer__extended-container"
-            >
-              {GroupContainer.renderChaseName()}
-              {this.renderDistancer()}
-              {this.renderPursuers()}
-              {this.renderMembers()}
-            </animated.div>
-          ))
-        }
-      </Transition>
+        <InputLabel htmlFor={selectId}>Distancer</InputLabel>
+        <NativeSelect
+          id={selectId}
+          value={distancerId}
+          onChange={this.handleDistancerChange}
+        >
+          <option key="default" aria-label="None" value="" />
+          {groups.map(this.renderOption)}
+        </NativeSelect>
+        {!hasDistancer && (
+          <FormHelperText role="alert">
+            No valid distancer selected
+            <br />
+            <q>
+              No appetite for the hunt? In due time it will come. It always
+              does...
+            </q>
+          </FormHelperText>
+        )}
+      </FormControl>
+    );
+  }
+
+  private renderPursuers() {
+    const { classes } = this.props;
+    const { pursuers } = this.currentGroup;
+
+    const pursuerLabelId = `pursuers-heading-${this.id}`;
+
+    return (
+      <Card
+        variant="outlined"
+        classes={{ root: this.hasPursuers() ? undefined : classes.errorCard }}
+      >
+        <CardContent>
+          <Typography variant="h2" id={pursuerLabelId}>
+            Pursuers
+          </Typography>
+          <Divider />
+          {this.hasPursuers() ? (
+            <List aria-labelledby={pursuerLabelId}>
+              {pursuers.map(({ id }) => (
+                <ListItem key={id}>{id}</ListItem>
+              ))}
+            </List>
+          ) : (
+            <Typography component="p" variant="body2" role="alert">
+              No pursuers for this group
+              <br />
+              <q>
+                These little birds fly free. They haven&apos;t noticed, yet.
+              </q>
+            </Typography>
+          )}
+        </CardContent>
+      </Card>
+    );
+  }
+
+  private renderMembers() {
+    const { participants: currentParticipants } = this.currentGroup;
+
+    this.highestMovementRateMember = this.findMemberWithHighestMovementRate();
+    this.lowestMovementRateMember = this.findMemberWithLowestMovementRate();
+
+    return (
+      <Paper variant="outlined">
+        <TableContainer>
+          <Table size="small">
+            <caption>
+              <Typography variant="h2">Members</Typography>
+            </caption>
+            <TableHead>{this.renderMemberHeader()}</TableHead>
+            <TableBody>
+              {this.hasMembers()
+                ? currentParticipants.map(this.renderMember)
+                : this.renderMemberWarning()}
+            </TableBody>
+          </Table>
+          <Box p={1}>
+            <ButtonGroup>
+              <Button
+                variant="outlined"
+                color="secondary"
+                onClick={this.handleInitiateMemberAdditionClick}
+                disabled={!this.hasValidParticipantCount()}
+              >
+                ADD
+              </Button>
+              <Button
+                variant="outlined"
+                color="secondary"
+                onClick={this.handleInitiateMemberRemovalClick}
+                disabled={!this.hasMembers()}
+              >
+                REMOVE
+              </Button>
+            </ButtonGroup>
+          </Box>
+        </TableContainer>
+      </Paper>
     );
   }
 
@@ -475,42 +612,62 @@ export default class GroupContainer extends React.Component<Props, State> {
 
     const availableParticipants = participants?.filter(this.isAvailable) ?? [];
 
-    const Header = (
-      <h2 className="Modal__header">Select Participant To Add To Group</h2>
-    );
     const Content = (
-      <form onSubmit={this.handleMemberAdditionSubmit}>
-        <div className="Modal__body">
-          {availableParticipants.length > 0 ? (
-            availableParticipants.map(this.renderParticipantCheckbox)
-          ) : (
-            <p>{GroupContainer.getNoAvailableParticipantWarningMessage()}</p>
-          )}
-        </div>
-        <div className="Modal__options">
-          <Button
-            className="button button--outlined button--on-dark button--medium"
-            onClick={this.handleCancelMemberAdditionClick}
-          >
-            CANCEL
-          </Button>
-          <Button
-            className="button button--text button--on-dark button--medium"
-            type="submit"
-            disabled={!(availableParticipants.length > 0)}
-          >
-            ADD
-          </Button>
-        </div>
-      </form>
+      <Box p={2}>
+        <form onSubmit={this.handleMemberAdditionSubmit}>
+          <DialogContent dividers>
+            {availableParticipants.length > 0 ? (
+              <FormGroup>
+                {availableParticipants.map(({ id, name }) => (
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        value={id}
+                        onChange={this.handleParticipantCheckboxChange}
+                      />
+                    }
+                    label={name}
+                    key={id}
+                  />
+                ))}
+              </FormGroup>
+            ) : (
+              <DialogContentText component="p">
+                No available participants
+                <br />
+                <q>
+                  A place void of life... past or present. All claimed. None
+                  free.
+                </q>
+              </DialogContentText>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button
+              variant="outlined"
+              color="secondary"
+              onClick={this.handleCancelMemberAdditionClick}
+            >
+              CANCEL
+            </Button>
+            <Button
+              variant="text"
+              color="secondary"
+              type="submit"
+              disabled={!(availableParticipants.length > 0)}
+            >
+              ADD
+            </Button>
+          </DialogActions>
+        </form>
+      </Box>
     );
 
     return (
       addMemberModalShown &&
-      createFormModal(
+      createMuiFormModal(
         addMemberModalShown,
-        "Select participants",
-        Header,
+        "Select participants to add to group",
         Content,
         this.handleCancelMemberAdditionClick
       )
@@ -521,193 +678,49 @@ export default class GroupContainer extends React.Component<Props, State> {
     const { removeMemberModalShown } = this.state;
     const { participants } = this.currentGroup;
 
-    const Header = <h2 className="Modal__header">Remove members from group</h2>;
     const Content = (
-      <form onSubmit={this.handleMemberRemovalSubmit}>
-        <div className="Modal__body">
-          {participants.map(this.renderParticipantCheckbox)}
-        </div>
-        <div className="Modal__options">
-          <Button
-            className="button button--outlined button--on-dark button--medium"
-            onClick={this.handleCancelMemberRemovalClick}
-          >
-            CANCEL
-          </Button>
-          <Button
-            className="button button--text button--on-dark button--medium"
-            type="submit"
-          >
-            REMOVE
-          </Button>
-        </div>
-      </form>
+      <Box p={2}>
+        <form onSubmit={this.handleMemberRemovalSubmit}>
+          <DialogContent dividers>
+            <FormGroup>
+              {participants.map(({ id, name }) => (
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      value={id}
+                      onChange={this.handleParticipantCheckboxChange}
+                    />
+                  }
+                  label={name}
+                  key={id}
+                />
+              ))}
+            </FormGroup>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              variant="outlined"
+              color="secondary"
+              onClick={this.handleCancelMemberRemovalClick}
+            >
+              CANCEL
+            </Button>
+            <Button variant="text" color="secondary" type="submit">
+              REMOVE
+            </Button>
+          </DialogActions>
+        </form>
+      </Box>
     );
 
     return (
       removeMemberModalShown &&
-      createFormModal(
+      createMuiFormModal(
         removeMemberModalShown,
-        "Remove member",
-        Header,
+        "Remove members from group",
         Content,
         this.handleCancelMemberRemovalClick
       )
-    );
-  }
-
-  private static renderChaseName() {
-    return (
-      <div className="GroupContainer__section-container">
-        <h2 className="GroupContainer__title">
-          Chase Name: <em>{GroupContainer.getDefaultChaseName()}</em>
-        </h2>
-      </div>
-    );
-  }
-
-  private renderDistancer() {
-    const { groups } = this.props;
-    const { hasDistancer } = this.state;
-
-    const warningMessageId = `distancer-combobox-warning-${this.id}`;
-
-    return (
-      <div className="GroupContainer__section-container">
-        <label>
-          <span className="input__label">Distancer</span>
-          <select
-            className="combobox combobox--full-width"
-            onBlur={this.handleDistancerBlur}
-            aria-describedby={hasDistancer ? undefined : warningMessageId}
-          >
-            <option key="default" value="default">
-              [N/A]
-            </option>
-            {groups.map(this.renderOption)}
-          </select>
-        </label>
-        <p
-          id={warningMessageId}
-          className="centered error text--small"
-          hidden={hasDistancer}
-        >
-          {GroupContainer.getNoDistancerWarningMessage()}
-        </p>
-      </div>
-    );
-  }
-
-  private renderPursuers() {
-    const { pursuers } = this.currentGroup;
-
-    const pursuerLabelId = `pursuers-heading-${this.id}`;
-    const warningMessageId = `pursuers-list-warning-${this.id}`;
-
-    return (
-      <div className="GroupContainer__section-container">
-        <h2
-          id={pursuerLabelId}
-          className="GroupContainer__title"
-          aria-describedby={this.hasPursuers() ? undefined : warningMessageId}
-        >
-          Pursuers
-        </h2>
-        {this.hasPursuers() ? (
-          <ul aria-labelledby={pursuerLabelId}>
-            {pursuers.map(GroupContainer.renderPursuer)}
-          </ul>
-        ) : (
-          <p id={warningMessageId} className="centered error text--small">
-            {GroupContainer.getNoPursuerWarningMessage()}
-          </p>
-        )}
-      </div>
-    );
-  }
-
-  private renderMembers() {
-    const { participants: currentParticipants } = this.currentGroup;
-
-    const warningId = `member-table-warning-${this.id}`;
-
-    this.highestMovementRateMember = this.findMemberWithHighestMovementRate();
-    this.lowestMovementRateMember = this.findMemberWithLowestMovementRate();
-
-    const highestMovementRowClasses = classnames({
-      [GroupContainer.HIGHEST_MOVEMENT_CLASS_NAME]: !this.areBoundariesEqual(),
-    });
-    const lowestMovementRowClasses = classnames({
-      [GroupContainer.LOWEST_MOVEMENT_CLASS_NAME]: !this.areBoundariesEqual(),
-    });
-
-    return (
-      <div className="GroupContainer__section-container">
-        <table
-          className="GroupContainer__table"
-          aria-describedby={this.hasMembers() ? undefined : warningId}
-        >
-          <caption>
-            <h2 className="GroupContainer__title">Members</h2>
-          </caption>
-          <thead>
-            <tr
-              className={highestMovementRowClasses}
-              aria-label="Member with the highest MOV"
-            >
-              <td className="material-icons-outlined">arrow_upward</td>
-              <td className="GroupContainer__cell--summarize">
-                {this.highestMovementRateMember?.name ||
-                  GroupContainer.PLACEHOLDER_MEMBER_NAME}
-              </td>
-              <td>
-                {this.highestMovementRateMember?.movementRate ||
-                  GroupContainer.PLACEHOLDER_MEMBER_MOVEMENT_RATE}
-              </td>
-            </tr>
-            <tr
-              className={lowestMovementRowClasses}
-              aria-label="Member with the lowest MOV"
-            >
-              <td className="material-icons-outlined">arrow_downward</td>
-              <td className="GroupContainer__cell--summarize">
-                {this.lowestMovementRateMember?.name ||
-                  GroupContainer.PLACEHOLDER_MEMBER_NAME}
-              </td>
-              <td>
-                {this.lowestMovementRateMember?.movementRate ||
-                  GroupContainer.PLACEHOLDER_MEMBER_MOVEMENT_RATE}
-              </td>
-            </tr>
-            <tr className="GroupContainer__header">
-              <th aria-label="icon" />
-              <th>Name</th>
-              <th>MOV</th>
-            </tr>
-          </thead>
-          <tbody>
-            {this.hasMembers()
-              ? currentParticipants.map(this.renderMember)
-              : GroupContainer.renderMemberWarning(warningId)}
-          </tbody>
-        </table>
-        <div className="GroupContainer__button-list">
-          <Button
-            className="button button--outlined button--on-light button--small"
-            onClick={this.handleInitiateMemberAdditionClick}
-            disabled={!this.hasValidParticipantCount()}
-          >
-            ADD
-          </Button>
-          <Button
-            className="button button--outlined button--on-light button--small"
-            onClick={this.handleInitiateMemberRemovalClick}
-            disabled={!this.hasMembers()}
-          >
-            REMOVE
-          </Button>
-        </div>
-      </div>
     );
   }
 
@@ -723,79 +736,106 @@ export default class GroupContainer extends React.Component<Props, State> {
     );
   }
 
-  private static renderPursuer({ id }: Group) {
-    return <li key={id}>{id}</li>;
+  private renderMemberHeader() {
+    const { classes } = this.props;
+    const highestRowClasses = classnames({
+      [classes.highestRow]: !this.areBoundariesEqual(),
+    });
+    const lowestRowClasses = classnames({
+      [classes.lowestRow]: !this.areBoundariesEqual(),
+    });
+
+    return (
+      <>
+        <TableRow
+          classes={{ root: highestRowClasses }}
+          aria-label="Member with the highest MOV"
+        >
+          <TableCell align="center">
+            <span className="material-icons-outlined">arrow_upward</span>
+          </TableCell>
+          <TableCell className="GroupContainer__cell--summarize">
+            {this.highestMovementRateMember?.name ||
+              GroupContainer.PLACEHOLDER_MEMBER_NAME}
+          </TableCell>
+          <TableCell align="right">
+            {this.highestMovementRateMember?.movementRate ||
+              GroupContainer.PLACEHOLDER_MEMBER_MOVEMENT_RATE}
+          </TableCell>
+        </TableRow>
+        <TableRow
+          classes={{ root: lowestRowClasses }}
+          aria-label="Member with the lowest MOV"
+        >
+          <TableCell align="center">
+            <span className="material-icons-outlined">arrow_downward</span>
+          </TableCell>
+          <TableCell className="GroupContainer__cell--summarize">
+            {this.lowestMovementRateMember?.name ||
+              GroupContainer.PLACEHOLDER_MEMBER_NAME}
+          </TableCell>
+          <TableCell align="right">
+            {this.lowestMovementRateMember?.movementRate ||
+              GroupContainer.PLACEHOLDER_MEMBER_MOVEMENT_RATE}
+          </TableCell>
+        </TableRow>
+        <TableRow classes={{ root: classes.head }}>
+          <TableCell align="center" aria-label="icon" />
+          <TableCell align="center">Name</TableCell>
+          <TableCell align="center">MOV</TableCell>
+        </TableRow>
+      </>
+    );
   }
 
   private renderMember(participant: Participant) {
-    const iconClasses = classnames(
-      "material-icons-outlined",
-      "GroupContainer__icon",
-      {
-        "GroupContainer__icon--hidden":
-          !this.hasBoundaryMovementRate(participant),
-      }
-    );
+    const rowClasses = classnames([this.getBoundaryClassName(participant)]);
 
     return (
-      <tr
-        className={`${this.getBoundaryClassName(participant)}`}
+      <TableRow
+        classes={{ root: rowClasses }}
         aria-label={participant.name}
         key={participant.id}
       >
-        <td
-          className={iconClasses}
+        <TableCell
+          align="center"
           aria-hidden={!this.hasBoundaryMovementRate(participant)}
         >
-          warning
-        </td>
-        <td className="GroupContainer__cell--summarize GroupContainer__cell--fill-horizontal">
+          <span className="material-icons-outlined">warning</span>
+        </TableCell>
+        <TableCell className="GroupContainer__cell--summarize">
           {participant.name}
-        </td>
-        <td>{participant.movementRate}</td>
-      </tr>
+        </TableCell>
+        <TableCell align="right">{participant.movementRate}</TableCell>
+      </TableRow>
     );
   }
 
-  private static renderMemberWarning(warningId: string) {
-    return (
-      <tr>
-        <td id={warningId} className="centered error text--small" colSpan={3}>
-          {GroupContainer.getNoMemberWarningMessage()}
-        </td>
-      </tr>
-    );
-  }
+  private renderMemberWarning() {
+    const { classes } = this.props;
 
-  private renderParticipantCheckbox({ id, name }: Participant) {
     return (
-      <label className="checkbox" key={id}>
-        <span>
-          <input
-            className="checkbox__input"
-            type="checkbox"
-            value={id}
-            onChange={this.handleParticipantCheckboxChange}
-          />
-          <span className="checkbox__checkmark">
-            <span className="material-icons" aria-hidden>
-              check
-            </span>
-          </span>
-        </span>
-        <span className="input__label">{name}</span>
-      </label>
+      <TableRow>
+        <TableCell className={classes.errorCard} colSpan={3}>
+          <Typography variant="body2">
+            No members exist in this group.
+            <br />
+            <q>An emptiness, yet to be filled. This vessel lacks purpose.</q>
+          </Typography>
+        </TableCell>
+      </TableRow>
     );
   }
 
   render() {
     return (
       <div className="GroupContainer">
-        {this.renderSummaryContent()}
-        {this.renderExpandedContent()}
+        {this.renderGroupData()}
         {this.renderMemberAdditionModal()}
         {this.renderMemberRemovalModal()}
       </div>
     );
   }
 }
+
+export default withStyles(styles)(GroupContainer);

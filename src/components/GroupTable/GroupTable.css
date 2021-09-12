@@ -9,6 +9,11 @@
   margin: 0 auto;
 }
 
+.GroupTable__merge-control-container {
+  display: flex;
+  justify-content: space-evenly;
+}
+
 .GroupTable__row-container {
   display: grid;
   grid-template-columns: auto min-content;

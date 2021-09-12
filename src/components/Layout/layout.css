@@ -25,8 +25,6 @@
   --state--focused: 0.12;
 
   /* COLORS: Highlights */
-  --rufous: 164, 0, 7;
-  --usafa-blue: 0, 84, 133;
   --deep-saffron: 255, 158, 68;
 }
 
@@ -36,17 +34,6 @@ body,
 #gatsby-focus-wrapper {
   width: 100%;
   margin: 0;
-}
-
-html {
-  font-size: 16px;
-}
-
-body {
-  font-weight: 400;
-  font-family: "Open Sans", sans-serif;
-  background-color: rgb(var(--dark-jungle-green));
-  color: rgba(var(--cultured), var(--text-emphasis--high));
 }
 
 #___gatsby {
@@ -62,40 +49,6 @@ body {
 ::-moz-selection {
   background-color: rgb(var(--jonquil));
   color: rgba(var(--cultured), var(--text-emphasis--high));
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  margin: 0 0 1.38rem;
-  font-family: "Fraunces", serif;
-}
-
-h1 {
-  font-size: 1.476rem;
-}
-
-h2 {
-  font-size: 1.383rem;
-}
-
-h3 {
-  font-size: 1.296rem;
-}
-
-h4 {
-  font-size: 1.215rem;
-}
-
-h5 {
-  font-size: 1.138rem;
-}
-
-h6 {
-  font-size: 1.067rem;
 }
 
 .text--small {

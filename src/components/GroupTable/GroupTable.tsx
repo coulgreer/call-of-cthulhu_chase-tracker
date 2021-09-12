@@ -2,6 +2,8 @@ import React from "react";
 
 import { nanoid } from "nanoid";
 
+import { Container, Typography } from "@material-ui/core";
+
 import GroupContainer from "../GroupContainer";
 import Button from "../Button";
 
@@ -410,7 +412,13 @@ export default class GroupTable extends React.Component<Props, State> {
     const { warningMessage = GroupTable.getDefaultWarningMessage() } =
       this.props;
 
-    return <p className="centered">{warningMessage}</p>;
+    return (
+      <Container>
+        <Typography component="p" color="error">
+          {warningMessage}
+        </Typography>
+      </Container>
+    );
   }
 
   private renderRows() {
@@ -432,7 +440,7 @@ export default class GroupTable extends React.Component<Props, State> {
     return (
       <div className="GroupTable__row-container" role="row" key={id}>
         <div role="gridcell" aria-label={`${name} Editor`}>
-          <div className="GroupContainer__merge-control-container">
+          <div className="GroupTable__merge-control-container">
             <Button
               className="button button--small button--outlined button--on-dark"
               disabled={members.length <= 1}

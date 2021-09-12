@@ -100,12 +100,12 @@ describe("Initial State", () => {
 
     render(<GroupContainer ownedIndex={ownedIndex} groups={groups} />);
 
-    const expandEl = screen.getByRole("button", { name: /group details/i });
+    const expandButton = screen.getByRole("button", { name: /group details/i });
 
     expect(screen.getByRole("textbox", { name: /name/i })).toBeInTheDocument();
-    expect(expandEl).toHaveAttribute("aria-expanded", "false");
-    expect(expandEl).toHaveAttribute("aria-controls");
-    expect(screen.queryByText(/chase name/i)).not.toBeInTheDocument();
+    expect(expandButton).toHaveAttribute("aria-expanded", "false");
+    expect(expandButton).toHaveAttribute("aria-controls");
+    expect(screen.getByText(/chase name/i)).not.toBeVisible();
     expect(
       screen.queryByRole("combobox", { name: /distancer/i })
     ).not.toBeInTheDocument();
@@ -123,12 +123,14 @@ describe("Initial State", () => {
 
       render(<GroupContainer ownedIndex={ownedIndex} groups={groups} />);
 
-      const expandEl = screen.getByRole("button", { name: /group details/i });
+      const expandButton = screen.getByRole("button", {
+        name: /group details/i,
+      });
 
-      userEvent.click(expandEl);
+      userEvent.click(expandButton);
 
-      expect(expandEl).toHaveAttribute("aria-expanded", "true");
-      expect(expandEl).toHaveAttribute("aria-controls");
+      expect(expandButton).toHaveAttribute("aria-expanded", "true");
+      expect(expandButton).toHaveAttribute("aria-controls");
       expect(
         screen.getByText((content, element) => {
           if (!element) return false;
@@ -136,10 +138,7 @@ describe("Initial State", () => {
           const hasText = (node: Element) => {
             if (node.textContent === null) return false;
 
-            const regex = new RegExp(
-              `chase name: ${GroupContainer.getDefaultChaseName()}`,
-              "i"
-            );
+            const regex = /chase name/i;
 
             return regex.test(node.textContent);
           };
@@ -157,15 +156,11 @@ describe("Initial State", () => {
       expect(
         screen.getByRole("heading", { name: /pursuers/i })
       ).toBeInTheDocument();
-      expect(
-        screen.getByText(GroupContainer.getNoPursuerWarningMessage())
-      ).toBeInTheDocument();
+      expect(screen.getByText(/no.*pursuers/i)).toBeInTheDocument();
       expect(
         screen.getByRole("heading", { name: /members/i })
       ).toBeInTheDocument();
-      expect(
-        screen.getByText(GroupContainer.getNoMemberWarningMessage())
-      ).toBeInTheDocument();
+      expect(screen.getByText(/no.*members/i)).toBeInTheDocument();
       expect(screen.getByRole("button", { name: /add/i })).toBeDisabled();
       expect(screen.getByRole("button", { name: /remove/i })).toBeDisabled();
     });
@@ -194,10 +189,7 @@ describe("Initial State", () => {
           const hasText = (node: Element) => {
             if (node.textContent === null) return false;
 
-            const regex = new RegExp(
-              `chase name: ${GroupContainer.getDefaultChaseName()}`,
-              "i"
-            );
+            const regex = /chase name/i;
 
             return regex.test(node.textContent);
           };
@@ -215,16 +207,12 @@ describe("Initial State", () => {
       expect(
         screen.getByRole("heading", { name: /pursuers/i })
       ).toBeInTheDocument();
-      expect(
-        screen.getByText(GroupContainer.getNoPursuerWarningMessage())
-      ).toBeInTheDocument();
+      expect(screen.getByText(/no.*pursuers/i)).toBeInTheDocument();
 
       expect(
         screen.getByRole("heading", { name: /members/i })
       ).toBeInTheDocument();
-      expect(
-        screen.getByText(GroupContainer.getNoMemberWarningMessage())
-      ).toBeInTheDocument();
+      expect(screen.getByText(/no.*members/i)).toBeInTheDocument();
 
       expect(screen.getByRole("button", { name: /add/i })).not.toBeDisabled();
       expect(screen.getByRole("button", { name: /remove/i })).toBeDisabled();
@@ -309,18 +297,12 @@ describe("Distancer Display", () => {
     userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
     const distancerEl = screen.getByRole("combobox", { name: /distancer/i });
-    const warningEl = screen.getByText(
-      GroupContainer.getNoDistancerWarningMessage()
-    );
 
-    distancerEl.focus();
+    userEvent.selectOptions(distancerEl, "");
     distancerEl.blur();
 
-    expect(warningEl).toBeVisible();
-    expect(distancerEl).toHaveAttribute(
-      "aria-describedby",
-      expect.stringMatching(/distancer-combobox-warning-.+/i)
-    );
+    expect(screen.getByRole("alert")).toBeVisible();
+    expect(screen.getByText(/no.*distancer/i)).toBeInTheDocument();
   });
 
   test("should hide warning message and display current distancer", () => {
@@ -331,9 +313,7 @@ describe("Distancer Display", () => {
     );
     userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
-    expect(
-      screen.getByText(GroupContainer.getNoDistancerWarningMessage())
-    ).not.toBeVisible();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 });
 
@@ -344,9 +324,7 @@ describe("Pursuer Display", () => {
     render(<GroupContainer ownedIndex={3} groups={groups} />);
     userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
-    expect(
-      screen.getByText(GroupContainer.getNoPursuerWarningMessage())
-    ).toBeInTheDocument();
+    expect(screen.getByText(/no.*pursuers/i)).toBeInTheDocument();
   });
 
   test("should hide warning and display pursuers", () => {
@@ -357,9 +335,7 @@ describe("Pursuer Display", () => {
     );
     userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
-    expect(
-      screen.queryByText(GroupContainer.getNoPursuerWarningMessage())
-    ).not.toBeInTheDocument();
+    expect(screen.queryByText(/no.*pursuers/i)).not.toBeInTheDocument();
 
     expect(
       within(screen.getByRole("list", { name: /pursuers/i })).getAllByRole(
@@ -378,36 +354,50 @@ describe("Members Display", () => {
 
       userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
-      const tableEl = screen.getByRole("table", { name: /members/i });
+      const table = screen.getByRole("table", { name: /members/i });
+      const highestMovRow = within(table).getByRole("row", {
+        name: /highest mov/i,
+      });
+      const lowestMovRow = within(table).getByRole("row", {
+        name: /lowest mov/i,
+      });
 
-      expect(tableEl).toHaveAttribute(
-        "aria-describedby",
-        expect.stringMatching(/member-table-warning-.+/i)
-      );
       expect(
-        within(tableEl).getByRole("cell", { name: /arrow_upward/i })
+        within(highestMovRow).getByRole("columnheader", {
+          name: /arrow_upward/i,
+        })
       ).toBeInTheDocument();
       expect(
-        within(tableEl).getByRole("cell", { name: /arrow_downward/i })
+        within(highestMovRow).getByRole("columnheader", { name: /---/i })
       ).toBeInTheDocument();
       expect(
-        within(tableEl).getAllByRole("cell", { name: /---/i })
-      ).toHaveLength(2);
+        within(highestMovRow).getByRole("columnheader", { name: /N\/A/i })
+      ).toBeInTheDocument();
+
       expect(
-        within(tableEl).getAllByRole("cell", { name: /N\/A/i })
-      ).toHaveLength(2);
-      expect(
-        within(tableEl).getByRole("columnheader", { name: /icon/i })
+        within(lowestMovRow).getByRole("columnheader", {
+          name: /arrow_downward/i,
+        })
       ).toBeInTheDocument();
       expect(
-        within(tableEl).getByRole("columnheader", { name: /name/i })
+        within(lowestMovRow).getByRole("columnheader", { name: /---/i })
       ).toBeInTheDocument();
       expect(
-        within(tableEl).getByRole("columnheader", { name: /mov/i })
+        within(lowestMovRow).getByRole("columnheader", { name: /N\/A/i })
+      ).toBeInTheDocument();
+
+      expect(
+        within(table).getByRole("columnheader", { name: /icon/i })
       ).toBeInTheDocument();
       expect(
-        within(tableEl).getByRole("cell", {
-          name: GroupContainer.getNoMemberWarningMessage(),
+        within(table).getByRole("columnheader", { name: /name/i })
+      ).toBeInTheDocument();
+      expect(
+        within(table).getByRole("columnheader", { name: /mov/i })
+      ).toBeInTheDocument();
+      expect(
+        within(table).getByRole("cell", {
+          name: /no.*members/i,
         })
       ).toBeInTheDocument();
       expect(screen.getByRole("button", { name: /add/i })).toBeInTheDocument();
@@ -424,56 +414,74 @@ describe("Members Display", () => {
 
       userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
-      const tableEl = screen.getByRole("table", { name: /members/i });
+      const table = screen.getByRole("table", { name: /members/i });
+      const highestMovRow = within(table).getByRole("row", {
+        name: /highest mov/i,
+      });
+      const lowestMovRow = within(table).getByRole("row", {
+        name: /lowest mov/i,
+      });
+      const participantRow = within(table).getByRole("row", {
+        name: firstParticipant.name,
+      });
 
       expect(
-        within(tableEl).getByRole("cell", { name: /warning/i })
-      ).toBeVisible();
-
-      expect(
-        within(tableEl).getByRole("cell", { name: /arrow_upward/i })
+        within(highestMovRow).getByRole("columnheader", {
+          name: /arrow_upward/i,
+        })
       ).toBeInTheDocument();
       expect(
-        within(tableEl).getByRole("cell", { name: /arrow_downward/i })
+        within(highestMovRow).getByRole("columnheader", {
+          name: firstParticipant.name,
+        })
       ).toBeInTheDocument();
       expect(
-        within(tableEl).getAllByRole("cell", { name: firstParticipant.name })
-      ).toHaveLength(3);
-      expect(
-        within(tableEl).getAllByRole("cell", {
+        within(highestMovRow).getByRole("columnheader", {
           name: `${firstParticipant.movementRate}`,
         })
-      ).toHaveLength(3);
-      expect(
-        within(tableEl).getByRole("row", {
-          name: /member with the highest mov/i,
-        })
-      ).not.toHaveClass(GroupContainer.HIGHEST_MOVEMENT_CLASS_NAME);
-      expect(
-        within(tableEl).getByRole("row", {
-          name: /member with the lowest mov/i,
-        })
-      ).not.toHaveClass(GroupContainer.LOWEST_MOVEMENT_CLASS_NAME);
-      expect(
-        screen.getByRole("columnheader", { name: /icon/i })
-      ).toBeInTheDocument();
-      expect(
-        screen.getByRole("columnheader", { name: /name/i })
-      ).toBeInTheDocument();
-      expect(
-        screen.getByRole("columnheader", { name: /mov/i })
-      ).toBeInTheDocument();
-      expect(
-        within(tableEl).getByRole("row", { name: firstParticipant.name })
-      ).not.toHaveClass(GroupContainer.HIGHEST_MOVEMENT_CLASS_NAME);
-      expect(
-        within(tableEl).getByRole("row", { name: firstParticipant.name })
-      ).not.toHaveClass(GroupContainer.LOWEST_MOVEMENT_CLASS_NAME);
-      expect(
-        within(tableEl).getByRole("cell", { name: /warning/i })
       ).toBeInTheDocument();
 
-      expect(within(tableEl).getAllByRole("row")).toHaveLength(4);
+      expect(
+        within(lowestMovRow).getByRole("columnheader", {
+          name: /arrow_downward/i,
+        })
+      ).toBeInTheDocument();
+      expect(
+        within(lowestMovRow).getByRole("columnheader", {
+          name: firstParticipant.name,
+        })
+      ).toBeInTheDocument();
+      expect(
+        within(lowestMovRow).getByRole("columnheader", {
+          name: `${firstParticipant.movementRate}`,
+        })
+      ).toBeInTheDocument();
+
+      expect(
+        within(table).getByRole("columnheader", { name: /icon/i })
+      ).toBeInTheDocument();
+      expect(
+        within(table).getByRole("columnheader", { name: /name/i })
+      ).toBeInTheDocument();
+      expect(
+        within(table).getByRole("columnheader", { name: /mov/i })
+      ).toBeInTheDocument();
+
+      expect(
+        within(participantRow).getByRole("cell", { name: /warning/i })
+      ).toBeVisible();
+      expect(
+        within(participantRow).getByRole("cell", {
+          name: `${firstParticipant.movementRate}`,
+        })
+      ).toBeInTheDocument();
+      expect(
+        within(participantRow).getByRole("cell", {
+          name: firstParticipant.name,
+        })
+      ).toBeInTheDocument();
+
+      expect(within(table).getAllByRole("row")).toHaveLength(4);
     });
 
     test("should render properly when at least two participants exist with differing movement ratings", () => {
@@ -498,44 +506,52 @@ describe("Members Display", () => {
 
       userEvent.click(screen.getByRole("button", { name: /group details/i }));
 
-      const tableEl = screen.getByRole("table", { name: /members/i });
+      const table = screen.getByRole("table", { name: /members/i });
+      const highestMovRow = within(table).getByRole("row", {
+        name: /highest mov/i,
+      });
+      const lowestMovRow = within(table).getByRole("row", {
+        name: /lowest mov/i,
+      });
+      const highestMovParticipantRow = within(table).getByRole("row", {
+        name: highestMovParticipant.name,
+      });
+      const lowestMovParticipantRow = within(table).getByRole("row", {
+        name: lowestMovParticipant.name,
+      });
 
       expect(
-        within(tableEl).getByRole("cell", { name: /arrow_upward/i })
+        within(highestMovRow).getByRole("columnheader", {
+          name: /arrow_upward/i,
+        })
       ).toBeInTheDocument();
       expect(
-        within(tableEl).getByRole("cell", { name: /arrow_downward/i })
-      ).toBeInTheDocument();
-      expect(
-        within(tableEl).getAllByRole("cell", {
-          name: lowestMovParticipant.name,
-        })
-      ).toHaveLength(2);
-      expect(
-        within(tableEl).getAllByRole("cell", {
-          name: `${lowestMovParticipant.movementRate}`,
-        })
-      ).toHaveLength(2);
-      expect(
-        within(tableEl).getAllByRole("cell", {
+        within(highestMovRow).getByRole("columnheader", {
           name: highestMovParticipant.name,
         })
-      ).toHaveLength(2);
+      ).toBeInTheDocument();
       expect(
-        within(tableEl).getAllByRole("cell", {
+        within(highestMovRow).getByRole("columnheader", {
           name: `${highestMovParticipant.movementRate}`,
         })
-      ).toHaveLength(2);
+      ).toBeInTheDocument();
+
       expect(
-        within(tableEl).getByRole("row", {
-          name: /member with the highest mov/i,
+        within(lowestMovRow).getByRole("columnheader", {
+          name: /arrow_downward/i,
         })
-      ).toHaveClass(GroupContainer.HIGHEST_MOVEMENT_CLASS_NAME);
+      ).toBeInTheDocument();
       expect(
-        within(tableEl).getByRole("row", {
-          name: /member with the lowest mov/i,
+        within(lowestMovRow).getByRole("columnheader", {
+          name: lowestMovParticipant.name,
         })
-      ).toHaveClass(GroupContainer.LOWEST_MOVEMENT_CLASS_NAME);
+      ).toBeInTheDocument();
+      expect(
+        within(lowestMovRow).getByRole("columnheader", {
+          name: `${lowestMovParticipant.movementRate}`,
+        })
+      ).toBeInTheDocument();
+
       expect(
         screen.getByRole("columnheader", { name: /icon/i })
       ).toBeInTheDocument();
@@ -545,19 +561,38 @@ describe("Members Display", () => {
       expect(
         screen.getByRole("columnheader", { name: /mov/i })
       ).toBeInTheDocument();
+
       expect(
-        within(tableEl).getByRole("row", {
+        within(highestMovParticipantRow).getByRole("cell", {
+          name: /warning/i,
+        })
+      ).toBeVisible();
+      expect(
+        within(highestMovParticipantRow).getByRole("cell", {
           name: highestMovParticipant.name,
         })
-      ).toHaveClass(GroupContainer.HIGHEST_MOVEMENT_CLASS_NAME);
+      ).toBeInTheDocument();
       expect(
-        within(tableEl).getByRole("row", {
+        within(highestMovParticipantRow).getByRole("cell", {
+          name: `${highestMovParticipant.movementRate}`,
+        })
+      ).toBeInTheDocument();
+
+      expect(
+        within(lowestMovParticipantRow).getByRole("cell", {
+          name: /warning/i,
+        })
+      ).toBeVisible();
+      expect(
+        within(lowestMovParticipantRow).getByRole("cell", {
           name: lowestMovParticipant.name,
         })
-      ).toHaveClass(GroupContainer.LOWEST_MOVEMENT_CLASS_NAME);
+      ).toBeInTheDocument();
       expect(
-        within(tableEl).getAllByRole("cell", { name: /warning/i })
-      ).toHaveLength(2);
+        within(lowestMovParticipantRow).getByRole("cell", {
+          name: `${lowestMovParticipant.movementRate}`,
+        })
+      ).toBeInTheDocument();
     });
   });
 
@@ -604,19 +639,15 @@ describe("Members Display", () => {
       userEvent.click(screen.getByRole("button", { name: /details/i }));
       userEvent.click(screen.getByRole("button", { name: /add/i }));
 
-      const modalEl = screen.getByRole("dialog", { name: /participant/i });
+      const modal = screen.getByRole("dialog", { name: /participant/i });
 
-      expect(within(modalEl).queryByRole("checkbox")).not.toBeInTheDocument();
+      expect(within(modal).queryByRole("checkbox")).not.toBeInTheDocument();
+      expect(within(modal).getByText(/no.*participants/i)).toBeInTheDocument();
       expect(
-        within(modalEl).getByText(
-          GroupContainer.getNoAvailableParticipantWarningMessage()
-        )
+        within(modal).getByRole("button", { name: /cancel/i })
       ).toBeInTheDocument();
       expect(
-        within(modalEl).getByRole("button", { name: /cancel/i })
-      ).toBeInTheDocument();
-      expect(
-        within(modalEl).getByRole("button", { name: /add/i })
+        within(modal).getByRole("button", { name: /add/i })
       ).toBeDisabled();
     });
 

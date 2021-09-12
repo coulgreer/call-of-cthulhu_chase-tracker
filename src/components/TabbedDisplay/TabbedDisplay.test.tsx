@@ -116,18 +116,14 @@ describe("Confirmation Tests", () => {
     userEvent.type(movEl, newMov.toString());
     userEvent.click(screen.getByRole("tab", { name: /groups/i }));
 
-    const lowestRow = screen.getByRole("row", {
-      name: /lowest.*mov/i,
-    });
-    const highestRow = screen.getByRole("row", {
-      name: /highest.*mov/i,
-    });
+    const lowestRow = screen.getByRole("row", { name: /lowest.*mov/i });
+    const highestRow = screen.getByRole("row", { name: /highest.*mov/i });
 
     expect(
-      within(lowestRow).getByRole("cell", { name: `${newMov}` })
+      within(lowestRow).getByRole("columnheader", { name: `${newMov}` })
     ).toBeInTheDocument();
     expect(
-      within(highestRow).getByRole("cell", { name: `${newMov}` })
+      within(highestRow).getByRole("columnheader", { name: `${newMov}` })
     ).toBeInTheDocument();
   });
 
