@@ -12,3 +12,13 @@
   flex-direction: column;
   align-items: center;
 }
+
+.StatisticDisplay--upper-limit,
+.StatisticDisplay--upper-warning {
+  color: rgb(var(--buff));
+}
+
+.StatisticDisplay--lower-limit,
+.StatisticDisplay--lower-warning {
+  color: rgba(var(--deep-saffron), var(--text-emphasis--high));
+}

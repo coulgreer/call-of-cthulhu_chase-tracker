@@ -5,6 +5,17 @@ import userEvent from "@testing-library/user-event";
 
 import StatisticDisplay from ".";
 
+function createLimiter(seed: number | string) {
+  const valueNum = typeof seed === "string" ? Number.parseInt(seed, 10) : seed;
+
+  return {
+    upperLimit: valueNum + 2,
+    upperWarning: valueNum + 1,
+    lowerWarning: valueNum - 1,
+    lowerLimit: valueNum - 2,
+  };
+}
+
 const DEFAULT_PROPS = {
   className: "",
   title: "TEST_TITLE",
@@ -15,26 +26,17 @@ const DEFAULT_PROPS = {
   onStatisticBlur: jest.fn(),
 };
 
-/*
-  TODO (Coul Greer): Refactor tests to test appropriate aspects of the
-  associated component.
-*/
 test("should render properly", () => {
-  render(
-    <StatisticDisplay
-      textboxClassName={StatisticDisplay.LIGHT_MODE_CLASS}
-      title={DEFAULT_PROPS.title}
-      currentValue={DEFAULT_PROPS.currentValue}
-    />
-  );
+  const { title, currentValue } = DEFAULT_PROPS;
 
-  const inputEl = screen.getByLabelText(DEFAULT_PROPS.title);
-  expect(inputEl).toBeInTheDocument();
-  expect(inputEl).toHaveDisplayValue(DEFAULT_PROPS.currentValue);
-  expect(inputEl).toHaveClass(StatisticDisplay.LIGHT_MODE_CLASS);
+  render(<StatisticDisplay title={title} currentValue={currentValue} />);
+
+  expect(screen.getByRole("spinbutton", { name: title })).toHaveDisplayValue(
+    currentValue
+  );
 });
 
-test("should call onChange handler when anything is changed in input", () => {
+test("should trigger onChange", () => {
   const { title, currentValue, onStatisticChange } = DEFAULT_PROPS;
 
   render(
@@ -47,55 +49,59 @@ test("should call onChange handler when anything is changed in input", () => {
 
   userEvent.type(screen.getByRole("spinbutton", { name: title }), "3");
 
-  expect(onStatisticChange).toBeCalled();
+  expect(onStatisticChange).toBeCalledTimes(1);
 });
 
-test("should call onBlur handler when input is deselected", () => {
+test("should trigger onBlur", () => {
+  const { title, currentValue, onStatisticBlur } = DEFAULT_PROPS;
+
   render(
     <StatisticDisplay
-      title={DEFAULT_PROPS.title}
-      currentValue={DEFAULT_PROPS.currentValue}
-      onStatisticBlur={DEFAULT_PROPS.onStatisticBlur}
+      title={title}
+      currentValue={currentValue}
+      onStatisticBlur={onStatisticBlur}
     />
   );
 
-  const inputEl = screen.getByLabelText(DEFAULT_PROPS.title);
+  const inputEl = screen.getByRole("spinbutton", { name: title });
   userEvent.click(inputEl);
   inputEl.blur();
 
-  expect(DEFAULT_PROPS.onStatisticBlur).toBeCalled();
+  expect(onStatisticBlur).toBeCalledTimes(1);
 });
 
 describe("Threshold class names", () => {
-  const currentValueNum = Number.parseInt(DEFAULT_PROPS.currentValue, 10);
+  const upperLimitClasses = "StatisticDisplay--upper-limit";
+  const upperWarningClasses = "StatisticDisplay--upper-warning";
+  const lowerWarningClasses = "StatisticDisplay--lower-warning";
+  const lowerLimitClasses = "StatisticDisplay--lower-limit";
 
-  test("should render display without any additional classNames when thresholds are not provided and currentValue does not equal MAX_SAFE_INTEGER or MIN_SAFE_INTEGER", () => {
-    const limiter = {
-      upperLimit: currentValueNum + 2,
-      upperWarning: currentValueNum + 1,
-      lowerWarning: currentValueNum - 1,
-      lowerLimit: currentValueNum - 2,
-    };
+  test("should render without any boundary classnames when current value is within limits", () => {
+    const title = "Total F's per Minute";
+    const currentValue = "999";
+    const limiter = createLimiter(currentValue);
 
     render(
       <StatisticDisplay
-        title={DEFAULT_PROPS.title}
-        currentValue={DEFAULT_PROPS.currentValue}
+        title={title}
+        currentValue={currentValue}
         limiter={limiter}
       />
     );
 
-    const valueEl = screen.getByLabelText(DEFAULT_PROPS.title);
-    expect(valueEl).not.toHaveClass(StatisticDisplay.UPPER_LIMIT_CLASS);
-    expect(valueEl).not.toHaveClass(StatisticDisplay.UPPER_WARNING_CLASS);
-    expect(valueEl).not.toHaveClass(StatisticDisplay.LOWER_WARNING_CLASS);
-    expect(valueEl).not.toHaveClass(StatisticDisplay.LOWER_LIMIT_CLASS);
+    const valueEl = screen.getByRole("spinbutton", { name: title });
+    expect(valueEl).not.toHaveClass(upperLimitClasses);
+    expect(valueEl).not.toHaveClass(upperWarningClasses);
+    expect(valueEl).not.toHaveClass(lowerWarningClasses);
+    expect(valueEl).not.toHaveClass(lowerLimitClasses);
   });
 
   test("should throw error when upper warning and upper limit are equal", () => {
-    const threshold = currentValueNum + 1;
+    const currentValue = "5675309";
+    const threshold = Number.parseInt(currentValue, 10) + 1;
+    const lowerLimit = threshold - 10;
     const limiter = {
-      lowerLimit: DEFAULT_PROPS.lowerLimit,
+      lowerLimit,
       upperWarning: threshold,
       upperLimit: threshold,
     };
@@ -106,8 +112,8 @@ describe("Threshold class names", () => {
     expect(() => {
       render(
         <StatisticDisplay
-          title={DEFAULT_PROPS.title}
-          currentValue={DEFAULT_PROPS.currentValue}
+          title="That One Song About That Phone Number"
+          currentValue={currentValue}
           limiter={limiter}
         />
       );
@@ -117,10 +123,12 @@ describe("Threshold class names", () => {
   });
 
   test("should throw error when upper warning threshold is greater than upper limit threshold", () => {
-    const upperWarning = currentValueNum + 2;
+    const currentValue = "2";
+    const lowerLimit = Number.parseInt(currentValue, 10) - 10;
+    const upperWarning = Number.parseInt(currentValue, 10) + 10;
     const upperLimit = upperWarning - 1;
     const limiter = {
-      lowerLimit: DEFAULT_PROPS.lowerLimit,
+      lowerLimit,
       upperWarning,
       upperLimit,
     };
@@ -131,8 +139,8 @@ describe("Threshold class names", () => {
     expect(() => {
       render(
         <StatisticDisplay
-          title={DEFAULT_PROPS.title}
-          currentValue={DEFAULT_PROPS.currentValue}
+          title="Clap Count"
+          currentValue={currentValue}
           limiter={limiter}
         />
       );
@@ -142,11 +150,13 @@ describe("Threshold class names", () => {
   });
 
   test("should throw error when lower warning and lower limit are equal", () => {
-    const threshold = currentValueNum - 1;
+    const currentValue = "2";
+    const threshold = Number.parseInt(currentValue, 10) - 10;
+    const upperLimit = threshold + 10;
     const limiter = {
       lowerLimit: threshold,
       lowerWarning: threshold,
-      upperLimit: DEFAULT_PROPS.upperLimit,
+      upperLimit,
     };
     const spy = jest.spyOn(console, "error");
 
@@ -155,8 +165,8 @@ describe("Threshold class names", () => {
     expect(() => {
       render(
         <StatisticDisplay
-          title={DEFAULT_PROPS.title}
-          currentValue={DEFAULT_PROPS.currentValue}
+          title="Good Alien Movie Count"
+          currentValue={currentValue}
           limiter={limiter}
         />
       );
@@ -166,10 +176,12 @@ describe("Threshold class names", () => {
   });
 
   test("should throw error when lower warning threshold is less than lower limit threshold", () => {
-    const lowerWarning = currentValueNum - 2;
-    const lowerLimit = lowerWarning + 1;
+    const currentValue = "96";
+    const upperLimit = Number.parseInt(currentValue, 10) + 10;
+    const lowerWarning = Number.parseInt(currentValue, 10) - 2;
+    const lowerLimit = lowerWarning + 10;
     const limiter = {
-      upperLimit: DEFAULT_PROPS.upperLimit,
+      upperLimit,
       lowerWarning,
       lowerLimit,
     };
@@ -180,8 +192,8 @@ describe("Threshold class names", () => {
     expect(() => {
       render(
         <StatisticDisplay
-          title={DEFAULT_PROPS.title}
-          currentValue={DEFAULT_PROPS.currentValue}
+          title="bpm"
+          currentValue={currentValue}
           limiter={limiter}
         />
       );
@@ -191,11 +203,16 @@ describe("Threshold class names", () => {
   });
 
   test("should throw error when lower bound and upper bound intercept", () => {
+    const currentValue = "1000000";
+    const upperLimit = Number.parseInt(currentValue, 10) + 10;
+    const upperWarning = Number.parseInt(currentValue, 10) - 5;
+    const lowerWarning = Number.parseInt(currentValue, 10) + 5;
+    const lowerLimit = Number.parseInt(currentValue, 10) - 10;
     const limiter = {
-      upperLimit: 7,
-      upperWarning: 3,
-      lowerWarning: 5,
-      lowerLimit: 2,
+      upperLimit,
+      upperWarning,
+      lowerWarning,
+      lowerLimit,
     };
     const spy = jest.spyOn(console, "error");
 
@@ -204,8 +221,8 @@ describe("Threshold class names", () => {
     expect(() => {
       render(
         <StatisticDisplay
-          title={DEFAULT_PROPS.title}
-          currentValue={DEFAULT_PROPS.currentValue}
+          title="Times Confused by an Analogy"
+          currentValue={currentValue}
           limiter={limiter}
         />
       );
@@ -220,58 +237,61 @@ describe("Threshold class names", () => {
     const upperLimit = lowerWarning + 3;
     const limiter = { lowerLimit, lowerWarning, upperLimit };
 
-    test("should render statistics with an additional className when value is inside threshold", () => {
+    test("should render statistics with appropriate boundary classname when value is inside threshold", () => {
+      const title = "A Test Called Desire";
       const currentValue = (lowerWarning - 1).toString();
 
       render(
         <StatisticDisplay
-          title={DEFAULT_PROPS.title}
+          title={title}
           currentValue={currentValue}
           limiter={limiter}
         />
       );
 
-      const valueEl = screen.getByLabelText(DEFAULT_PROPS.title);
-      expect(valueEl).not.toHaveClass(StatisticDisplay.UPPER_LIMIT_CLASS);
-      expect(valueEl).not.toHaveClass(StatisticDisplay.UPPER_WARNING_CLASS);
-      expect(valueEl).toHaveClass(StatisticDisplay.LOWER_WARNING_CLASS);
-      expect(valueEl).not.toHaveClass(StatisticDisplay.LOWER_LIMIT_CLASS);
+      const valueEl = screen.getByLabelText(title);
+      expect(valueEl).not.toHaveClass(upperLimitClasses);
+      expect(valueEl).not.toHaveClass(upperWarningClasses);
+      expect(valueEl).toHaveClass(lowerWarningClasses);
+      expect(valueEl).not.toHaveClass(lowerLimitClasses);
     });
 
-    test("should render statistics with an additional className when value is at threshold", () => {
+    test("should render statistics with appropriate boundary classname when value is at threshold", () => {
+      const title = "The Testfather";
       const currentValue = lowerWarning.toString();
 
       render(
         <StatisticDisplay
-          title={DEFAULT_PROPS.title}
+          title={title}
           currentValue={currentValue}
           limiter={limiter}
         />
       );
 
-      const valueEl = screen.getByLabelText(DEFAULT_PROPS.title);
-      expect(valueEl).not.toHaveClass(StatisticDisplay.UPPER_LIMIT_CLASS);
-      expect(valueEl).not.toHaveClass(StatisticDisplay.UPPER_WARNING_CLASS);
-      expect(valueEl).toHaveClass(StatisticDisplay.LOWER_WARNING_CLASS);
-      expect(valueEl).not.toHaveClass(StatisticDisplay.LOWER_LIMIT_CLASS);
+      const valueEl = screen.getByLabelText(title);
+      expect(valueEl).not.toHaveClass(upperLimitClasses);
+      expect(valueEl).not.toHaveClass(upperWarningClasses);
+      expect(valueEl).toHaveClass(lowerWarningClasses);
+      expect(valueEl).not.toHaveClass(lowerLimitClasses);
     });
 
-    test("should render statistics with no additional className when value is outside threshold", () => {
+    test("should render statistics without boundary classname when value is outside threshold", () => {
+      const title = "On the Testfront";
       const currentValue = (lowerWarning + 1).toString();
 
       render(
         <StatisticDisplay
-          title={DEFAULT_PROPS.title}
+          title={title}
           currentValue={currentValue}
           limiter={limiter}
         />
       );
 
-      const valueEl = screen.getByLabelText(DEFAULT_PROPS.title);
-      expect(valueEl).not.toHaveClass(StatisticDisplay.UPPER_LIMIT_CLASS);
-      expect(valueEl).not.toHaveClass(StatisticDisplay.UPPER_WARNING_CLASS);
-      expect(valueEl).not.toHaveClass(StatisticDisplay.LOWER_WARNING_CLASS);
-      expect(valueEl).not.toHaveClass(StatisticDisplay.LOWER_LIMIT_CLASS);
+      const valueEl = screen.getByLabelText(title);
+      expect(valueEl).not.toHaveClass(upperLimitClasses);
+      expect(valueEl).not.toHaveClass(upperWarningClasses);
+      expect(valueEl).not.toHaveClass(lowerWarningClasses);
+      expect(valueEl).not.toHaveClass(lowerLimitClasses);
     });
   });
 
@@ -280,40 +300,42 @@ describe("Threshold class names", () => {
     const upperLimit = lowerLimit + 4;
     const limiter = { upperLimit, lowerLimit };
 
-    test("should render statistics with an additional className when value is at threshold", () => {
+    test("should render statistics with appropriate boundary classname when value is at threshold", () => {
+      const title = "Apoca-test Now";
       const currentValue = lowerLimit.toString();
 
       render(
         <StatisticDisplay
-          title={DEFAULT_PROPS.title}
+          title={title}
           currentValue={currentValue}
           limiter={limiter}
         />
       );
 
-      const valueEl = screen.getByLabelText(DEFAULT_PROPS.title);
-      expect(valueEl).not.toHaveClass(StatisticDisplay.UPPER_LIMIT_CLASS);
-      expect(valueEl).not.toHaveClass(StatisticDisplay.UPPER_WARNING_CLASS);
-      expect(valueEl).not.toHaveClass(StatisticDisplay.LOWER_WARNING_CLASS);
-      expect(valueEl).toHaveClass(StatisticDisplay.LOWER_LIMIT_CLASS);
+      const valueEl = screen.getByLabelText(title);
+      expect(valueEl).not.toHaveClass(upperLimitClasses);
+      expect(valueEl).not.toHaveClass(upperWarningClasses);
+      expect(valueEl).not.toHaveClass(lowerWarningClasses);
+      expect(valueEl).toHaveClass(lowerLimitClasses);
     });
 
-    test("should render statistics with no additional className when value is before threshold", () => {
+    test("should render statistics without boundary classname when value is before threshold", () => {
+      const title = "Now You Test";
       const currentValue = (lowerLimit + 1).toString();
 
       render(
         <StatisticDisplay
-          title={DEFAULT_PROPS.title}
+          title={title}
           currentValue={currentValue}
           limiter={limiter}
         />
       );
 
-      const valueEl = screen.getByLabelText(DEFAULT_PROPS.title);
-      expect(valueEl).not.toHaveClass(StatisticDisplay.UPPER_LIMIT_CLASS);
-      expect(valueEl).not.toHaveClass(StatisticDisplay.UPPER_WARNING_CLASS);
-      expect(valueEl).not.toHaveClass(StatisticDisplay.LOWER_WARNING_CLASS);
-      expect(valueEl).not.toHaveClass(StatisticDisplay.LOWER_LIMIT_CLASS);
+      const valueEl = screen.getByLabelText(title);
+      expect(valueEl).not.toHaveClass(upperLimitClasses);
+      expect(valueEl).not.toHaveClass(upperWarningClasses);
+      expect(valueEl).not.toHaveClass(lowerWarningClasses);
+      expect(valueEl).not.toHaveClass(lowerLimitClasses);
     });
 
     test("should throw error when value is below lower limit threshold", () => {
@@ -325,7 +347,7 @@ describe("Threshold class names", () => {
       expect(() => {
         render(
           <StatisticDisplay
-            title={DEFAULT_PROPS.title}
+            title="How Many Titles Can I Test?"
             currentValue={currentValue}
             limiter={limiter}
           />
@@ -342,58 +364,61 @@ describe("Threshold class names", () => {
     const lowerLimit = upperWarning - 2;
     const limiter = { upperLimit, upperWarning, lowerLimit };
 
-    test("should render statistics with an additional className when value is inside threshold", () => {
+    test("should render statistics with appropriate boundary classname when value is inside threshold", () => {
+      const title = "A Value or Something";
       const currentValue = (upperWarning + 1).toString();
 
       render(
         <StatisticDisplay
-          title={DEFAULT_PROPS.title}
+          title={title}
           currentValue={currentValue}
           limiter={limiter}
         />
       );
 
-      const valueEl = screen.getByLabelText(DEFAULT_PROPS.title);
-      expect(valueEl).not.toHaveClass(StatisticDisplay.UPPER_LIMIT_CLASS);
-      expect(valueEl).toHaveClass(StatisticDisplay.UPPER_WARNING_CLASS);
-      expect(valueEl).not.toHaveClass(StatisticDisplay.LOWER_WARNING_CLASS);
-      expect(valueEl).not.toHaveClass(StatisticDisplay.LOWER_LIMIT_CLASS);
+      const valueEl = screen.getByLabelText(title);
+      expect(valueEl).not.toHaveClass(upperLimitClasses);
+      expect(valueEl).toHaveClass(upperWarningClasses);
+      expect(valueEl).not.toHaveClass(lowerWarningClasses);
+      expect(valueEl).not.toHaveClass(lowerLimitClasses);
     });
 
-    test("should render statistics with an additional className when value is at threshold", () => {
+    test("should render statistics with appropriate boundary classname when value is at threshold", () => {
+      const title = "A Dog Day Testing";
       const currentValue = upperWarning.toString();
 
       render(
         <StatisticDisplay
-          title={DEFAULT_PROPS.title}
+          title={title}
           currentValue={currentValue}
           limiter={limiter}
         />
       );
 
-      const valueEl = screen.getByLabelText(DEFAULT_PROPS.title);
-      expect(valueEl).not.toHaveClass(StatisticDisplay.UPPER_LIMIT_CLASS);
-      expect(valueEl).toHaveClass(StatisticDisplay.UPPER_WARNING_CLASS);
-      expect(valueEl).not.toHaveClass(StatisticDisplay.LOWER_WARNING_CLASS);
-      expect(valueEl).not.toHaveClass(StatisticDisplay.LOWER_LIMIT_CLASS);
+      const valueEl = screen.getByLabelText(title);
+      expect(valueEl).not.toHaveClass(upperLimitClasses);
+      expect(valueEl).toHaveClass(upperWarningClasses);
+      expect(valueEl).not.toHaveClass(lowerWarningClasses);
+      expect(valueEl).not.toHaveClass(lowerLimitClasses);
     });
 
-    test("should render statistics with an additional className when value is outside threshold", () => {
+    test("should render statistics with appropriate boundary classname when value is outside threshold", () => {
+      const title = "For a Few Values More";
       const currentValue = (upperWarning - 1).toString();
 
       render(
         <StatisticDisplay
-          title={DEFAULT_PROPS.title}
+          title={title}
           currentValue={currentValue}
           limiter={limiter}
         />
       );
 
-      const valueEl = screen.getByLabelText(DEFAULT_PROPS.title);
-      expect(valueEl).not.toHaveClass(StatisticDisplay.UPPER_LIMIT_CLASS);
-      expect(valueEl).not.toHaveClass(StatisticDisplay.UPPER_WARNING_CLASS);
-      expect(valueEl).not.toHaveClass(StatisticDisplay.LOWER_WARNING_CLASS);
-      expect(valueEl).not.toHaveClass(StatisticDisplay.LOWER_LIMIT_CLASS);
+      const valueEl = screen.getByLabelText(title);
+      expect(valueEl).not.toHaveClass(upperLimitClasses);
+      expect(valueEl).not.toHaveClass(upperWarningClasses);
+      expect(valueEl).not.toHaveClass(lowerWarningClasses);
+      expect(valueEl).not.toHaveClass(lowerLimitClasses);
     });
   });
 
@@ -402,40 +427,42 @@ describe("Threshold class names", () => {
     const lowerLimit = upperLimit - 4;
     const limiter = { upperLimit, lowerLimit };
 
-    test("should render statistics with an additional className when value is at threshold", () => {
+    test("should render statistics with appropriate boundary classname when value is at threshold", () => {
+      const title = "A Fistful of Tests";
       const currentValue = upperLimit.toString();
 
       render(
         <StatisticDisplay
-          title={DEFAULT_PROPS.title}
+          title={title}
           currentValue={currentValue}
           limiter={limiter}
         />
       );
 
-      const valueEl = screen.getByLabelText(DEFAULT_PROPS.title);
-      expect(valueEl).toHaveClass(StatisticDisplay.UPPER_LIMIT_CLASS);
-      expect(valueEl).not.toHaveClass(StatisticDisplay.UPPER_WARNING_CLASS);
-      expect(valueEl).not.toHaveClass(StatisticDisplay.LOWER_WARNING_CLASS);
-      expect(valueEl).not.toHaveClass(StatisticDisplay.LOWER_LIMIT_CLASS);
+      const valueEl = screen.getByLabelText(title);
+      expect(valueEl).toHaveClass(upperLimitClasses);
+      expect(valueEl).not.toHaveClass(upperWarningClasses);
+      expect(valueEl).not.toHaveClass(lowerWarningClasses);
+      expect(valueEl).not.toHaveClass(lowerLimitClasses);
     });
 
-    test("should render statistics with no additional className when value is before threshold", () => {
+    test("should render statistics without boundary classname when value is before threshold", () => {
+      const title = "The Good, The Bad, and The Tested";
       const currentValue = (upperLimit - 1).toString();
 
       render(
         <StatisticDisplay
-          title={DEFAULT_PROPS.title}
+          title={title}
           currentValue={currentValue}
           limiter={limiter}
         />
       );
 
-      const valueEl = screen.getByLabelText(DEFAULT_PROPS.title);
-      expect(valueEl).not.toHaveClass(StatisticDisplay.UPPER_LIMIT_CLASS);
-      expect(valueEl).not.toHaveClass(StatisticDisplay.UPPER_WARNING_CLASS);
-      expect(valueEl).not.toHaveClass(StatisticDisplay.LOWER_WARNING_CLASS);
-      expect(valueEl).not.toHaveClass(StatisticDisplay.LOWER_LIMIT_CLASS);
+      const valueEl = screen.getByLabelText(title);
+      expect(valueEl).not.toHaveClass(upperLimitClasses);
+      expect(valueEl).not.toHaveClass(upperWarningClasses);
+      expect(valueEl).not.toHaveClass(lowerWarningClasses);
+      expect(valueEl).not.toHaveClass(lowerLimitClasses);
     });
 
     test("should throw error when value is above upper limit threshold", () => {
@@ -447,7 +474,7 @@ describe("Threshold class names", () => {
       expect(() => {
         render(
           <StatisticDisplay
-            title={DEFAULT_PROPS.title}
+            title="The Last of the Test-hicans"
             currentValue={currentValue}
             limiter={limiter}
           />

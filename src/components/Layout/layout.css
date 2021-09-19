@@ -125,16 +125,6 @@ input[type="number"] {
     rgba(var(--rich-black-fogra-39), var(--state--focused));
 }
 
-.textbox--upper-limit,
-.textbox--upper-warning {
-  color: rgb(var(--buff));
-}
-
-.textbox--lower-limit,
-.textbox--lower-warning {
-  color: rgba(var(--deep-saffron), var(--text-emphasis--high));
-}
-
 /* Input: radio button */
 .radio-button {
   position: relative;
@@ -187,108 +177,10 @@ input[type="number"] {
   line-height: 1;
 }
 
-/* Input: checkbox */
-.checkbox {
-  display: grid;
-  grid-template-columns: min-content auto;
-  align-items: center;
-  grid-gap: 6px;
-}
-
-.checkbox__input {
-  position: absolute;
-  opacity: 0;
-}
-
-.checkbox__checkmark {
-  display: inline-grid;
-  width: 1em;
-  height: 1em;
-  border-radius: 25%;
-  border: 2px solid rgb(var(--buff));
-}
-
-.checkbox__input:checked + .checkbox__checkmark {
-  background-color: rgb(var(--buff));
-}
-
-.checkbox__input:focus + .checkbox__checkmark,
-.checkbox:hover .checkbox__checkmark {
-  border-radius: 25%;
-  box-shadow: 0 0 1px #fff, 0 0 6px rgb(var(--buff));
-}
-
-.checkbox__checkmark .material-icons {
-  font-size: 1em;
-  color: rgb(var(--dark-jungle-green));
-  transition: transform 0.1s ease-in 25ms;
-  transform: scale(0);
-  transform-origin: bottom left;
-}
-
-.checkbox__input:checked + .checkbox__checkmark .material-icons {
-  transform: scale(1);
-}
-
-/* 
-  TODO (Coul Greer): Create a style that has an on-brand color when hovering
-  an option.
-*/
-
-/* Input: combobox */
-.combobox {
-  appearance: none;
-  outline: none;
-  cursor: pointer;
-  box-sizing: border-box;
-  padding: 0 12px;
-  background: url(../../images/expand_more_white_24dp.svg) no-repeat right
-    rgb(var(--middle-blue-green));
-  color: rgba(var(--cultured), var(--text-emphasis--high));
-  border: none;
-  border-bottom: 1px solid rgba(var(--cultured), var(--state--focused));
-  border-radius: 4px 4px 0 0;
-  font-family: inherit;
-  font-size: 1rem;
-  font-weight: normal;
-  line-height: 150%;
-}
-
-.combobox--full-width {
-  width: 100%;
-}
-
-/* Card */
-.card {
-  border-radius: 10px;
-  padding: 6px;
-  margin: 4px;
-}
-
-.card--dark {
-  background-color: var(--component-background);
-}
-
 /* Miscellaneous */
 img {
   max-width: 100%;
   height: auto;
-}
-
-.list {
-  padding: 0;
-  list-style-type: none;
-}
-
-.list__item {
-  padding: 3px 6px;
-}
-
-.error {
-  margin: 6px 0 10px;
-  font-weight: bold;
-  color: rgb(var(--cinnamon-satin));
-  opacity: 60%;
 }
 
 .centered {

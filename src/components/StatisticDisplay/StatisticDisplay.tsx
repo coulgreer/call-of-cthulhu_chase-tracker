@@ -31,10 +31,6 @@ interface Props {
   onStatisticBlur?: () => void;
 }
 
-/* 
-  TODO (Coul Greer): Refector this class to better represent the new
-  understanding of components.
-*/
 export default class StatisticDisplay extends React.Component<Props> {
   static defaultProps = {
     className: "",
@@ -45,30 +41,6 @@ export default class StatisticDisplay extends React.Component<Props> {
       lowerLimit: Number.MIN_SAFE_INTEGER,
     },
   };
-
-  static get DARK_MODE_CLASS() {
-    return "textbox--on-dark";
-  }
-
-  static get LIGHT_MODE_CLASS() {
-    return "textbox--on-light";
-  }
-
-  static get UPPER_LIMIT_CLASS() {
-    return "textbox--upper-limit";
-  }
-
-  static get UPPER_WARNING_CLASS() {
-    return "textbox--upper-warning";
-  }
-
-  static get LOWER_WARNING_CLASS() {
-    return "textbox--lower-warning";
-  }
-
-  static get LOWER_LIMIT_CLASS() {
-    return "textbox--lower-limit";
-  }
 
   constructor(props: Props) {
     super(props);
@@ -197,23 +169,25 @@ export default class StatisticDisplay extends React.Component<Props> {
     const currentValueNum = Number.parseInt(currentValue, 10);
 
     const inputClassName = classnames({
-      [StatisticDisplay.UPPER_LIMIT_CLASS]:
+      "StatisticDisplay--upper-limit":
         this.isValueAtUpperLimit(currentValueNum),
-      [StatisticDisplay.UPPER_WARNING_CLASS]:
+      "StatisticDisplay--upper-warning":
         this.isValueWithinUpperWarning(currentValueNum),
-      [StatisticDisplay.LOWER_WARNING_CLASS]:
+      "StatisticDisplay--lower-warning":
         this.isValueWithinLowerWarning(currentValueNum),
-      [StatisticDisplay.LOWER_LIMIT_CLASS]:
+      "StatisticDisplay--lower-limit":
         this.isValueAtLowerLimit(currentValueNum),
     });
 
+    /* Kept native due to issues with Material-UI v5.0.0 not supporting
+    type="number" properly. */
     return (
       <label className={`StatisticDisplay ${className}`}>
         <span className="input__label">{title}</span>
         <input
           type="number"
           className={`textbox textbox--centered ${inputClassName} ${
-            textboxClassName || StatisticDisplay.DARK_MODE_CLASS
+            textboxClassName || "textbox--on-dark"
           }`}
           value={currentValue}
           onChange={this.handleChange}
