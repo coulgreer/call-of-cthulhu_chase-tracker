@@ -2,17 +2,31 @@ import React from "react";
 
 import { nanoid } from "nanoid";
 
-import { Container, Typography } from "@material-ui/core";
+import {
+  Button,
+  ButtonGroup,
+  Checkbox,
+  Container,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  Fab,
+  FormControlLabel,
+  FormGroup,
+  Grid,
+  Paper,
+  TextField,
+  Typography,
+} from "@material-ui/core";
 
 import GroupContainer from "../GroupContainer";
-import Button from "../Button";
 
 import "./GroupTable.css";
 
 import { Group, Participant } from "../../types";
 
 import UniqueSequenceGen from "../../utils/unique-sequence-generator";
-import { createConfirmationalModal, createFormModal } from "../Modal";
+import { createMuiConfirmationModal, createMuiFormModal } from "../Modal";
 
 interface Props {
   groups: Group[];
@@ -39,14 +53,6 @@ const SEQUENCE_START = 0;
 
 export default class GroupTable extends React.Component<Props, State> {
   static DEFAULT_SPLINTERED_NAME = "New Group";
-
-  static getDefaultWarningMessage() {
-    return "No groups exist in this table";
-  }
-
-  static getCombiningWarningMessage() {
-    return "This process will remove the selected group and move its members into the initiating group.";
-  }
 
   static areGroupsEqual(g1: Group | string, g2: Group | string) {
     if (GroupTable.isGroup(g1) && GroupTable.isGroup(g2)) {
@@ -131,12 +137,6 @@ export default class GroupTable extends React.Component<Props, State> {
     this.handleSplittingSubmit = this.handleSplittingSubmit.bind(this);
     this.handleNewGroupNameChange = this.handleNewGroupNameChange.bind(this);
     this.handleNewGroupNameBlur = this.handleNewGroupNameBlur.bind(this);
-
-    this.renderRow = this.renderRow.bind(this);
-    this.renderCombinableGroupCheckbox =
-      this.renderCombinableGroupCheckbox.bind(this);
-    this.renderOriginalMemberRow = this.renderOriginalMemberRow.bind(this);
-    this.renderNewMemberRow = this.renderNewMemberRow.bind(this);
   }
 
   private handleGroupChange(target: Group) {
@@ -285,14 +285,12 @@ export default class GroupTable extends React.Component<Props, State> {
       const { selectedCombining } = state;
 
       if (checked) {
-        const mergingGroup = groups.find(
-          (group) => mergingGroupId === group.id
-        );
+        const mergingGroup = groups.find(({ id }) => mergingGroupId === id);
 
         if (mergingGroup) selectedCombining.push(mergingGroup);
       } else {
         const targetIndex = selectedCombining.findIndex(
-          (group) => mergingGroupId === group.id
+          ({ id }) => mergingGroupId === id
         );
         selectedCombining.splice(targetIndex, 1);
       }
@@ -301,8 +299,10 @@ export default class GroupTable extends React.Component<Props, State> {
     });
   }
 
-  private handleCombiningNameChange(event: React.FormEvent<HTMLInputElement>) {
-    const { value } = event.currentTarget;
+  private handleCombiningNameChange(
+    event: React.ChangeEvent<HTMLInputElement>
+  ) {
+    const { value } = event.target;
 
     if (value) this.setState({ validCombiningName: value });
 
@@ -341,8 +341,8 @@ export default class GroupTable extends React.Component<Props, State> {
     });
   }
 
-  private handleNewGroupNameChange(event: React.FormEvent<HTMLInputElement>) {
-    const { value } = event.currentTarget;
+  private handleNewGroupNameChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const { value } = event.target;
 
     if (value) this.setState({ validSplinteredGroupName: value });
 
@@ -408,87 +408,89 @@ export default class GroupTable extends React.Component<Props, State> {
     groups.splice(index, 1);
   }
 
-  private renderWarning() {
-    const { warningMessage = GroupTable.getDefaultWarningMessage() } =
-      this.props;
+  private renderMainContent() {
+    const {
+      groups,
+      participants,
+      warningMessage = "No groups exist in this table",
+    } = this.props;
 
-    return (
+    const groupGrid = (
+      <Grid container spacing={2} role="grid" aria-label="Groups">
+        {groups.map(({ id, name, participants: members }, index) => (
+          <Grid item role="row" key={id}>
+            <Paper>
+              <Grid container>
+                <Grid item xs={9} role="gridcell" aria-label={`${name} Editor`}>
+                  <ButtonGroup color="secondary" fullWidth variant="contained">
+                    <Button
+                      disabled={members.length <= 1}
+                      onClick={() => this.handleInitiateSplittingClick(index)}
+                    >
+                      SPLIT
+                    </Button>
+                    <Button
+                      disabled={groups.length < 2}
+                      onClick={() => this.handleInitiateCombiningClick(index)}
+                    >
+                      COMBINE
+                    </Button>
+                  </ButtonGroup>
+                  <GroupContainer
+                    ownedIndex={index}
+                    groups={groups}
+                    participants={participants}
+                    onGroupChange={this.handleGroupChange}
+                  />
+                </Grid>
+                <Grid
+                  container
+                  item
+                  alignItems="stretch"
+                  justifyContent="flex-end"
+                  xs={3}
+                  role="gridcell"
+                >
+                  <Button
+                    color="primary"
+                    variant="contained"
+                    aria-label={`Delete ${id}`}
+                    onClick={() => this.handleInitiateDeletingClick(index)}
+                  >
+                    <span className="material-icons" aria-hidden>
+                      remove_circle
+                    </span>
+                  </Button>
+                </Grid>
+              </Grid>
+            </Paper>
+          </Grid>
+        ))}
+      </Grid>
+    );
+    const warning = (
       <Container>
         <Typography component="p" color="error">
           {warningMessage}
         </Typography>
       </Container>
     );
-  }
 
-  private renderRows() {
-    const { groups } = this.props;
-
-    return (
-      <div className="GroupTable__container" role="grid" aria-label="Groups">
-        {groups.map(this.renderRow)}
-      </div>
-    );
-  }
-
-  /* TODO (Coul Greer): AHA! Take the render row and implement it directly by
-  removing the callback. Maybe use a callback for rendering the gridcells if
-  nesting too deeply is a concern */
-  private renderRow({ id, name, participants: members }: Group, index: number) {
-    const { groups, participants } = this.props;
-
-    return (
-      <div className="GroupTable__row-container" role="row" key={id}>
-        <div role="gridcell" aria-label={`${name} Editor`}>
-          <div className="GroupTable__merge-control-container">
-            <Button
-              className="button button--small button--outlined button--on-dark"
-              disabled={members.length <= 1}
-              onClick={() => this.handleInitiateSplittingClick(index)}
-            >
-              SPLIT
-            </Button>
-            <Button
-              className="button button--small button--outlined button--on-dark"
-              disabled={groups.length < 2}
-              onClick={() => this.handleInitiateCombiningClick(index)}
-            >
-              COMBINE
-            </Button>
-          </div>
-          <GroupContainer
-            ownedIndex={index}
-            groups={groups}
-            participants={participants}
-            onGroupChange={this.handleGroupChange}
-          />
-        </div>
-        <div role="gridcell">
-          <Button
-            className="GroupTable__row-control button button--contained button--on-dark"
-            aria-label={`Delete ${id}`}
-            onClick={() => this.handleInitiateDeletingClick(index)}
-          >
-            <span className="material-icons" aria-hidden>
-              remove_circle
-            </span>
-          </Button>
-        </div>
-      </div>
-    );
+    return groups.length > 0 ? groupGrid : warning;
   }
 
   private renderFloatingActionButton() {
     return (
-      <Button
-        className="button fab"
-        aria-label="Create Group"
+      <Fab
+        color="secondary"
+        className="fab"
+        aria-label="Create group"
         onClick={this.handleCreationClick}
       >
         <span className="material-icons" aria-hidden>
           add
         </span>
-      </Button>
+      </Fab>
     );
   }
 
@@ -497,13 +499,13 @@ export default class GroupTable extends React.Component<Props, State> {
 
     return (
       deletingModalShown &&
-      createConfirmationalModal(
+      createMuiConfirmationModal(
         "Would you like to delete the selected group?",
         deletingModalShown,
         this.handleCancelDeletingClick,
+        "Delete group",
         { text: "CANCEL", onClick: this.handleCancelDeletingClick },
-        { text: "DELETE", onSubmit: this.handleDeletingClick },
-        "Delete group"
+        { text: "DELETE", onSubmit: this.handleDeletingClick }
       )
     );
   }
@@ -518,65 +520,94 @@ export default class GroupTable extends React.Component<Props, State> {
       rawSplinteredGroupName,
     } = this.state;
     const selectedGroup = groups[selectedIndex];
-    const newNameInputId = `new-name-input-${this.id}`;
-
-    const Header = <h2 className="Modal__header">Transfer members</h2>;
+    const titleId = `base-group-title-${this.id}`;
+    const newNameId = `new-group-name-${this.id}`;
     const Content = selectedGroup && (
       <form onSubmit={this.handleSplittingSubmit}>
-        <div className="Modal__body">
-          <div className="card card--dark">
-            <h3>{selectedGroup.name}</h3>
-            <div role="grid" aria-label={selectedGroup.name}>
-              <div role="rowgroup">
-                {originalMembers.map(this.renderOriginalMemberRow)}
-              </div>
-            </div>
-          </div>
-          <div className="card card--dark">
-            <label>
-              <span className="input__label">New group name</span>
-              <input
-                id={newNameInputId}
-                className="textbox textbox--full-width"
-                value={rawSplinteredGroupName}
-                onChange={this.handleNewGroupNameChange}
-                onBlur={this.handleNewGroupNameBlur}
-                type="text"
-              />
-            </label>
-            <div role="grid" aria-labelledby={newNameInputId}>
-              <div role="rowgroup">
-                {splinteredMembers.length > 0
-                  ? splinteredMembers.map(this.renderNewMemberRow)
-                  : GroupTable.renderMemberPlaceholder()}
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="Modal__options">
+        <DialogContent>
+          <Grid container direction="column" spacing={2}>
+            <Grid item>
+              <Paper elevation={3}>
+                <Typography variant="h3" id={titleId}>
+                  {selectedGroup.name}
+                </Typography>
+                <Grid
+                  container
+                  direction="column"
+                  spacing={1}
+                  role="grid"
+                  aria-labelledby={titleId}
+                >
+                  {originalMembers.map((member) => (
+                    <Grid item key={member.id} role="row">
+                      <span role="gridcell">
+                        <Button
+                          color="secondary"
+                          endIcon={
+                            <span className="material-icons" aria-hidden>
+                              arrow_downward
+                            </span>
+                          }
+                          fullWidth
+                          variant="contained"
+                          disabled={originalMembers.length < 2}
+                          aria-label={`Move ${member.name}`}
+                          onClick={() => this.handleOriginalMemberClick(member)}
+                        >
+                          {member.name}
+                        </Button>
+                      </span>
+                    </Grid>
+                  ))}
+                </Grid>
+              </Paper>
+            </Grid>
+            <Grid item>
+              <Paper elevation={3}>
+                <TextField
+                  label="New group name"
+                  id={newNameId}
+                  value={rawSplinteredGroupName}
+                  onChange={this.handleNewGroupNameChange}
+                  onBlur={this.handleNewGroupNameBlur}
+                />
+                <Grid
+                  container
+                  direction="column"
+                  spacing={1}
+                  role="grid"
+                  aria-labelledby={newNameId}
+                >
+                  {this.renderSplinteredMembers()}
+                </Grid>
+              </Paper>
+            </Grid>
+          </Grid>
+        </DialogContent>
+        <DialogActions>
           <Button
-            className="button button--medium button--on-dark button--outlined"
+            color="secondary"
+            variant="outlined"
             onClick={this.handleCancelSplittingClick}
           >
             CANCEL
           </Button>
           <Button
-            className="button button--text button--on-dark button--medium"
+            color="secondary"
             disabled={splinteredMembers.length < 1}
             type="submit"
           >
             SPLIT
           </Button>
-        </div>
+        </DialogActions>
       </form>
     );
 
     return (
       splittingModalShown &&
-      createFormModal(
+      createMuiFormModal(
         splittingModalShown,
         "Transfer members",
-        Header,
         Content,
         this.handleCancelSplittingClick
       )
@@ -591,152 +622,116 @@ export default class GroupTable extends React.Component<Props, State> {
       rawCombiningName = "Default",
     } = this.state;
     const currentGroup = groups[selectedIndex];
-    const Header = <h2 className="Modal__header">Select groups to merge</h2>;
+    const nameId = `combined-group-name-${this.id}`;
+
     const Content = currentGroup && (
       <form onSubmit={this.handleCombiningSubmit}>
-        <div className="Modal__body">
-          <label>
-            <span className="input__label">New Name</span>
-            <input
-              className="textbox textbox--full-width"
-              type="text"
-              value={rawCombiningName}
-              onChange={this.handleCombiningNameChange}
-              onBlur={this.handleCombiningNameBlur}
-            />
-          </label>
-          <div>
+        <DialogContent>
+          <TextField
+            id={nameId}
+            color="secondary"
+            label="New Name"
+            fullWidth
+            value={rawCombiningName}
+            onChange={this.handleCombiningNameChange}
+            onBlur={this.handleCombiningNameBlur}
+          />
+          <FormGroup>
             {groups
-              .filter((group) => currentGroup.id !== group.id)
-              .map(this.renderCombinableGroupCheckbox)}
-          </div>
-          <p className="text--small">
-            {GroupTable.getCombiningWarningMessage()}
-          </p>
-        </div>
-        <div className="Modal__options">
+              .filter(({ id }) => currentGroup.id !== id)
+              .map(({ id, name }) => (
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      value={id}
+                      onChange={this.handleCombiningGroupCheckboxChange}
+                    />
+                  }
+                  label={name}
+                  key={id}
+                />
+              ))}
+          </FormGroup>
+          <DialogContentText>
+            This process will remove the selected group and move its members
+            into the initiating group.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
           <Button
-            className="button button--outlined button--on-dark button--medium"
+            color="secondary"
+            variant="outlined"
             onClick={this.handleCancelCombiningClick}
           >
             CANCEL
           </Button>
-          <Button
-            className="button button--text button--on-dark button--medium"
-            type="submit"
-          >
+          <Button color="secondary" type="submit">
             COMBINE
           </Button>
-        </div>
+        </DialogActions>
       </form>
     );
 
     return (
       combiningModalShown &&
-      createFormModal(
+      createMuiFormModal(
         combiningModalShown,
         "Combine groups",
-        Header,
         Content,
         this.handleCancelCombiningClick
       )
     );
   }
 
-  private renderCombinableGroupCheckbox({ id, name }: Group) {
-    return (
-      <label className="checkbox" key={id}>
-        <input
-          className="checkbox__input"
-          type="checkbox"
-          value={id}
-          onChange={this.handleCombiningGroupCheckboxChange}
-        />
-        <span className="checkbox__checkmark">
-          <span className="material-icons" aria-hidden>
-            check
-          </span>
-        </span>
-        <span className="input__label">{name}</span>
-      </label>
-    );
-  }
+  private renderSplinteredMembers() {
+    const { splinteredMembers } = this.state;
+    const buttonId = `placeholder-button-${this.id}`;
 
-  private static renderMemberPlaceholder() {
-    return (
-      <div
-        className="GroupTable__row card card--dark"
-        role="row"
-        aria-label="placeholder"
-      >
-        <span role="gridcell">---</span>
+    const members = splinteredMembers.map((member) => (
+      <Grid item key={member.id} role="row">
         <span role="gridcell">
           <Button
-            className="button button--small button--text button--on-dark"
-            disabled
-          >
-            <span className="material-icons">block</span>
-          </Button>
-        </span>
-      </div>
-    );
-  }
-
-  private renderOriginalMemberRow(member: Participant) {
-    const { originalMembers } = this.state;
-
-    return (
-      <div
-        className="GroupTable__row card card--dark"
-        key={member.id}
-        role="row"
-      >
-        <span role="gridcell">{member.name}</span>
-        <span role="gridcell">
-          <Button
-            className="button button--small button--on-dark button--text"
-            disabled={originalMembers.length < 2}
-            aria-label={`Move ${member.name}`}
-            onClick={() => this.handleOriginalMemberClick(member)}
-          >
-            <span className="material-icons" aria-hidden>
-              arrow_downward
-            </span>
-          </Button>
-        </span>
-      </div>
-    );
-  }
-
-  private renderNewMemberRow(member: Participant) {
-    return (
-      <div
-        className="GroupTable__row card card--dark"
-        key={member.id}
-        role="row"
-      >
-        <span role="gridcell">{member.name}</span>
-        <span role="gridcell">
-          <Button
-            className="button button--small button--on-dark button--text"
+            color="secondary"
+            endIcon={
+              <span className="material-icons" aria-hidden>
+                arrow_upward
+              </span>
+            }
+            fullWidth
+            variant="contained"
             aria-label={`Move ${member.name}`}
             onClick={() => this.handleNewMemberClick(member)}
           >
-            <span className="material-icons" aria-hidden>
-              arrow_upward
-            </span>
+            {member.name}
           </Button>
         </span>
-      </div>
+      </Grid>
+    ));
+    const placeholder = (
+      <Grid item role="row">
+        <span role="gridcell" aria-labelledby={buttonId}>
+          <Button
+            id={buttonId}
+            color="secondary"
+            fullWidth
+            variant="contained"
+            disabled
+            endIcon={<span className="material-icons">block</span>}
+            aria-label="placeholder"
+          >
+            ---
+          </Button>
+        </span>
+      </Grid>
     );
+
+    return splinteredMembers.length > 0 ? members : placeholder;
   }
 
   render() {
-    const { groups } = this.props;
-
     return (
       <section className="GroupTable">
-        {groups.length > 0 ? this.renderRows() : this.renderWarning()}
+        {this.renderMainContent()}
         {this.renderFloatingActionButton()}
         {this.renderDeletionModal()}
         {this.renderSplittingModal()}

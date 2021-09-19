@@ -1,7 +1,7 @@
 import React from "react";
 
 import {
-  Container,
+  Box,
   createTheme,
   CssBaseline,
   ThemeProvider,
@@ -87,6 +87,11 @@ export default function Layout({ children }: Props) {
       },
     },
     overrides: {
+      MuiFab: {
+        secondary: {
+          backgroundColor: "#E9C52A",
+        },
+      },
       MuiTableCell: {
         sizeSmall: {
           padding: "3px 12px 3px 8px",
@@ -98,9 +103,9 @@ export default function Layout({ children }: Props) {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline>
-        <Container maxWidth="md">
+        <Box width={360}>
           <>{children}</>
-        </Container>
+        </Box>
       </CssBaseline>
     </ThemeProvider>
   );

@@ -1,9 +1,3 @@
 .GroupContainer {
-  margin-bottom: 1rem;
-}
-
-.GroupContainer__cell--summarize {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  margin-bottom: 0;
 }

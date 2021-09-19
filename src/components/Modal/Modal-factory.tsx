@@ -67,10 +67,14 @@ export function createMuiConfirmationModal(
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <MuiButton variant="contained" onClick={handleCancelClick}>
+          <MuiButton
+            color="secondary"
+            variant="contained"
+            onClick={handleCancelClick}
+          >
             {cancelText}
           </MuiButton>
-          <MuiButton variant="outlined" type="submit">
+          <MuiButton color="secondary" variant="outlined" type="submit">
             {confirmText}
           </MuiButton>
         </DialogActions>

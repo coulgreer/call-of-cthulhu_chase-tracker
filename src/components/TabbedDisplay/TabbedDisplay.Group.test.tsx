@@ -4,7 +4,6 @@ import { screen, render, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import TabbedDisplay from ".";
-import GroupTable from "../GroupTable";
 
 function createAnExpandedGroupContainer() {
   userEvent.click(screen.getByRole("tab", { name: /groups/i }));
@@ -55,9 +54,7 @@ test("should render properly when a group is created", () => {
   userEvent.click(screen.getByRole("tab", { name: /groups/i }));
   userEvent.click(screen.getByRole("button", { name: /create group/i }));
 
-  expect(
-    screen.queryByText(GroupTable.getDefaultWarningMessage())
-  ).not.toBeInTheDocument();
+  expect(screen.queryByText(/no group/i)).not.toBeInTheDocument();
   expect(screen.getByRole("grid", { name: /groups/i })).toBeInTheDocument();
 });
 

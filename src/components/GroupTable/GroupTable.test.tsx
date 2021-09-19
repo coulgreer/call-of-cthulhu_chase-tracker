@@ -110,9 +110,7 @@ describe("Initial State", () => {
     test("should render properly when ommitting all optional props", () => {
       render(<GroupTable groups={empty} />);
 
-      expect(
-        screen.getByText(GroupTable.getDefaultWarningMessage())
-      ).toBeInTheDocument();
+      expect(screen.getByText(/no groups/i)).toBeInTheDocument();
       expect(
         screen.getByRole("button", { name: /create group/i })
       ).toBeInTheDocument();
@@ -463,7 +461,7 @@ describe("Combine Groups Button", () => {
       const modalEl = screen.getByRole("dialog", { name: /groups/i });
 
       expect(
-        within(modalEl).getByRole("heading", { name: /merge/i })
+        within(modalEl).getByRole("heading", { name: /combine/i })
       ).toBeInTheDocument();
       expect(
         within(modalEl).getByRole("textbox", { name: /new name/i })
@@ -472,7 +470,7 @@ describe("Combine Groups Button", () => {
         groups.length - 1
       );
       expect(
-        within(modalEl).getByText(GroupTable.getCombiningWarningMessage())
+        within(modalEl).getByText(/will remove the selected group/i)
       ).toBeInTheDocument();
       expect(
         within(modalEl).getByRole("button", { name: /cancel/i })
@@ -679,7 +677,7 @@ describe("Split Group Button", () => {
         })
       ).toBeInTheDocument();
       expect(
-        within(newMembersEl).getByRole("row", { name: /placeholder/i })
+        within(newMembersEl).getByRole("gridcell", { name: /placeholder/i })
       ).toBeInTheDocument();
       expect(
         within(modalEl).getByRole("button", { name: /cancel/i })

@@ -443,7 +443,11 @@ class GroupContainer extends React.Component<Props, State> {
     );
 
     return (
-      <Accordion expanded={expansionShown} onChange={this.handleToggleClick}>
+      <Accordion
+        square
+        expanded={expansionShown}
+        onChange={this.handleToggleClick}
+      >
         <AccordionSummary
           id={headerId}
           expandIcon={expandMoreIcon}
@@ -461,19 +465,11 @@ class GroupContainer extends React.Component<Props, State> {
         </AccordionSummary>
         <AccordionDetails id={contentId}>
           <Box p={1}>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                {GroupContainer.renderChaseName()}
-              </Grid>
-              <Grid item xs={12}>
-                {this.renderDistancer()}
-              </Grid>
-              <Grid item xs={12}>
-                {this.renderPursuers()}
-              </Grid>
-              <Grid item xs={12}>
-                {this.renderMembers()}
-              </Grid>
+            <Grid container direction="column" spacing={2}>
+              <Grid item>{GroupContainer.renderChaseName()}</Grid>
+              <Grid item>{this.renderDistancer()}</Grid>
+              <Grid item>{this.renderPursuers()}</Grid>
+              <Grid item>{this.renderMembers()}</Grid>
             </Grid>
           </Box>
         </AccordionDetails>
@@ -754,7 +750,7 @@ class GroupContainer extends React.Component<Props, State> {
           <TableCell align="center">
             <span className="material-icons-outlined">arrow_upward</span>
           </TableCell>
-          <TableCell className="GroupContainer__cell--summarize">
+          <TableCell>
             {this.highestMovementRateMember?.name ||
               GroupContainer.PLACEHOLDER_MEMBER_NAME}
           </TableCell>
@@ -770,7 +766,7 @@ class GroupContainer extends React.Component<Props, State> {
           <TableCell align="center">
             <span className="material-icons-outlined">arrow_downward</span>
           </TableCell>
-          <TableCell className="GroupContainer__cell--summarize">
+          <TableCell>
             {this.lowestMovementRateMember?.name ||
               GroupContainer.PLACEHOLDER_MEMBER_NAME}
           </TableCell>
@@ -803,9 +799,7 @@ class GroupContainer extends React.Component<Props, State> {
         >
           <span className="material-icons-outlined">warning</span>
         </TableCell>
-        <TableCell className="GroupContainer__cell--summarize">
-          {participant.name}
-        </TableCell>
+        <TableCell>{participant.name}</TableCell>
         <TableCell align="right">{participant.movementRate}</TableCell>
       </TableRow>
     );

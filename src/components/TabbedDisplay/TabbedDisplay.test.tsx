@@ -187,9 +187,6 @@ describe("Confirmation Tests", () => {
     userEvent.click(secondCheckbox);
     userEvent.click(thirdCheckbox);
     userEvent.click(within(modalEl).getByRole("button", { name: /combine/i }));
-    userEvent.click(
-      within(firstCell).getByRole("button", { name: /combine/i })
-    );
 
     expect(firstCell).toBeInTheDocument();
     expect(secondCell).not.toBeInTheDocument();
