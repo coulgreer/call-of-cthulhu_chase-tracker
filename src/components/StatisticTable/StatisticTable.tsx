@@ -1,9 +1,21 @@
 import React from "react";
 
-import Button from "../Button";
+import {
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  CardHeader,
+  DialogActions,
+  DialogContent,
+  Grid,
+  IconButton,
+  TextField,
+} from "@material-ui/core";
+
 import { WrappedStatistic } from "../StatisticDisplay";
 import DisplayFactory from "../StatisticDisplay/DisplayFactory";
-import { createFormModal } from "../Modal";
+import { createMuiFormModal } from "../Modal";
 
 import "./StatisticTable.css";
 
@@ -117,96 +129,105 @@ export default class StatisticTable extends React.Component<Props, State> {
     const { title, data } = this.props;
 
     return (
-      <>
-        <h2>{title}</h2>
-        {data.map((datum, index) => {
-          const { statistic } = datum;
+      <Card>
+        <CardHeader title={title} component="h2" />
+        <CardContent>
+          <Grid container>
+            {data.map((datum, index) => {
+              const { statistic } = datum;
 
-          return (
-            <div
-              className="StatisticTable__statistics-controls"
-              key={datum.key}
-            >
-              <Button
-                className="button button--small button--text button--on-light"
-                aria-label={`delete: ${statistic.name}`}
-                onClick={() => this.handleDeleteClick(index)}
-              >
-                <span className="material-icons" aria-hidden>
-                  delete_outline
-                </span>
-              </Button>
-              <Button
-                className="button button--small button--text button--on-light"
-                aria-label={`rename: ${statistic.name}`}
-                onClick={() => this.handlePromptRenameClick(index)}
-              >
-                <span className="material-icons-outlined" aria-hidden>
-                  edit
-                </span>
-              </Button>
-              {DisplayFactory.createStatisticDisplay(
-                "StatisticDisplay--horizontal",
-                datum,
-                (value) => this.handleStatisticValueChange(index, value),
-                () => this.handleStatisticValueBlur(index),
-                "textbox--on-light"
-              )}
-            </div>
-          );
-        })}
-        <Button
-          className="button button--small button--contained button--on-dark"
-          aria-label="create statistic"
-          onClick={this.handleCreateClick}
-        >
-          <span className="material-icons" aria-hidden>
-            add
-          </span>
-        </Button>
-      </>
+              return (
+                <Grid container item alignItems="center" key={datum.key}>
+                  <Grid item xs={3}>
+                    <IconButton
+                      color="secondary"
+                      aria-label={`delete: ${statistic.name}`}
+                      onClick={() => this.handleDeleteClick(index)}
+                    >
+                      <span className="material-icons" aria-hidden>
+                        delete_outline
+                      </span>
+                    </IconButton>
+                  </Grid>
+                  <Grid item xs={3}>
+                    <IconButton
+                      color="secondary"
+                      aria-label={`rename: ${statistic.name}`}
+                      onClick={() => this.handlePromptRenameClick(index)}
+                    >
+                      <span className="material-icons-outlined" aria-hidden>
+                        edit
+                      </span>
+                    </IconButton>
+                  </Grid>
+                  <Grid item xs={6}>
+                    {DisplayFactory.createStatisticDisplay(
+                      "StatisticDisplay--vertical",
+                      datum,
+                      (value) => this.handleStatisticValueChange(index, value),
+                      () => this.handleStatisticValueBlur(index),
+                      "textbox--on-light"
+                    )}
+                  </Grid>
+                </Grid>
+              );
+            })}
+          </Grid>
+        </CardContent>
+        <CardActions>
+          <Button
+            color="secondary"
+            size="small"
+            variant="contained"
+            fullWidth
+            aria-label="create statistic"
+            onClick={this.handleCreateClick}
+          >
+            <span className="material-icons" aria-hidden>
+              add
+            </span>
+          </Button>
+        </CardActions>
+      </Card>
     );
   }
 
   private renderModal() {
     const { modalShown, currentNewName } = this.state;
-    const Header = <h2 className="Modal__header">Rename the Statistic</h2>;
+    const nameId = "new-statistic-name";
     const Content = (
       <form onSubmit={this.handleSubmit}>
-        <label className="Modal__body">
-          <span className="input__label">New Name</span>
-          <input
-            className="textbox textbox--full-width"
-            type="text"
+        <DialogContent>
+          <TextField
+            id={nameId}
+            color="secondary"
+            label="New Name"
+            fullWidth
             value={currentNewName}
             onChange={this.handleStatisticNameChange}
             onBlur={this.handleStatisticNameBlur}
-            required
           />
-        </label>
-        <div className="Modal__options">
+        </DialogContent>
+        <DialogActions>
           <Button
-            className="button button--medium button--outlined button--on-dark"
+            color="secondary"
+            variant="outlined"
             onClick={this.closeModal}
           >
             CANCEL
           </Button>
-          <Button
-            className="button button--medium button--text button--on-dark"
-            type="submit"
-          >
+          <Button color="secondary" type="submit">
             RENAME
           </Button>
-        </div>
+        </DialogActions>
       </form>
     );
 
     return (
       modalShown &&
-      createFormModal(
+      createMuiFormModal(
         modalShown,
         "Rename statistic",
-        Header,
         Content,
         this.closeModal
       )

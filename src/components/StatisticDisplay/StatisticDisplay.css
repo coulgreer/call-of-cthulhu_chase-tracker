@@ -6,11 +6,13 @@
 .StatisticDisplay--horizontal {
   flex-direction: row;
   align-items: center;
+  text-align: center;
 }
 
 .StatisticDisplay--vertical {
   flex-direction: column;
   align-items: center;
+  text-align: center;
 }
 
 .StatisticDisplay--upper-limit,
