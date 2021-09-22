@@ -458,6 +458,7 @@ class GroupContainer extends React.Component<Props, State> {
             id={`group-name-${this.id}`}
             label="Name"
             color="secondary"
+            variant="filled"
             value={rawGroupName}
             onChange={this.handleNameChange}
             onBlur={this.handleNameBlur}

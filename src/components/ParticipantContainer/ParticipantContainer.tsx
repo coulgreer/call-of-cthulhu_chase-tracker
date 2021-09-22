@@ -1,10 +1,25 @@
 import React from "react";
 
-import { Transition, animated } from "react-spring/renderprops";
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Box,
+  Button,
+  DialogActions,
+  DialogContent,
+  FormControl,
+  FormControlLabel,
+  FormLabel,
+  Grid,
+  Radio,
+  RadioGroup,
+  TextField,
+  Typography,
+} from "@material-ui/core";
 
 import { nanoid } from "nanoid";
 
-import Button from "../Button";
 import StatisticTable from "../StatisticTable";
 import { WrappedStatistic } from "../StatisticDisplay";
 import DisplayFactory from "../StatisticDisplay/DisplayFactory";
@@ -15,7 +30,7 @@ import "./ParticipantContainer.css";
 
 import UniqueSequenceGenerator from "../../utils/unique-sequence-generator";
 import { roll, Result } from "../../utils/roller";
-import { createFormModal } from "../Modal";
+import { createMuiFormModal } from "../Modal";
 
 import { Participant } from "../../types";
 
@@ -28,7 +43,7 @@ interface State {
   nameWarningShown: boolean;
   expansionShown: boolean;
   modalShown: boolean;
-  selectedStatisticScore: string;
+  selectedStatisticId: string;
   currentName: string;
   dexterity: WrappedStatistic;
   movementRate: WrappedStatistic;
@@ -255,7 +270,7 @@ export default class ParticipantContainer extends React.Component<
       nameWarningShown: false,
       expansionShown: false,
       modalShown: false,
-      selectedStatisticScore: "",
+      selectedStatisticId: "",
       currentName: participant.name,
       dexterity: ParticipantContainer.initializeDexterity(participant),
       movementRate: ParticipantContainer.initializeMovementRate(participant),
@@ -434,14 +449,15 @@ export default class ParticipantContainer extends React.Component<
   }
 
   private handleSelectionChange(event: React.ChangeEvent<HTMLInputElement>) {
-    this.setState({ selectedStatisticScore: event.currentTarget.value });
+    this.setState({ selectedStatisticId: event.currentTarget.value });
   }
 
   private handleSubmit() {
-    const { selectedStatisticScore } = this.state;
-    const modifier = ParticipantContainer.generateSpeedModifier(
-      Number.parseInt(selectedStatisticScore, 10)
-    );
+    const { selectedStatisticId, speedStatistics } = this.state;
+    const score =
+      speedStatistics.find(({ id }) => selectedStatisticId === id)?.statistic
+        .score || 1;
+    const modifier = ParticipantContainer.generateSpeedModifier(score);
 
     this.updateSpeedModifier(modifier);
 
@@ -470,6 +486,7 @@ export default class ParticipantContainer extends React.Component<
       speedStatistics: [
         ...speedStatistics,
         {
+          id: `speed-statistic-${nanoid()}`,
           statistic: {
             name: `${ParticipantContainer.DEFAULT_STAT_NAME} #${idNum}`,
             score: startingScore,
@@ -512,6 +529,7 @@ export default class ParticipantContainer extends React.Component<
       hazardStatistics: [
         ...hazardStatistics,
         {
+          id: `hazard-statistic-${nanoid()}`,
           statistic: {
             name: `${ParticipantContainer.DEFAULT_STAT_NAME} #${idNum}`,
             score: startingScore,
@@ -550,6 +568,7 @@ export default class ParticipantContainer extends React.Component<
     speedStatistics,
   }: Participant): WrappedStatistic[] {
     return speedStatistics.map((statistic) => ({
+      id: `speed-statistic-${nanoid()}`,
       statistic,
       currentValue: statistic.score.toString(),
       key: this.speedStatSequence.nextNum(),
@@ -560,6 +579,7 @@ export default class ParticipantContainer extends React.Component<
     hazardStatistics,
   }: Participant): WrappedStatistic[] {
     return hazardStatistics.map((statistic) => ({
+      id: `hazard-statistic-${nanoid()}`,
       statistic,
       currentValue: statistic.score.toString(),
       key: this.hazardStatSequence.nextNum(),
@@ -577,49 +597,42 @@ export default class ParticipantContainer extends React.Component<
     });
   }
 
-  /*
-     FIXME (Coul Greer): There is a known bug in ReactModal involving radio
-     buttons and pressing shift+tab. The focus escapes the modal when
-     shift-tabbing through modal elements causing a break in the very point of
-     using this package.
-   */
   private renderSpeedStatisticModal() {
-    const { modalShown, speedStatistics } = this.state;
+    const { modalShown, speedStatistics, selectedStatisticId } = this.state;
 
-    const Header = <h2 className="Modal__header">Select a Speed Statistic</h2>;
     const Content = (
       <form onSubmit={this.handleSubmit}>
-        <div className="Modal__body">
-          {speedStatistics.map((wrappedStatistic) => (
-            <label className="radio-button" key={wrappedStatistic.key}>
-              <input
-                className="radio-button__input"
-                type="radio"
-                name="selectedStatistic"
-                value={wrappedStatistic.statistic.score}
-                onChange={this.handleSelectionChange}
-              />
-              <span className="radio-button__checkmark" />
-              <span className="input__label">
-                {wrappedStatistic.statistic.name}
-              </span>
-            </label>
-          ))}
-        </div>
-        <div className="Modal__options">
+        <DialogContent>
+          <FormControl component="fieldset">
+            <FormLabel component="legend">Speed Statistic</FormLabel>
+            <RadioGroup
+              name="selectedStatistic"
+              value={selectedStatisticId}
+              onChange={this.handleSelectionChange}
+            >
+              {speedStatistics.map(({ id, statistic: { name } }) => (
+                <FormControlLabel
+                  key={id}
+                  value={id}
+                  control={<Radio color="secondary" />}
+                  label={name}
+                />
+              ))}
+            </RadioGroup>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
           <Button
-            className="button button--outlined button--on-dark button--small"
+            color="secondary"
+            variant="outlined"
             onClick={this.handleCancelSpeedModifierGenerationClick}
           >
             CANCEL
           </Button>
-          <Button
-            className="button button--text button--on-dark button--small"
-            type="submit"
-          >
+          <Button color="secondary" type="submit">
             CONFIRM
           </Button>
-        </div>
+        </DialogActions>
       </form>
     );
 
@@ -630,13 +643,40 @@ export default class ParticipantContainer extends React.Component<
     */
     return (
       modalShown &&
-      createFormModal(
+      createMuiFormModal(
         modalShown,
         "Select speed statistic",
-        Header,
         Content,
         this.handleCancelSpeedModifierGenerationClick
       )
+    );
+  }
+
+  private renderMainDisplay() {
+    const { expansionShown } = this.state;
+
+    return (
+      <>
+        <Box>{this.renderActionCount()}</Box>
+        <Accordion
+          expanded={expansionShown}
+          onChange={this.handleToggleExpansionClick}
+        >
+          <AccordionSummary
+            expandIcon={
+              <span className="material-icons" aria-hidden>
+                expand_more
+              </span>
+            }
+            id={`participant-accordian-${this.id}`}
+            aria-label="participant details"
+            aria-controls={`${ParticipantContainer.EXPANSION_PREFIX}-${this.id}`}
+          >
+            {this.renderSummary()}
+          </AccordionSummary>
+          <AccordionDetails>{this.renderDetails()}</AccordionDetails>
+        </Accordion>
+      </>
     );
   }
 
@@ -646,13 +686,14 @@ export default class ParticipantContainer extends React.Component<
     } = this.props;
     const hasChaseStarted = this.context;
     return (
-      <p>Actions : {isGrouped && hasChaseStarted ? actionCount : "N/A"}</p>
+      <Typography align="center">
+        Actions : {isGrouped && hasChaseStarted ? actionCount : "N/A"}
+      </Typography>
     );
   }
 
-  private renderMainDisplay() {
+  private renderSummary() {
     const {
-      expansionShown,
       nameWarningShown,
       currentName,
       dexterity,
@@ -661,133 +702,93 @@ export default class ParticipantContainer extends React.Component<
     } = this.state;
 
     return (
-      <div className="ParticipantContainer__main-display">
-        <label>
-          <span className="input__label">Name</span>
-          <input
-            className="textbox textbox--full-width"
-            type="text"
+      <Grid container>
+        <Grid item>
+          <TextField
+            id={`participant-name-${this.id}`}
+            variant="filled"
+            color="secondary"
+            error={nameWarningShown}
+            fullWidth
+            label="Name"
+            FormHelperTextProps={{ role: "alert" }}
+            helperText={
+              nameWarningShown ? ParticipantContainer.WARNING_MESSAGE : null
+            }
             value={currentName}
             onChange={this.handleNameChange}
             onBlur={this.handleNameBlur}
           />
-        </label>
-        <p
-          className="error  text--small"
-          style={{
-            visibility: nameWarningShown ? "visible" : "hidden",
-          }}
-          role="alert"
-        >
-          {ParticipantContainer.WARNING_MESSAGE}
-        </p>
-        <div className="ParticipantContainer__footer">
-          <div className="ParticipantContainer__main-characteristics">
+        </Grid>
+
+        <Grid container item>
+          <Grid item xs={4}>
             {DisplayFactory.createStatisticDisplay(
               "StatisticDisplay--vertical",
               dexterity,
               (value) => this.handleDexterityChange(value),
               () => this.handleDexterityBlur()
             )}
+          </Grid>
+          <Grid item xs={4}>
             {DisplayFactory.createStatisticDisplay(
               "StatisticDisplay--vertical",
               speedModifier,
               (value) => this.handleDerivedSpeedChange(value),
               () => this.handleDerivedSpeedBlur()
             )}
+          </Grid>
+          <Grid item xs={4}>
             {DisplayFactory.createStatisticDisplay(
               "StatisticDisplay--vertical",
               movementRate,
               (value) => this.handleMovementRateChange(value),
               () => this.handleMovementRateBlur()
             )}
+          </Grid>
+          <Grid item xs={12}>
             <Button
-              className="button button--outlined button--on-dark button--small"
+              color="secondary"
+              fullWidth
+              variant="outlined"
               onClick={this.handleInitiateSpeedModifierGenerationClick}
             >
               GENERATE
             </Button>
-          </div>
-          <Button
-            className="button button--contained button--on-dark button--small button--circular"
-            aria-label="Participant Details"
-            aria-expanded={expansionShown}
-            aria-controls={`${ParticipantContainer.EXPANSION_PREFIX}-${this.id}`}
-            onClick={this.handleToggleExpansionClick}
-          >
-            {expansionShown ? (
-              <span className="material-icons" aria-hidden>
-                expand_less
-              </span>
-            ) : (
-              <span className="material-icons" aria-hidden>
-                expand_more
-              </span>
-            )}
-          </Button>
-        </div>
-      </div>
+          </Grid>
+        </Grid>
+      </Grid>
     );
   }
 
-  private renderExpansiveDisplay() {
-    const { expansionShown } = this.state;
-    return (
-      <Transition
-        native
-        items={expansionShown}
-        from={{ height: 0, overflow: "hidden" }}
-        enter={{ height: "auto" }}
-        leave={{ height: 0 }}
-      >
-        {(shown) =>
-          shown &&
-          ((props) => (
-            <animated.div
-              id={`${ParticipantContainer.EXPANSION_PREFIX}-${this.id}`}
-              className="ParticipantContainer__extended-display"
-              style={props}
-            >
-              {this.renderSpeedStatistics()}
-              {this.renderHazardStatistics()}
-            </animated.div>
-          ))
-        }
-      </Transition>
-    );
-  }
-
-  private renderSpeedStatistics() {
-    const { speedStatistics } = this.state;
-    const title = "SPEED Stats";
+  private renderDetails() {
+    const { speedStatistics, hazardStatistics } = this.state;
 
     return (
-      <StatisticTable
-        title={title}
-        data={speedStatistics}
-        onCreateClick={this.handleCreateSpeedStatisticClick}
-        onDeleteClick={this.handleDeleteSpeedStatisticClick}
-        onRenameStatistic={this.handleRenameSpeedStatisticClick}
-        onStatisticValueChange={this.handleSpeedStatisticChange}
-        onStatisticValueBlur={this.handleSpeedStatisticBlur}
-      />
-    );
-  }
-
-  private renderHazardStatistics() {
-    const { hazardStatistics } = this.state;
-    const title = "HAZARD Stats";
-
-    return (
-      <StatisticTable
-        title={title}
-        data={hazardStatistics}
-        onCreateClick={this.handleCreateHazardStatisticClick}
-        onDeleteClick={this.handleDeleteHazardStatisticClick}
-        onRenameStatistic={this.handleRenameHazardStatisticClick}
-        onStatisticValueChange={this.handleHazardStatisticChange}
-        onStatisticValueBlur={this.handleHazardStatisticBlur}
-      />
+      <Grid container>
+        <Grid item>
+          <StatisticTable
+            title="SPEED Stats"
+            data={speedStatistics}
+            onCreateClick={this.handleCreateSpeedStatisticClick}
+            onDeleteClick={this.handleDeleteSpeedStatisticClick}
+            onRenameStatistic={this.handleRenameSpeedStatisticClick}
+            onStatisticValueChange={this.handleSpeedStatisticChange}
+            onStatisticValueBlur={this.handleSpeedStatisticBlur}
+          />
+        </Grid>
+        <Grid item>
+          <StatisticTable
+            title="HAZARD Stats"
+            data={hazardStatistics}
+            onCreateClick={this.handleCreateHazardStatisticClick}
+            onDeleteClick={this.handleDeleteHazardStatisticClick}
+            onRenameStatistic={this.handleRenameHazardStatisticClick}
+            onStatisticValueChange={this.handleHazardStatisticChange}
+            onStatisticValueBlur={this.handleHazardStatisticBlur}
+          />
+        </Grid>
+      </Grid>
     );
   }
 
@@ -796,9 +797,7 @@ export default class ParticipantContainer extends React.Component<
 
     return (
       <div role={role} aria-label={ariaLabel} className="ParticipantContainer">
-        {this.renderActionCount()}
         {this.renderMainDisplay()}
-        {this.renderExpansiveDisplay()}
         {this.renderSpeedStatisticModal()}
       </div>
     );

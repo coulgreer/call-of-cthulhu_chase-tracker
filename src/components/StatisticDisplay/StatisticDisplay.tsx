@@ -8,6 +8,7 @@ import "./StatisticDisplay.css";
 import { Statistic } from "../../types";
 
 export interface WrappedStatistic {
+  id?: string;
   statistic: Statistic;
   currentValue: string;
   limiter?: Limiter;

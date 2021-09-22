@@ -109,10 +109,16 @@ describe("Initial State", () => {
     expect(screen.getByRole("textbox", { name: /name/i })).toBeInTheDocument();
     expect(
       screen.queryByText(ParticipantContainer.WARNING_MESSAGE)
-    ).not.toBeVisible();
-    expect(screen.getByLabelText(/dex/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/spd/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/spd/i)).toBeInTheDocument();
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("spinbutton", { name: /dex/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("spinbutton", { name: /spd/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("spinbutton", { name: /spd/i })
+    ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /generate/i })
     ).toBeInTheDocument();
@@ -122,21 +128,45 @@ describe("Initial State", () => {
     expect(
       screen.queryByRole("heading", { name: /speed stats/i })
     ).not.toBeInTheDocument();
-    expect(screen.queryByLabelText(constitution.name)).not.toBeInTheDocument();
-    expect(screen.queryByLabelText(driveAuto.name)).not.toBeInTheDocument();
-    expect(screen.queryByLabelText(ride.name)).not.toBeInTheDocument();
-    expect(screen.queryByLabelText(aircraft.name)).not.toBeInTheDocument();
-    expect(screen.queryByLabelText(boat.name)).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("spinbutton", { name: constitution.name })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("spinbutton", { name: driveAuto.name })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("spinbutton", { name: ride.name })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("spinbutton", { name: aircraft.name })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("spinbutton", { name: boat.name })
+    ).not.toBeInTheDocument();
     expect(
       screen.queryByRole("heading", { name: /hazard stats/i })
     ).not.toBeInTheDocument();
-    expect(screen.queryByLabelText(strength.name)).not.toBeInTheDocument();
-    expect(screen.queryByLabelText(climb.name)).not.toBeInTheDocument();
-    expect(screen.queryByLabelText(swim.name)).not.toBeInTheDocument();
-    expect(screen.queryByLabelText(dodge.name)).not.toBeInTheDocument();
-    expect(screen.queryByLabelText(brawl.name)).not.toBeInTheDocument();
-    expect(screen.queryByLabelText(handgun.name)).not.toBeInTheDocument();
-    expect(screen.queryByLabelText(rifle.name)).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("spinbutton", { name: strength.name })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("spinbutton", { name: climb.name })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("spinbutton", { name: swim.name })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("spinbutton", { name: dodge.name })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("spinbutton", { name: brawl.name })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("spinbutton", { name: handgun.name })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("spinbutton", { name: rifle.name })
+    ).not.toBeInTheDocument();
 
     expect(
       screen.queryAllByRole("button", { name: /create statistic/i })
@@ -155,11 +185,17 @@ describe("Initial State", () => {
 
     expect(
       screen.queryByText(ParticipantContainer.WARNING_MESSAGE)
-    ).not.toBeVisible();
+    ).not.toBeInTheDocument();
 
-    expect(screen.getByLabelText(/dex/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/mov/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/spd/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole("spinbutton", { name: /dex/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("spinbutton", { name: /mov/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("spinbutton", { name: /spd/i })
+    ).toBeInTheDocument();
 
     expect(
       screen.getByRole("button", { name: /generate/i })
@@ -169,23 +205,47 @@ describe("Initial State", () => {
       screen.getByRole("heading", { name: /speed stats/i })
     ).toBeInTheDocument();
 
-    expect(screen.getByLabelText(constitution.name)).toBeInTheDocument();
-    expect(screen.getByLabelText(driveAuto.name)).toBeInTheDocument();
-    expect(screen.getByLabelText(ride.name)).toBeInTheDocument();
-    expect(screen.getByLabelText(aircraft.name)).toBeInTheDocument();
-    expect(screen.getByLabelText(boat.name)).toBeInTheDocument();
+    expect(
+      screen.getByRole("spinbutton", { name: constitution.name })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("spinbutton", { name: driveAuto.name })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("spinbutton", { name: ride.name })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("spinbutton", { name: aircraft.name })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("spinbutton", { name: boat.name })
+    ).toBeInTheDocument();
 
     expect(
       screen.getByRole("heading", { name: /hazard stats/i })
     ).toBeInTheDocument();
 
-    expect(screen.getByLabelText(strength.name)).toBeInTheDocument();
-    expect(screen.getByLabelText(climb.name)).toBeInTheDocument();
-    expect(screen.getByLabelText(swim.name)).toBeInTheDocument();
-    expect(screen.getByLabelText(dodge.name)).toBeInTheDocument();
-    expect(screen.getByLabelText(brawl.name)).toBeInTheDocument();
-    expect(screen.getByLabelText(handgun.name)).toBeInTheDocument();
-    expect(screen.getByLabelText(rifle.name)).toBeInTheDocument();
+    expect(
+      screen.getByRole("spinbutton", { name: strength.name })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("spinbutton", { name: climb.name })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("spinbutton", { name: swim.name })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("spinbutton", { name: dodge.name })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("spinbutton", { name: brawl.name })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("spinbutton", { name: handgun.name })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("spinbutton", { name: rifle.name })
+    ).toBeInTheDocument();
 
     expect(
       screen.getAllByRole("button", { name: /create statistic/i })
