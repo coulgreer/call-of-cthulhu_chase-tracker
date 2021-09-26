@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import * as React from "react";
 
 import classnames from "classnames";
 
@@ -13,7 +13,7 @@ interface Props {
 }
 
 function ChaseControls({ onStartButtonClick, onStopButtonClick }: Props) {
-  const hasStarted = useContext(ChaseStartContext);
+  const hasStarted = React.useContext(ChaseStartContext);
   const startButtonClasses = classnames(
     "button",
     "button--medium",

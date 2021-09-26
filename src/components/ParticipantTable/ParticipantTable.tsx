@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import * as React from "react";
 
 import { Button, Fab, Grid, Paper, Typography } from "@material-ui/core";
 
@@ -24,7 +24,7 @@ interface State {
 
 const SEQUENCE_START = 0;
 
-export default class ParticipantTable extends Component<Props, State> {
+export default class ParticipantTable extends React.Component<Props, State> {
   private static minimumParticipants = 1;
 
   private participantSequence;

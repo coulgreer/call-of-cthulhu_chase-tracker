@@ -7,6 +7,8 @@
   "extends": [
     "airbnb-typescript",
     "plugin:jest/recommended",
+    "plugin:import/errors",
+    "plugin:import/warnings",
     "plugin:import/typescript",
     "plugin:jsx-a11y/recommended",
     "plugin:prettier/recommended"
@@ -36,6 +38,9 @@
       "typescript": {
         "alwaysTryTypes": true
       }
+    },
+    "react": {
+      "version": "detect"
     }
   }
 }

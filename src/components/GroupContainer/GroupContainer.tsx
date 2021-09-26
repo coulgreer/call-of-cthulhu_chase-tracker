@@ -1,3 +1,5 @@
+import * as React from "react";
+
 import {
   Accordion,
   AccordionDetails,
@@ -33,11 +35,14 @@ import {
   Typography,
 } from "@material-ui/core";
 import { Theme, withStyles, WithStyles } from "@material-ui/core/styles";
+
 import classnames from "classnames";
 import { nanoid } from "nanoid";
-import React from "react";
+
 import { Group, Participant } from "../../types";
+
 import { createMuiFormModal } from "../Modal/Modal-factory";
+
 import "./GroupContainer.css";
 
 const styles = createStyles((theme: Theme) => ({

@@ -1,4 +1,4 @@
-import React from "react";
+import * as React from "react";
 
 import NumberFormat from "react-number-format";
 import { TextField } from "@material-ui/core";
