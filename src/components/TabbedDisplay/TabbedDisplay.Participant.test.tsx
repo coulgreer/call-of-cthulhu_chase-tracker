@@ -4,7 +4,6 @@ import { screen, render, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import TabbedDisplay from ".";
-import ParticipantTable from "../ParticipantTable";
 import ParticipantContainer from "../ParticipantContainer";
 
 function createAnExpandedParticipantContainer() {
@@ -46,9 +45,7 @@ test("should create participant", () => {
   userEvent.click(screen.getByRole("tab", { name: /participants/i }));
   userEvent.click(screen.getByRole("button", { name: /create participant/i }));
 
-  expect(
-    screen.queryByText(ParticipantTable.DEFAULT_WARNING_MESSAGE)
-  ).not.toBeInTheDocument();
+  expect(screen.queryByText(/no.*participant/i)).not.toBeInTheDocument();
   expect(
     screen.getByRole("grid", { name: /participant/i })
   ).toBeInTheDocument();

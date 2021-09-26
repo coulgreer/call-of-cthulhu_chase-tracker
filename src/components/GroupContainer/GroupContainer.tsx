@@ -527,6 +527,20 @@ class GroupContainer extends React.Component<Props, State> {
     const { pursuers } = this.currentGroup;
 
     const pursuerLabelId = `pursuers-heading-${this.id}`;
+    const pursuerList = (
+      <List aria-labelledby={pursuerLabelId}>
+        {pursuers.map(({ id }) => (
+          <ListItem key={id}>{id}</ListItem>
+        ))}
+      </List>
+    );
+    const warning = (
+      <Typography variant="body2" role="alert">
+        No pursuers for this group
+        <br />
+        <q>These little birds fly free. They haven&apos;t noticed, yet.</q>
+      </Typography>
+    );
 
     return (
       <Card
@@ -538,21 +552,7 @@ class GroupContainer extends React.Component<Props, State> {
             Pursuers
           </Typography>
           <Divider />
-          {this.hasPursuers() ? (
-            <List aria-labelledby={pursuerLabelId}>
-              {pursuers.map(({ id }) => (
-                <ListItem key={id}>{id}</ListItem>
-              ))}
-            </List>
-          ) : (
-            <Typography component="p" variant="body2" role="alert">
-              No pursuers for this group
-              <br />
-              <q>
-                These little birds fly free. They haven&apos;t noticed, yet.
-              </q>
-            </Typography>
-          )}
+          {this.hasPursuers() ? pursuerList : warning}
         </CardContent>
       </Card>
     );
@@ -812,7 +812,7 @@ class GroupContainer extends React.Component<Props, State> {
     return (
       <TableRow>
         <TableCell className={classes.errorCard} colSpan={3}>
-          <Typography variant="body2">
+          <Typography role="alert" variant="body2">
             No members exist in this group.
             <br />
             <q>An emptiness, yet to be filled. This vessel lacks purpose.</q>

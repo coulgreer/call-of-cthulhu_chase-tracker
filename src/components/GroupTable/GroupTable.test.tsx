@@ -110,7 +110,7 @@ describe("Initial State", () => {
     test("should render properly when ommitting all optional props", () => {
       render(<GroupTable groups={empty} />);
 
-      expect(screen.getByText(/no groups/i)).toBeInTheDocument();
+      expect(screen.getByRole("alert")).toHaveTextContent(/no.*groups/i);
       expect(
         screen.getByRole("button", { name: /create group/i })
       ).toBeInTheDocument();
@@ -129,7 +129,7 @@ describe("Initial State", () => {
         />
       );
 
-      expect(screen.getByText(warningMessage)).toBeInTheDocument();
+      expect(screen.getByRole("alert")).toHaveTextContent(warningMessage);
       expect(
         screen.getByRole("button", { name: /create group/i })
       ).toBeInTheDocument();

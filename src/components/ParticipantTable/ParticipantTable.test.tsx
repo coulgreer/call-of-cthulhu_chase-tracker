@@ -60,10 +60,8 @@ describe("Initial State", () => {
     test("should render properly when omitting all optional props", () => {
       render(<ParticipantTable participants={empty} />);
 
-      expect(
-        screen.getByText(ParticipantTable.DEFAULT_WARNING_MESSAGE)
-      ).toBeInTheDocument();
-      expect(screen.queryAllByRole("row")).toHaveLength(0);
+      expect(screen.getByRole("alert")).toBeInTheDocument();
+      expect(screen.queryByRole("row")).not.toBeInTheDocument();
       expect(
         screen.getByRole("button", { name: /create participant/i })
       ).toBeInTheDocument();
@@ -93,7 +91,7 @@ describe("Initial State", () => {
       render(<ParticipantTable participants={participants} />);
 
       expect(
-        screen.queryByText(ParticipantTable.DEFAULT_WARNING_MESSAGE)
+        screen.queryByRole("alert", { name: /no.*participants/i })
       ).not.toBeInTheDocument();
       expect(screen.getAllByRole("row")).toHaveLength(participants.length);
       expect(

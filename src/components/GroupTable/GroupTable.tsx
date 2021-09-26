@@ -6,7 +6,6 @@ import {
   Button,
   ButtonGroup,
   Checkbox,
-  Container,
   DialogActions,
   DialogContent,
   DialogContentText,
@@ -421,7 +420,7 @@ export default class GroupTable extends React.Component<Props, State> {
           <Grid item role="row" key={id}>
             <Paper>
               <Grid container>
-                <Grid item xs={9} role="gridcell" aria-label={`${name} Editor`}>
+                <Grid item xs={9} role="gridcell" aria-label={`${name} editor`}>
                   <ButtonGroup color="secondary" fullWidth variant="contained">
                     <Button
                       disabled={members.length <= 1}
@@ -469,11 +468,9 @@ export default class GroupTable extends React.Component<Props, State> {
       </Grid>
     );
     const warning = (
-      <Container>
-        <Typography component="p" color="error">
-          {warningMessage}
-        </Typography>
-      </Container>
+      <Typography role="alert" align="center" color="error">
+        {warningMessage}
+      </Typography>
     );
 
     return groups.length > 0 ? groupGrid : warning;

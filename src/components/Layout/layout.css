@@ -61,16 +61,9 @@ p {
   margin: 0 0 1rem;
 }
 
-label {
-  min-width: 48px;
-  min-height: 48px;
-  margin: 4px;
-}
-
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
   -webkit-appearance: none;
-  margin: 0;
 }
 
 input[type="number"] {
@@ -109,10 +102,6 @@ input[type="number"] {
   text-align: center;
 }
 
-.textbox--full-width {
-  width: 100%;
-}
-
 .textbox--on-light {
   background-color: rgb(var(--middle-blue-green));
   color: rgba(var(--cultured), var(--text-emphasis--high));
@@ -120,65 +109,8 @@ input[type="number"] {
     rgba(var(--rich-black-fogra-39), var(--state--focused));
 }
 
-/* Input: radio button */
-.radio-button {
-  position: relative;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  cursor: pointer;
-}
-
-.radio-button__input {
-  position: absolute;
-  opacity: 0;
-}
-
-.radio-button__checkmark {
-  position: relative;
-  display: flex;
-  width: 16px;
-  height: 16px;
-  margin-right: 16px;
-  border-radius: 50%;
-  border: 2px solid rgb(var(--buff));
-}
-
-.radio-button__input:focus + .radio-button__checkmark,
-.radio-button:hover .radio-button__checkmark {
-  border-radius: 100%;
-  box-shadow: 0 0 2px #fff, 0 0 6px rgb(var(--buff));
-}
-
-.radio-button__checkmark::after {
-  content: "";
-  position: absolute;
-  display: block;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background-color: rgb(var(--buff));
-  opacity: 0;
-  transform: scale(0);
-}
-
-.radio-button__input:checked + .radio-button__checkmark::after {
-  opacity: 1;
-  transform: scale(0.6);
-  transition: all 0.2s ease;
-}
-
-.radio.input__label {
-  line-height: 1;
-}
-
 /* Miscellaneous */
 img {
   max-width: 100%;
   height: auto;
-}
-
-.centered {
-  margin: auto;
-  text-align: center;
 }

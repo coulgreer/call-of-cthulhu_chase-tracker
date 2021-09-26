@@ -160,13 +160,11 @@ export default class StatisticTable extends React.Component<Props, State> {
                       </span>
                     </IconButton>
                   </Grid>
-                  <Grid item xs={6}>
+                  <Grid item xs={6} zeroMinWidth>
                     {DisplayFactory.createStatisticDisplay(
-                      "StatisticDisplay--vertical",
                       datum,
                       (value) => this.handleStatisticValueChange(index, value),
-                      () => this.handleStatisticValueBlur(index),
-                      "textbox--on-light"
+                      () => this.handleStatisticValueBlur(index)
                     )}
                   </Grid>
                 </Grid>

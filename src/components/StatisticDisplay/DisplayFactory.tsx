@@ -12,7 +12,6 @@ export default class DisplayFactory {
   }
 
   static createStatisticDisplay(
-    className: string,
     {
       statistic,
       currentValue,
@@ -26,12 +25,11 @@ export default class DisplayFactory {
     }: WrappedStatistic,
     handleStatisticChange: (value: string) => void,
     handleStatisticBlur: () => void,
-    textboxClassName?: string
+    color?: "primary" | "secondary"
   ) {
     return (
       <StatisticDisplay
-        className={className}
-        textboxClassName={textboxClassName}
+        color={color}
         title={statistic.name}
         limiter={limiter}
         currentValue={currentValue}

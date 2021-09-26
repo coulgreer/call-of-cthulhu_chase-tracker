@@ -1,9 +1,10 @@
 import React, { Component } from "react";
 
+import { Button, Fab, Grid, Paper, Typography } from "@material-ui/core";
+
 import ParticipantContainer from "../ParticipantContainer";
 
-import Button from "../Button";
-import { createConfirmationalModal } from "../Modal";
+import { createMuiConfirmationModal } from "../Modal";
 
 import "./ParticipantTable.css";
 
@@ -25,10 +26,6 @@ const SEQUENCE_START = 0;
 
 export default class ParticipantTable extends Component<Props, State> {
   private static minimumParticipants = 1;
-
-  static get DEFAULT_WARNING_MESSAGE() {
-    return "No participants exist in this table";
-  }
 
   private participantSequence;
 
@@ -138,15 +135,16 @@ export default class ParticipantTable extends Component<Props, State> {
 
   private renderFloatingActionButton() {
     return (
-      <Button
-        className="button fab"
+      <Fab
+        color="secondary"
+        className="fab"
         aria-label="Create Participant"
         onClick={this.handleCreateParticipantClick}
       >
         <span className="material-icons" aria-hidden>
           add
         </span>
-      </Button>
+      </Fab>
     );
   }
 
@@ -155,68 +153,83 @@ export default class ParticipantTable extends Component<Props, State> {
 
     return (
       modalShown &&
-      createConfirmationalModal(
+      createMuiConfirmationModal(
         "Would You Like To Delete This Participant?",
         modalShown,
         this.closeModal,
+        "Confirm Removal",
         { text: "CANCEL", onClick: this.handleCancelParticipantDeletingClick },
-        { text: "DELETE", onSubmit: this.handleDeleteParticipantClick },
-        "Confirm Removal"
+        { text: "DELETE", onSubmit: this.handleDeleteParticipantClick }
       )
     );
   }
 
-  private renderWarningMessage() {
-    const { warningMessage = ParticipantTable.DEFAULT_WARNING_MESSAGE } =
-      this.props;
+  private renderMainContent() {
+    const {
+      participants,
+      warningMessage = "No participants exist in this table",
+    } = this.props;
 
-    return <p className="centered">{warningMessage}</p>;
-  }
+    const participantGrid = (
+      <Grid container spacing={2} role="grid" aria-label="Participants">
+        {participants.map((participant) => (
+          <Grid item role="row" key={participant.id}>
+            <Paper>
+              <Grid container>
+                <Grid
+                  item
+                  xs
+                  role="gridcell"
+                  aria-label={`${participant.name} editor`}
+                >
+                  <ParticipantContainer
+                    participant={participant}
+                    onParticipantChange={this.handleParticipantChange}
+                  />
+                </Grid>
+                <Grid
+                  container
+                  item
+                  alignItems="stretch"
+                  justifyContent="flex-end"
+                  xs={3}
+                  role="gridcell"
+                >
+                  <Button
+                    color="primary"
+                    variant="contained"
+                    aria-label={`Remove: ${participant.id}`}
+                    onClick={() =>
+                      this.handleInitiateParticipantDeletingClick(participant)
+                    }
+                  >
+                    <span className="material-icons" aria-hidden>
+                      remove_circle
+                    </span>
+                  </Button>
+                </Grid>
+              </Grid>
+            </Paper>
+          </Grid>
+        ))}
+      </Grid>
+    );
 
-  private renderParticipants() {
-    const { participants } = this.props;
+    const warning = (
+      <Typography role="alert" align="center" color="error">
+        {warningMessage}
+      </Typography>
+    );
 
-    return participants.map((participant) => (
-      <div className="ParticipantTable__row" role="row" key={participant.id}>
-        <ParticipantContainer
-          role="gridcell"
-          aria-label={`${participant.name} editor`}
-          participant={participant}
-          onParticipantChange={this.handleParticipantChange}
-        />
-        <div role="gridcell">
-          <Button
-            className="ParticipantTable__row-control button button--contained button--on-dark"
-            onClick={() =>
-              this.handleInitiateParticipantDeletingClick(participant)
-            }
-            aria-label={`Remove: ${participant.id}`}
-          >
-            <span className="material-icons" aria-hidden>
-              remove_circle
-            </span>
-          </Button>
-        </div>
-      </div>
-    ));
+    return participants.length >= ParticipantTable.minimumParticipants
+      ? participantGrid
+      : warning;
   }
 
   render() {
-    const { participants } = this.props;
-
     return (
       <div className="ParticipantTable">
-        {participants.length < ParticipantTable.minimumParticipants ? (
-          this.renderWarningMessage()
-        ) : (
-          <div
-            className="ParticipantTable__rows"
-            role="grid"
-            aria-label="Participants"
-          >
-            {this.renderParticipants()}
-          </div>
-        )}
+        {this.renderMainContent()}
         {this.renderFloatingActionButton()}
         {this.renderRemovalModal()}
       </div>

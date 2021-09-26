@@ -107,9 +107,7 @@ describe("Initial State", () => {
 
     expect(screen.getByText(/actions.+/i)).toBeInTheDocument();
     expect(screen.getByRole("textbox", { name: /name/i })).toBeInTheDocument();
-    expect(
-      screen.queryByText(ParticipantContainer.WARNING_MESSAGE)
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     expect(
       screen.getByRole("spinbutton", { name: /dex/i })
     ).toBeInTheDocument();
@@ -183,9 +181,7 @@ describe("Initial State", () => {
     expect(screen.getByText(/actions.+/i)).toBeInTheDocument();
     expect(screen.getByRole("textbox", { name: /name/i })).toBeInTheDocument();
 
-    expect(
-      screen.queryByText(ParticipantContainer.WARNING_MESSAGE)
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("role")).not.toBeInTheDocument();
 
     expect(
       screen.getByRole("spinbutton", { name: /dex/i })
@@ -308,9 +304,7 @@ describe("Participant Name", () => {
     clearNameInput();
 
     expect(inputEl).toHaveDisplayValue("");
-    expect(screen.getByRole("alert")).toHaveTextContent(
-      ParticipantContainer.WARNING_MESSAGE
-    );
+    expect(screen.getByRole("alert")).toHaveTextContent(/provide.*name/i);
     expect(handleParticipantChange).not.toBeCalled();
   });
 

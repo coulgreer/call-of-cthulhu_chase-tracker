@@ -1,3 +1,9 @@
-.StatisticDisplay .textbox {
-  width: 7ch;
+.ParticipantContainer .StatisticDisplay {
+  overflow: hidden;
+}
+
+.ParticipantContainer .StatisticDisplay,
+.ParticipantContainer .StatisticDisplay .textbox,
+.ParticipantContainer .StatisticDisplay .input__label {
+  min-width: 0;
 }

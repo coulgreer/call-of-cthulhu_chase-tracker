@@ -129,6 +129,8 @@ describe("Initial State", () => {
 
       userEvent.click(expandButton);
 
+      const alerts = screen.getAllByRole("alert");
+
       expect(expandButton).toHaveAttribute("aria-expanded", "true");
       expect(expandButton).toHaveAttribute("aria-controls");
       expect(
@@ -156,11 +158,11 @@ describe("Initial State", () => {
       expect(
         screen.getByRole("heading", { name: /pursuers/i })
       ).toBeInTheDocument();
-      expect(screen.getByText(/no.*pursuers/i)).toBeInTheDocument();
+      expect(alerts[0]).toHaveTextContent(/no.*pursuers/i);
       expect(
         screen.getByRole("heading", { name: /members/i })
       ).toBeInTheDocument();
-      expect(screen.getByText(/no.*members/i)).toBeInTheDocument();
+      expect(alerts[1]).toHaveTextContent(/no.*members/i);
       expect(screen.getByRole("button", { name: /add/i })).toBeDisabled();
       expect(screen.getByRole("button", { name: /remove/i })).toBeDisabled();
     });
@@ -177,6 +179,8 @@ describe("Initial State", () => {
         />
       );
       userEvent.click(screen.getByRole("button", { name: /group details/i }));
+
+      const alerts = screen.getAllByRole("alert");
 
       expect(
         screen.getByRole("textbox", { name: /name/i })
@@ -207,12 +211,12 @@ describe("Initial State", () => {
       expect(
         screen.getByRole("heading", { name: /pursuers/i })
       ).toBeInTheDocument();
-      expect(screen.getByText(/no.*pursuers/i)).toBeInTheDocument();
+      expect(alerts[0]).toHaveTextContent(/no.*pursuers/i);
 
       expect(
         screen.getByRole("heading", { name: /members/i })
       ).toBeInTheDocument();
-      expect(screen.getByText(/no.*members/i)).toBeInTheDocument();
+      expect(alerts[1]).toHaveTextContent(/no.*members/i);
 
       expect(screen.getByRole("button", { name: /add/i })).not.toBeDisabled();
       expect(screen.getByRole("button", { name: /remove/i })).toBeDisabled();
@@ -301,8 +305,7 @@ describe("Distancer Display", () => {
     userEvent.selectOptions(distancerEl, "");
     distancerEl.blur();
 
-    expect(screen.getByRole("alert")).toBeVisible();
-    expect(screen.getByText(/no.*distancer/i)).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent(/no.*distancer/i);
   });
 
   test("should hide warning message and display current distancer", () => {

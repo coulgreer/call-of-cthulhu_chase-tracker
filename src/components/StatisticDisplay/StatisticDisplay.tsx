@@ -1,6 +1,10 @@
 import React from "react";
 
+import NumberFormat from "react-number-format";
+import { TextField } from "@material-ui/core";
+
 import classnames from "classnames";
+import { nanoid } from "nanoid";
 
 import Range from "../../utils/range";
 
@@ -23,11 +27,10 @@ export interface Limiter {
 }
 
 interface Props {
-  className: string;
-  textboxClassName?: string;
   title: string;
   currentValue: string;
   limiter: Limiter;
+  color?: "primary" | "secondary";
   onStatisticChange?: (value: string) => void;
   onStatisticBlur?: () => void;
 }
@@ -42,6 +45,8 @@ export default class StatisticDisplay extends React.Component<Props> {
       lowerLimit: Number.MIN_SAFE_INTEGER,
     },
   };
+
+  private id;
 
   constructor(props: Props) {
     super(props);
@@ -68,6 +73,8 @@ export default class StatisticDisplay extends React.Component<Props> {
 
     this.handleChange = this.handleChange.bind(this);
     this.handleBlur = this.handleBlur.bind(this);
+
+    this.id = nanoid();
   }
 
   private handleChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -166,10 +173,11 @@ export default class StatisticDisplay extends React.Component<Props> {
   }
 
   render() {
-    const { title, className, textboxClassName, currentValue } = this.props;
+    const { title, currentValue, color = "primary" } = this.props;
+    const inputId = `statistic-display-${this.id}`;
     const currentValueNum = Number.parseInt(currentValue, 10);
 
-    const inputClassName = classnames({
+    const inputClasses = classnames({
       "StatisticDisplay--upper-limit":
         this.isValueAtUpperLimit(currentValueNum),
       "StatisticDisplay--upper-warning":
@@ -180,21 +188,22 @@ export default class StatisticDisplay extends React.Component<Props> {
         this.isValueAtLowerLimit(currentValueNum),
     });
 
-    /* Kept native due to issues with Material-UI v5.0.0 not supporting
-    type="number" properly. */
+    // TODO (Coul Greer): Add keyboard support for ArrowDown and ArrowUp
     return (
-      <label className={`StatisticDisplay ${className}`}>
-        <span className="input__label">{title}</span>
-        <input
-          type="number"
-          className={`textbox textbox--centered ${inputClassName} ${
-            textboxClassName || "textbox--on-dark"
-          }`}
-          value={currentValue}
-          onChange={this.handleChange}
-          onBlur={this.handleBlur}
-        />
-      </label>
+      <NumberFormat
+        inputMode="decimal"
+        customInput={TextField}
+        id={inputId}
+        label={title}
+        variant="outlined"
+        color={color}
+        value={currentValue}
+        onChange={this.handleChange}
+        onBlur={this.handleBlur}
+        InputProps={{
+          inputProps: { className: inputClasses, role: "spinbutton" },
+        }}
+      />
     );
   }
 }

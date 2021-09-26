@@ -60,14 +60,6 @@ export default class ParticipantContainer extends React.Component<
 > {
   static contextType = ChaseStartContext;
 
-  static get WARNING_MESSAGE() {
-    return "Even Elder Ones have a title. You ought follow suit.";
-  }
-
-  static get DEFAULT_STAT_NAME() {
-    return "New Stat";
-  }
-
   static get DEFAULT_SPEED_STATISTICS() {
     return [
       {
@@ -488,7 +480,7 @@ export default class ParticipantContainer extends React.Component<
         {
           id: `speed-statistic-${nanoid()}`,
           statistic: {
-            name: `${ParticipantContainer.DEFAULT_STAT_NAME} #${idNum}`,
+            name: `New Stat #${idNum}`,
             score: startingScore,
           },
           currentValue: startingScore.toString(),
@@ -531,7 +523,7 @@ export default class ParticipantContainer extends React.Component<
         {
           id: `hazard-statistic-${nanoid()}`,
           statistic: {
-            name: `${ParticipantContainer.DEFAULT_STAT_NAME} #${idNum}`,
+            name: `New Stat #${idNum}`,
             score: startingScore,
           },
           currentValue: startingScore.toString(),
@@ -713,34 +705,32 @@ export default class ParticipantContainer extends React.Component<
             label="Name"
             FormHelperTextProps={{ role: "alert" }}
             helperText={
-              nameWarningShown ? ParticipantContainer.WARNING_MESSAGE : null
+              nameWarningShown
+                ? "Provide the participant's name. Even Elder Ones have a title."
+                : null
             }
             value={currentName}
             onChange={this.handleNameChange}
             onBlur={this.handleNameBlur}
           />
         </Grid>
-
         <Grid container item>
-          <Grid item xs={4}>
+          <Grid item xs={4} zeroMinWidth>
             {DisplayFactory.createStatisticDisplay(
-              "StatisticDisplay--vertical",
               dexterity,
               (value) => this.handleDexterityChange(value),
               () => this.handleDexterityBlur()
             )}
           </Grid>
-          <Grid item xs={4}>
+          <Grid item xs={4} zeroMinWidth>
             {DisplayFactory.createStatisticDisplay(
-              "StatisticDisplay--vertical",
               speedModifier,
               (value) => this.handleDerivedSpeedChange(value),
               () => this.handleDerivedSpeedBlur()
             )}
           </Grid>
-          <Grid item xs={4}>
+          <Grid item xs={4} zeroMinWidth>
             {DisplayFactory.createStatisticDisplay(
-              "StatisticDisplay--vertical",
               movementRate,
               (value) => this.handleMovementRateChange(value),
               () => this.handleMovementRateBlur()
