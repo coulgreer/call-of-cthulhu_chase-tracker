@@ -16,7 +16,7 @@ import {
   RadioGroup,
   TextField,
   Typography,
-} from "@material-ui/core";
+} from "@mui/material";
 
 import { nanoid } from "nanoid";
 

@@ -1,7 +1,7 @@
 import * as React from "react";
 
 import NumberFormat from "react-number-format";
-import { TextField } from "@material-ui/core";
+import { TextField } from "@mui/material";
 
 import classnames from "classnames";
 import { nanoid } from "nanoid";

@@ -1,11 +1,6 @@
 import * as React from "react";
 
-import {
-  Box,
-  createTheme,
-  CssBaseline,
-  ThemeProvider,
-} from "@material-ui/core";
+import { Box, createTheme, CssBaseline, ThemeProvider } from "@mui/material";
 import Modal from "react-modal";
 
 import "@fontsource/fraunces/300.css";
@@ -28,7 +23,7 @@ export default function Layout({ children }: Props) {
   const headingMargin = "0 0 1.38rem";
   const theme = createTheme({
     palette: {
-      type: "dark",
+      mode: "dark",
       background: { default: "#1C2421", paper: "#2E423B" },
       primary: { main: "#8FCCB8" },
       secondary: { main: "#F0DB82" },
@@ -86,15 +81,19 @@ export default function Layout({ children }: Props) {
         fontSize: "0.889rem",
       },
     },
-    overrides: {
+    components: {
       MuiFab: {
-        secondary: {
-          backgroundColor: "#E9C52A",
+        styleOverrides: {
+          secondary: {
+            backgroundColor: "#E9C52A",
+          },
         },
       },
       MuiTableCell: {
-        sizeSmall: {
-          padding: "3px 12px 3px 8px",
+        styleOverrides: {
+          sizeSmall: {
+            padding: "3px 12px 3px 8px",
+          },
         },
       },
     },

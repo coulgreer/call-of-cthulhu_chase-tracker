@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { Button, Fab, Grid, Paper, Typography } from "@material-ui/core";
+import { Button, Fab, Grid, Paper, Typography } from "@mui/material";
 
 import ParticipantContainer from "../ParticipantContainer";
 

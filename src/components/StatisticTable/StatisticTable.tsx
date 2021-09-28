@@ -11,7 +11,7 @@ import {
   Grid,
   IconButton,
   TextField,
-} from "@material-ui/core";
+} from "@mui/material";
 
 import { WrappedStatistic } from "../StatisticDisplay";
 import DisplayFactory from "../StatisticDisplay/DisplayFactory";

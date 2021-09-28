@@ -53,9 +53,9 @@ test("should render properly", () => {
 
   expect(
     within(tablist).getByRole("tab", { name: /participants/i })
-  ).toHaveClass("TabbedDisplay__tab--enabled");
-  expect(within(tablist).getByRole("tab", { name: /groups/i })).toHaveClass(
-    "TabbedDisplay__tab--disabled"
+  ).toHaveClass("Mui-selected");
+  expect(within(tablist).getByRole("tab", { name: /groups/i })).not.toHaveClass(
+    "Mui-selected"
   );
   expect(
     screen.getByRole("tabpanel", { name: /participants/i })
@@ -75,8 +75,8 @@ test("should switch display", () => {
 
   expect(
     within(tablist).getByRole("tab", { name: /participants/i })
-  ).toHaveClass("TabbedDisplay__tab--disabled");
-  expect(groupsTab).toHaveClass("TabbedDisplay__tab--enabled");
+  ).not.toHaveClass("Mui-selected");
+  expect(groupsTab).toHaveClass("Mui-selected");
   expect(
     screen.queryByRole("tabpanel", { name: /participants/i })
   ).not.toBeInTheDocument();

@@ -10,7 +10,6 @@ import {
   Card,
   CardContent,
   Checkbox,
-  createStyles,
   DialogActions,
   DialogContent,
   DialogContentText,
@@ -33,10 +32,8 @@ import {
   TableRow,
   TextField,
   Typography,
-} from "@material-ui/core";
-import { Theme, withStyles, WithStyles } from "@material-ui/core/styles";
+} from "@mui/material";
 
-import classnames from "classnames";
 import { nanoid } from "nanoid";
 
 import { Group, Participant } from "../../types";
@@ -45,24 +42,7 @@ import { createMuiFormModal } from "../Modal/Modal-factory";
 
 import "./GroupContainer.css";
 
-const styles = createStyles((theme: Theme) => ({
-  head: {
-    backgroundColor: "#000",
-    color: "#fff",
-  },
-  errorCard: {
-    backgroundColor: theme.palette.error.main,
-    color: theme.palette.error.contrastText,
-  },
-  highestRow: {
-    backgroundColor: "rgba(164, 0, 7, 0.87)",
-  },
-  lowestRow: {
-    backgroundColor: "rgba(0, 84, 133, 0.87)",
-  },
-}));
-
-interface Props extends WithStyles {
+interface Props {
   ownedIndex: number;
   groups: Group[];
   participants?: Participant[];
@@ -80,7 +60,7 @@ interface State {
   removeMemberModalShown: boolean;
 }
 
-class GroupContainer extends React.Component<Props, State> {
+export default class GroupContainer extends React.Component<Props, State> {
   // TODO (Coul Greer): Remove any static variables/functions that are made public for testing
   static getDefaultChaseName() {
     return "DEFAULT Chase";
@@ -298,21 +278,20 @@ class GroupContainer extends React.Component<Props, State> {
     });
   }
 
-  private getBoundaryClassName(participant: Participant) {
-    const { classes } = this.props;
+  private getBoundaryStyle(participant: Participant) {
     const { movementRate } = participant;
 
-    if (this.areBoundariesEqual()) return "";
+    if (this.areBoundariesEqual()) return {};
 
     if (this.isHighestBoundary(movementRate)) {
-      return classes.highestRow;
+      return { bgcolor: "rgba(164, 0, 7, 0.87)" };
     }
 
     if (this.isLowestBoundary(movementRate)) {
-      return classes.lowestRow;
+      return { bgcolor: "rgba(0, 84, 133, 0.87)" };
     }
 
-    return "";
+    return {};
   }
 
   private findMemberWithHighestMovementRate() {
@@ -528,7 +507,6 @@ class GroupContainer extends React.Component<Props, State> {
   }
 
   private renderPursuers() {
-    const { classes } = this.props;
     const { pursuers } = this.currentGroup;
 
     const pursuerLabelId = `pursuers-heading-${this.id}`;
@@ -550,7 +528,14 @@ class GroupContainer extends React.Component<Props, State> {
     return (
       <Card
         variant="outlined"
-        classes={{ root: this.hasPursuers() ? undefined : classes.errorCard }}
+        sx={
+          this.hasPursuers()
+            ? undefined
+            : {
+                bgcolor: (theme) => theme.palette.error.main,
+                color: (theme) => theme.palette.error.contrastText,
+              }
+        }
       >
         <CardContent>
           <Typography variant="h2" id={pursuerLabelId}>
@@ -739,20 +724,16 @@ class GroupContainer extends React.Component<Props, State> {
   }
 
   private renderMemberHeader() {
-    const { classes } = this.props;
-    const highestRowClasses = classnames({
-      [classes.highestRow]: !this.areBoundariesEqual(),
-    });
-    const lowestRowClasses = classnames({
-      [classes.lowestRow]: !this.areBoundariesEqual(),
-    });
+    const highestRowStyle = this.areBoundariesEqual()
+      ? undefined
+      : { bgcolor: "rgba(164, 0, 7, 0.87)" };
+    const lowestRowStyle = this.areBoundariesEqual()
+      ? undefined
+      : { bgcolor: "rgba(0, 84, 133, 0.87)" };
 
     return (
       <>
-        <TableRow
-          classes={{ root: highestRowClasses }}
-          aria-label="Member with the highest MOV"
-        >
+        <TableRow sx={highestRowStyle} aria-label="Member with the highest MOV">
           <TableCell align="center">
             <span className="material-icons-outlined">arrow_upward</span>
           </TableCell>
@@ -765,10 +746,7 @@ class GroupContainer extends React.Component<Props, State> {
               GroupContainer.PLACEHOLDER_MEMBER_MOVEMENT_RATE}
           </TableCell>
         </TableRow>
-        <TableRow
-          classes={{ root: lowestRowClasses }}
-          aria-label="Member with the lowest MOV"
-        >
+        <TableRow sx={lowestRowStyle} aria-label="Member with the lowest MOV">
           <TableCell align="center">
             <span className="material-icons-outlined">arrow_downward</span>
           </TableCell>
@@ -781,7 +759,12 @@ class GroupContainer extends React.Component<Props, State> {
               GroupContainer.PLACEHOLDER_MEMBER_MOVEMENT_RATE}
           </TableCell>
         </TableRow>
-        <TableRow classes={{ root: classes.head }}>
+        <TableRow
+          sx={{
+            bgcolor: "#000",
+            color: "#fff",
+          }}
+        >
           <TableCell align="center" aria-label="icon" />
           <TableCell align="center">Name</TableCell>
           <TableCell align="center">MOV</TableCell>
@@ -791,11 +774,11 @@ class GroupContainer extends React.Component<Props, State> {
   }
 
   private renderMember(participant: Participant) {
-    const rowClasses = classnames([this.getBoundaryClassName(participant)]);
+    const rowStyles = this.getBoundaryStyle(participant);
 
     return (
       <TableRow
-        classes={{ root: rowClasses }}
+        sx={rowStyles}
         aria-label={participant.name}
         key={participant.id}
       >
@@ -812,11 +795,15 @@ class GroupContainer extends React.Component<Props, State> {
   }
 
   private renderMemberWarning() {
-    const { classes } = this.props;
-
     return (
       <TableRow>
-        <TableCell className={classes.errorCard} colSpan={3}>
+        <TableCell
+          sx={{
+            bgcolor: (theme) => theme.palette.error.main,
+            color: (theme) => theme.palette.error.contrastText,
+          }}
+          colSpan={3}
+        >
           <Typography role="alert" variant="body2">
             No members exist in this group.
             <br />
@@ -837,5 +824,3 @@ class GroupContainer extends React.Component<Props, State> {
     );
   }
 }
-
-export default withStyles(styles)(GroupContainer);

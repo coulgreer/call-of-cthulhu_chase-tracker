@@ -1,14 +1,13 @@
 import * as React from "react";
 
-import Button from "../Button";
+import { Box, Tab, Tabs } from "@mui/material";
+
 import GroupTable from "../GroupTable";
 import ParticipantTable from "../ParticipantTable";
 
 import ChaseStartContext from "../../contexts/ChaseStartContext";
 
 import { Group, Participant } from "../../types";
-
-import "./TabbedDisplay.css";
 
 interface State {
   displayedIndex: number;
@@ -58,13 +57,14 @@ export default class TabbedDisplay extends React.Component<{}, State> {
 
     this.handleParticipantsChange = this.handleParticipantsChange.bind(this);
     this.handleGroupsChange = this.handleGroupsChange.bind(this);
+    this.handleTabChange = this.handleTabChange.bind(this);
   }
 
   componentDidUpdate() {
     this.calculateActions();
   }
 
-  private handleClick(index: number) {
+  private handleTabChange(evt: React.SyntheticEvent, index: number) {
     this.setState({ displayedIndex: index });
   }
 
@@ -151,37 +151,44 @@ export default class TabbedDisplay extends React.Component<{}, State> {
   }
 
   render() {
+    const { displayedIndex } = this.state;
+    const tabPrefix = "tab";
+    const tabPanelPrefix = "tab-panel";
     const displays = [
       { title: "Participants", content: this.createParticipantTable() },
       { title: "Groups", content: this.createGroupTable() },
     ];
 
     return (
-      <>
-        <div className="TabbedDisplay__tabs" role="tablist">
-          {displays.map((display, index) => (
-            <Button
-              className={`button button--large TabbedDisplay__tab ${
-                this.isActive(index)
-                  ? "TabbedDisplay__tab--enabled"
-                  : "TabbedDisplay__tab--disabled"
-              }`}
-              onClick={() => this.handleClick(index)}
-              role="tab"
-              aria-selected={this.isActive(index)}
-              key={display.title}
-            >
-              {display.title}
-            </Button>
-          ))}
-        </div>
-        <div className="TabbedDisplay__displays">
+      <Box pt={2}>
+        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+          <Tabs
+            value={displayedIndex}
+            onChange={this.handleTabChange}
+            selectionFollowsFocus
+            variant="fullWidth"
+            aria-label="Categories"
+          >
+            {displays.map((display, index) => (
+              <Tab
+                id={`${tabPrefix}-${index}`}
+                label={display.title}
+                role="tab"
+                aria-controls={`${tabPanelPrefix}-${index}`}
+                aria-selected={this.isActive(index)}
+                key={display.title}
+              />
+            ))}
+          </Tabs>
+        </Box>
+        <div>
           {displays.map((display, index) => {
             return (
               <div
+                id={`${tabPanelPrefix}-${index}`}
                 hidden={!this.isActive(index)}
                 role="tabpanel"
-                aria-label={display.title}
+                aria-labelledby={`${tabPrefix}-${index}`}
                 key={display.title}
               >
                 {display.content}
@@ -189,7 +196,7 @@ export default class TabbedDisplay extends React.Component<{}, State> {
             );
           })}
         </div>
-      </>
+      </Box>
     );
   }
 }
