@@ -22,6 +22,7 @@ const DEFAULT_PROPS = {
   currentValue: "5",
   upperLimit: 11,
   lowerLimit: -11,
+  onStatisticClick: jest.fn(),
   onStatisticChange: jest.fn(),
   onStatisticBlur: jest.fn(),
 };
@@ -34,6 +35,22 @@ test("should render properly", () => {
   expect(screen.getByRole("spinbutton", { name: title })).toHaveDisplayValue(
     currentValue
   );
+});
+
+test("should trigger onClick", () => {
+  const { title, currentValue, onStatisticClick } = DEFAULT_PROPS;
+
+  render(
+    <StatisticDisplay
+      title={title}
+      currentValue={currentValue}
+      onStatisticClick={onStatisticClick}
+    />
+  );
+
+  userEvent.click(screen.getByRole("spinbutton", { name: title }));
+
+  expect(onStatisticClick).toBeCalledTimes(1);
 });
 
 test("should trigger onChange", () => {

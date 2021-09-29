@@ -250,15 +250,27 @@ describe("Initial State", () => {
 });
 
 describe("Participant Name", () => {
+  test("should keep aria-expand from changing", () => {
+    setup();
+    const input = screen.getByRole("textbox", { name: /name/i });
+    const accordion = screen.getByRole("button", {
+      name: /participant details/i,
+    });
+
+    userEvent.click(input);
+
+    expect(accordion).toHaveAttribute("aria-expanded", "false");
+  });
+
   test("should update participant name", () => {
     const newName = "Test Name";
     const { participant, handleParticipantChange, changeNameInput } = setup();
-    const inputEl = screen.getByRole("textbox", { name: /name/i });
+    const input = screen.getByRole("textbox", { name: /name/i });
 
     changeNameInput(newName);
-    inputEl.blur();
+    input.blur();
 
-    expect(inputEl).toHaveDisplayValue(newName);
+    expect(input).toHaveDisplayValue(newName);
     expect(handleParticipantChange).toBeCalledTimes(1);
     expect(handleParticipantChange).toBeCalledWith(participant);
   });
@@ -324,6 +336,47 @@ describe("Participant Name", () => {
 });
 
 describe("Statistic Display", () => {
+  describe("when clicked", () => {
+    test("should keep aria-expand from changing for DEX", () => {
+      setup();
+
+      const input = screen.getByRole("spinbutton", { name: /dex/i });
+      const accordion = screen.getByRole("button", {
+        name: /participant details/i,
+      });
+
+      userEvent.click(input);
+
+      expect(accordion).toHaveAttribute("aria-expanded", "false");
+    });
+
+    test("should keep aria-expand from changing for SPD", () => {
+      setup();
+
+      const input = screen.getByRole("spinbutton", { name: /spd/i });
+      const accordion = screen.getByRole("button", {
+        name: /participant details/i,
+      });
+
+      userEvent.click(input);
+
+      expect(accordion).toHaveAttribute("aria-expanded", "false");
+    });
+
+    test("should keep aria-expand from changing for MOV", () => {
+      setup();
+
+      const input = screen.getByRole("spinbutton", { name: /mov/i });
+      const accordion = screen.getByRole("button", {
+        name: /participant details/i,
+      });
+
+      userEvent.click(input);
+
+      expect(accordion).toHaveAttribute("aria-expanded", "false");
+    });
+  });
+
   describe("when changing to valid score", () => {
     test("should update dexterity score", () => {
       const validScore = "11";
@@ -620,6 +673,18 @@ describe("Statistic Display", () => {
 });
 
 describe("Modal", () => {
+  test("should keep accordion collapsed when generate button is clicked", () => {
+    setup();
+
+    const accordion = screen.getByRole("button", {
+      name: /participant details/i,
+    });
+
+    userEvent.click(screen.getByRole("button", { name: /generate/i }));
+
+    expect(accordion).toHaveAttribute("aria-expanded", "false");
+  });
+
   test("should reveal modal when 'generate' button is clicked", () => {
     setup();
 

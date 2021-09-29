@@ -444,6 +444,7 @@ export default class GroupContainer extends React.Component<Props, State> {
             color="secondary"
             variant="filled"
             value={rawGroupName}
+            onClick={(event) => event.stopPropagation()}
             onChange={this.handleNameChange}
             onBlur={this.handleNameBlur}
           />

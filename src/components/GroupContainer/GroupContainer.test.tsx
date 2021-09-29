@@ -276,20 +276,33 @@ describe("Initial State", () => {
 });
 
 describe("Group Name", () => {
+  test("should keep aria-expand from changing", () => {
+    const groups = [createDummyGroup()];
+
+    render(<GroupContainer ownedIndex={0} groups={groups} />);
+
+    const input = screen.getByRole("textbox", { name: /name/i });
+    const accordion = screen.getByRole("button", { name: /group details/i });
+
+    userEvent.click(input);
+
+    expect(accordion).toHaveAttribute("aria-expanded", "false");
+  });
+
   test("should change to prior, valid name", () => {
     const newGroupName = "Weyland Yutani";
     const groups = [createDummyGroup()];
 
     render(<GroupContainer ownedIndex={0} groups={groups} />);
 
-    const nameEl = screen.getByRole("textbox", { name: /name/i });
+    const input = screen.getByRole("textbox", { name: /name/i });
 
-    userEvent.clear(nameEl);
-    userEvent.type(nameEl, newGroupName);
-    userEvent.clear(nameEl);
-    nameEl.blur();
+    userEvent.clear(input);
+    userEvent.type(input, newGroupName);
+    userEvent.clear(input);
+    input.blur();
 
-    expect(nameEl).toHaveValue(newGroupName);
+    expect(input).toHaveValue(newGroupName);
   });
 });
 

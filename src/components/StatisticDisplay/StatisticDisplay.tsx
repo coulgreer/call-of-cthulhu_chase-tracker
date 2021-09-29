@@ -31,6 +31,7 @@ interface Props {
   currentValue: string;
   limiter: Limiter;
   color?: "primary" | "secondary";
+  onStatisticClick?: (event: React.SyntheticEvent) => void;
   onStatisticChange?: (value: string) => void;
   onStatisticBlur?: () => void;
 }
@@ -71,10 +72,17 @@ export default class StatisticDisplay extends React.Component<Props> {
       );
     }
 
+    this.handleClick = this.handleClick.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.handleBlur = this.handleBlur.bind(this);
 
     this.id = nanoid();
+  }
+
+  private handleClick(event: React.SyntheticEvent) {
+    const { onStatisticClick } = this.props;
+
+    if (onStatisticClick) onStatisticClick(event);
   }
 
   private handleChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -198,6 +206,7 @@ export default class StatisticDisplay extends React.Component<Props> {
         variant="outlined"
         color={color}
         value={currentValue}
+        onClick={this.handleClick}
         onChange={this.handleChange}
         onBlur={this.handleBlur}
         InputProps={{

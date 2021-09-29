@@ -25,6 +25,7 @@ export default class DisplayFactory {
     }: WrappedStatistic,
     handleStatisticChange: (value: string) => void,
     handleStatisticBlur: () => void,
+    handleStatisticClick?: (event: React.SyntheticEvent) => void,
     color?: "primary" | "secondary"
   ) {
     return (
@@ -33,6 +34,7 @@ export default class DisplayFactory {
         title={statistic.name}
         limiter={limiter}
         currentValue={currentValue}
+        onStatisticClick={handleStatisticClick}
         onStatisticChange={handleStatisticChange}
         onStatisticBlur={handleStatisticBlur}
         key={key}

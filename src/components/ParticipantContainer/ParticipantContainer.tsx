@@ -462,7 +462,10 @@ export default class ParticipantContainer extends React.Component<
     }));
   }
 
-  private handleInitiateSpeedModifierGenerationClick() {
+  private handleInitiateSpeedModifierGenerationClick(
+    event: React.SyntheticEvent
+  ) {
+    event.stopPropagation();
     this.setState({ modalShown: true });
   }
 
@@ -710,6 +713,7 @@ export default class ParticipantContainer extends React.Component<
                 : null
             }
             value={currentName}
+            onClick={(event) => event.stopPropagation()}
             onChange={this.handleNameChange}
             onBlur={this.handleNameBlur}
           />
@@ -719,21 +723,24 @@ export default class ParticipantContainer extends React.Component<
             {DisplayFactory.createStatisticDisplay(
               dexterity,
               (value) => this.handleDexterityChange(value),
-              () => this.handleDexterityBlur()
+              () => this.handleDexterityBlur(),
+              (event) => event.stopPropagation()
             )}
           </Grid>
           <Grid item xs={4} zeroMinWidth>
             {DisplayFactory.createStatisticDisplay(
               speedModifier,
               (value) => this.handleDerivedSpeedChange(value),
-              () => this.handleDerivedSpeedBlur()
+              () => this.handleDerivedSpeedBlur(),
+              (event) => event.stopPropagation()
             )}
           </Grid>
           <Grid item xs={4} zeroMinWidth>
             {DisplayFactory.createStatisticDisplay(
               movementRate,
               (value) => this.handleMovementRateChange(value),
-              () => this.handleMovementRateBlur()
+              () => this.handleMovementRateBlur(),
+              (event) => event.stopPropagation()
             )}
           </Grid>
           <Grid item xs={12}>
