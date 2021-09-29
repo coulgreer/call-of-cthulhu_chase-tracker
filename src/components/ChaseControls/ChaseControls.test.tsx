@@ -15,7 +15,7 @@ test("should render properly when given no context", () => {
   ).toBeInTheDocument();
   expect(
     within(buttonGroup).getByRole("button", { name: /stop/i })
-  ).toHaveClass("ChaseControls--active");
+  ).toHaveClass("Mui-selected");
 });
 
 test("should trigger onStartButtonClick", () => {

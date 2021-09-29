@@ -124,7 +124,7 @@ test("should render properly", () => {
 
 describe("Chase Controls", () => {
   test("should render properly when chase starts", () => {
-    const activeClass = "ChaseControls--active";
+    const activeClass = "Mui-selected";
     const { clickStart } = setup();
     const buttonGroup = screen.getByRole("group", { name: /chase.*controls/i });
 
@@ -139,7 +139,7 @@ describe("Chase Controls", () => {
   });
 
   test("should render properly when chase stops again", () => {
-    const activeClass = "ChaseControls--active";
+    const activeClass = "Mui-selected";
     const { clickStart, clickStop } = setup();
     const buttonGroup = screen.getByRole("group", { name: /chase.*controls/i });
 

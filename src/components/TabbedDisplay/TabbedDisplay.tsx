@@ -160,8 +160,8 @@ export default class TabbedDisplay extends React.Component<{}, State> {
     ];
 
     return (
-      <Box pt={2}>
-        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+      <>
+        <Box pt={2} sx={{ borderBottom: 1, borderColor: "divider" }}>
           <Tabs
             value={displayedIndex}
             onChange={this.handleTabChange}
@@ -181,7 +181,7 @@ export default class TabbedDisplay extends React.Component<{}, State> {
             ))}
           </Tabs>
         </Box>
-        <div>
+        <Box pt={1}>
           {displays.map((display, index) => {
             return (
               <div
@@ -195,8 +195,8 @@ export default class TabbedDisplay extends React.Component<{}, State> {
               </div>
             );
           })}
-        </div>
-      </Box>
+        </Box>
+      </>
     );
   }
 }
