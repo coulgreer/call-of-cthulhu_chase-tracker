@@ -640,6 +640,7 @@ export default class GroupTable extends React.Component<Props, State> {
                 <FormControlLabel
                   control={
                     <Checkbox
+                      color="secondary"
                       value={id}
                       onChange={this.handleCombiningGroupCheckboxChange}
                     />

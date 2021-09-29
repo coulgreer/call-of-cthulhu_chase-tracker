@@ -570,18 +570,14 @@ export default class GroupContainer extends React.Component<Props, State> {
             </TableBody>
           </Table>
           <Box p={1}>
-            <ButtonGroup>
+            <ButtonGroup color="secondary" variant="outlined">
               <Button
-                variant="outlined"
-                color="secondary"
                 onClick={this.handleInitiateMemberAdditionClick}
                 disabled={!this.hasValidParticipantCount()}
               >
                 ADD
               </Button>
               <Button
-                variant="outlined"
-                color="secondary"
                 onClick={this.handleInitiateMemberRemovalClick}
                 disabled={!this.hasMembers()}
               >
@@ -610,6 +606,7 @@ export default class GroupContainer extends React.Component<Props, State> {
                   <FormControlLabel
                     control={
                       <Checkbox
+                        color="secondary"
                         value={id}
                         onChange={this.handleParticipantCheckboxChange}
                       />
@@ -675,6 +672,7 @@ export default class GroupContainer extends React.Component<Props, State> {
                 <FormControlLabel
                   control={
                     <Checkbox
+                      color="secondary"
                       value={id}
                       onChange={this.handleParticipantCheckboxChange}
                     />

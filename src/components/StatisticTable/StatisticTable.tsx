@@ -129,7 +129,7 @@ export default class StatisticTable extends React.Component<Props, State> {
     const { title, data } = this.props;
 
     return (
-      <Card>
+      <Card variant="outlined">
         <CardHeader title={title} component="h2" />
         <CardContent>
           <Grid container>
@@ -175,7 +175,7 @@ export default class StatisticTable extends React.Component<Props, State> {
         <CardActions>
           <Button
             color="secondary"
-            size="small"
+            size="large"
             variant="contained"
             fullWidth
             aria-label="create statistic"
