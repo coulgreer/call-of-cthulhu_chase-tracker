@@ -199,7 +199,6 @@ export default class StatisticDisplay extends React.Component<Props> {
     // TODO (Coul Greer): Add keyboard support for ArrowDown and ArrowUp
     return (
       <NumberFormat
-        inputMode="decimal"
         customInput={TextField}
         id={inputId}
         label={title}
@@ -210,7 +209,11 @@ export default class StatisticDisplay extends React.Component<Props> {
         onChange={this.handleChange}
         onBlur={this.handleBlur}
         InputProps={{
-          inputProps: { className: inputClasses, role: "spinbutton" },
+          inputProps: {
+            className: inputClasses,
+            role: "spinbutton",
+            inputMode: "decimal",
+          },
         }}
       />
     );
