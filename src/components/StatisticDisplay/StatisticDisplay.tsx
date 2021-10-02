@@ -36,7 +36,13 @@ interface Props {
   onStatisticBlur?: () => void;
 }
 
-export default class StatisticDisplay extends React.Component<Props> {
+interface State {
+  modifier: number;
+}
+
+const neutralModifier = 0;
+
+export default class StatisticDisplay extends React.Component<Props, State> {
   static defaultProps = {
     className: "",
     limiter: {
@@ -51,6 +57,8 @@ export default class StatisticDisplay extends React.Component<Props> {
 
   constructor(props: Props) {
     super(props);
+
+    this.state = { modifier: neutralModifier };
 
     const { currentValue, limiter } = this.props;
 
@@ -73,6 +81,7 @@ export default class StatisticDisplay extends React.Component<Props> {
     }
 
     this.handleClick = this.handleClick.bind(this);
+    this.handleKeyDown = this.handleKeyDown.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.handleBlur = this.handleBlur.bind(this);
 
@@ -85,9 +94,19 @@ export default class StatisticDisplay extends React.Component<Props> {
     if (onStatisticClick) onStatisticClick(event);
   }
 
+  private handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+    if (event.key === "ArrowUp") {
+      this.setState(({ modifier }) => ({ modifier: modifier + 1 }));
+    } else if (event.key === "ArrowDown") {
+      this.setState(({ modifier }) => ({ modifier: modifier - 1 }));
+    }
+  }
+
   private handleChange(event: React.ChangeEvent<HTMLInputElement>) {
     const { onStatisticChange } = this.props;
     const { value } = event.currentTarget;
+
+    this.setState({ modifier: neutralModifier });
 
     if (onStatisticChange) onStatisticChange(value);
   }
@@ -182,18 +201,18 @@ export default class StatisticDisplay extends React.Component<Props> {
 
   render() {
     const { title, currentValue, color = "primary" } = this.props;
+    const { modifier } = this.state;
     const inputId = `statistic-display-${this.id}`;
     const currentValueNum = Number.parseInt(currentValue, 10);
+    const totalValue = currentValueNum + modifier;
 
     const inputClasses = classnames({
-      "StatisticDisplay--upper-limit":
-        this.isValueAtUpperLimit(currentValueNum),
+      "StatisticDisplay--upper-limit": this.isValueAtUpperLimit(totalValue),
       "StatisticDisplay--upper-warning":
-        this.isValueWithinUpperWarning(currentValueNum),
+        this.isValueWithinUpperWarning(totalValue),
       "StatisticDisplay--lower-warning":
-        this.isValueWithinLowerWarning(currentValueNum),
-      "StatisticDisplay--lower-limit":
-        this.isValueAtLowerLimit(currentValueNum),
+        this.isValueWithinLowerWarning(totalValue),
+      "StatisticDisplay--lower-limit": this.isValueAtLowerLimit(totalValue),
     });
 
     // TODO (Coul Greer): Add keyboard support for ArrowDown and ArrowUp
@@ -204,8 +223,9 @@ export default class StatisticDisplay extends React.Component<Props> {
         label={title}
         variant="outlined"
         color={color}
-        value={currentValue}
+        value={totalValue.toString()}
         onClick={this.handleClick}
+        onKeyDown={this.handleKeyDown}
         onChange={this.handleChange}
         onBlur={this.handleBlur}
         InputProps={{

@@ -37,54 +37,99 @@ test("should render properly", () => {
   );
 });
 
-test("should trigger onClick", () => {
-  const { title, currentValue, onStatisticClick } = DEFAULT_PROPS;
+test("should increment value", () => {
+  const { title, currentValue } = DEFAULT_PROPS;
 
-  render(
-    <StatisticDisplay
-      title={title}
-      currentValue={currentValue}
-      onStatisticClick={onStatisticClick}
-    />
-  );
+  render(<StatisticDisplay title={title} currentValue={currentValue} />);
 
-  userEvent.click(screen.getByRole("spinbutton", { name: title }));
+  const input = screen.getByRole("spinbutton");
 
-  expect(onStatisticClick).toBeCalledTimes(1);
+  input.focus();
+  userEvent.keyboard("{ArrowUp}");
+
+  expect(input).toHaveValue(`${Number.parseInt(currentValue, 10) + 1}`);
 });
 
-test("should trigger onChange", () => {
-  const { title, currentValue, onStatisticChange } = DEFAULT_PROPS;
+test("should decrement value", () => {
+  const { title, currentValue } = DEFAULT_PROPS;
 
-  render(
-    <StatisticDisplay
-      title={title}
-      currentValue={currentValue}
-      onStatisticChange={onStatisticChange}
-    />
-  );
+  render(<StatisticDisplay title={title} currentValue={currentValue} />);
 
-  userEvent.type(screen.getByRole("spinbutton", { name: title }), "3");
+  const input = screen.getByRole("spinbutton");
 
-  expect(onStatisticChange).toBeCalledTimes(1);
+  input.focus();
+  userEvent.keyboard("{ArrowDown}");
+
+  expect(input).toHaveValue(`${Number.parseInt(currentValue, 10) - 1}`);
 });
 
-test("should trigger onBlur", () => {
-  const { title, currentValue, onStatisticBlur } = DEFAULT_PROPS;
+test("should reset modifier when value is typed", () => {
+  const title = "Magic Number";
+  let currentValue = "10";
 
-  render(
-    <StatisticDisplay
-      title={title}
-      currentValue={currentValue}
-      onStatisticBlur={onStatisticBlur}
-    />
-  );
+  render(<StatisticDisplay title={title} currentValue={currentValue} />);
 
-  const inputEl = screen.getByRole("spinbutton", { name: title });
-  userEvent.click(inputEl);
-  inputEl.blur();
+  const input = screen.getByRole("spinbutton");
 
-  expect(onStatisticBlur).toBeCalledTimes(1);
+  input.focus();
+  userEvent.keyboard("{ArrowUp}");
+  userEvent.keyboard("{ArrowUp}");
+  // Type one integer to trigger onChange event
+  userEvent.type(input, "1");
+
+  expect(input).toHaveValue(currentValue);
+});
+
+describe("Event Handlers", () => {
+  test("should trigger onClick", () => {
+    const { title, currentValue, onStatisticClick } = DEFAULT_PROPS;
+
+    render(
+      <StatisticDisplay
+        title={title}
+        currentValue={currentValue}
+        onStatisticClick={onStatisticClick}
+      />
+    );
+
+    userEvent.click(screen.getByRole("spinbutton", { name: title }));
+
+    expect(onStatisticClick).toBeCalledTimes(1);
+  });
+
+  test("should trigger onChange", () => {
+    const { title, currentValue, onStatisticChange } = DEFAULT_PROPS;
+
+    render(
+      <StatisticDisplay
+        title={title}
+        currentValue={currentValue}
+        onStatisticChange={onStatisticChange}
+      />
+    );
+
+    userEvent.type(screen.getByRole("spinbutton", { name: title }), "3");
+
+    expect(onStatisticChange).toBeCalledTimes(1);
+  });
+
+  test("should trigger onBlur", () => {
+    const { title, currentValue, onStatisticBlur } = DEFAULT_PROPS;
+
+    render(
+      <StatisticDisplay
+        title={title}
+        currentValue={currentValue}
+        onStatisticBlur={onStatisticBlur}
+      />
+    );
+
+    const inputEl = screen.getByRole("spinbutton", { name: title });
+    userEvent.click(inputEl);
+    inputEl.blur();
+
+    expect(onStatisticBlur).toBeCalledTimes(1);
+  });
 });
 
 describe("Threshold class names", () => {
