@@ -1,9 +1,4 @@
-.StatisticTable .button {
+.StatisticTable {
   width: 100%;
   margin: 12px 0;
-}
-
-.StatisticTable__statistics-controls {
-  display: grid;
-  grid-template-columns: min-content min-content auto;
 }

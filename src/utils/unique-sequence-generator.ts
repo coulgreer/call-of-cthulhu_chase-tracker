@@ -1,7 +1,5 @@
-/**
- * A generator used to add the lowest possible value based on the given
- * started number.
- */
+/* A generator used to add the lowest possible value based on the given
+  started number. */
 export default class UniqueSequenceGenerator {
   private start;
 

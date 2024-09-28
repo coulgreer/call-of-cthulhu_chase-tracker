@@ -1,14 +1,13 @@
 .StatisticDisplay {
-  display: flex;
-  font-size: 1em;
+  font-size: 1rem;
 }
 
-.StatisticDisplay--horizontal {
-  flex-direction: row;
-  align-items: center;
+.StatisticDisplay--upper-limit,
+.StatisticDisplay--upper-warning {
+  color: rgb(var(--buff));
 }
 
-.StatisticDisplay--vertical {
-  flex-direction: column;
-  align-items: center;
+.StatisticDisplay--lower-limit,
+.StatisticDisplay--lower-warning {
+  color: rgba(var(--deep-saffron), var(--text-emphasis--high));
 }

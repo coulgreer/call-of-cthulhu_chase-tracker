@@ -1,240 +1,228 @@
-import React from "react";
-import Modal from "react-modal";
-import { render, screen } from "@testing-library/react";
+import * as React from "react";
+
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom/extend-expect";
 
 import ParticipantTable from ".";
 
-function renderParticipantTableWithModal(
-  warningMessage: string = "Unexpected WARNING"
-) {
-  const div = document.createElement("div");
-  document.body.appendChild(div);
+import { Participant } from "../../types";
+import ParticipantBuilder from "../../utils/participant-builder";
 
-  Modal.setAppElement(div);
-
-  return render(<ParticipantTable warningMessage={warningMessage} />, {
-    container: div,
-  });
+function createNamedParticipant(name: string): Participant {
+  return new ParticipantBuilder().withName(name).build();
 }
 
-describe("Warning Message prop", () => {
-  test("should render with an error message when no participants exist", () => {
-    const WARNING_MESSAGE =
-      "Shame. No prey for the chase. Still, keep your wits about you.";
+const DEFAULT_PROPS: {
+  participants: Participant[];
+  warningMessage: string;
+  onParticipantsChange: (p: Participant[]) => void;
+} = {
+  participants: [
+    createNamedParticipant("0"),
+    createNamedParticipant("1"),
+    createNamedParticipant("2"),
+  ],
+  warningMessage:
+    "Shame. No prey for the chase. Still, keep your wits about you.",
+  onParticipantsChange: jest.fn(),
+};
 
-    render(<ParticipantTable warningMessage={WARNING_MESSAGE} />);
+let origErrorConsole: (...data: any[]) => void;
 
-    expect(screen.getByText(WARNING_MESSAGE)).toBeInTheDocument();
+beforeEach(() => {
+  origErrorConsole = window.console.error;
+
+  window.console.error = (...args) => {
+    const firstArg = args.length > 0 && args[0];
+
+    const shouldBeIgnored =
+      firstArg &&
+      typeof firstArg === "string" &&
+      firstArg.includes("Not implemented: HTMLFormElement.prototype.submit");
+
+    if (!shouldBeIgnored) {
+      origErrorConsole(...args);
+    }
+  };
+});
+
+afterEach(() => {
+  window.console.error = origErrorConsole;
+});
+
+describe("Initial State", () => {
+  const { participants } = DEFAULT_PROPS;
+
+  describe("when no participants exist", () => {
+    const empty: Participant[] = [];
+
+    test("should render properly when omitting all optional props", () => {
+      render(<ParticipantTable participants={empty} />);
+
+      expect(screen.getByRole("alert")).toBeInTheDocument();
+      expect(screen.queryByRole("row")).not.toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /create participant/i })
+      ).toBeInTheDocument();
+    });
+
+    test("should render properly when including all optional props", () => {
+      const { warningMessage, onParticipantsChange } = DEFAULT_PROPS;
+
+      render(
+        <ParticipantTable
+          participants={empty}
+          warningMessage={warningMessage}
+          onParticipantsChange={onParticipantsChange}
+        />
+      );
+
+      expect(screen.getByText(warningMessage)).toBeInTheDocument();
+      expect(screen.queryAllByRole("row")).toHaveLength(0);
+      expect(
+        screen.getByRole("button", { name: /create participant/i })
+      ).toBeInTheDocument();
+    });
   });
 
-  test("should render a participant instead of an error message when a participant exists", () => {
-    const WARNING_MESSAGE = "This should not show.";
-    render(<ParticipantTable warningMessage={WARNING_MESSAGE} />);
+  describe("when at least one participant exists", () => {
+    test("should render properly when omitting all optional props", () => {
+      render(<ParticipantTable participants={participants} />);
 
-    userEvent.click(screen.getByRole("button", { name: /add participant/i }));
-
-    expect(screen.queryByText(WARNING_MESSAGE)).not.toBeInTheDocument();
-    expect(
-      screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #1`)
-    ).toBeInTheDocument();
+      expect(
+        screen.queryByRole("alert", { name: /no.*participants/i })
+      ).not.toBeInTheDocument();
+      expect(screen.getAllByRole("row")).toHaveLength(participants.length);
+      expect(
+        screen.getByRole("button", { name: /create participant/i })
+      ).toBeInTheDocument();
+    });
   });
 });
 
-describe("Participant Removal", () => {
-  test("should remove the designated participant", () => {
-    renderParticipantTableWithModal();
+test("should trigger creation of a participant", () => {
+  const empty: Participant[] = [];
+  const handleParticipantsChange = jest.fn();
 
-    const addButton = screen.getByRole("button", { name: /add participant/i });
-    userEvent.click(addButton);
-    userEvent.click(addButton);
-    userEvent.click(addButton);
+  render(
+    <ParticipantTable
+      participants={empty}
+      onParticipantsChange={handleParticipantsChange}
+    />
+  );
+
+  userEvent.click(screen.getByRole("button", { name: /create participant/i }));
+
+  expect(handleParticipantsChange).toBeCalledTimes(1);
+  expect(handleParticipantsChange).not.toBeCalledWith(empty);
+});
+
+test("should trigger update when participant changes", () => {
+  const participants = [
+    new ParticipantBuilder().build(),
+    new ParticipantBuilder().build(),
+    new ParticipantBuilder().build(),
+  ];
+  const handleParticipantsChange = jest.fn();
+  const newName = "Test Name";
+
+  render(
+    <ParticipantTable
+      participants={participants}
+      onParticipantsChange={handleParticipantsChange}
+    />
+  );
+
+  const [nameInput] = screen.getAllByRole("textbox", { name: /name/i });
+
+  userEvent.type(nameInput, newName);
+  nameInput.blur();
+
+  expect(handleParticipantsChange).toBeCalledTimes(1);
+  expect(handleParticipantsChange).toBeCalledWith(participants);
+});
+
+describe("Modal", () => {
+  test("should trigger deletion of given particpant", () => {
+    const participants = [
+      new ParticipantBuilder().build(),
+      new ParticipantBuilder().build(),
+    ];
+    const handleParticipantsChange = jest.fn();
+    const [{ id: participantId }] = participants;
+
+    render(
+      <ParticipantTable
+        participants={participants}
+        onParticipantsChange={handleParticipantsChange}
+      />
+    );
+
     userEvent.click(
       screen.getByRole("button", {
-        name: new RegExp(`remove: ${ParticipantTable.DEFAULT_NAME} #1`, "i"),
+        name: new RegExp(`remove: ${participantId}`, "i"),
       })
     );
-    userEvent.click(screen.getByRole("button", { name: /delete/i }));
 
-    expect(
-      screen.queryByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #1`)
-    ).not.toBeInTheDocument();
-    expect(
-      screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #2`)
-    ).toBeInTheDocument();
-    expect(
-      screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #3`)
-    ).toBeInTheDocument();
-    expect(
-      screen.queryByRole("dialog", { name: /confirm removal/i })
-    ).not.toBeInTheDocument();
+    const modal = screen.getByRole("dialog");
+
+    userEvent.click(within(modal).getByRole("button", { name: /^delete$/i }));
+
+    expect(handleParticipantsChange).toBeCalledTimes(1);
+    expect(handleParticipantsChange).not.toBeCalledWith(participants);
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
-  test("should preserve all participants when removal is canceled via button", () => {
-    renderParticipantTableWithModal();
+  test("should cancel deletion when 'esc' is pressed", () => {
+    const participants = [
+      new ParticipantBuilder().build(),
+      new ParticipantBuilder().build(),
+    ];
+    const handleParticipantsChange = jest.fn();
+    const [{ id: participantId }] = participants;
 
-    const addButton = screen.getByRole("button", { name: /add participant/i });
-    userEvent.click(addButton);
-    userEvent.click(addButton);
-    userEvent.click(addButton);
+    render(
+      <ParticipantTable
+        participants={participants}
+        onParticipantsChange={handleParticipantsChange}
+      />
+    );
+
     userEvent.click(
       screen.getByRole("button", {
-        name: new RegExp(`remove: ${ParticipantTable.DEFAULT_NAME} #1`, "i"),
+        name: new RegExp(`remove: ${participantId}`, "i"),
+      })
+    );
+    userEvent.keyboard("{esc}");
+
+    expect(handleParticipantsChange).not.toBeCalled();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  test("should cancel deletion when 'cancel' button is clicked", () => {
+    const participants = [
+      new ParticipantBuilder().build(),
+      new ParticipantBuilder().build(),
+    ];
+    const handleParticipantsChange = jest.fn();
+    const [{ id: participantId }] = participants;
+
+    render(
+      <ParticipantTable
+        participants={participants}
+        onParticipantsChange={handleParticipantsChange}
+      />
+    );
+
+    userEvent.click(
+      screen.getByRole("button", {
+        name: new RegExp(`remove: ${participantId}`, "i"),
       })
     );
     userEvent.click(screen.getByRole("button", { name: /cancel/i }));
 
-    expect(
-      screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #1`)
-    ).toBeInTheDocument();
-    expect(
-      screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #2`)
-    ).toBeInTheDocument();
-    expect(
-      screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #3`)
-    ).toBeInTheDocument();
-  });
-
-  test("should preserve all participants when removal is canceled via 'esc' key", () => {
-    renderParticipantTableWithModal("This should not show.");
-
-    const addButton = screen.getByRole("button", { name: /add participant/i });
-    userEvent.click(addButton);
-    userEvent.click(addButton);
-    userEvent.click(addButton);
-    userEvent.click(
-      screen.getByRole("button", {
-        name: new RegExp(`remove: ${ParticipantTable.DEFAULT_NAME} #1`, "i"),
-      })
-    );
-    userEvent.type(
-      screen.getByRole("dialog", { name: /confirm removal/i }),
-      "{esc}"
-    );
-
-    expect(
-      screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #1`)
-    ).toBeInTheDocument();
-    expect(
-      screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #2`)
-    ).toBeInTheDocument();
-    expect(
-      screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #3`)
-    ).toBeInTheDocument();
-  });
-});
-
-test("should have the appropriate default participant name when a participant has been removed", () => {
-  renderParticipantTableWithModal("TESTING");
-
-  const addButton = screen.getByRole("button", { name: /add participant/i });
-  userEvent.click(addButton);
-  userEvent.click(addButton);
-  userEvent.click(addButton);
-  userEvent.click(addButton);
-  userEvent.click(
-    screen.getByRole("button", {
-      name: new RegExp(`remove: ${ParticipantTable.DEFAULT_NAME} #2`, "i"),
-    })
-  );
-  userEvent.click(screen.getByRole("button", { name: /delete/i }));
-  userEvent.click(
-    screen.getByRole("button", {
-      name: new RegExp(`remove: ${ParticipantTable.DEFAULT_NAME} #4`, "i"),
-    })
-  );
-  userEvent.click(screen.getByRole("button", { name: /delete/i }));
-  userEvent.click(addButton);
-
-  expect(
-    screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #1`)
-  ).toBeInTheDocument();
-  expect(
-    screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #2`)
-  ).toBeInTheDocument();
-  expect(
-    screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #3`)
-  ).toBeInTheDocument();
-  expect(
-    screen.queryByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #4`)
-  ).not.toBeInTheDocument();
-  expect(
-    screen.queryByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #5`)
-  ).not.toBeInTheDocument();
-});
-
-describe("Confirmation Tests", () => {
-  test("should properly remove and add back participants when their numbers would sort differently between numerical and alphabetical", () => {
-    renderParticipantTableWithModal("TESTING");
-
-    const addButton = screen.getByRole("button", { name: /add participant/i });
-
-    // Create 10+ participants.
-    userEvent.click(addButton);
-    userEvent.click(addButton);
-    userEvent.click(addButton);
-    userEvent.click(addButton);
-    userEvent.click(addButton);
-    userEvent.click(addButton);
-    userEvent.click(addButton);
-    userEvent.click(addButton);
-    userEvent.click(addButton);
-    userEvent.click(addButton);
-
-    // Remove a participant that's not at the end of the sequence.
-    userEvent.click(
-      screen.getByRole("button", {
-        name: new RegExp(`remove: ${ParticipantTable.DEFAULT_NAME} #1$`, "i"),
-      })
-    );
-    userEvent.click(screen.getByRole("button", { name: /delete/i }));
-
-    /* Then, remove another participant that starts with a differing digit
-     *  from the first, but is not at the end of the sequence. */
-    userEvent.click(
-      screen.getByRole("button", {
-        name: new RegExp(`remove: ${ParticipantTable.DEFAULT_NAME} #3$`, "i"),
-      })
-    );
-    userEvent.click(screen.getByRole("button", { name: /delete/i }));
-
-    // Add the participants back.
-    userEvent.click(addButton);
-    userEvent.click(addButton);
-
-    expect(
-      screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #1`)
-    ).toBeInTheDocument();
-    expect(
-      screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #2`)
-    ).toBeInTheDocument();
-    expect(
-      screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #3`)
-    ).toBeInTheDocument();
-    expect(
-      screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #4`)
-    ).toBeInTheDocument();
-    expect(
-      screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #5`)
-    ).toBeInTheDocument();
-    expect(
-      screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #6`)
-    ).toBeInTheDocument();
-    expect(
-      screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #7`)
-    ).toBeInTheDocument();
-    expect(
-      screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #8`)
-    ).toBeInTheDocument();
-    expect(
-      screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #9`)
-    ).toBeInTheDocument();
-    expect(
-      screen.getByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #10`)
-    ).toBeInTheDocument();
-    expect(
-      screen.queryByDisplayValue(`${ParticipantTable.DEFAULT_NAME} #11`)
-    ).not.toBeInTheDocument();
+    expect(handleParticipantsChange).not.toBeCalled();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 });

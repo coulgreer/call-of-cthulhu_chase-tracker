@@ -7,12 +7,11 @@
   "extends": [
     "airbnb-typescript",
     "plugin:jest/recommended",
+    "plugin:import/errors",
+    "plugin:import/warnings",
     "plugin:import/typescript",
     "plugin:jsx-a11y/recommended",
-    "plugin:prettier/recommended",
-    "prettier/@typescript-eslint",
-    "prettier/prettier",
-    "prettier/react"
+    "plugin:prettier/recommended"
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
@@ -25,18 +24,10 @@
   },
   "plugins": ["react", "@typescript-eslint"],
   "rules": {
-    "import/no-extraneous-dependencies": [
-      "error",
-      {
-        "devDependencies": [
-          "**/*.test.[jt]s?(x)",
-          "**/*.spec.[jt]s?(x)",
-          "**/setup-test-env.ts"
-        ]
-      }
-    ],
     "import/no-unresolved": "error",
     "jsx-a11y/label-has-associated-control": ["error", { "assert": "either" }],
+    "react/prop-types": "off",
+    "react/require-default-props": "off",
     "react/static-property-placement": ["error", "static public field"]
   },
   "settings": {
@@ -47,6 +38,9 @@
       "typescript": {
         "alwaysTryTypes": true
       }
+    },
+    "react": {
+      "version": "detect"
     }
   }
 }

@@ -1,0 +1,9 @@
+.ParticipantContainer .StatisticDisplay {
+  overflow: hidden;
+}
+
+.ParticipantContainer .StatisticDisplay,
+.ParticipantContainer .StatisticDisplay .textbox,
+.ParticipantContainer .StatisticDisplay .input__label {
+  min-width: 0;
+}

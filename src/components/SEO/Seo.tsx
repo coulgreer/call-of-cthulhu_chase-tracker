@@ -1,9 +1,14 @@
-import React from "react";
-import PropTypes from "prop-types";
+import * as React from "react";
+import * as PropTypes from "prop-types";
 import { Helmet } from "react-helmet";
 import { useStaticQuery, graphql } from "gatsby";
 
-const Seo = ({ title, description }) => {
+interface Props {
+  title: string;
+  description: string;
+}
+
+const Seo = ({ title, description }: Props) => {
   const query = graphql`
     query SEO {
       site {
@@ -25,6 +30,10 @@ const Seo = ({ title, description }) => {
     <Helmet title={seo.title}>
       <html lang="en" />
       <meta name="description" content={seo.description} />
+      <link
+        href="https://fonts.googleapis.com/icon?family=Material+Icons|Material+Icons+Outlined"
+        rel="stylesheet"
+      />
     </Helmet>
   );
 };

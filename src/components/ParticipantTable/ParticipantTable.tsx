@@ -1,106 +1,110 @@
-import React, { Component, ReactElement } from "react";
-import Modal from "react-modal";
+import * as React from "react";
 
-import ParticipantRow from "../ParticipantRow";
-import Button from "../Button";
+import { Button, Fab, Grid, Paper, Typography } from "@mui/material";
 
-import UniqueSequenceGenerator from "../../utils/unique-sequence-generator";
+import ParticipantContainer from "../ParticipantContainer";
 
-import AddIcon from "../../images/baseline_add_black_24dp_x2.png";
-import RemoveIcon from "../../images/baseline_remove_circle_outline_black_24dp.png";
+import { createMuiConfirmationModal } from "../Modal";
 
 import "./ParticipantTable.css";
 
-if (process.env.NODE_ENV !== "test") Modal.setAppElement("#___gatsby");
+import { Participant } from "../../types";
+import UniqueSequenceGenerator from "../../utils/unique-sequence-generator";
 
 interface Props {
-  warningMessage: string;
+  participants: Participant[];
+  warningMessage?: string;
+  onParticipantsChange?: (p: Participant[]) => void;
 }
 
 interface State {
-  participantRows: ReactElement[];
   modalShown: boolean;
-  selectedRow: ReactElement | null;
+  selectedParticipant: Participant | null;
 }
 
-export default class ParticipantTable extends Component<Props, State> {
+const SEQUENCE_START = 0;
+
+export default class ParticipantTable extends React.Component<Props, State> {
   private static minimumParticipants = 1;
 
-  private static startingNumber = 0;
-
-  static get DEFAULT_NAME() {
-    return "Participant";
-  }
-
-  private sequnceGenerator;
+  private participantSequence;
 
   constructor(props: Props) {
     super(props);
     this.state = {
-      participantRows: [],
       modalShown: false,
-      selectedRow: null,
+      selectedParticipant: null,
     };
 
-    this.sequnceGenerator = new UniqueSequenceGenerator(
-      ParticipantTable.startingNumber
-    );
+    this.participantSequence = new UniqueSequenceGenerator(SEQUENCE_START);
 
-    this.createParticipant = this.createParticipant.bind(this);
-    this.deleteSelectedParticipant = this.deleteSelectedParticipant.bind(this);
+    this.handleParticipantChange = this.handleParticipantChange.bind(this);
+    this.handleCreateParticipantClick =
+      this.handleCreateParticipantClick.bind(this);
+    this.handleDeleteParticipantClick =
+      this.handleDeleteParticipantClick.bind(this);
+    this.handleCancelParticipantDeletingClick =
+      this.handleCancelParticipantDeletingClick.bind(this);
+
     this.closeModal = this.closeModal.bind(this);
   }
 
-  private deleteSelectedParticipant() {
-    const { selectedRow } = this.state;
+  private handleParticipantChange(target: Participant) {
+    const { participants, onParticipantsChange } = this.props;
 
-    if (selectedRow) {
-      this.removeParticipantFromSequence(selectedRow);
-      this.removeParticipantFromTable(selectedRow);
+    const targetIndex = participants.findIndex(({ id }) => id === target.id);
+    participants.splice(targetIndex, 1, target);
+
+    if (onParticipantsChange) onParticipantsChange([...participants]);
+  }
+
+  private handleCreateParticipantClick() {
+    const { participants, onParticipantsChange } = this.props;
+    const idNum = this.participantSequence.nextNum();
+
+    const newParticipants = [
+      ...participants,
+      {
+        id: `PARTICIPANT-${idNum}`,
+        name: `Participant #${idNum}`,
+        dexterity: 15,
+        movementRate: 2,
+        speedModifier: 1,
+        derivedSpeed: 3,
+        actionCount: 1,
+        speedStatistics: ParticipantContainer.DEFAULT_SPEED_STATISTICS,
+        hazardStatistics: ParticipantContainer.DEFAULT_HAZARD_STATISTICS,
+        isGrouped: false,
+      },
+    ];
+
+    if (onParticipantsChange) onParticipantsChange(newParticipants);
+  }
+
+  private handleDeleteParticipantClick() {
+    const { participants, onParticipantsChange } = this.props;
+    const { selectedParticipant } = this.state;
+
+    if (selectedParticipant) {
+      const newParticipants = this.removeParticipant(
+        participants,
+        selectedParticipant
+      );
+
+      if (onParticipantsChange) onParticipantsChange(newParticipants);
     }
 
     this.closeModal();
   }
 
-  private createParticipant() {
-    const defaultParticipantName = `${
-      ParticipantTable.DEFAULT_NAME
-    } #${this.sequnceGenerator.nextNum()}`;
-    const newRow = (
-      <ParticipantRow
-        key={defaultParticipantName}
-        defaultParticipantName={defaultParticipantName}
-      />
-    );
-
-    this.setState((state) => ({
-      participantRows: [...state.participantRows, newRow],
-    }));
+  private handleCancelParticipantDeletingClick() {
+    this.setState({ modalShown: false, selectedParticipant: null });
   }
 
-  private promptParticipantRemoval(row: ReactElement) {
+  private handleInitiateParticipantDeletingClick(participant: Participant) {
     this.setState({
       modalShown: true,
-      selectedRow: row,
-    });
-  }
-
-  private removeParticipantFromSequence(row: ReactElement) {
-    const idNum = Number.parseInt(
-      row.props.defaultParticipantName.match(/[0-9]+$/)[0],
-      10
-    );
-    this.sequnceGenerator.remove(idNum);
-  }
-
-  private removeParticipantFromTable(row: ReactElement) {
-    const { participantRows } = this.state;
-
-    this.setState(() => {
-      const targetIndex = participantRows.indexOf(row);
-      participantRows.splice(targetIndex, 1);
-
-      return { selectedRow: null };
+      selectedParticipant: participant,
     });
   }
 
@@ -108,11 +112,39 @@ export default class ParticipantTable extends Component<Props, State> {
     this.setState({ modalShown: false });
   }
 
+  private removeParticipant(
+    participants: Participant[],
+    participant: Participant
+  ) {
+    const newParticipants = [...participants];
+    const targetIndex = newParticipants.indexOf(participant);
+    const results = participant.id.match(/participant-\d+/i);
+
+    if (!results) {
+      throw Error(
+        `The given participant ID -- ${participant.id} -- should be formatted with trailing digits.`
+      );
+    }
+
+    const result = results[0].replace(/participant-/i, "");
+    this.participantSequence.remove(Number.parseInt(result, 10));
+    newParticipants.splice(targetIndex, 1);
+
+    return newParticipants;
+  }
+
   private renderFloatingActionButton() {
     return (
-      <Button className="button fab" onClick={this.createParticipant}>
-        <img src={AddIcon} alt="Add Participant" />
-      </Button>
+      <Fab
+        color="secondary"
+        className="fab"
+        aria-label="Create Participant"
+        onClick={this.handleCreateParticipantClick}
+      >
+        <span className="material-icons" aria-hidden>
+          add
+        </span>
+      </Fab>
     );
   }
 
@@ -120,66 +152,84 @@ export default class ParticipantTable extends Component<Props, State> {
     const { modalShown } = this.state;
 
     return (
-      <Modal
-        className="Modal__Content"
-        overlayClassName="Modal__Overlay"
-        contentLabel="Confirm Removal"
-        isOpen={modalShown}
-        onRequestClose={this.closeModal}
-      >
-        <p className="Modal__Content__text">
-          Would you like to delete this participant?
-        </p>
-        <div className="Modal__Content__options">
-          <Button
-            className="button button--tertiary-on-dark button--medium"
-            onClick={this.closeModal}
-          >
-            CANCEL
-          </Button>
-          <Button
-            className="button button--secondary button--medium"
-            onClick={this.deleteSelectedParticipant}
-          >
-            DELETE
-          </Button>
-        </div>
-      </Modal>
+      modalShown &&
+      createMuiConfirmationModal(
+        "Would You Like To Delete This Participant?",
+        modalShown,
+        this.closeModal,
+        "Confirm Removal",
+        { text: "CANCEL", onClick: this.handleCancelParticipantDeletingClick },
+        { text: "DELETE", onSubmit: this.handleDeleteParticipantClick }
+      )
     );
   }
 
-  private renderWarningMessage() {
-    const { warningMessage } = this.props;
+  private renderMainContent() {
+    const {
+      participants,
+      warningMessage = "No participants exist in this table",
+    } = this.props;
 
-    return <p className="centered">{warningMessage}</p>;
-  }
+    const participantGrid = (
+      <Grid container spacing={2} role="grid" aria-label="Participants">
+        {participants.map((participant) => (
+          <Grid item role="row" key={participant.id}>
+            <Paper>
+              <Grid container>
+                <Grid
+                  item
+                  xs
+                  role="gridcell"
+                  aria-label={`${participant.name} editor`}
+                >
+                  <ParticipantContainer
+                    participant={participant}
+                    onParticipantChange={this.handleParticipantChange}
+                  />
+                </Grid>
+                <Grid
+                  container
+                  item
+                  alignItems="stretch"
+                  justifyContent="flex-end"
+                  xs={3}
+                  role="gridcell"
+                >
+                  <Button
+                    color="primary"
+                    variant="contained"
+                    aria-label={`Remove: ${participant.id}`}
+                    onClick={() =>
+                      this.handleInitiateParticipantDeletingClick(participant)
+                    }
+                  >
+                    <span className="material-icons" aria-hidden>
+                      remove_circle
+                    </span>
+                  </Button>
+                </Grid>
+              </Grid>
+            </Paper>
+          </Grid>
+        ))}
+      </Grid>
+    );
 
-  private renderParticipants() {
-    const { participantRows } = this.state;
-    return participantRows.map((row) => (
-      <div className="ParticipantTable__row" key={row.key}>
-        {row}
-        <Button
-          className="ParticipantTable__row-control button button--primary button--small"
-          onClick={() => this.promptParticipantRemoval(row)}
-        >
-          <img src={RemoveIcon} alt={`Remove: ${row.key}`} />
-        </Button>
-      </div>
-    ));
+    const warning = (
+      <Typography role="alert" align="center" color="error">
+        {warningMessage}
+      </Typography>
+    );
+
+    return participants.length >= ParticipantTable.minimumParticipants
+      ? participantGrid
+      : warning;
   }
 
   render() {
-    const { participantRows } = this.state;
-
-    const rowsElement =
-      participantRows.length < ParticipantTable.minimumParticipants
-        ? this.renderWarningMessage()
-        : this.renderParticipants();
-
     return (
       <div className="ParticipantTable">
-        <div className="ParticipantTable__rows">{rowsElement}</div>
+        {this.renderMainContent()}
         {this.renderFloatingActionButton()}
         {this.renderRemovalModal()}
       </div>

@@ -1,6 +1,6 @@
-import React from "react";
+import * as React from "react";
 
-import StatisticDisplay, { Data as StatisticDisplayData } from ".";
+import StatisticDisplay, { WrappedStatistic } from ".";
 
 export default class DisplayFactory {
   static get MAX_PERCENTILE() {
@@ -12,18 +12,29 @@ export default class DisplayFactory {
   }
 
   static createStatisticDisplay(
-    className: string,
-    { title, currentValue, key }: StatisticDisplayData,
+    {
+      statistic,
+      currentValue,
+      limiter = {
+        upperLimit: Number.MAX_SAFE_INTEGER,
+        upperWarning: DisplayFactory.MAX_PERCENTILE - 1,
+        lowerWarning: DisplayFactory.MIN_PERCENTILE + 1,
+        lowerLimit: Number.MIN_SAFE_INTEGER,
+      },
+      key,
+    }: WrappedStatistic,
     handleStatisticChange: (value: string) => void,
-    handleStatisticBlur: () => void
+    handleStatisticBlur: () => void,
+    handleStatisticClick?: (event: React.SyntheticEvent) => void,
+    color?: "primary" | "secondary"
   ) {
     return (
       <StatisticDisplay
-        className={className}
-        title={title}
-        lowerWarning={DisplayFactory.MIN_PERCENTILE - 1}
-        upperWarning={DisplayFactory.MAX_PERCENTILE}
+        color={color}
+        title={statistic.name}
+        limiter={limiter}
         currentValue={currentValue}
+        onStatisticClick={handleStatisticClick}
         onStatisticChange={handleStatisticChange}
         onStatisticBlur={handleStatisticBlur}
         key={key}

@@ -1,20 +1,27 @@
-import React from "react";
+import * as React from "react";
 
-import Modal from "react-modal";
+import {
+  Button,
+  Card,
+  CardActions,
+  CardContent,
+  CardHeader,
+  DialogActions,
+  DialogContent,
+  Grid,
+  IconButton,
+  TextField,
+} from "@mui/material";
 
-import Button from "../Button";
-import { Data } from "../StatisticDisplay";
+import { WrappedStatistic } from "../StatisticDisplay";
 import DisplayFactory from "../StatisticDisplay/DisplayFactory";
-
-import AddIcon from "../../images/baseline_add_black_24dp_x2.png";
-import DeleteIcon from "../../images/baseline_delete_black_24dp.png";
-import EditIcon from "../../images/baseline_edit_black_24dp.png";
+import { createMuiFormModal } from "../Modal";
 
 import "./StatisticTable.css";
 
 interface Props {
   title: string;
-  data: Data[];
+  data: WrappedStatistic[];
   onDeleteClick?: (index: number) => void;
   onCreateClick?: () => void;
   onRenameStatistic?: (index: number, value: string) => void;
@@ -39,6 +46,7 @@ export default class StatisticTable extends React.Component<Props, State> {
 
     this.handleCreateClick = this.handleCreateClick.bind(this);
     this.handleStatisticNameChange = this.handleStatisticNameChange.bind(this);
+    this.handleStatisticNameBlur = this.handleStatisticNameBlur.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
 
     this.state = {
@@ -63,12 +71,13 @@ export default class StatisticTable extends React.Component<Props, State> {
 
   private handlePromptRenameClick(index: number) {
     const { data } = this.props;
+    const { statistic } = data[index];
 
     this.setState({
       modalShown: true,
       selectedIndex: index,
-      currentNewName: data[index].title,
-      validNewName: data[index].title,
+      currentNewName: statistic.name,
+      validNewName: statistic.name,
     });
   }
 
@@ -92,11 +101,24 @@ export default class StatisticTable extends React.Component<Props, State> {
     if (onStatisticValueBlur) onStatisticValueBlur(index);
   }
 
-  private handleStatisticNameChange(evt: React.ChangeEvent<HTMLInputElement>) {
-    const { value } = evt.target;
+  private handleStatisticNameChange(
+    event: React.ChangeEvent<HTMLInputElement>
+  ) {
+    const { value } = event.currentTarget;
 
-    if (value) this.setState({ validNewName: value });
+    if (value.trim()) this.setState({ validNewName: value.trim() });
+
     this.setState({ currentNewName: value });
+  }
+
+  private handleStatisticNameBlur() {
+    this.setState((state) => {
+      const { currentNewName, validNewName } = state;
+
+      if (currentNewName.trim()) return { currentNewName };
+
+      return { currentNewName: validNewName };
+    });
   }
 
   private closeModal() {
@@ -107,79 +129,106 @@ export default class StatisticTable extends React.Component<Props, State> {
     const { title, data } = this.props;
 
     return (
-      <>
-        <h4>{title}</h4>
-        {data.map((datum, index) => (
-          <div className="StatisticTable__statistics-controls">
-            <Button
-              className="button button--small button--tertiary-on-light"
-              onClick={() => this.handleDeleteClick(index)}
-            >
-              <img src={DeleteIcon} alt={`delete: ${datum.title}`} />
-            </Button>
-            <Button
-              className="button button--small button--tertiary-on-light"
-              onClick={() => this.handlePromptRenameClick(index)}
-            >
-              <img src={EditIcon} alt={`rename: ${datum.title}`} />
-            </Button>
-            {DisplayFactory.createStatisticDisplay(
-              "StatisticDisplay--horizontal",
-              datum,
-              (value) => this.handleStatisticValueChange(index, value),
-              () => this.handleStatisticValueBlur(index)
-            )}
-          </div>
-        ))}
-        <Button
-          className="button button--small button--primary"
-          onClick={this.handleCreateClick}
-        >
-          <img src={AddIcon} alt="create statistic" />
-        </Button>
-      </>
+      <Card variant="outlined">
+        <CardHeader title={title} component="h2" />
+        <CardContent>
+          <Grid container>
+            {data.map((datum, index) => {
+              const { statistic } = datum;
+
+              return (
+                <Grid container item alignItems="center" key={datum.key}>
+                  <Grid item xs={3}>
+                    <IconButton
+                      color="secondary"
+                      aria-label={`delete: ${statistic.name}`}
+                      onClick={() => this.handleDeleteClick(index)}
+                    >
+                      <span className="material-icons" aria-hidden>
+                        delete_outline
+                      </span>
+                    </IconButton>
+                  </Grid>
+                  <Grid item xs={3}>
+                    <IconButton
+                      color="secondary"
+                      aria-label={`rename: ${statistic.name}`}
+                      onClick={() => this.handlePromptRenameClick(index)}
+                    >
+                      <span className="material-icons-outlined" aria-hidden>
+                        edit
+                      </span>
+                    </IconButton>
+                  </Grid>
+                  <Grid item xs={6} zeroMinWidth>
+                    {DisplayFactory.createStatisticDisplay(
+                      datum,
+                      (value) => this.handleStatisticValueChange(index, value),
+                      () => this.handleStatisticValueBlur(index)
+                    )}
+                  </Grid>
+                </Grid>
+              );
+            })}
+          </Grid>
+        </CardContent>
+        <CardActions>
+          <Button
+            color="secondary"
+            size="large"
+            variant="contained"
+            fullWidth
+            aria-label="create statistic"
+            onClick={this.handleCreateClick}
+          >
+            <span className="material-icons" aria-hidden>
+              add
+            </span>
+          </Button>
+        </CardActions>
+      </Card>
     );
   }
 
   private renderModal() {
     const { modalShown, currentNewName } = this.state;
+    const nameId = "new-statistic-name";
+    const Content = (
+      <form onSubmit={this.handleSubmit}>
+        <DialogContent>
+          <TextField
+            id={nameId}
+            color="secondary"
+            label="New Name"
+            fullWidth
+            value={currentNewName}
+            onChange={this.handleStatisticNameChange}
+            onBlur={this.handleStatisticNameBlur}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button
+            color="secondary"
+            variant="outlined"
+            onClick={this.closeModal}
+          >
+            CANCEL
+          </Button>
+          <Button color="secondary" type="submit">
+            RENAME
+          </Button>
+        </DialogActions>
+      </form>
+    );
 
     return (
-      <Modal
-        className="Modal__Content"
-        overlayClassName="Modal__Overlay"
-        contentLabel="Rename the Statistic"
-        isOpen={modalShown}
-        onRequestClose={this.closeModal}
-      >
-        <p className="Modal__Content__text">Rename the Statistic</p>
-        <form onSubmit={this.handleSubmit}>
-          <label className="input input__label">
-            New name
-            <input
-              className="input__textbox input__textbox--full-width"
-              type="text"
-              value={currentNewName}
-              onChange={this.handleStatisticNameChange}
-              required
-            />
-          </label>
-          <div className="Modal__Content__options">
-            <Button
-              className="button button--medium button--tertiary-on-dark"
-              onClick={this.closeModal}
-            >
-              CANCEL
-            </Button>
-            <Button
-              className="button button--medium button--secondary"
-              type="submit"
-            >
-              RENAME
-            </Button>
-          </div>
-        </form>
-      </Modal>
+      modalShown &&
+      createMuiFormModal(
+        modalShown,
+        "Rename statistic",
+        Content,
+        this.closeModal
+      )
     );
   }
 
