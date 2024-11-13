@@ -4,13 +4,8 @@ import { ToggleButton, ToggleButtonGroup } from "@mui/material";
 
 import ChaseStartContext from "../../contexts/ChaseStartContext";
 
-interface Props {
-  onStartButtonClick?: () => void;
-  onStopButtonClick?: () => void;
-}
-
-function ChaseControls({ onStartButtonClick, onStopButtonClick }: Props) {
-  const hasStarted = React.useContext(ChaseStartContext);
+function ChaseControls() {
+  const { hasStarted, setHasStarted } = React.useContext(ChaseStartContext);
 
   return (
     <ToggleButtonGroup
@@ -21,27 +16,30 @@ function ChaseControls({ onStartButtonClick, onStopButtonClick }: Props) {
       fullWidth
       aria-label="Chase controls"
     >
-      <ToggleButton
-        value={true}
-        onClick={onStartButtonClick}
-        aria-label="Start"
-      >
-        <span className="material-icons" aria-hidden>
-          play_arrow
-        </span>
-      </ToggleButton>
-      <ToggleButton value={false} onClick={onStopButtonClick} aria-label="Stop">
-        <span className="material-icons" aria-hidden>
-          stop
-        </span>
-      </ToggleButton>
+      {!hasStarted
+        ? (
+          <ToggleButton
+            value={true}
+            onClick={() => { setHasStarted(true) }}
+            aria-label="Start"
+          >
+            <span className="material-icons" aria-hidden>
+              play_arrow
+            </span>
+          </ToggleButton>
+        ) : (
+          <ToggleButton
+            value={false}
+            onClick={() => { setHasStarted(false) }}
+            aria-label="Stop">
+            <span className="material-icons" aria-hidden>
+              stop
+            </span>
+          </ToggleButton>
+        )
+      }
     </ToggleButtonGroup>
   );
 }
-
-ChaseControls.defaultProps = {
-  onStartButtonClick: undefined,
-  onStopButtonClick: undefined,
-};
 
 export default ChaseControls;

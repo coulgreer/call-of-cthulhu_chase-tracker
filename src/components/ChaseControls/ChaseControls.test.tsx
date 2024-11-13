@@ -1,39 +1,63 @@
 import * as React from "react";
 
-import { screen, render, within } from "@testing-library/react";
+import { screen, render } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import ChaseControls from "./ChaseControls";
+import ChaseStartContext from "../../contexts/ChaseStartContext";
+
+function Wrapper(props: { children: React.ReactNode }) {
+  const [hasStarted, setHasStarted] = React.useState(false);
+
+  return (
+    <ChaseStartContext.Provider value={{ hasStarted, setHasStarted }}>
+      {props.children}
+    </ChaseStartContext.Provider>
+  );
+}
 
 test("should render properly when given no context", () => {
   render(<ChaseControls />);
 
-  const buttonGroup = screen.getByRole("group", { name: /chase.*controls/i });
-
   expect(
-    within(buttonGroup).getByRole("button", { name: /start/i })
+    screen.getByRole("button", { name: /start/i })
   ).toBeInTheDocument();
   expect(
-    within(buttonGroup).getByRole("button", { name: /stop/i })
-  ).toHaveClass("Mui-selected");
+    screen.queryByRole("button", { name: /stop/i })
+  ).not.toBeInTheDocument();
 });
 
-test("should trigger onStartButtonClick", () => {
-  const handleStartButtonClick = jest.fn();
-
-  render(<ChaseControls onStartButtonClick={handleStartButtonClick} />);
+test("should render properly when chase started", () => {
+  render(
+    <Wrapper>
+      <ChaseControls />
+    </Wrapper>
+  );
 
   userEvent.click(screen.getByRole("button", { name: /start/i }));
 
-  expect(handleStartButtonClick).toBeCalledTimes(1);
+  expect(
+    screen.queryByRole("button", { name: /start/i })
+  ).not.toBeInTheDocument();
+  expect(
+    screen.getByRole("button", { name: /stop/i })
+  ).toBeInTheDocument();
 });
 
-test("should trigger onStopButtonClick", () => {
-  const handleStopButtonClick = jest.fn();
-
-  render(<ChaseControls onStopButtonClick={handleStopButtonClick} />);
+test("should render properly when chase stopped given it was already in progress", () => {
+  render(
+    <Wrapper>
+      <ChaseControls />
+    </Wrapper>
+  );
+  userEvent.click(screen.getByRole("button", { name: /start/i }));
 
   userEvent.click(screen.getByRole("button", { name: /stop/i }));
 
-  expect(handleStopButtonClick).toBeCalledTimes(1);
+  expect(
+    screen.getByRole("button", { name: /start/i })
+  ).toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: /stop/i })
+  ).not.toBeInTheDocument();
 });
